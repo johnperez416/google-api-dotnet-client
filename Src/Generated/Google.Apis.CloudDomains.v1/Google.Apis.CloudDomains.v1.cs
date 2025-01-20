@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.CloudDomains.v1
         public CloudDomainsService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://domains.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://domains.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.CloudDomains.v1
         public override string Name => "domains";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://domains.googleapis.com/";
-        #else
-            "https://domains.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://domains.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Domains API.</summary>
         public class Scope
@@ -325,7 +320,7 @@ namespace Google.Apis.CloudDomains.v1
                 /// <param name="name">The name of the operation resource.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -371,27 +366,17 @@ namespace Google.Apis.CloudDomains.v1
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the
-                /// binding to use different resource name schemes, such as `users/*/operations`. To override the
-                /// binding, API services can add a binding such as `"/v1/{name=users/*}/operations"` to their service
-                /// configuration. For backwards compatibility, the default name includes the operations collection id,
-                /// however overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns `UNIMPLEMENTED`.
                 /// </summary>
                 /// <param name="name">The name of the operation's parent resource.</param>
                 public virtual ListRequest List(string name)
                 {
-                    return new ListRequest(service, name);
+                    return new ListRequest(this.service, name);
                 }
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the
-                /// binding to use different resource name schemes, such as `users/*/operations`. To override the
-                /// binding, API services can add a binding such as `"/v1/{name=users/*}/operations"` to their service
-                /// configuration. For backwards compatibility, the default name includes the operations collection id,
-                /// however overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns `UNIMPLEMENTED`.
                 /// </summary>
                 public class ListRequest : CloudDomainsBaseServiceRequest<Google.Apis.CloudDomains.v1.Data.ListOperationsResponse>
                 {
@@ -486,7 +471,13 @@ namespace Google.Apis.CloudDomains.v1
 
                 /// <summary>
                 /// Updates a `Registration`'s contact settings. Some changes require confirmation by the domain's
-                /// registrant contact .
+                /// registrant contact . Caution: Please consider carefully any changes to contact privacy settings when
+                /// changing from `REDACTED_CONTACT_DATA` to `PUBLIC_CONTACT_DATA.` There may be a delay in reflecting
+                /// updates you make to registrant contact information such that any changes you make to contact privacy
+                /// (including from `REDACTED_CONTACT_DATA` to `PUBLIC_CONTACT_DATA`) will be applied without delay but
+                /// changes to registrant contact information may take a limited time to be publicized. This means that
+                /// changes to contact privacy from `REDACTED_CONTACT_DATA` to `PUBLIC_CONTACT_DATA` may make the
+                /// previous registrant contact data public until the modified registrant contact details are published.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="registration">
@@ -495,12 +486,18 @@ namespace Google.Apis.CloudDomains.v1
                 /// </param>
                 public virtual ConfigureContactSettingsRequest ConfigureContactSettings(Google.Apis.CloudDomains.v1.Data.ConfigureContactSettingsRequest body, string registration)
                 {
-                    return new ConfigureContactSettingsRequest(service, body, registration);
+                    return new ConfigureContactSettingsRequest(this.service, body, registration);
                 }
 
                 /// <summary>
                 /// Updates a `Registration`'s contact settings. Some changes require confirmation by the domain's
-                /// registrant contact .
+                /// registrant contact . Caution: Please consider carefully any changes to contact privacy settings when
+                /// changing from `REDACTED_CONTACT_DATA` to `PUBLIC_CONTACT_DATA.` There may be a delay in reflecting
+                /// updates you make to registrant contact information such that any changes you make to contact privacy
+                /// (including from `REDACTED_CONTACT_DATA` to `PUBLIC_CONTACT_DATA`) will be applied without delay but
+                /// changes to registrant contact information may take a limited time to be publicized. This means that
+                /// changes to contact privacy from `REDACTED_CONTACT_DATA` to `PUBLIC_CONTACT_DATA` may make the
+                /// previous registrant contact data public until the modified registrant contact details are published.
                 /// </summary>
                 public class ConfigureContactSettingsRequest : CloudDomainsBaseServiceRequest<Google.Apis.CloudDomains.v1.Data.Operation>
                 {
@@ -557,7 +554,7 @@ namespace Google.Apis.CloudDomains.v1
                 /// </param>
                 public virtual ConfigureDnsSettingsRequest ConfigureDnsSettings(Google.Apis.CloudDomains.v1.Data.ConfigureDnsSettingsRequest body, string registration)
                 {
-                    return new ConfigureDnsSettingsRequest(service, body, registration);
+                    return new ConfigureDnsSettingsRequest(this.service, body, registration);
                 }
 
                 /// <summary>Updates a `Registration`'s DNS settings.</summary>
@@ -616,7 +613,7 @@ namespace Google.Apis.CloudDomains.v1
                 /// </param>
                 public virtual ConfigureManagementSettingsRequest ConfigureManagementSettings(Google.Apis.CloudDomains.v1.Data.ConfigureManagementSettingsRequest body, string registration)
                 {
-                    return new ConfigureManagementSettingsRequest(service, body, registration);
+                    return new ConfigureManagementSettingsRequest(this.service, body, registration);
                 }
 
                 /// <summary>Updates a `Registration`'s management settings.</summary>
@@ -670,13 +667,15 @@ namespace Google.Apis.CloudDomains.v1
                 /// <summary>
                 /// Deletes a `Registration` resource. This method works on any `Registration` resource using
                 /// [Subscription or Commitment billing](/domains/pricing#billing-models), provided that the resource
-                /// was created at least 1 day in the past. For `Registration` resources using [Monthly
-                /// billing](/domains/pricing#billing-models), this method works if: * `state` is `EXPORTED` with
-                /// `expire_time` in the past * `state` is `REGISTRATION_FAILED` * `state` is `TRANSFER_FAILED` When an
-                /// active registration is successfully deleted, you can continue to use the domain in [Google
-                /// Domains](https://domains.google/) until it expires. The calling user becomes the domain's sole owner
-                /// in Google Domains, and permissions for the domain are subsequently managed there. The domain does
-                /// not renew automatically unless the new owner sets up billing in Google Domains.
+                /// was created at least 1 day in the past. When an active registration is successfully deleted, you can
+                /// continue to use the domain in [Google Domains](https://domains.google/) until it expires. The
+                /// calling user becomes the domain's sole owner in Google Domains, and permissions for the domain are
+                /// subsequently managed there. The domain does not renew automatically unless the new owner sets up
+                /// billing in Google Domains. After January 2024 you will only be able to delete `Registration`
+                /// resources when `state` is one of: `EXPORTED`, `EXPIRED`,`REGISTRATION_FAILED` or `TRANSFER_FAILED`.
+                /// See [Cloud Domains feature
+                /// deprecation](https://cloud.google.com/domains/docs/deprecations/feature-deprecations) for more
+                /// details.
                 /// </summary>
                 /// <param name="name">
                 /// Required. The name of the `Registration` to delete, in the format
@@ -684,19 +683,21 @@ namespace Google.Apis.CloudDomains.v1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
                 /// Deletes a `Registration` resource. This method works on any `Registration` resource using
                 /// [Subscription or Commitment billing](/domains/pricing#billing-models), provided that the resource
-                /// was created at least 1 day in the past. For `Registration` resources using [Monthly
-                /// billing](/domains/pricing#billing-models), this method works if: * `state` is `EXPORTED` with
-                /// `expire_time` in the past * `state` is `REGISTRATION_FAILED` * `state` is `TRANSFER_FAILED` When an
-                /// active registration is successfully deleted, you can continue to use the domain in [Google
-                /// Domains](https://domains.google/) until it expires. The calling user becomes the domain's sole owner
-                /// in Google Domains, and permissions for the domain are subsequently managed there. The domain does
-                /// not renew automatically unless the new owner sets up billing in Google Domains.
+                /// was created at least 1 day in the past. When an active registration is successfully deleted, you can
+                /// continue to use the domain in [Google Domains](https://domains.google/) until it expires. The
+                /// calling user becomes the domain's sole owner in Google Domains, and permissions for the domain are
+                /// subsequently managed there. The domain does not renew automatically unless the new owner sets up
+                /// billing in Google Domains. After January 2024 you will only be able to delete `Registration`
+                /// resources when `state` is one of: `EXPORTED`, `EXPIRED`,`REGISTRATION_FAILED` or `TRANSFER_FAILED`.
+                /// See [Cloud Domains feature
+                /// deprecation](https://cloud.google.com/domains/docs/deprecations/feature-deprecations) for more
+                /// details.
                 /// </summary>
                 public class DeleteRequest : CloudDomainsBaseServiceRequest<Google.Apis.CloudDomains.v1.Data.Operation>
                 {
@@ -739,8 +740,10 @@ namespace Google.Apis.CloudDomains.v1
                 }
 
                 /// <summary>
-                /// Exports a `Registration` resource, such that it is no longer managed by Cloud Domains. When an
-                /// active domain is successfully exported, you can continue to use the domain in [Google
+                /// Deprecated: For more information, see [Cloud Domains feature
+                /// deprecation](https://cloud.google.com/domains/docs/deprecations/feature-deprecations) Exports a
+                /// `Registration` resource, such that it is no longer managed by Cloud Domains. When an active domain
+                /// is successfully exported, you can continue to use the domain in [Google
                 /// Domains](https://domains.google/) until it expires. The calling user becomes the domain's sole owner
                 /// in Google Domains, and permissions for the domain are subsequently managed there. The domain does
                 /// not renew automatically unless the new owner sets up billing in Google Domains.
@@ -752,12 +755,14 @@ namespace Google.Apis.CloudDomains.v1
                 /// </param>
                 public virtual ExportRequest Export(Google.Apis.CloudDomains.v1.Data.ExportRegistrationRequest body, string name)
                 {
-                    return new ExportRequest(service, body, name);
+                    return new ExportRequest(this.service, body, name);
                 }
 
                 /// <summary>
-                /// Exports a `Registration` resource, such that it is no longer managed by Cloud Domains. When an
-                /// active domain is successfully exported, you can continue to use the domain in [Google
+                /// Deprecated: For more information, see [Cloud Domains feature
+                /// deprecation](https://cloud.google.com/domains/docs/deprecations/feature-deprecations) Exports a
+                /// `Registration` resource, such that it is no longer managed by Cloud Domains. When an active domain
+                /// is successfully exported, you can continue to use the domain in [Google
                 /// Domains](https://domains.google/) until it expires. The calling user becomes the domain's sole owner
                 /// in Google Domains, and permissions for the domain are subsequently managed there. The domain does
                 /// not renew automatically unless the new owner sets up billing in Google Domains.
@@ -816,7 +821,7 @@ namespace Google.Apis.CloudDomains.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets the details of a `Registration` resource.</summary>
@@ -865,12 +870,13 @@ namespace Google.Apis.CloudDomains.v1
                 /// does not have a policy set.
                 /// </summary>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual GetIamPolicyRequest GetIamPolicy(string resource)
                 {
-                    return new GetIamPolicyRequest(service, resource);
+                    return new GetIamPolicyRequest(this.service, resource);
                 }
 
                 /// <summary>
@@ -887,8 +893,9 @@ namespace Google.Apis.CloudDomains.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being requested. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -938,6 +945,151 @@ namespace Google.Apis.CloudDomains.v1
                     }
                 }
 
+                /// <summary>
+                /// Deprecated: For more information, see [Cloud Domains feature
+                /// deprecation](https://cloud.google.com/domains/docs/deprecations/feature-deprecations) Imports a
+                /// domain name from [Google Domains](https://domains.google/) for use in Cloud Domains. To transfer a
+                /// domain from another registrar, use the `TransferDomain` method instead. Since individual users can
+                /// own domains in Google Domains, the calling user must have ownership permission on the domain.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The parent resource of the Registration. Must be in the format `projects/*/locations/*`.
+                /// </param>
+                public virtual ImportRequest Import(Google.Apis.CloudDomains.v1.Data.ImportDomainRequest body, string parent)
+                {
+                    return new ImportRequest(this.service, body, parent);
+                }
+
+                /// <summary>
+                /// Deprecated: For more information, see [Cloud Domains feature
+                /// deprecation](https://cloud.google.com/domains/docs/deprecations/feature-deprecations) Imports a
+                /// domain name from [Google Domains](https://domains.google/) for use in Cloud Domains. To transfer a
+                /// domain from another registrar, use the `TransferDomain` method instead. Since individual users can
+                /// own domains in Google Domains, the calling user must have ownership permission on the domain.
+                /// </summary>
+                public class ImportRequest : CloudDomainsBaseServiceRequest<Google.Apis.CloudDomains.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Import request.</summary>
+                    public ImportRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudDomains.v1.Data.ImportDomainRequest body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The parent resource of the Registration. Must be in the format
+                    /// `projects/*/locations/*`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.CloudDomains.v1.Data.ImportDomainRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "import";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/registrations:import";
+
+                    /// <summary>Initializes Import parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Initiates the `Push Transfer` process to transfer the domain to another registrar. The process might
+                /// complete instantly or might require confirmation or additional work. Check the emails sent to the
+                /// email address of the registrant. The process is aborted after a timeout if it's not completed. This
+                /// method is only supported for domains that have the `REQUIRE_PUSH_TRANSFER` property in the list of
+                /// `domain_properties`. The domain must also be unlocked before it can be transferred to a different
+                /// registrar. For more information, see [Transfer a registered domain to another
+                /// registrar](https://cloud.google.com/domains/docs/transfer-domain-to-another-registrar).
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="registration">
+                /// Required. The name of the `Registration` for which the push transfer is initiated, in the format
+                /// `projects/*/locations/*/registrations/*`.
+                /// </param>
+                public virtual InitiatePushTransferRequest InitiatePushTransfer(Google.Apis.CloudDomains.v1.Data.InitiatePushTransferRequest body, string registration)
+                {
+                    return new InitiatePushTransferRequest(this.service, body, registration);
+                }
+
+                /// <summary>
+                /// Initiates the `Push Transfer` process to transfer the domain to another registrar. The process might
+                /// complete instantly or might require confirmation or additional work. Check the emails sent to the
+                /// email address of the registrant. The process is aborted after a timeout if it's not completed. This
+                /// method is only supported for domains that have the `REQUIRE_PUSH_TRANSFER` property in the list of
+                /// `domain_properties`. The domain must also be unlocked before it can be transferred to a different
+                /// registrar. For more information, see [Transfer a registered domain to another
+                /// registrar](https://cloud.google.com/domains/docs/transfer-domain-to-another-registrar).
+                /// </summary>
+                public class InitiatePushTransferRequest : CloudDomainsBaseServiceRequest<Google.Apis.CloudDomains.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new InitiatePushTransfer request.</summary>
+                    public InitiatePushTransferRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudDomains.v1.Data.InitiatePushTransferRequest body, string registration) : base(service)
+                    {
+                        Registration = registration;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the `Registration` for which the push transfer is initiated, in the format
+                    /// `projects/*/locations/*/registrations/*`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("registration", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Registration { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.CloudDomains.v1.Data.InitiatePushTransferRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "initiatePushTransfer";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+registration}:initiatePushTransfer";
+
+                    /// <summary>Initializes InitiatePushTransfer parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("registration", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "registration",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/registrations/[^/]+$",
+                        });
+                    }
+                }
+
                 /// <summary>Lists the `Registration` resources in a project.</summary>
                 /// <param name="parent">
                 /// Required. The project and location from which to list `Registration`s, specified in the format
@@ -945,7 +1097,7 @@ namespace Google.Apis.CloudDomains.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists the `Registration` resources in a project.</summary>
@@ -1051,7 +1203,7 @@ namespace Google.Apis.CloudDomains.v1
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.CloudDomains.v1.Data.Registration body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -1137,7 +1289,7 @@ namespace Google.Apis.CloudDomains.v1
                 /// </param>
                 public virtual RegisterRequest Register(Google.Apis.CloudDomains.v1.Data.RegisterDomainRequest body, string parent)
                 {
-                    return new RegisterRequest(service, body, parent);
+                    return new RegisterRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -1197,8 +1349,78 @@ namespace Google.Apis.CloudDomains.v1
                 }
 
                 /// <summary>
+                /// Renews a recently expired domain. This method can only be called on domains that expired in the
+                /// previous 30 days. After the renewal, the new expiration time of the domain is one year after the old
+                /// expiration time and you are charged a `yearly_price` for the renewal.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="registration">
+                /// Required. The name of the `Registration` whish is being renewed, in the format
+                /// `projects/*/locations/*/registrations/*`.
+                /// </param>
+                public virtual RenewDomainRequest RenewDomain(Google.Apis.CloudDomains.v1.Data.RenewDomainRequest body, string registration)
+                {
+                    return new RenewDomainRequest(this.service, body, registration);
+                }
+
+                /// <summary>
+                /// Renews a recently expired domain. This method can only be called on domains that expired in the
+                /// previous 30 days. After the renewal, the new expiration time of the domain is one year after the old
+                /// expiration time and you are charged a `yearly_price` for the renewal.
+                /// </summary>
+                public class RenewDomainRequest : CloudDomainsBaseServiceRequest<Google.Apis.CloudDomains.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new RenewDomain request.</summary>
+                    public RenewDomainRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudDomains.v1.Data.RenewDomainRequest body, string registration) : base(service)
+                    {
+                        Registration = registration;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the `Registration` whish is being renewed, in the format
+                    /// `projects/*/locations/*/registrations/*`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("registration", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Registration { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.CloudDomains.v1.Data.RenewDomainRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "renewDomain";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+registration}:renewDomain";
+
+                    /// <summary>Initializes RenewDomain parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("registration", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "registration",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/registrations/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
                 /// Resets the authorization code of the `Registration` to a new random string. You can call this method
-                /// only after 60 days have elapsed since the initial domain registration.
+                /// only after 60 days have elapsed since the initial domain registration. Domains that have the
+                /// `REQUIRE_PUSH_TRANSFER` property in the list of `domain_properties` don't support authorization
+                /// codes and must use the `InitiatePushTransfer` method to initiate the process to transfer the domain
+                /// to a different registrar.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="registration">
@@ -1207,12 +1429,15 @@ namespace Google.Apis.CloudDomains.v1
                 /// </param>
                 public virtual ResetAuthorizationCodeRequest ResetAuthorizationCode(Google.Apis.CloudDomains.v1.Data.ResetAuthorizationCodeRequest body, string registration)
                 {
-                    return new ResetAuthorizationCodeRequest(service, body, registration);
+                    return new ResetAuthorizationCodeRequest(this.service, body, registration);
                 }
 
                 /// <summary>
                 /// Resets the authorization code of the `Registration` to a new random string. You can call this method
-                /// only after 60 days have elapsed since the initial domain registration.
+                /// only after 60 days have elapsed since the initial domain registration. Domains that have the
+                /// `REQUIRE_PUSH_TRANSFER` property in the list of `domain_properties` don't support authorization
+                /// codes and must use the `InitiatePushTransfer` method to initiate the process to transfer the domain
+                /// to a different registrar.
                 /// </summary>
                 public class ResetAuthorizationCodeRequest : CloudDomainsBaseServiceRequest<Google.Apis.CloudDomains.v1.Data.AuthorizationCode>
                 {
@@ -1264,7 +1489,9 @@ namespace Google.Apis.CloudDomains.v1
                 /// <summary>
                 /// Gets the authorization code of the `Registration` for the purpose of transferring the domain to
                 /// another registrar. You can call this method only after 60 days have elapsed since the initial domain
-                /// registration.
+                /// registration. Domains that have the `REQUIRE_PUSH_TRANSFER` property in the list of
+                /// `domain_properties` don't support authorization codes and must use the `InitiatePushTransfer` method
+                /// to initiate the process to transfer the domain to a different registrar.
                 /// </summary>
                 /// <param name="registration">
                 /// Required. The name of the `Registration` whose authorization code is being retrieved, in the format
@@ -1272,13 +1499,15 @@ namespace Google.Apis.CloudDomains.v1
                 /// </param>
                 public virtual RetrieveAuthorizationCodeRequest RetrieveAuthorizationCode(string registration)
                 {
-                    return new RetrieveAuthorizationCodeRequest(service, registration);
+                    return new RetrieveAuthorizationCodeRequest(this.service, registration);
                 }
 
                 /// <summary>
                 /// Gets the authorization code of the `Registration` for the purpose of transferring the domain to
                 /// another registrar. You can call this method only after 60 days have elapsed since the initial domain
-                /// registration.
+                /// registration. Domains that have the `REQUIRE_PUSH_TRANSFER` property in the list of
+                /// `domain_properties` don't support authorization codes and must use the `InitiatePushTransfer` method
+                /// to initiate the process to transfer the domain to a different registrar.
                 /// </summary>
                 public class RetrieveAuthorizationCodeRequest : CloudDomainsBaseServiceRequest<Google.Apis.CloudDomains.v1.Data.AuthorizationCode>
                 {
@@ -1321,6 +1550,240 @@ namespace Google.Apis.CloudDomains.v1
                 }
 
                 /// <summary>
+                /// Lists the DNS records from the Google Domains DNS zone for domains that use the deprecated
+                /// `google_domains_dns` in the `Registration`'s `dns_settings`.
+                /// </summary>
+                /// <param name="registration">
+                /// Required. The name of the `Registration` whose Google Domains DNS records details you are
+                /// retrieving, in the format `projects/*/locations/*/registrations/*`.
+                /// </param>
+                public virtual RetrieveGoogleDomainsDnsRecordsRequest RetrieveGoogleDomainsDnsRecords(string registration)
+                {
+                    return new RetrieveGoogleDomainsDnsRecordsRequest(this.service, registration);
+                }
+
+                /// <summary>
+                /// Lists the DNS records from the Google Domains DNS zone for domains that use the deprecated
+                /// `google_domains_dns` in the `Registration`'s `dns_settings`.
+                /// </summary>
+                public class RetrieveGoogleDomainsDnsRecordsRequest : CloudDomainsBaseServiceRequest<Google.Apis.CloudDomains.v1.Data.RetrieveGoogleDomainsDnsRecordsResponse>
+                {
+                    /// <summary>Constructs a new RetrieveGoogleDomainsDnsRecords request.</summary>
+                    public RetrieveGoogleDomainsDnsRecordsRequest(Google.Apis.Services.IClientService service, string registration) : base(service)
+                    {
+                        Registration = registration;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the `Registration` whose Google Domains DNS records details you are
+                    /// retrieving, in the format `projects/*/locations/*/registrations/*`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("registration", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Registration { get; private set; }
+
+                    /// <summary>Optional. Maximum number of results to return.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// Optional. When set to the `next_page_token` from a prior response, provides the next page of
+                    /// results.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "retrieveGoogleDomainsDnsRecords";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+registration}:retrieveGoogleDomainsDnsRecords";
+
+                    /// <summary>Initializes RetrieveGoogleDomainsDnsRecords parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("registration", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "registration",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/registrations/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Lists the deprecated domain and email forwarding configurations you set up in the deprecated Google
+                /// Domains UI. The configuration is present only for domains with the
+                /// `google_domains_redirects_data_available` set to `true` in the `Registration`'s `dns_settings`. A
+                /// forwarding configuration might not work correctly if required DNS records are not present in the
+                /// domain's authoritative DNS Zone.
+                /// </summary>
+                /// <param name="registration">
+                /// Required. The name of the `Registration` whose Google Domains forwarding configuration details are
+                /// being retrieved, in the format `projects/*/locations/*/registrations/*`.
+                /// </param>
+                public virtual RetrieveGoogleDomainsForwardingConfigRequest RetrieveGoogleDomainsForwardingConfig(string registration)
+                {
+                    return new RetrieveGoogleDomainsForwardingConfigRequest(this.service, registration);
+                }
+
+                /// <summary>
+                /// Lists the deprecated domain and email forwarding configurations you set up in the deprecated Google
+                /// Domains UI. The configuration is present only for domains with the
+                /// `google_domains_redirects_data_available` set to `true` in the `Registration`'s `dns_settings`. A
+                /// forwarding configuration might not work correctly if required DNS records are not present in the
+                /// domain's authoritative DNS Zone.
+                /// </summary>
+                public class RetrieveGoogleDomainsForwardingConfigRequest : CloudDomainsBaseServiceRequest<Google.Apis.CloudDomains.v1.Data.RetrieveGoogleDomainsForwardingConfigResponse>
+                {
+                    /// <summary>Constructs a new RetrieveGoogleDomainsForwardingConfig request.</summary>
+                    public RetrieveGoogleDomainsForwardingConfigRequest(Google.Apis.Services.IClientService service, string registration) : base(service)
+                    {
+                        Registration = registration;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the `Registration` whose Google Domains forwarding configuration details
+                    /// are being retrieved, in the format `projects/*/locations/*/registrations/*`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("registration", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Registration { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "retrieveGoogleDomainsForwardingConfig";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+registration}:retrieveGoogleDomainsForwardingConfig";
+
+                    /// <summary>Initializes RetrieveGoogleDomainsForwardingConfig parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("registration", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "registration",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/registrations/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Deprecated: For more information, see [Cloud Domains feature
+                /// deprecation](https://cloud.google.com/domains/docs/deprecations/feature-deprecations) Lists domain
+                /// names from [Google Domains](https://domains.google/) that can be imported to Cloud Domains using the
+                /// `ImportDomain` method. Since individual users can own domains in Google Domains, the list of domains
+                /// returned depends on the individual user making the call. Domains already managed by Cloud Domains
+                /// are not returned.
+                /// </summary>
+                /// <param name="location">
+                /// Required. The location. Must be in the format `projects/*/locations/*`.
+                /// </param>
+                public virtual RetrieveImportableDomainsRequest RetrieveImportableDomains(string location)
+                {
+                    return new RetrieveImportableDomainsRequest(this.service, location);
+                }
+
+                /// <summary>
+                /// Deprecated: For more information, see [Cloud Domains feature
+                /// deprecation](https://cloud.google.com/domains/docs/deprecations/feature-deprecations) Lists domain
+                /// names from [Google Domains](https://domains.google/) that can be imported to Cloud Domains using the
+                /// `ImportDomain` method. Since individual users can own domains in Google Domains, the list of domains
+                /// returned depends on the individual user making the call. Domains already managed by Cloud Domains
+                /// are not returned.
+                /// </summary>
+                public class RetrieveImportableDomainsRequest : CloudDomainsBaseServiceRequest<Google.Apis.CloudDomains.v1.Data.RetrieveImportableDomainsResponse>
+                {
+                    /// <summary>Constructs a new RetrieveImportableDomains request.</summary>
+                    public RetrieveImportableDomainsRequest(Google.Apis.Services.IClientService service, string location) : base(service)
+                    {
+                        Location = location;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. The location. Must be in the format `projects/*/locations/*`.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("location", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Location { get; private set; }
+
+                    /// <summary>Maximum number of results to return.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// When set to the `next_page_token` from a prior response, provides the next page of results.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "retrieveImportableDomains";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+location}/registrations:retrieveImportableDomains";
+
+                    /// <summary>Initializes RetrieveImportableDomains parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("location", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "location",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
                 /// Gets parameters needed to register a new domain name, including price and up-to-date availability.
                 /// Use the returned values to call `RegisterDomain`.
                 /// </summary>
@@ -1329,7 +1792,7 @@ namespace Google.Apis.CloudDomains.v1
                 /// </param>
                 public virtual RetrieveRegisterParametersRequest RetrieveRegisterParameters(string location)
                 {
-                    return new RetrieveRegisterParametersRequest(service, location);
+                    return new RetrieveRegisterParametersRequest(this.service, location);
                 }
 
                 /// <summary>
@@ -1388,22 +1851,26 @@ namespace Google.Apis.CloudDomains.v1
                 }
 
                 /// <summary>
-                /// Gets parameters needed to transfer a domain name from another registrar to Cloud Domains. For
-                /// domains managed by Google Domains, transferring to Cloud Domains is not supported. Use the returned
-                /// values to call `TransferDomain`.
+                /// Deprecated: For more information, see [Cloud Domains feature
+                /// deprecation](https://cloud.google.com/domains/docs/deprecations/feature-deprecations) Gets
+                /// parameters needed to transfer a domain name from another registrar to Cloud Domains. For domains
+                /// already managed by [Google Domains](https://domains.google/), use `ImportDomain` instead. Use the
+                /// returned values to call `TransferDomain`.
                 /// </summary>
                 /// <param name="location">
                 /// Required. The location. Must be in the format `projects/*/locations/*`.
                 /// </param>
                 public virtual RetrieveTransferParametersRequest RetrieveTransferParameters(string location)
                 {
-                    return new RetrieveTransferParametersRequest(service, location);
+                    return new RetrieveTransferParametersRequest(this.service, location);
                 }
 
                 /// <summary>
-                /// Gets parameters needed to transfer a domain name from another registrar to Cloud Domains. For
-                /// domains managed by Google Domains, transferring to Cloud Domains is not supported. Use the returned
-                /// values to call `TransferDomain`.
+                /// Deprecated: For more information, see [Cloud Domains feature
+                /// deprecation](https://cloud.google.com/domains/docs/deprecations/feature-deprecations) Gets
+                /// parameters needed to transfer a domain name from another registrar to Cloud Domains. For domains
+                /// already managed by [Google Domains](https://domains.google/), use `ImportDomain` instead. Use the
+                /// returned values to call `TransferDomain`.
                 /// </summary>
                 public class RetrieveTransferParametersRequest : CloudDomainsBaseServiceRequest<Google.Apis.CloudDomains.v1.Data.RetrieveTransferParametersResponse>
                 {
@@ -1466,7 +1933,7 @@ namespace Google.Apis.CloudDomains.v1
                 /// </param>
                 public virtual SearchDomainsRequest SearchDomains(string location)
                 {
-                    return new SearchDomainsRequest(service, location);
+                    return new SearchDomainsRequest(this.service, location);
                 }
 
                 /// <summary>
@@ -1529,12 +1996,13 @@ namespace Google.Apis.CloudDomains.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.CloudDomains.v1.Data.SetIamPolicyRequest body, string resource)
                 {
-                    return new SetIamPolicyRequest(service, body, resource);
+                    return new SetIamPolicyRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -1552,8 +2020,9 @@ namespace Google.Apis.CloudDomains.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy is being specified. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -1596,12 +2065,13 @@ namespace Google.Apis.CloudDomains.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="resource">
-                /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                /// documentation for the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </param>
                 public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.CloudDomains.v1.Data.TestIamPermissionsRequest body, string resource)
                 {
-                    return new TestIamPermissionsRequest(service, body, resource);
+                    return new TestIamPermissionsRequest(this.service, body, resource);
                 }
 
                 /// <summary>
@@ -1621,8 +2091,9 @@ namespace Google.Apis.CloudDomains.v1
                     }
 
                     /// <summary>
-                    /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                    /// documentation for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Resource { get; private set; }
@@ -1658,8 +2129,10 @@ namespace Google.Apis.CloudDomains.v1
                 }
 
                 /// <summary>
-                /// Transfers a domain name from another registrar to Cloud Domains. For domains managed by Google
-                /// Domains, transferring to Cloud Domains is not supported. Before calling this method, go to the
+                /// Deprecated: For more information, see [Cloud Domains feature
+                /// deprecation](https://cloud.google.com/domains/docs/deprecations/feature-deprecations) Transfers a
+                /// domain name from another registrar to Cloud Domains. For domains already managed by [Google
+                /// Domains](https://domains.google/), use `ImportDomain` instead. Before calling this method, go to the
                 /// domain's current registrar to unlock the domain for transfer and retrieve the domain's transfer
                 /// authorization code. Then call `RetrieveTransferParameters` to confirm that the domain is unlocked
                 /// and to get values needed to build a call to this method. A successful call creates a `Registration`
@@ -1677,12 +2150,14 @@ namespace Google.Apis.CloudDomains.v1
                 /// </param>
                 public virtual TransferRequest Transfer(Google.Apis.CloudDomains.v1.Data.TransferDomainRequest body, string parent)
                 {
-                    return new TransferRequest(service, body, parent);
+                    return new TransferRequest(this.service, body, parent);
                 }
 
                 /// <summary>
-                /// Transfers a domain name from another registrar to Cloud Domains. For domains managed by Google
-                /// Domains, transferring to Cloud Domains is not supported. Before calling this method, go to the
+                /// Deprecated: For more information, see [Cloud Domains feature
+                /// deprecation](https://cloud.google.com/domains/docs/deprecations/feature-deprecations) Transfers a
+                /// domain name from another registrar to Cloud Domains. For domains already managed by [Google
+                /// Domains](https://domains.google/), use `ImportDomain` instead. Before calling this method, go to the
                 /// domain's current registrar to unlock the domain for transfer and retrieve the domain's transfer
                 /// authorization code. Then call `RetrieveTransferParameters` to confirm that the domain is unlocked
                 /// and to get values needed to build a call to this method. A successful call creates a `Registration`
@@ -1746,7 +2221,7 @@ namespace Google.Apis.CloudDomains.v1
             /// <param name="name">Resource name for the location.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets information about a location.</summary>
@@ -1791,7 +2266,7 @@ namespace Google.Apis.CloudDomains.v1
             /// <param name="name">The resource that owns the locations collection, if applicable.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>Lists information about the supported locations for this service.</summary>
@@ -1810,7 +2285,7 @@ namespace Google.Apis.CloudDomains.v1
 
                 /// <summary>
                 /// A filter to narrow down results to a preferred subset. The filtering language accepts strings like
-                /// "displayName=tokyo", and is documented in more detail in [AIP-160](https://google.aip.dev/160).
+                /// `"displayName=tokyo"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
@@ -1890,7 +2365,8 @@ namespace Google.Apis.CloudDomains.v1.Data
     /// }, { "log_type": "DATA_WRITE" }, { "log_type": "ADMIN_READ" } ] }, { "service": "sampleservice.googleapis.com",
     /// "audit_log_configs": [ { "log_type": "DATA_READ" }, { "log_type": "DATA_WRITE", "exempted_members": [
     /// "user:aliya@example.com" ] } ] } ] } For sampleservice, this policy enables DATA_READ, DATA_WRITE and ADMIN_READ
-    /// logging. It also exempts jose@example.com from DATA_READ logging, and aliya@example.com from DATA_WRITE logging.
+    /// logging. It also exempts `jose@example.com` from DATA_READ logging, and `aliya@example.com` from DATA_WRITE
+    /// logging.
     /// </summary>
     public class AuditConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1958,16 +2434,37 @@ namespace Google.Apis.CloudDomains.v1.Data
         public virtual Expr Condition { get; set; }
 
         /// <summary>
-        /// Specifies the principals requesting access for a Cloud Platform resource. `members` can have the following
+        /// Specifies the principals requesting access for a Google Cloud resource. `members` can have the following
         /// values: * `allUsers`: A special identifier that represents anyone who is on the internet; with or without a
         /// Google account. * `allAuthenticatedUsers`: A special identifier that represents anyone who is authenticated
-        /// with a Google account or a service account. * `user:{emailid}`: An email address that represents a specific
-        /// Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address that
-        /// represents a service account. For example, `my-other-app@appspot.gserviceaccount.com`. * `group:{emailid}`:
-        /// An email address that represents a Google group. For example, `admins@example.com`. *
-        /// `deleted:user:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a user that
-        /// has been recently deleted. For example, `alice@example.com?uid=123456789012345678901`. If the user is
-        /// recovered, this value reverts to `user:{emailid}` and the recovered user retains the role in the binding. *
+        /// with a Google account or a service account. Does not include identities that come from external identity
+        /// providers (IdPs) through identity federation. * `user:{emailid}`: An email address that represents a
+        /// specific Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address
+        /// that represents a Google service account. For example, `my-other-app@appspot.gserviceaccount.com`. *
+        /// `serviceAccount:{projectid}.svc.id.goog[{namespace}/{kubernetes-sa}]`: An identifier for a [Kubernetes
+        /// service account](https://cloud.google.com/kubernetes-engine/docs/how-to/kubernetes-service-accounts). For
+        /// example, `my-project.svc.id.goog[my-namespace/my-kubernetes-sa]`. * `group:{emailid}`: An email address that
+        /// represents a Google group. For example, `admins@example.com`. * `domain:{domain}`: The G Suite domain
+        /// (primary) that represents all the users of that domain. For example, `google.com` or `example.com`. *
+        /// `principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workforce identity pool. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/group/{group_id}`: All
+        /// workforce identities in a group. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All workforce identities with a specific attribute value. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/*`: All identities in a
+        /// workforce identity pool. *
+        /// `principal://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workload identity pool. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/group/{group_id}`:
+        /// A workload identity pool group. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All identities in a workload identity pool with a certain attribute. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/*`:
+        /// All identities in a workload identity pool. * `deleted:user:{emailid}?uid={uniqueid}`: An email address
+        /// (plus unique identifier) representing a user that has been recently deleted. For example,
+        /// `alice@example.com?uid=123456789012345678901`. If the user is recovered, this value reverts to
+        /// `user:{emailid}` and the recovered user retains the role in the binding. *
         /// `deleted:serviceAccount:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a
         /// service account that has been recently deleted. For example,
         /// `my-other-app@appspot.gserviceaccount.com?uid=123456789012345678901`. If the service account is undeleted,
@@ -1975,15 +2472,19 @@ namespace Google.Apis.CloudDomains.v1.Data
         /// binding. * `deleted:group:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing
         /// a Google group that has been recently deleted. For example, `admins@example.com?uid=123456789012345678901`.
         /// If the group is recovered, this value reverts to `group:{emailid}` and the recovered group retains the role
-        /// in the binding. * `domain:{domain}`: The G Suite domain (primary) that represents all the users of that
-        /// domain. For example, `google.com` or `example.com`.
+        /// in the binding. *
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// Deleted single identity in a workforce identity pool. For example,
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/my-pool-id/subject/my-subject-attribute-value`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("members")]
         public virtual System.Collections.Generic.IList<string> Members { get; set; }
 
         /// <summary>
         /// Role that is assigned to the list of `members`, or principals. For example, `roles/viewer`, `roles/editor`,
-        /// or `roles/owner`.
+        /// or `roles/owner`. For an overview of the IAM roles and permissions, see the [IAM
+        /// documentation](https://cloud.google.com/iam/docs/roles-overview). For a list of the available pre-defined
+        /// roles, see [here](https://cloud.google.com/iam/docs/understanding-roles).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("role")]
         public virtual string Role { get; set; }
@@ -2155,9 +2656,77 @@ namespace Google.Apis.CloudDomains.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("glueRecords")]
         public virtual System.Collections.Generic.IList<GlueRecord> GlueRecords { get; set; }
 
-        /// <summary>The free DNS zone provided by [Google Domains](https://domains.google/).</summary>
+        /// <summary>
+        /// Deprecated: For more information, see [Cloud Domains feature
+        /// deprecation](https://cloud.google.com/domains/docs/deprecations/feature-deprecations). The free DNS zone
+        /// provided by [Google Domains](https://domains.google/).
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("googleDomainsDns")]
         public virtual GoogleDomainsDns GoogleDomainsDns { get; set; }
+
+        /// <summary>
+        /// Output only. Indicates if this `Registration` has configured one of the following deprecated Google Domains
+        /// DNS features: * Domain forwarding (HTTP `301` and `302` response status codes), * Email forwarding. See
+        /// https://cloud.google.com/domains/docs/deprecations/feature-deprecations for more details. If any of these
+        /// features is enabled call the `RetrieveGoogleDomainsForwardingConfig` method to get details about the
+        /// feature's configuration. A forwarding configuration might not work correctly if required DNS records are not
+        /// present in the domain's authoritative DNS Zone.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("googleDomainsRedirectsDataAvailable")]
+        public virtual System.Nullable<bool> GoogleDomainsRedirectsDataAvailable { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A domain that the calling user manages in Google Domains.</summary>
+    public class Domain : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The domain name. Unicode domain names are expressed in Punycode format.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("domainName")]
+        public virtual string DomainName { get; set; }
+
+        /// <summary>The state of this domain as a `Registration` resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourceState")]
+        public virtual string ResourceState { get; set; }
+
+        /// <summary>Price to renew the domain for one year. Only set when `resource_state` is `IMPORTABLE`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("yearlyPrice")]
+        public virtual Money YearlyPrice { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Domain forwarding configuration.</summary>
+    public class DomainForwarding : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>If true, forwards the path after the domain name to the same path at the new address.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pathForwarding")]
+        public virtual System.Nullable<bool> PathForwarding { get; set; }
+
+        /// <summary>The PEM-encoded certificate chain.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pemCertificate")]
+        public virtual string PemCertificate { get; set; }
+
+        /// <summary>The redirect type.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("redirectType")]
+        public virtual string RedirectType { get; set; }
+
+        /// <summary>If true, the forwarding works also over HTTPS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sslEnabled")]
+        public virtual System.Nullable<bool> SslEnabled { get; set; }
+
+        /// <summary>
+        /// The subdomain of the registered domain that is being forwarded. E.g. `www.example.com`, `example.com` (i.e.
+        /// the registered domain itself) or `*.example.com` (i.e. all subdomains).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("subdomain")]
+        public virtual string Subdomain { get; set; }
+
+        /// <summary>The target of the domain forwarding, i.e. the path to redirect the `subdomain` to.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targetUri")]
+        public virtual string TargetUri { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2189,7 +2758,29 @@ namespace Google.Apis.CloudDomains.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Request for the `ExportRegistration` method.</summary>
+    /// <summary>Email forwarding configuration.</summary>
+    public class EmailForwarding : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// An alias recipient email that forwards emails to the `target_email_address`. For example,
+        /// `admin@example.com` or `*@example.com` (wildcard alias forwards all the emails under the registered domain).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("alias")]
+        public virtual string Alias { get; set; }
+
+        /// <summary>Target email that receives emails sent to the `alias`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targetEmailAddress")]
+        public virtual string TargetEmailAddress { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Deprecated: For more information, see [Cloud Domains feature
+    /// deprecation](https://cloud.google.com/domains/docs/deprecations/feature-deprecations). Request for the
+    /// `ExportRegistration` method.
+    /// </summary>
     public class ExportRegistrationRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The ETag of the item.</summary>
@@ -2240,6 +2831,61 @@ namespace Google.Apis.CloudDomains.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Configures a `RRSetRoutingPolicy` that routes based on the geo location of the querying user.</summary>
+    public class GeoPolicy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Without fencing, if health check fails for all configured items in the current geo bucket, we failover to
+        /// the next nearest geo bucket. With fencing, if health checking is enabled, as long as some targets in the
+        /// current geo bucket are healthy, we return only the healthy targets. However, if all targets are unhealthy,
+        /// we don't failover to the next nearest bucket; instead, we return all the items in the current bucket even
+        /// when all targets are unhealthy.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enableFencing")]
+        public virtual System.Nullable<bool> EnableFencing { get; set; }
+
+        /// <summary>
+        /// The primary geo routing configuration. If there are multiple items with the same location, an error is
+        /// returned instead.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("item")]
+        public virtual System.Collections.Generic.IList<GeoPolicyItem> Item { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>ResourceRecordSet data for one geo location.</summary>
+    public class GeoPolicyItem : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// For A and AAAA types only. Endpoints to return in the query result only if they are healthy. These can be
+        /// specified along with `rrdata` within this item.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("healthCheckedTargets")]
+        public virtual HealthCheckTargets HealthCheckedTargets { get; set; }
+
+        /// <summary>
+        /// The geo-location granularity is a GCP region. This location string should correspond to a GCP region. e.g.
+        /// "us-east1", "southamerica-east1", "asia-east1", etc.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual string Location { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("rrdata")]
+        public virtual System.Collections.Generic.IList<string> Rrdata { get; set; }
+
+        /// <summary>
+        /// DNSSEC generated signatures for all the `rrdata` within this item. If health checked targets are provided
+        /// for DNSSEC enabled zones, there's a restriction of 1 IP address per item.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("signatureRrdata")]
+        public virtual System.Collections.Generic.IList<string> SignatureRrdata { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// Defines a host on your domain that is a DNS name server for your domain and/or other domains. Glue records are a
     /// way of making the IP address of a name server known, even when it serves DNS queries for its parent domain. For
@@ -2271,9 +2917,10 @@ namespace Google.Apis.CloudDomains.v1.Data
     }
 
     /// <summary>
-    /// Configuration for using the free DNS zone provided by Google Domains as a `Registration`'s `dns_provider`. You
-    /// cannot configure the DNS zone itself using the API. To configure the DNS zone, go to [Google
-    /// Domains](https://domains.google/).
+    /// Deprecated: For more information, see [Cloud Domains feature
+    /// deprecation](https://cloud.google.com/domains/docs/deprecations/feature-deprecations). Configuration for using
+    /// the free DNS zone provided by Google Domains as a `Registration`'s `dns_provider`. You cannot configure the DNS
+    /// zone itself using the API. To configure the DNS zone, go to [Google Domains](https://domains.google/).
     /// </summary>
     public class GoogleDomainsDns : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2297,6 +2944,60 @@ namespace Google.Apis.CloudDomains.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nameServers")]
         public virtual System.Collections.Generic.IList<string> NameServers { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// HealthCheckTargets describes endpoints to health-check when responding to Routing Policy queries. Only the
+    /// healthy endpoints will be included in the response.
+    /// </summary>
+    public class HealthCheckTargets : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The Internet IP addresses to be health checked. The format matches the format of ResourceRecordSet.rrdata as
+        /// defined in RFC 1035 (section 5) and RFC 1034 (section 3.6.1)
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("externalEndpoints")]
+        public virtual System.Collections.Generic.IList<string> ExternalEndpoints { get; set; }
+
+        /// <summary>Configuration for internal load balancers to be health checked.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("internalLoadBalancer")]
+        public virtual System.Collections.Generic.IList<LoadBalancerTarget> InternalLoadBalancer { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Deprecated: For more information, see [Cloud Domains feature
+    /// deprecation](https://cloud.google.com/domains/docs/deprecations/feature-deprecations). Request for the
+    /// `ImportDomain` method.
+    /// </summary>
+    public class ImportDomainRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The domain name. Unicode domain names must be expressed in Punycode format.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("domainName")]
+        public virtual string DomainName { get; set; }
+
+        /// <summary>Set of labels associated with the `Registration`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labels")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request for the `InitiatePushTransfer` method.</summary>
+    public class InitiatePushTransferRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The Tag of the new registrar. Can be found at [List of
+        /// registrars](https://nominet.uk/registrar-list/).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tag")]
+        public virtual string Tag { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2350,7 +3051,51 @@ namespace Google.Apis.CloudDomains.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A resource that represents Google Cloud Platform location.</summary>
+    /// <summary>The configuration for an individual load balancer to health check.</summary>
+    public class LoadBalancerTarget : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The frontend IP address of the load balancer to health check.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ipAddress")]
+        public virtual string IpAddress { get; set; }
+
+        /// <summary>The protocol of the load balancer to health check.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ipProtocol")]
+        public virtual string IpProtocol { get; set; }
+
+        /// <summary>
+        /// The type of load balancer specified by this target. This value must match the configuration of the load
+        /// balancer located at the LoadBalancerTarget's IP address, port, and region. Use the following: -
+        /// *regionalL4ilb*: for a regional internal passthrough Network Load Balancer. - *regionalL7ilb*: for a
+        /// regional internal Application Load Balancer. - *globalL7ilb*: for a global internal Application Load
+        /// Balancer.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("loadBalancerType")]
+        public virtual string LoadBalancerType { get; set; }
+
+        /// <summary>
+        /// The fully qualified URL of the network that the load balancer is attached to. This should be formatted like
+        /// `https://www.googleapis.com/compute/v1/projects/{project}/global/networks/{network}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("networkUrl")]
+        public virtual string NetworkUrl { get; set; }
+
+        /// <summary>The configured port of the load balancer.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("port")]
+        public virtual string Port { get; set; }
+
+        /// <summary>The project ID in which the load balancer is located.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("project")]
+        public virtual string Project { get; set; }
+
+        /// <summary>The region in which the load balancer is located.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("region")]
+        public virtual string Region { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A resource that represents a Google Cloud location.</summary>
     public class Location : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The friendly name for this location, typically a nearby city name. For example, "Tokyo".</summary>
@@ -2385,11 +3130,41 @@ namespace Google.Apis.CloudDomains.v1.Data
     /// <summary>Defines renewal, billing, and transfer settings for a `Registration`.</summary>
     public class ManagementSettings : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Output only. The renewal method for this `Registration`.</summary>
+        /// <summary>Output only. The actual transfer lock state for this `Registration`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("effectiveTransferLockState")]
+        public virtual string EffectiveTransferLockState { get; set; }
+
+        /// <summary>
+        /// Optional. The desired renewal method for this `Registration`. The actual `renewal_method` is automatically
+        /// updated to reflect this choice. If unset or equal to `RENEWAL_METHOD_UNSPECIFIED`, the actual
+        /// `renewalMethod` is treated as if it were set to `AUTOMATIC_RENEWAL`. You cannot use `RENEWAL_DISABLED`
+        /// during resource creation, and you can update the renewal status only when the `Registration` resource has
+        /// state `ACTIVE` or `SUSPENDED`. When `preferred_renewal_method` is set to `AUTOMATIC_RENEWAL`, the actual
+        /// `renewal_method` can be set to `RENEWAL_DISABLED` in case of problems with the billing account or reported
+        /// domain abuse. In such cases, check the `issues` field on the `Registration`. After the problem is resolved,
+        /// the `renewal_method` is automatically updated to `preferred_renewal_method` in a few hours.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("preferredRenewalMethod")]
+        public virtual string PreferredRenewalMethod { get; set; }
+
+        /// <summary>
+        /// Output only. The actual renewal method for this `Registration`. When `preferred_renewal_method` is set to
+        /// `AUTOMATIC_RENEWAL`, the actual `renewal_method` can be equal to `RENEWAL_DISABLED`—for example, when there
+        /// are problems with the billing account or reported domain abuse. In such cases, check the `issues` field on
+        /// the `Registration`. After the problem is resolved, the `renewal_method` is automatically updated to
+        /// `preferred_renewal_method` in a few hours.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("renewalMethod")]
         public virtual string RenewalMethod { get; set; }
 
-        /// <summary>Controls whether the domain can be transferred to another registrar.</summary>
+        /// <summary>
+        /// This is the desired transfer lock state for this `Registration`. A transfer lock controls whether the domain
+        /// can be transferred to another registrar. The transfer lock state of the domain is returned in the
+        /// `effective_transfer_lock_state` property. The transfer lock state values might be different for the
+        /// following reasons: * `transfer_lock_state` was updated only a short time ago. * Domains with the
+        /// `TRANSFER_LOCK_UNSUPPORTED_BY_REGISTRY` state are in the list of `domain_properties`. These domains are
+        /// always in the `UNLOCKED` state.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("transferLockState")]
         public virtual string TransferLockState { get; set; }
 
@@ -2453,8 +3228,8 @@ namespace Google.Apis.CloudDomains.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -2473,13 +3248,79 @@ namespace Google.Apis.CloudDomains.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("apiVersion")]
         public virtual string ApiVersion { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The time the operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
 
         /// <summary>The time the operation finished running.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Human-readable status of the operation, if any.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("statusDetail")]
@@ -2506,18 +3347,26 @@ namespace Google.Apis.CloudDomains.v1.Data
     /// expression that allows access to a resource only if the expression evaluates to `true`. A condition can add
     /// constraints based on attributes of the request, the resource, or both. To learn which resources support
     /// conditions in their IAM policies, see the [IAM
-    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:** { "bindings":
-    /// [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
+    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:**
+    /// ```
+    /// {
+    /// "bindings": [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
     /// "group:admins@example.com", "domain:google.com", "serviceAccount:my-project-id@appspot.gserviceaccount.com" ] },
     /// { "role": "roles/resourcemanager.organizationViewer", "members": [ "user:eve@example.com" ], "condition": {
     /// "title": "expirable access", "description": "Does not grant access after Sep 2020", "expression": "request.time
-    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 } **YAML example:**
+    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 }
+    /// ```
+    /// **YAML
+    /// example:**
+    /// ```
     /// bindings: - members: - user:mike@example.com - group:admins@example.com - domain:google.com -
     /// serviceAccount:my-project-id@appspot.gserviceaccount.com role: roles/resourcemanager.organizationAdmin -
     /// members: - user:eve@example.com role: roles/resourcemanager.organizationViewer condition: title: expirable
     /// access description: Does not grant access after Sep 2020 expression: request.time &amp;lt;
-    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3 For a description of IAM and its features,
-    /// see the [IAM documentation](https://cloud.google.com/iam/docs/).
+    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3
+    /// ```
+    /// For a description of IAM and its
+    /// features, see the [IAM documentation](https://cloud.google.com/iam/docs/).
     /// </summary>
     public class Policy : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2567,29 +3416,29 @@ namespace Google.Apis.CloudDomains.v1.Data
     }
 
     /// <summary>
-    /// Represents a postal address, e.g. for postal delivery or payments addresses. Given a postal address, a postal
-    /// service can deliver items to a premise, P.O. Box or similar. It is not intended to model geographical locations
-    /// (roads, towns, mountains). In typical usage an address would be created via user input or from importing
-    /// existing data, depending on the type of process. Advice on address input / editing: - Use an i18n-ready address
-    /// widget such as https://github.com/google/libaddressinput) - Users should not be presented with UI elements for
-    /// input or editing of fields outside countries where that field is used. For more guidance on how to use this
-    /// schema, please see: https://support.google.com/business/answer/6397478
+    /// Represents a postal address. For example for postal delivery or payments addresses. Given a postal address, a
+    /// postal service can deliver items to a premise, P.O. Box or similar. It is not intended to model geographical
+    /// locations (roads, towns, mountains). In typical usage an address would be created by user input or from
+    /// importing existing data, depending on the type of process. Advice on address input / editing: - Use an
+    /// internationalization-ready address widget such as https://github.com/google/libaddressinput) - Users should not
+    /// be presented with UI elements for input or editing of fields outside countries where that field is used. For
+    /// more guidance on how to use this schema, see: https://support.google.com/business/answer/6397478
     /// </summary>
     public class PostalAddress : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
         /// Unstructured address lines describing the lower levels of an address. Because values in address_lines do not
-        /// have type information and may sometimes contain multiple values in a single field (e.g. "Austin, TX"), it is
-        /// important that the line order is clear. The order of address lines should be "envelope order" for the
-        /// country/region of the address. In places where this can vary (e.g. Japan), address_language is used to make
-        /// it explicit (e.g. "ja" for large-to-small ordering and "ja-Latn" or "en" for small-to-large). This way, the
-        /// most specific line of an address can be selected based on the language. The minimum permitted structural
-        /// representation of an address consists of a region_code with all remaining information placed in the
-        /// address_lines. It would be possible to format such an address very approximately without geocoding, but no
-        /// semantic reasoning could be made about any of the address components until it was at least partially
-        /// resolved. Creating an address only containing a region_code and address_lines, and then geocoding is the
-        /// recommended way to handle completely unstructured addresses (as opposed to guessing which parts of the
-        /// address should be localities or administrative areas).
+        /// have type information and may sometimes contain multiple values in a single field (For example "Austin,
+        /// TX"), it is important that the line order is clear. The order of address lines should be "envelope order"
+        /// for the country/region of the address. In places where this can vary (For example Japan), address_language
+        /// is used to make it explicit (For example "ja" for large-to-small ordering and "ja-Latn" or "en" for
+        /// small-to-large). This way, the most specific line of an address can be selected based on the language. The
+        /// minimum permitted structural representation of an address consists of a region_code with all remaining
+        /// information placed in the address_lines. It would be possible to format such an address very approximately
+        /// without geocoding, but no semantic reasoning could be made about any of the address components until it was
+        /// at least partially resolved. Creating an address only containing a region_code and address_lines, and then
+        /// geocoding is the recommended way to handle completely unstructured addresses (as opposed to guessing which
+        /// parts of the address should be localities or administrative areas).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("addressLines")]
         public virtual System.Collections.Generic.IList<string> AddressLines { get; set; }
@@ -2597,8 +3446,9 @@ namespace Google.Apis.CloudDomains.v1.Data
         /// <summary>
         /// Optional. Highest administrative subdivision which is used for postal addresses of a country or region. For
         /// example, this can be a state, a province, an oblast, or a prefecture. Specifically, for Spain this is the
-        /// province and not the autonomous community (e.g. "Barcelona" and not "Catalonia"). Many countries don't use
-        /// an administrative area in postal addresses. E.g. in Switzerland this should be left unpopulated.
+        /// province and not the autonomous community (For example "Barcelona" and not "Catalonia"). Many countries
+        /// don't use an administrative area in postal addresses. For example in Switzerland this should be left
+        /// unpopulated.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("administrativeArea")]
         public virtual string AdministrativeArea { get; set; }
@@ -2628,7 +3478,7 @@ namespace Google.Apis.CloudDomains.v1.Data
 
         /// <summary>
         /// Optional. Postal code of the address. Not all countries use or require postal codes to be present, but where
-        /// they are used, they may trigger additional validation with other parts of the address (e.g. state/zip
+        /// they are used, they may trigger additional validation with other parts of the address (For example state/zip
         /// validation in the U.S.A.).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("postalCode")]
@@ -2643,9 +3493,9 @@ namespace Google.Apis.CloudDomains.v1.Data
 
         /// <summary>
         /// Required. CLDR region code of the country/region of the address. This is never inferred and it is up to the
-        /// user to ensure the value is correct. See http://cldr.unicode.org/ and
-        /// http://www.unicode.org/cldr/charts/30/supplemental/territory_information.html for details. Example: "CH" for
-        /// Switzerland.
+        /// user to ensure the value is correct. See https://cldr.unicode.org/ and
+        /// https://www.unicode.org/cldr/charts/30/supplemental/territory_information.html for details. Example: "CH"
+        /// for Switzerland.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("regionCode")]
         public virtual string RegionCode { get; set; }
@@ -2659,9 +3509,9 @@ namespace Google.Apis.CloudDomains.v1.Data
 
         /// <summary>
         /// Optional. Additional, country-specific, sorting code. This is not used in most regions. Where it is used,
-        /// the value is either a string like "CEDEX", optionally followed by a number (e.g. "CEDEX 7"), or just a
-        /// number alone, representing the "sector code" (Jamaica), "delivery area indicator" (Malawi) or "post office
-        /// indicator" (e.g. Côte d'Ivoire).
+        /// the value is either a string like "CEDEX", optionally followed by a number (For example "CEDEX 7"), or just
+        /// a number alone, representing the "sector code" (Jamaica), "delivery area indicator" (Malawi) or "post office
+        /// indicator" (For example Côte d'Ivoire).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sortingCode")]
         public virtual string SortingCode { get; set; }
@@ -2671,6 +3521,69 @@ namespace Google.Apis.CloudDomains.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sublocality")]
         public virtual string Sublocality { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Configures a RRSetRoutingPolicy such that all queries are responded with the primary_targets if they are
+    /// healthy. And if all of them are unhealthy, then we fallback to a geo localized policy.
+    /// </summary>
+    public class PrimaryBackupPolicy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Backup targets provide a regional failover policy for the otherwise global primary targets. If serving state
+        /// is set to `BACKUP`, this policy essentially becomes a geo routing policy.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("backupGeoTargets")]
+        public virtual GeoPolicy BackupGeoTargets { get; set; }
+
+        /// <summary>
+        /// Endpoints that are health checked before making the routing decision. Unhealthy endpoints are omitted from
+        /// the results. If all endpoints are unhealthy, we serve a response based on the `backup_geo_targets`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("primaryTargets")]
+        public virtual HealthCheckTargets PrimaryTargets { get; set; }
+
+        /// <summary>
+        /// When serving state is `PRIMARY`, this field provides the option of sending a small percentage of the traffic
+        /// to the backup targets.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("trickleTraffic")]
+        public virtual System.Nullable<double> TrickleTraffic { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A RRSetRoutingPolicy represents ResourceRecordSet data that is returned dynamically with the response varying
+    /// based on configured properties such as geolocation or by weighted random selection.
+    /// </summary>
+    public class RRSetRoutingPolicy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("geo")]
+        public virtual GeoPolicy Geo { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("geoPolicy")]
+        public virtual GeoPolicy GeoPolicy { get; set; }
+
+        /// <summary>
+        /// The selfLink attribute of the HealthCheck resource to use for this RRSetRoutingPolicy.
+        /// https://cloud.google.com/compute/docs/reference/rest/v1/healthChecks
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("healthCheck")]
+        public virtual string HealthCheck { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("primaryBackup")]
+        public virtual PrimaryBackupPolicy PrimaryBackup { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("wrr")]
+        public virtual WrrPolicy Wrr { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("wrrPolicy")]
+        public virtual WrrPolicy WrrPolicy { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2751,9 +3664,15 @@ namespace Google.Apis.CloudDomains.v1.Data
     /// name by calling the `SearchDomains` method with a query to see available domain name options. After choosing a
     /// name, call `RetrieveRegisterParameters` to ensure availability and obtain information like pricing, which is
     /// needed to build a call to `RegisterDomain`. Another way to create a new `Registration` is to transfer an
-    /// existing domain from another registrar. First, go to the current registrar to unlock the domain for transfer and
-    /// retrieve the domain's transfer authorization code. Then call `RetrieveTransferParameters` to confirm that the
-    /// domain is unlocked and to get values needed to build a call to `TransferDomain`.
+    /// existing domain from another registrar (Deprecated: For more information, see [Cloud Domains feature
+    /// deprecation](https://cloud.google.com/domains/docs/deprecations/feature-deprecations)). First, go to the current
+    /// registrar to unlock the domain for transfer and retrieve the domain's transfer authorization code. Then call
+    /// `RetrieveTransferParameters` to confirm that the domain is unlocked and to get values needed to build a call to
+    /// `TransferDomain`. Finally, you can create a new `Registration` by importing an existing domain managed with
+    /// [Google Domains](https://domains.google/) (Deprecated: For more information, see [Cloud Domains feature
+    /// deprecation](https://cloud.google.com/domains/docs/deprecations/feature-deprecations)). First, call
+    /// `RetrieveImportableDomains` to list domains to which the calling user has sufficient access. Then call
+    /// `ImportDomain` on any domain names you want to use with Cloud Domains.
     /// </summary>
     public class Registration : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2764,9 +3683,42 @@ namespace Google.Apis.CloudDomains.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("contactSettings")]
         public virtual ContactSettings ContactSettings { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The creation timestamp of the `Registration` resource.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Settings controlling the DNS configuration of the `Registration`. You cannot update these with the
@@ -2781,9 +3733,46 @@ namespace Google.Apis.CloudDomains.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("domainName")]
         public virtual string DomainName { get; set; }
 
+        /// <summary>Output only. Special properties of the domain.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("domainProperties")]
+        public virtual System.Collections.Generic.IList<string> DomainProperties { get; set; }
+
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
         /// <summary>Output only. The expiration timestamp of the `Registration`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
-        public virtual object ExpireTime { get; set; }
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The set of issues with the `Registration` that require attention.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("issues")]
@@ -2817,6 +3806,12 @@ namespace Google.Apis.CloudDomains.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("pendingContactSettings")]
         public virtual ContactSettings PendingContactSettings { get; set; }
 
+        /// <summary>
+        /// Output only. The reason the domain registration failed. Only set for domains in REGISTRATION_FAILED state.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("registerFailureReason")]
+        public virtual string RegisterFailureReason { get; set; }
+
         /// <summary>Output only. The state of the `Registration`</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
@@ -2827,6 +3822,37 @@ namespace Google.Apis.CloudDomains.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("supportedPrivacy")]
         public virtual System.Collections.Generic.IList<string> SupportedPrivacy { get; set; }
 
+        /// <summary>
+        /// Output only. Deprecated: For more information, see [Cloud Domains feature
+        /// deprecation](https://cloud.google.com/domains/docs/deprecations/feature-deprecations). The reason the domain
+        /// transfer failed. Only set for domains in TRANSFER_FAILED state.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("transferFailureReason")]
+        public virtual string TransferFailureReason { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request for the `RenewDomain` method.</summary>
+    public class RenewDomainRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. When true, only validation is performed, without actually renewing the domain. For more
+        /// information, see [Request
+        /// validation](https://cloud.google.com/apis/design/design_patterns#request_validation)
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("validateOnly")]
+        public virtual System.Nullable<bool> ValidateOnly { get; set; }
+
+        /// <summary>
+        /// Required. Acknowledgement of the price to renew the domain for one year. To get the price, see [Cloud
+        /// Domains pricing](https://cloud.google.com/domains/pricing). If not provided, the expected price is returned
+        /// in the error message.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("yearlyPrice")]
+        public virtual Money YearlyPrice { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -2834,6 +3860,102 @@ namespace Google.Apis.CloudDomains.v1.Data
     /// <summary>Request for the `ResetAuthorizationCode` method.</summary>
     public class ResetAuthorizationCodeRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A unit of data that is returned by the DNS servers.</summary>
+    public class ResourceRecordSet : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>For example, www.example.com.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Configures dynamic query responses based on either the geo location of the querying user or a weighted round
+        /// robin based routing policy. A valid `ResourceRecordSet` contains only `rrdata` (for static resolution) or a
+        /// `routing_policy` (for dynamic resolution).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("routingPolicy")]
+        public virtual RRSetRoutingPolicy RoutingPolicy { get; set; }
+
+        /// <summary>As defined in RFC 1035 (section 5) and RFC 1034 (section 3.6.1) -- see examples.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rrdata")]
+        public virtual System.Collections.Generic.IList<string> Rrdata { get; set; }
+
+        /// <summary>As defined in RFC 4034 (section 3.2).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("signatureRrdata")]
+        public virtual System.Collections.Generic.IList<string> SignatureRrdata { get; set; }
+
+        /// <summary>Number of seconds that this `ResourceRecordSet` can be cached by resolvers.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ttl")]
+        public virtual System.Nullable<int> Ttl { get; set; }
+
+        /// <summary>The identifier of a supported record type. See the list of Supported DNS record types.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response for the `RetrieveGoogleDomainsDnsRecords` method.</summary>
+    public class RetrieveGoogleDomainsDnsRecordsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// When present, there are more results to retrieve. Set `page_token` to this value on a subsequent call to get
+        /// the next page of results.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The resource record set resources (DNS Zone records).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rrset")]
+        public virtual System.Collections.Generic.IList<ResourceRecordSet> Rrset { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response for the `RetrieveGoogleDomainsForwardingConfig` method.</summary>
+    public class RetrieveGoogleDomainsForwardingConfigResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The list of domain forwarding configurations. A forwarding configuration might not work correctly if the
+        /// required DNS records are not present in the domain's authoritative DNS zone.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("domainForwardings")]
+        public virtual System.Collections.Generic.IList<DomainForwarding> DomainForwardings { get; set; }
+
+        /// <summary>
+        /// The list of email forwarding configurations. A forwarding configuration might not work correctly if the
+        /// required DNS records are not present in the domain's authoritative DNS zone.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("emailForwardings")]
+        public virtual System.Collections.Generic.IList<EmailForwarding> EmailForwardings { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Deprecated: For more information, see [Cloud Domains feature
+    /// deprecation](https://cloud.google.com/domains/docs/deprecations/feature-deprecations). Response for the
+    /// `RetrieveImportableDomains` method.
+    /// </summary>
+    public class RetrieveImportableDomainsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A list of domains that the calling user manages in Google Domains.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("domains")]
+        public virtual System.Collections.Generic.IList<Domain> Domains { get; set; }
+
+        /// <summary>
+        /// When present, there are more results to retrieve. Set `page_token` to this value on a subsequent call to get
+        /// the next page of results.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -2849,7 +3971,11 @@ namespace Google.Apis.CloudDomains.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Response for the `RetrieveTransferParameters` method.</summary>
+    /// <summary>
+    /// Deprecated: For more information, see [Cloud Domains feature
+    /// deprecation](https://cloud.google.com/domains/docs/deprecations/feature-deprecations). Response for the
+    /// `RetrieveTransferParameters` method.
+    /// </summary>
     public class RetrieveTransferParametersResponse : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>Parameters to use when calling the `TransferDomain` method.</summary>
@@ -2876,7 +4002,7 @@ namespace Google.Apis.CloudDomains.v1.Data
     {
         /// <summary>
         /// REQUIRED: The complete policy to be applied to the `resource`. The size of the policy is limited to a few
-        /// 10s of KB. An empty policy is a valid policy but certain Cloud Platform services (such as Projects) might
+        /// 10s of KB. An empty policy is a valid policy but certain Google Cloud services (such as Projects) might
         /// reject them.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("policy")]
@@ -2926,7 +4052,7 @@ namespace Google.Apis.CloudDomains.v1.Data
     public class TestIamPermissionsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as '*' or 'storage.*')
+        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as `*` or `storage.*`)
         /// are not allowed. For more information see [IAM
         /// Overview](https://cloud.google.com/iam/docs/overview#permissions).
         /// </summary>
@@ -2948,7 +4074,11 @@ namespace Google.Apis.CloudDomains.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Request for the `TransferDomain` method.</summary>
+    /// <summary>
+    /// Deprecated: For more information, see [Cloud Domains feature
+    /// deprecation](https://cloud.google.com/domains/docs/deprecations/feature-deprecations). Request for the
+    /// `TransferDomain` method.
+    /// </summary>
     public class TransferDomainRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
@@ -2988,12 +4118,20 @@ namespace Google.Apis.CloudDomains.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Parameters required to transfer a domain from another registrar.</summary>
+    /// <summary>
+    /// Deprecated: For more information, see [Cloud Domains feature
+    /// deprecation](https://cloud.google.com/domains/docs/deprecations/feature-deprecations). Parameters required to
+    /// transfer a domain from another registrar.
+    /// </summary>
     public class TransferParameters : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The registrar that currently manages the domain.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("currentRegistrar")]
         public virtual string CurrentRegistrar { get; set; }
+
+        /// <summary>The URL of the registrar that currently manages the domain.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("currentRegistrarUri")]
+        public virtual string CurrentRegistrarUri { get; set; }
 
         /// <summary>The domain name. Unicode domain names are expressed in Punycode format.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("domainName")]
@@ -3017,6 +4155,50 @@ namespace Google.Apis.CloudDomains.v1.Data
         /// <summary>Price to transfer or renew the domain for one year.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("yearlyPrice")]
         public virtual Money YearlyPrice { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Configures a RRSetRoutingPolicy that routes in a weighted round robin fashion.</summary>
+    public class WrrPolicy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("item")]
+        public virtual System.Collections.Generic.IList<WrrPolicyItem> Item { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A routing block which contains the routing information for one WRR item.</summary>
+    public class WrrPolicyItem : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Endpoints that are health checked before making the routing decision. The unhealthy endpoints are omitted
+        /// from the result. If all endpoints within a bucket are unhealthy, we choose a different bucket (sampled with
+        /// respect to its weight) for responding. If DNSSEC is enabled for this zone, only one of `rrdata` or
+        /// `health_checked_targets` can be set.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("healthCheckedTargets")]
+        public virtual HealthCheckTargets HealthCheckedTargets { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("rrdata")]
+        public virtual System.Collections.Generic.IList<string> Rrdata { get; set; }
+
+        /// <summary>
+        /// DNSSEC generated signatures for all the `rrdata` within this item. Note that if health checked targets are
+        /// provided for DNSSEC enabled zones, there's a restriction of 1 IP address per item.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("signatureRrdata")]
+        public virtual System.Collections.Generic.IList<string> SignatureRrdata { get; set; }
+
+        /// <summary>
+        /// The weight corresponding to this `WrrPolicyItem` object. When multiple `WrrPolicyItem` objects are
+        /// configured, the probability of returning an `WrrPolicyItem` object's data is proportional to its weight
+        /// relative to the sum of weights configured for all items. This weight must be non-negative.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("weight")]
+        public virtual System.Nullable<double> Weight { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

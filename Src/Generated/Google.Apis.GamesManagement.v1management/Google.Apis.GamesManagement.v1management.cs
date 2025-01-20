@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,6 +39,8 @@ namespace Google.Apis.GamesManagement.v1management
             Events = new EventsResource(this);
             Players = new PlayersResource(this);
             Scores = new ScoresResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://gamesmanagement.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://gamesmanagement.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -48,23 +50,16 @@ namespace Google.Apis.GamesManagement.v1management
         public override string Name => "gamesManagement";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://gamesmanagement.googleapis.com/";
-        #else
-            "https://gamesmanagement.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://gamesmanagement.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Google Play Game Management.</summary>
         public class Scope
@@ -298,7 +293,7 @@ namespace Google.Apis.GamesManagement.v1management
         /// <param name="achievementId">The ID of the achievement used by this method.</param>
         public virtual ResetRequest Reset(string achievementId)
         {
-            return new ResetRequest(service, achievementId);
+            return new ResetRequest(this.service, achievementId);
         }
 
         /// <summary>
@@ -348,7 +343,7 @@ namespace Google.Apis.GamesManagement.v1management
         /// </summary>
         public virtual ResetAllRequest ResetAll()
         {
-            return new ResetAllRequest(service);
+            return new ResetAllRequest(this.service);
         }
 
         /// <summary>
@@ -385,7 +380,7 @@ namespace Google.Apis.GamesManagement.v1management
         /// </summary>
         public virtual ResetAllForAllPlayersRequest ResetAllForAllPlayers()
         {
-            return new ResetAllForAllPlayersRequest(service);
+            return new ResetAllForAllPlayersRequest(this.service);
         }
 
         /// <summary>
@@ -423,7 +418,7 @@ namespace Google.Apis.GamesManagement.v1management
         /// <param name="achievementId">The ID of the achievement used by this method.</param>
         public virtual ResetForAllPlayersRequest ResetForAllPlayers(string achievementId)
         {
-            return new ResetForAllPlayersRequest(service, achievementId);
+            return new ResetForAllPlayersRequest(this.service, achievementId);
         }
 
         /// <summary>
@@ -474,7 +469,7 @@ namespace Google.Apis.GamesManagement.v1management
         /// <param name="body">The body of the request.</param>
         public virtual ResetMultipleForAllPlayersRequest ResetMultipleForAllPlayers(Google.Apis.GamesManagement.v1management.Data.AchievementResetMultipleForAllRequest body)
         {
-            return new ResetMultipleForAllPlayersRequest(service, body);
+            return new ResetMultipleForAllPlayersRequest(this.service, body);
         }
 
         /// <summary>
@@ -534,7 +529,7 @@ namespace Google.Apis.GamesManagement.v1management
         /// <param name="applicationId">The application ID from the Google Play developer console.</param>
         public virtual ListHiddenRequest ListHidden(string applicationId)
         {
-            return new ListHiddenRequest(service, applicationId);
+            return new ListHiddenRequest(this.service, applicationId);
         }
 
         /// <summary>
@@ -627,7 +622,7 @@ namespace Google.Apis.GamesManagement.v1management
         /// <param name="eventId">The ID of the event.</param>
         public virtual ResetRequest Reset(string eventId)
         {
-            return new ResetRequest(service, eventId);
+            return new ResetRequest(this.service, eventId);
         }
 
         /// <summary>
@@ -677,7 +672,7 @@ namespace Google.Apis.GamesManagement.v1management
         /// </summary>
         public virtual ResetAllRequest ResetAll()
         {
-            return new ResetAllRequest(service);
+            return new ResetAllRequest(this.service);
         }
 
         /// <summary>
@@ -714,7 +709,7 @@ namespace Google.Apis.GamesManagement.v1management
         /// </summary>
         public virtual ResetAllForAllPlayersRequest ResetAllForAllPlayers()
         {
-            return new ResetAllForAllPlayersRequest(service);
+            return new ResetAllForAllPlayersRequest(this.service);
         }
 
         /// <summary>
@@ -752,7 +747,7 @@ namespace Google.Apis.GamesManagement.v1management
         /// <param name="eventId">The ID of the event.</param>
         public virtual ResetForAllPlayersRequest ResetForAllPlayers(string eventId)
         {
-            return new ResetForAllPlayersRequest(service, eventId);
+            return new ResetForAllPlayersRequest(this.service, eventId);
         }
 
         /// <summary>
@@ -803,7 +798,7 @@ namespace Google.Apis.GamesManagement.v1management
         /// <param name="body">The body of the request.</param>
         public virtual ResetMultipleForAllPlayersRequest ResetMultipleForAllPlayers(Google.Apis.GamesManagement.v1management.Data.EventsResetMultipleForAllRequest body)
         {
-            return new ResetMultipleForAllPlayersRequest(service, body);
+            return new ResetMultipleForAllPlayersRequest(this.service, body);
         }
 
         /// <summary>
@@ -866,7 +861,7 @@ namespace Google.Apis.GamesManagement.v1management
         /// </param>
         public virtual HideRequest Hide(string applicationId, string playerId)
         {
-            return new HideRequest(service, applicationId, playerId);
+            return new HideRequest(this.service, applicationId, playerId);
         }
 
         /// <summary>
@@ -933,7 +928,7 @@ namespace Google.Apis.GamesManagement.v1management
         /// </param>
         public virtual UnhideRequest Unhide(string applicationId, string playerId)
         {
-            return new UnhideRequest(service, applicationId, playerId);
+            return new UnhideRequest(this.service, applicationId, playerId);
         }
 
         /// <summary>
@@ -1012,7 +1007,7 @@ namespace Google.Apis.GamesManagement.v1management
         /// <param name="leaderboardId">The ID of the leaderboard.</param>
         public virtual ResetRequest Reset(string leaderboardId)
         {
-            return new ResetRequest(service, leaderboardId);
+            return new ResetRequest(this.service, leaderboardId);
         }
 
         /// <summary>
@@ -1062,7 +1057,7 @@ namespace Google.Apis.GamesManagement.v1management
         /// </summary>
         public virtual ResetAllRequest ResetAll()
         {
-            return new ResetAllRequest(service);
+            return new ResetAllRequest(this.service);
         }
 
         /// <summary>
@@ -1099,7 +1094,7 @@ namespace Google.Apis.GamesManagement.v1management
         /// </summary>
         public virtual ResetAllForAllPlayersRequest ResetAllForAllPlayers()
         {
-            return new ResetAllForAllPlayersRequest(service);
+            return new ResetAllForAllPlayersRequest(this.service);
         }
 
         /// <summary>
@@ -1137,7 +1132,7 @@ namespace Google.Apis.GamesManagement.v1management
         /// <param name="leaderboardId">The ID of the leaderboard.</param>
         public virtual ResetForAllPlayersRequest ResetForAllPlayers(string leaderboardId)
         {
-            return new ResetForAllPlayersRequest(service, leaderboardId);
+            return new ResetForAllPlayersRequest(this.service, leaderboardId);
         }
 
         /// <summary>
@@ -1188,7 +1183,7 @@ namespace Google.Apis.GamesManagement.v1management
         /// <param name="body">The body of the request.</param>
         public virtual ResetMultipleForAllPlayersRequest ResetMultipleForAllPlayers(Google.Apis.GamesManagement.v1management.Data.ScoresResetMultipleForAllRequest body)
         {
-            return new ResetMultipleForAllPlayersRequest(service, body);
+            return new ResetMultipleForAllPlayersRequest(this.service, body);
         }
 
         /// <summary>

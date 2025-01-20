@@ -1,0 +1,23 @@
+{
+  "Google.Apis.DatabaseMigrationService.v1.DatabaseMigrationServiceBaseServiceRequest<<TResponse>>.AltEnum": [
+    "json",
+    "media",
+    "proto"
+  ],
+  "Google.Apis.DatabaseMigrationService.v1.DatabaseMigrationServiceBaseServiceRequest<<TResponse>>.XgafvEnum": [
+    "1",
+    "2"
+  ],
+  "Google.Apis.DatabaseMigrationService.v1.ProjectsResource+LocationsResource+ConversionWorkspacesResource+DescribeDatabaseEntitiesRequest.TreeEnum": [
+    "DB_TREE_TYPE_UNSPECIFIED",
+    "SOURCE_TREE",
+    "DRAFT_TREE",
+    "DESTINATION_TREE"
+  ],
+  "Google.Apis.DatabaseMigrationService.v1.ProjectsResource+LocationsResource+ConversionWorkspacesResource+DescribeDatabaseEntitiesRequest.ViewEnum": [
+    "DATABASE_ENTITY_VIEW_UNSPECIFIED",
+    "DATABASE_ENTITY_VIEW_BASIC",
+    "DATABASE_ENTITY_VIEW_FULL",
+    "DATABASE_ENTITY_VIEW_ROOT_SUMMARY"
+  ]
+}

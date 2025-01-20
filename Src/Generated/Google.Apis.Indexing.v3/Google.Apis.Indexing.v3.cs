@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.Indexing.v3
         public IndexingService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             UrlNotifications = new UrlNotificationsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://indexing.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://indexing.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,32 +46,25 @@ namespace Google.Apis.Indexing.v3
         public override string Name => "indexing";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://indexing.googleapis.com/";
-        #else
-            "https://indexing.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://indexing.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
-        /// <summary>Available OAuth 2.0 scopes for use with the Indexing API.</summary>
+        /// <summary>Available OAuth 2.0 scopes for use with the Web Search Indexing API.</summary>
         public class Scope
         {
             /// <summary>Submit data to Google for indexing</summary>
             public static string Indexing = "https://www.googleapis.com/auth/indexing";
         }
 
-        /// <summary>Available OAuth 2.0 scope constants for use with the Indexing API.</summary>
+        /// <summary>Available OAuth 2.0 scope constants for use with the Web Search Indexing API.</summary>
         public static class ScopeConstants
         {
             /// <summary>Submit data to Google for indexing</summary>
@@ -281,7 +276,7 @@ namespace Google.Apis.Indexing.v3
         /// </summary>
         public virtual GetMetadataRequest GetMetadata()
         {
-            return new GetMetadataRequest(service);
+            return new GetMetadataRequest(this.service);
         }
 
         /// <summary>
@@ -328,7 +323,7 @@ namespace Google.Apis.Indexing.v3
         /// <param name="body">The body of the request.</param>
         public virtual PublishRequest Publish(Google.Apis.Indexing.v3.Data.UrlNotification body)
         {
-            return new PublishRequest(service, body);
+            return new PublishRequest(this.service, body);
         }
 
         /// <summary>Notifies that a URL has been updated or deleted.</summary>
@@ -383,12 +378,45 @@ namespace Google.Apis.Indexing.v3.Data
     /// </summary>
     public class UrlNotification : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _notifyTimeRaw;
+
+        private object _notifyTime;
+
         /// <summary>
         /// Creation timestamp for this notification. Users should _not_ specify it, the field is ignored at the request
         /// time.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("notifyTime")]
-        public virtual object NotifyTime { get; set; }
+        public virtual string NotifyTimeRaw
+        {
+            get => _notifyTimeRaw;
+            set
+            {
+                _notifyTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _notifyTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="NotifyTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use NotifyTimeDateTimeOffset instead.")]
+        public virtual object NotifyTime
+        {
+            get => _notifyTime;
+            set
+            {
+                _notifyTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _notifyTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="NotifyTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? NotifyTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(NotifyTimeRaw);
+            set => NotifyTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The URL life cycle event that Google is being notified about.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("type")]

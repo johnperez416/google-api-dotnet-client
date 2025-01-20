@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.SecretManager.v1beta1
         public SecretManagerService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://secretmanager.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://secretmanager.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.SecretManager.v1beta1
         public override string Name => "secretmanager";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://secretmanager.googleapis.com/";
-        #else
-            "https://secretmanager.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://secretmanager.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Secret Manager API.</summary>
         public class Scope
@@ -304,7 +299,7 @@ namespace Google.Apis.SecretManager.v1beta1
             /// <param name="name">Resource name for the location.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets information about a location.</summary>
@@ -349,7 +344,7 @@ namespace Google.Apis.SecretManager.v1beta1
             /// <param name="name">The resource that owns the locations collection, if applicable.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>Lists information about the supported locations for this service.</summary>
@@ -368,7 +363,7 @@ namespace Google.Apis.SecretManager.v1beta1
 
                 /// <summary>
                 /// A filter to narrow down results to a preferred subset. The filtering language accepts strings like
-                /// "displayName=tokyo", and is documented in more detail in [AIP-160](https://google.aip.dev/160).
+                /// `"displayName=tokyo"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
@@ -479,7 +474,7 @@ namespace Google.Apis.SecretManager.v1beta1
                 /// </param>
                 public virtual AccessRequest Access(string name)
                 {
-                    return new AccessRequest(service, name);
+                    return new AccessRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -537,7 +532,7 @@ namespace Google.Apis.SecretManager.v1beta1
                 /// </param>
                 public virtual DestroyRequest Destroy(Google.Apis.SecretManager.v1beta1.Data.DestroySecretVersionRequest body, string name)
                 {
-                    return new DestroyRequest(service, body, name);
+                    return new DestroyRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -599,7 +594,7 @@ namespace Google.Apis.SecretManager.v1beta1
                 /// </param>
                 public virtual DisableRequest Disable(Google.Apis.SecretManager.v1beta1.Data.DisableSecretVersionRequest body, string name)
                 {
-                    return new DisableRequest(service, body, name);
+                    return new DisableRequest(this.service, body, name);
                 }
 
                 /// <summary>Disables a SecretVersion. Sets the state of the SecretVersion to DISABLED.</summary>
@@ -658,7 +653,7 @@ namespace Google.Apis.SecretManager.v1beta1
                 /// </param>
                 public virtual EnableRequest Enable(Google.Apis.SecretManager.v1beta1.Data.EnableSecretVersionRequest body, string name)
                 {
-                    return new EnableRequest(service, body, name);
+                    return new EnableRequest(this.service, body, name);
                 }
 
                 /// <summary>Enables a SecretVersion. Sets the state of the SecretVersion to ENABLED.</summary>
@@ -719,7 +714,7 @@ namespace Google.Apis.SecretManager.v1beta1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -774,7 +769,7 @@ namespace Google.Apis.SecretManager.v1beta1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists SecretVersions. This call does not return secret data.</summary>
@@ -859,7 +854,7 @@ namespace Google.Apis.SecretManager.v1beta1
             /// </param>
             public virtual AddVersionRequest AddVersion(Google.Apis.SecretManager.v1beta1.Data.AddSecretVersionRequest body, string parent)
             {
-                return new AddVersionRequest(service, body, parent);
+                return new AddVersionRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -919,7 +914,7 @@ namespace Google.Apis.SecretManager.v1beta1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.SecretManager.v1beta1.Data.Secret body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Creates a new Secret containing no SecretVersions.</summary>
@@ -991,7 +986,7 @@ namespace Google.Apis.SecretManager.v1beta1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes a Secret.</summary>
@@ -1040,7 +1035,7 @@ namespace Google.Apis.SecretManager.v1beta1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets metadata for a given Secret.</summary>
@@ -1086,12 +1081,12 @@ namespace Google.Apis.SecretManager.v1beta1
             /// a policy set.
             /// </summary>
             /// <param name="resource">
-            /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </param>
             public virtual GetIamPolicyRequest GetIamPolicy(string resource)
             {
-                return new GetIamPolicyRequest(service, resource);
+                return new GetIamPolicyRequest(this.service, resource);
             }
 
             /// <summary>
@@ -1108,8 +1103,9 @@ namespace Google.Apis.SecretManager.v1beta1
                 }
 
                 /// <summary>
-                /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Resource { get; private set; }
@@ -1165,7 +1161,7 @@ namespace Google.Apis.SecretManager.v1beta1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists Secrets.</summary>
@@ -1244,7 +1240,7 @@ namespace Google.Apis.SecretManager.v1beta1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.SecretManager.v1beta1.Data.Secret body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Updates metadata of an existing Secret.</summary>
@@ -1312,12 +1308,12 @@ namespace Google.Apis.SecretManager.v1beta1
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="resource">
-            /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being specified. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </param>
             public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.SecretManager.v1beta1.Data.SetIamPolicyRequest body, string resource)
             {
-                return new SetIamPolicyRequest(service, body, resource);
+                return new SetIamPolicyRequest(this.service, body, resource);
             }
 
             /// <summary>
@@ -1335,8 +1331,9 @@ namespace Google.Apis.SecretManager.v1beta1
                 }
 
                 /// <summary>
-                /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for
-                /// the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Resource { get; private set; }
@@ -1379,12 +1376,12 @@ namespace Google.Apis.SecretManager.v1beta1
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="resource">
-            /// REQUIRED: The resource for which the policy detail is being requested. See the operation documentation
-            /// for the appropriate value for this field.
+            /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </param>
             public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.SecretManager.v1beta1.Data.TestIamPermissionsRequest body, string resource)
             {
-                return new TestIamPermissionsRequest(service, body, resource);
+                return new TestIamPermissionsRequest(this.service, body, resource);
             }
 
             /// <summary>
@@ -1404,8 +1401,9 @@ namespace Google.Apis.SecretManager.v1beta1
                 }
 
                 /// <summary>
-                /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                /// documentation for the appropriate value for this field.
+                /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                /// field.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Resource { get; private set; }
@@ -1480,7 +1478,8 @@ namespace Google.Apis.SecretManager.v1beta1.Data
     /// }, { "log_type": "DATA_WRITE" }, { "log_type": "ADMIN_READ" } ] }, { "service": "sampleservice.googleapis.com",
     /// "audit_log_configs": [ { "log_type": "DATA_READ" }, { "log_type": "DATA_WRITE", "exempted_members": [
     /// "user:aliya@example.com" ] } ] } ] } For sampleservice, this policy enables DATA_READ, DATA_WRITE and ADMIN_READ
-    /// logging. It also exempts jose@example.com from DATA_READ logging, and aliya@example.com from DATA_WRITE logging.
+    /// logging. It also exempts `jose@example.com` from DATA_READ logging, and `aliya@example.com` from DATA_WRITE
+    /// logging.
     /// </summary>
     public class AuditConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1542,16 +1541,37 @@ namespace Google.Apis.SecretManager.v1beta1.Data
         public virtual Expr Condition { get; set; }
 
         /// <summary>
-        /// Specifies the principals requesting access for a Cloud Platform resource. `members` can have the following
+        /// Specifies the principals requesting access for a Google Cloud resource. `members` can have the following
         /// values: * `allUsers`: A special identifier that represents anyone who is on the internet; with or without a
         /// Google account. * `allAuthenticatedUsers`: A special identifier that represents anyone who is authenticated
-        /// with a Google account or a service account. * `user:{emailid}`: An email address that represents a specific
-        /// Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address that
-        /// represents a service account. For example, `my-other-app@appspot.gserviceaccount.com`. * `group:{emailid}`:
-        /// An email address that represents a Google group. For example, `admins@example.com`. *
-        /// `deleted:user:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a user that
-        /// has been recently deleted. For example, `alice@example.com?uid=123456789012345678901`. If the user is
-        /// recovered, this value reverts to `user:{emailid}` and the recovered user retains the role in the binding. *
+        /// with a Google account or a service account. Does not include identities that come from external identity
+        /// providers (IdPs) through identity federation. * `user:{emailid}`: An email address that represents a
+        /// specific Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address
+        /// that represents a Google service account. For example, `my-other-app@appspot.gserviceaccount.com`. *
+        /// `serviceAccount:{projectid}.svc.id.goog[{namespace}/{kubernetes-sa}]`: An identifier for a [Kubernetes
+        /// service account](https://cloud.google.com/kubernetes-engine/docs/how-to/kubernetes-service-accounts). For
+        /// example, `my-project.svc.id.goog[my-namespace/my-kubernetes-sa]`. * `group:{emailid}`: An email address that
+        /// represents a Google group. For example, `admins@example.com`. * `domain:{domain}`: The G Suite domain
+        /// (primary) that represents all the users of that domain. For example, `google.com` or `example.com`. *
+        /// `principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workforce identity pool. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/group/{group_id}`: All
+        /// workforce identities in a group. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All workforce identities with a specific attribute value. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/*`: All identities in a
+        /// workforce identity pool. *
+        /// `principal://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workload identity pool. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/group/{group_id}`:
+        /// A workload identity pool group. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All identities in a workload identity pool with a certain attribute. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/*`:
+        /// All identities in a workload identity pool. * `deleted:user:{emailid}?uid={uniqueid}`: An email address
+        /// (plus unique identifier) representing a user that has been recently deleted. For example,
+        /// `alice@example.com?uid=123456789012345678901`. If the user is recovered, this value reverts to
+        /// `user:{emailid}` and the recovered user retains the role in the binding. *
         /// `deleted:serviceAccount:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a
         /// service account that has been recently deleted. For example,
         /// `my-other-app@appspot.gserviceaccount.com?uid=123456789012345678901`. If the service account is undeleted,
@@ -1559,15 +1579,19 @@ namespace Google.Apis.SecretManager.v1beta1.Data
         /// binding. * `deleted:group:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing
         /// a Google group that has been recently deleted. For example, `admins@example.com?uid=123456789012345678901`.
         /// If the group is recovered, this value reverts to `group:{emailid}` and the recovered group retains the role
-        /// in the binding. * `domain:{domain}`: The G Suite domain (primary) that represents all the users of that
-        /// domain. For example, `google.com` or `example.com`.
+        /// in the binding. *
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// Deleted single identity in a workforce identity pool. For example,
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/my-pool-id/subject/my-subject-attribute-value`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("members")]
         public virtual System.Collections.Generic.IList<string> Members { get; set; }
 
         /// <summary>
         /// Role that is assigned to the list of `members`, or principals. For example, `roles/viewer`, `roles/editor`,
-        /// or `roles/owner`.
+        /// or `roles/owner`. For an overview of the IAM roles and permissions, see the [IAM
+        /// documentation](https://cloud.google.com/iam/docs/roles-overview). For a list of the available pre-defined
+        /// roles, see [here](https://cloud.google.com/iam/docs/understanding-roles).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("role")]
         public virtual string Role { get; set; }
@@ -1593,8 +1617,7 @@ namespace Google.Apis.SecretManager.v1beta1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1712,7 +1735,7 @@ namespace Google.Apis.SecretManager.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A resource that represents Google Cloud Platform location.</summary>
+    /// <summary>A resource that represents a Google Cloud location.</summary>
     public class Location : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The friendly name for this location, typically a nearby city name. For example, "Tokyo".</summary>
@@ -1753,18 +1776,26 @@ namespace Google.Apis.SecretManager.v1beta1.Data
     /// expression that allows access to a resource only if the expression evaluates to `true`. A condition can add
     /// constraints based on attributes of the request, the resource, or both. To learn which resources support
     /// conditions in their IAM policies, see the [IAM
-    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:** { "bindings":
-    /// [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
+    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:**
+    /// ```
+    /// {
+    /// "bindings": [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
     /// "group:admins@example.com", "domain:google.com", "serviceAccount:my-project-id@appspot.gserviceaccount.com" ] },
     /// { "role": "roles/resourcemanager.organizationViewer", "members": [ "user:eve@example.com" ], "condition": {
     /// "title": "expirable access", "description": "Does not grant access after Sep 2020", "expression": "request.time
-    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 } **YAML example:**
+    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 }
+    /// ```
+    /// **YAML
+    /// example:**
+    /// ```
     /// bindings: - members: - user:mike@example.com - group:admins@example.com - domain:google.com -
     /// serviceAccount:my-project-id@appspot.gserviceaccount.com role: roles/resourcemanager.organizationAdmin -
     /// members: - user:eve@example.com role: roles/resourcemanager.organizationViewer condition: title: expirable
     /// access description: Does not grant access after Sep 2020 expression: request.time &amp;lt;
-    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3 For a description of IAM and its features,
-    /// see the [IAM documentation](https://cloud.google.com/iam/docs/).
+    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3
+    /// ```
+    /// For a description of IAM and its
+    /// features, see the [IAM documentation](https://cloud.google.com/iam/docs/).
     /// </summary>
     public class Policy : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1845,9 +1876,42 @@ namespace Google.Apis.SecretManager.v1beta1.Data
     /// </summary>
     public class Secret : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time at which the Secret was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The labels assigned to this Secret. Label keys must be between 1 and 63 characters long, have a UTF-8
@@ -1891,15 +1955,81 @@ namespace Google.Apis.SecretManager.v1beta1.Data
     /// <summary>A secret version resource in the Secret Manager API.</summary>
     public class SecretVersion : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time at which the SecretVersion was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _destroyTimeRaw;
+
+        private object _destroyTime;
 
         /// <summary>
         /// Output only. The time this SecretVersion was destroyed. Only present if state is DESTROYED.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("destroyTime")]
-        public virtual object DestroyTime { get; set; }
+        public virtual string DestroyTimeRaw
+        {
+            get => _destroyTimeRaw;
+            set
+            {
+                _destroyTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _destroyTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="DestroyTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use DestroyTimeDateTimeOffset instead.")]
+        public virtual object DestroyTime
+        {
+            get => _destroyTime;
+            set
+            {
+                _destroyTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _destroyTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="DestroyTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? DestroyTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(DestroyTimeRaw);
+            set => DestroyTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. The resource name of the SecretVersion in the format `projects/*/secrets/*/versions/*`.
@@ -1921,7 +2051,7 @@ namespace Google.Apis.SecretManager.v1beta1.Data
     {
         /// <summary>
         /// REQUIRED: The complete policy to be applied to the `resource`. The size of the policy is limited to a few
-        /// 10s of KB. An empty policy is a valid policy but certain Cloud Platform services (such as Projects) might
+        /// 10s of KB. An empty policy is a valid policy but certain Google Cloud services (such as Projects) might
         /// reject them.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("policy")]
@@ -1942,7 +2072,7 @@ namespace Google.Apis.SecretManager.v1beta1.Data
     public class TestIamPermissionsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as '*' or 'storage.*')
+        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as `*` or `storage.*`)
         /// are not allowed. For more information see [IAM
         /// Overview](https://cloud.google.com/iam/docs/overview#permissions).
         /// </summary>
@@ -1966,7 +2096,7 @@ namespace Google.Apis.SecretManager.v1beta1.Data
 
     /// <summary>
     /// A replication policy that replicates the Secret payload into the locations specified in
-    /// Secret.replication.user_managed.replicas
+    /// Replication.UserManaged.replicas
     /// </summary>
     public class UserManaged : Google.Apis.Requests.IDirectResponseSchema
     {

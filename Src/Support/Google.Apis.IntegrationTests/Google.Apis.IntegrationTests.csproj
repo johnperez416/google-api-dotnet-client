@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+
+  <PropertyGroup>
+    <TargetFrameworks>net462;net6.0</TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT' ">net6.0</TargetFrameworks>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\google.apis.snk</AssemblyOriginatorKeyFile>
+    <IsPackable>false</IsPackable>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+    <ProjectReference Include="..\Google.Apis.Auth\Google.Apis.Auth.csproj" />
+    <ProjectReference Include="..\Google.Apis.Tests\Google.Apis.Tests.csproj" />
+    <ProjectReference Include="..\Google.Apis\Google.Apis.csproj" />
+    <ProjectReference Include="..\Google.Apis.Core\Google.Apis.Core.csproj" />
+
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='net462'">
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\Generated\Google.Apis.BigtableAdmin.v2\Google.Apis.BigtableAdmin.v2.cs" Link="Utils\Google.Apis.BigtableAdmin.v2.cs" />
+    <Compile Include="..\..\Generated\Google.Apis.CloudMachineLearningEngine.v1\Google.Apis.CloudMachineLearningEngine.v1.cs" Link="Utils\Google.Apis.CloudMachineLearningEngine.v1.cs" />
+    <Compile Include="..\..\Generated\Google.Apis.IAMCredentials.v1\Google.Apis.IAMCredentials.v1.cs" Link="Utils\Google.Apis.IAMCredentials.v1.cs" />
+    <Compile Include="..\..\Generated\Google.Apis.Storage.v1\Google.Apis.Storage.v1.cs" Link="Utils\Google.Apis.Storage.v1.cs" />
+  </ItemGroup>
+  
+</Project>

@@ -22,6 +22,7 @@ using Google.Apis.Json;
 using Google.Apis.Tests.Mocks;
 using Google.Apis.Util;
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -86,7 +87,14 @@ namespace Google.Apis.Auth.Tests.OAuth2
             return new GoogleCredential(new UserCredential(flow, "my.user.id", tokenResponse));
         }
 
-        private static ImpersonatedCredential CreateImpersonatedCredentialForBody(object body, bool serializeBody = true, HttpStatusCode status = HttpStatusCode.OK, Action<HttpRequestMessage> requestValidator = null)
+        private static ImpersonatedCredential CreateImpersonatedCredentialForBody(
+            object body, 
+            bool serializeBody = true,
+            HttpStatusCode status = HttpStatusCode.OK,
+            Action<HttpRequestMessage> requestValidator = null,
+            string principal = "principal",
+            string customTokenUrl = null,
+            ExponentialBackOffPolicy? retryPolicy = null)
         {
             var sourceCredential = CreateSourceCredential();
             var messageHandler = new FakeHttpMessageHandler(
@@ -94,27 +102,33 @@ namespace Google.Apis.Auth.Tests.OAuth2
                 serializeBody ? NewtonsoftJsonSerializer.Instance.Serialize(body) : body.ToString(),
                 requestValidator);
 
-            return ImpersonatedCredential.Create(
-                sourceCredential,
-                new ImpersonatedCredential.Initializer("principal")
-                {
-                    Scopes = new string[] { "scope" },
-                    Clock = _clock,
-                    HttpClientFactory = new MockHttpClientFactory(messageHandler)
-                });
+            var initializer = customTokenUrl is null
+                ? new ImpersonatedCredential.Initializer(principal)
+                : new ImpersonatedCredential.Initializer(customTokenUrl, principal);
+            initializer.Scopes = new string[] { "scope" };
+            initializer.Clock = _clock;
+            initializer.HttpClientFactory = new MockHttpClientFactory(messageHandler);
+            if (retryPolicy is not null)
+            {
+                initializer.DefaultExponentialBackOffPolicy = retryPolicy.Value;
+            }
+
+            return ImpersonatedCredential.Create(sourceCredential, initializer);
         }
 
         private static ImpersonatedCredential CreateImpersonatedCredentialWithIdTokenResponse() =>
             CreateImpersonatedCredentialForBody(new { token = OidcComputeSuccessMessageHandler.FirstCallToken });
 
-        private static ImpersonatedCredential CreateImpersonatedCredentialWithAccessTokenResponse(Action<HttpRequestMessage> requestValidator = null) =>
+        private static ImpersonatedCredential CreateImpersonatedCredentialWithAccessTokenResponse(Action<HttpRequestMessage> requestValidator = null, string principal = "principal", string customTokenUrl = null) =>
             CreateImpersonatedCredentialForBody(
                 new { accessToken = "access_token", expireTime = "2020-05-13T16:00:00.045123456Z" },
-                requestValidator: requestValidator);
+                requestValidator: requestValidator,
+                principal: principal,
+                customTokenUrl: customTokenUrl);
 
         // Use signedBlob = base64("principal") = "Zm9v"
-        private static ImpersonatedCredential CreateImpersonatedCredentialWithSignBlobResponse() =>
-            CreateImpersonatedCredentialForBody(new { keyId = "1", signedBlob = "Zm9v" });
+        private static ImpersonatedCredential CreateImpersonatedCredentialWithSignBlobResponse(ExponentialBackOffPolicy? retryPolicy = null) =>
+            CreateImpersonatedCredentialForBody(new { keyId = "1", signedBlob = "Zm9v" }, retryPolicy: retryPolicy);
 
         private static ImpersonatedCredential CreateImpersonatedCredentialWithErrorResponse() =>
             CreateImpersonatedCredentialForBody(ErrorResponseContent, false, HttpStatusCode.NotFound);
@@ -122,7 +136,7 @@ namespace Google.Apis.Auth.Tests.OAuth2
         [Fact]
         public void Create_InvalidSourceCredential() =>
             Assert.Throws<InvalidOperationException>(() => ImpersonatedCredential.Create(
-                GoogleCredential.FromComputeCredential(),
+                GoogleCredential.FromAccessToken("fake_access_token"),
                 new ImpersonatedCredential.Initializer("principal")));
 
         [Fact]
@@ -177,7 +191,7 @@ namespace Google.Apis.Auth.Tests.OAuth2
         public async Task RequestAccessTokenAsync()
         {
             var credential = CreateImpersonatedCredentialWithAccessTokenResponse();
-            var success = await credential.RequestAccessTokenAsync(CancellationToken.None).ConfigureAwait(false);
+            var success = await credential.RequestAccessTokenAsync(CancellationToken.None);
             Assert.True(success);
             Assert.Equal(3600, credential.Token.ExpiresInSeconds);
             Assert.Equal("access_token", credential.Token.AccessToken);
@@ -192,10 +206,116 @@ namespace Google.Apis.Auth.Tests.OAuth2
         }
 
         [Fact]
+        public async Task SignBlob_Default_RecommendedRetryPolicy()
+        {
+            var credential = CreateImpersonatedCredentialWithSignBlobResponse();
+            var mockFactory = credential.HttpClientFactory as MockHttpClientFactory;
+
+            await credential.SignBlobAsync(Encoding.ASCII.GetBytes("toSign"));
+
+            // Three clients have been created:
+            // - One is credential.HttpClient
+            // - One is the HttpClient that will make requests to the IAM endpoint.
+            Assert.Equal(2, mockFactory.AllCreateHttpClientArgs.Count());
+            var signBlobArgs = mockFactory.AllCreateHttpClientArgs.Last();
+
+            // One initializer is the retry policy and the other one is the IAM scoped source credential
+            Assert.Equal(2, signBlobArgs.Initializers.Count());
+            Assert.Contains(signBlobArgs.Initializers, initializer => initializer is GoogleCredential);
+            Assert.Contains(signBlobArgs.Initializers, initializer => initializer == GoogleAuthConsts.IamSignBlobEndpointRecommendedRetry);
+        }
+
+        [Fact]
+        public async Task SignBlob_BadResponse503AndRecommended_RecommendedRetryPolicy()
+        {
+            var credential = CreateImpersonatedCredentialWithSignBlobResponse(
+                retryPolicy: ExponentialBackOffPolicy.UnsuccessfulResponse503 | ExponentialBackOffPolicy.RecommendedOrDefault);
+            var mockFactory = credential.HttpClientFactory as MockHttpClientFactory;
+
+            await credential.SignBlobAsync(Encoding.ASCII.GetBytes("toSign"));
+
+            // Three clients have been created:
+            // - One is credential.HttpClient
+            // - One is the HttpClient that will make requests to the IAM endpoint.
+            Assert.Equal(2, mockFactory.AllCreateHttpClientArgs.Count());
+            var signBlobArgs = mockFactory.AllCreateHttpClientArgs.Last();
+
+            // One initializer is the retry policy and the other one is the IAM scoped source credential
+            Assert.Equal(2, signBlobArgs.Initializers.Count());
+            Assert.Contains(signBlobArgs.Initializers, initializer => initializer is GoogleCredential);
+            Assert.Contains(signBlobArgs.Initializers, initializer => initializer == GoogleAuthConsts.IamSignBlobEndpointRecommendedRetry);
+        }
+
+        [Fact]
+        public async Task SignBlob_ExceptionAndRecommended_RecommendedAndOtherRetryPolicy()
+        {
+            var credential = CreateImpersonatedCredentialWithSignBlobResponse(
+                retryPolicy: ExponentialBackOffPolicy.Exception | ExponentialBackOffPolicy.RecommendedOrDefault);
+            var mockFactory = credential.HttpClientFactory as MockHttpClientFactory;
+
+            await credential.SignBlobAsync(Encoding.ASCII.GetBytes("toSign"));
+
+            // Three clients have been created:
+            // - One is credential.HttpClient
+            // - One is the HttpClient that will make requests to the IAM endpoint.
+            Assert.Equal(2, mockFactory.AllCreateHttpClientArgs.Count());
+            var signBlobArgs = mockFactory.AllCreateHttpClientArgs.Last();
+
+            // Two retry policies and the IAM scoped source credential
+            Assert.Equal(3, signBlobArgs.Initializers.Count());
+            Assert.Contains(signBlobArgs.Initializers, initializer => initializer is GoogleCredential);
+            Assert.Contains(signBlobArgs.Initializers, initializer => initializer == GoogleAuthConsts.IamSignBlobEndpointRecommendedRetry);
+            Assert.Contains(signBlobArgs.Initializers, initializer => initializer is ExponentialBackOffInitializer && initializer != GoogleAuthConsts.IamSignBlobEndpointRecommendedRetry);
+        }
+
+        [Fact]
+        public async Task SignBlob_NoRetryPolicy()
+        {
+            var credential = CreateImpersonatedCredentialWithSignBlobResponse(
+                retryPolicy: ExponentialBackOffPolicy.None);
+            var mockFactory = credential.HttpClientFactory as MockHttpClientFactory;
+
+            await credential.SignBlobAsync(Encoding.ASCII.GetBytes("toSign"));
+
+            // Three clients have been created:
+            // - One is credential.HttpClient
+            // - One is the HttpClient that will make requests to the IAM endpoint.
+            Assert.Equal(2, mockFactory.AllCreateHttpClientArgs.Count());
+            var signBlobArgs = mockFactory.AllCreateHttpClientArgs.Last();
+
+            // Just the IAM scoped source credential
+            var clientInitializer = Assert.Single(signBlobArgs.Initializers);
+            Assert.IsType<GoogleCredential>(clientInitializer);
+        }
+
+        [Theory]
+        [InlineData(ExponentialBackOffPolicy.Exception)]
+        [InlineData(ExponentialBackOffPolicy.UnsuccessfulResponse503)]
+        [InlineData(ExponentialBackOffPolicy.Exception | ExponentialBackOffPolicy.UnsuccessfulResponse503)]
+        public async Task SignBlob_OtherThanRecommendedRetryPolicy(ExponentialBackOffPolicy policy)
+        {
+            var credential = CreateImpersonatedCredentialWithSignBlobResponse(retryPolicy: policy);
+            var mockFactory = credential.HttpClientFactory as MockHttpClientFactory;
+
+            await credential.SignBlobAsync(Encoding.ASCII.GetBytes("toSign"));
+
+            // Three clients have been created:
+            // - One is credential.HttpClient
+            // - One is the HttpClient that will make requests to the IAM endpoint.
+            Assert.Equal(2, mockFactory.AllCreateHttpClientArgs.Count());
+            var signBlobArgs = mockFactory.AllCreateHttpClientArgs.Last();
+
+            // Two retry policy but not the default and the IAM scoped source credential
+            Assert.Equal(2, signBlobArgs.Initializers.Count());
+            Assert.Contains(signBlobArgs.Initializers, initializer => initializer is GoogleCredential);
+            Assert.Contains(signBlobArgs.Initializers, initializer => initializer is ExponentialBackOffInitializer && initializer != GoogleAuthConsts.IamSignBlobEndpointRecommendedRetry);
+        }
+
+        [Fact]
         public async Task SignBlobAsync()
         {
             var credential = CreateImpersonatedCredentialWithSignBlobResponse();
-            var signature = await credential.SignBlobAsync(Encoding.ASCII.GetBytes("toSign")).ConfigureAwait(false);
+            var signature = await credential.SignBlobAsync(Encoding.ASCII.GetBytes("toSign"));
             Assert.Equal("Zm9v", signature);
         }
 
@@ -203,8 +323,170 @@ namespace Google.Apis.Auth.Tests.OAuth2
         public async Task SignBlobAsync_Failure()
         {
             var credential = CreateImpersonatedCredentialWithErrorResponse();
-            var ex = await Assert.ThrowsAsync<HttpRequestException>(() => credential.SignBlobAsync(Encoding.ASCII.GetBytes("toSign")));
-            Assert.Equal("Response status code does not indicate success: 404 (Not Found).", ex.Message);
+            var ex = await Assert.ThrowsAsync<GoogleApiException>(() => credential.SignBlobAsync(Encoding.ASCII.GetBytes("toSign")));
+            Assert.Equal(HttpStatusCode.NotFound, ex.HttpStatusCode);
+        }
+
+        [Fact]
+        public async Task CreateWithCustomTokenUrl()
+        {
+            string customTokenUrl = "https://custom.token.url";
+            var impersonatedCredential = CreateImpersonatedCredentialWithAccessTokenResponse(customTokenUrl: customTokenUrl);
+
+            Assert.Equal(customTokenUrl, impersonatedCredential.TokenServerUrl);
+            Assert.Equal("principal", impersonatedCredential.TargetPrincipal);
+            Assert.True(await impersonatedCredential.HasCustomTokenUrlCache.Value);
+
+            var success = await impersonatedCredential.RequestAccessTokenAsync(default);
+            Assert.True(success);
+            Assert.Equal(3600, impersonatedCredential.Token.ExpiresInSeconds);
+            Assert.Equal("access_token", impersonatedCredential.Token.AccessToken);
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() => impersonatedCredential.SignBlobAsync(new byte[] { }));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => impersonatedCredential.GetOidcTokenAsync(OidcTokenOptions.FromTargetAudience("audience")));
+        }
+
+        [Fact]
+        public async Task CreateWithCustomTokenUrl_NullPrincipal()
+        {
+            string customTokenUrl = "https://custom.token.url";
+            var impersonatedCredential = CreateImpersonatedCredentialWithAccessTokenResponse(customTokenUrl: customTokenUrl, principal: null);
+
+            Assert.Equal(customTokenUrl, impersonatedCredential.TokenServerUrl);
+            Assert.Null(impersonatedCredential.TargetPrincipal);
+            Assert.True(await impersonatedCredential.HasCustomTokenUrlCache.Value);
+
+            var success = await impersonatedCredential.RequestAccessTokenAsync(default);
+            Assert.True(success);
+            Assert.Equal(3600, impersonatedCredential.Token.ExpiresInSeconds);
+            Assert.Equal("access_token", impersonatedCredential.Token.AccessToken);
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() => impersonatedCredential.SignBlobAsync(new byte[] { }));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => impersonatedCredential.GetOidcTokenAsync(OidcTokenOptions.FromTargetAudience("audience")));
+        }
+
+        [Fact]
+        public async Task CreateWithCustomTokenUrl_SameAsDefaultUrl()
+        {
+            string principal = "principal";
+            string customTokenUrl = string.Format(GoogleAuthConsts.IamAccessTokenEndpointFormatString, GoogleAuthConsts.DefaultUniverseDomain, principal);
+            var impersonatedCredential = CreateImpersonatedCredentialWithAccessTokenResponse(customTokenUrl: customTokenUrl);
+
+            Assert.Equal(customTokenUrl, impersonatedCredential.TokenServerUrl);
+            Assert.Equal(principal, impersonatedCredential.TargetPrincipal);
+            Assert.False(await impersonatedCredential.HasCustomTokenUrlCache.Value);
+
+            var success = await impersonatedCredential.RequestAccessTokenAsync(default);
+            Assert.True(success);
+            Assert.Equal(3600, impersonatedCredential.Token.ExpiresInSeconds);
+            Assert.Equal("access_token", impersonatedCredential.Token.AccessToken);
+        }
+
+        [Fact]
+        public async Task UniverseDomain_FromSourceCredential_Default()
+        {
+            string principal = "principal";
+
+            var credential = ImpersonatedCredential.Create(
+                CreateSourceCredential(),
+                new ImpersonatedCredential.Initializer(principal));
+            var googleCredential = credential as IGoogleCredential;
+
+            Assert.Equal(GoogleAuthConsts.DefaultUniverseDomain, await googleCredential.GetUniverseDomainAsync(default));
+            Assert.Equal(GoogleAuthConsts.DefaultUniverseDomain, googleCredential.GetUniverseDomain());
+
+            string expectedTokenUrl = string.Format(GoogleAuthConsts.IamAccessTokenEndpointFormatString, GoogleAuthConsts.DefaultUniverseDomain, principal);
+
+            Assert.Null(credential.TokenServerUrl);
+            Assert.False(await credential.HasCustomTokenUrlCache.Value);
+            Assert.Equal(expectedTokenUrl, await credential.EffectiveTokenUrlCache.Value);
+        }
+
+        [Fact]
+        public async Task UniverseDomain_FromSourceCredential_Custom()
+        {
+            string principal = "principal";
+            string universeDomain = "universe.domain.com";
+
+            var sourceCredential = GoogleCredential.FromComputeCredential(new ComputeCredential(new ComputeCredential.Initializer()
+            {
+                UniverseDomain = universeDomain
+            }));
+
+            var credential = ImpersonatedCredential.Create(
+                sourceCredential,
+                new ImpersonatedCredential.Initializer(principal));
+            var googleCredential = credential as IGoogleCredential;
+
+            Assert.Equal(universeDomain, await googleCredential.GetUniverseDomainAsync(default));
+            Assert.Equal(universeDomain, googleCredential.GetUniverseDomain());
+
+            string expectedTokenUrl = string.Format(GoogleAuthConsts.IamAccessTokenEndpointFormatString, universeDomain, principal);
+
+            Assert.Null(credential.TokenServerUrl);
+            Assert.False(await credential.HasCustomTokenUrlCache.Value);
+            Assert.Equal(expectedTokenUrl, await credential.EffectiveTokenUrlCache.Value);
+        }
+
+        [Fact]
+        public async Task WithUniverseDomain()
+        {
+            string principal = "principal";
+            
+            // We start off with a Compute
+            string universeDomain1 = "universe1.domain.com";
+            string universeDomain2 = "universe2.domain.com";
+
+            // The impersonated credentials gets its universe domain from the source credential.
+            // That is to say that impersonated and impersonator are assumed to be from the same universe domain.
+
+            // Our impersonator is a ComputeCredential from universeDomain1.
+            // (We specify the universe explicitly to avoid the HTTP call to the metadata server.)
+            var sourceCredential = GoogleCredential.FromComputeCredential(new ComputeCredential(new ComputeCredential.Initializer()
+            {
+                UniverseDomain = universeDomain1
+            }));
+
+            // We use our impersonator to impersonate principal.
+            var credential = ImpersonatedCredential.Create(
+                sourceCredential,
+                new ImpersonatedCredential.Initializer(principal));
+            var googleCredential = credential as IGoogleCredential;
+            // And now we change the universe domain of the impersonated credential.
+            var newGoogleCredential = googleCredential.WithUniverseDomain(universeDomain2) ;
+
+            // The new impersonated credential is a different instance.
+            var newCredential = Assert.IsType<ImpersonatedCredential>(newGoogleCredential);
+            Assert.NotSame(credential, newCredential);
+
+            // The impersonator credentials are also different intances.
+            Assert.NotSame(credential.SourceCredential, newCredential.SourceCredential);
+            var newSourceCredential = Assert.IsType<GoogleCredential>(newCredential.SourceCredential);
+            Assert.IsType<ComputeCredential>(newSourceCredential.UnderlyingCredential);
+
+            // Both the original impersonator and impersonated are from universeDomain1.
+            // Both the new impersonator and impersonated are from universeDomain2.
+            Assert.Equal(universeDomain1, await credential.SourceCredential.GetUniverseDomainAsync(default));
+            Assert.Equal(universeDomain2, await newCredential.SourceCredential.GetUniverseDomainAsync(default));
+
+            Assert.Equal(universeDomain1, await googleCredential.GetUniverseDomainAsync(default));
+            Assert.Equal(universeDomain1, googleCredential.GetUniverseDomain());
+
+            Assert.Equal(universeDomain2, await newGoogleCredential.GetUniverseDomainAsync(default));
+            Assert.Equal(universeDomain2, newGoogleCredential.GetUniverseDomain());
+
+            // Token endpoints for the original and new credential include each the correct universe domain.
+            string expectedTokenUrl = string.Format(GoogleAuthConsts.IamAccessTokenEndpointFormatString, universeDomain1, principal);
+
+            Assert.Null(credential.TokenServerUrl);
+            Assert.False(await credential.HasCustomTokenUrlCache.Value);
+            Assert.Equal(expectedTokenUrl, await credential.EffectiveTokenUrlCache.Value);
+
+            string newExpectedTokenUrl = string.Format(GoogleAuthConsts.IamAccessTokenEndpointFormatString, universeDomain2, principal);
+
+            Assert.Null(newCredential.TokenServerUrl);
+            Assert.False(await newCredential.HasCustomTokenUrlCache.Value);
+            Assert.Equal(newExpectedTokenUrl, await newCredential.EffectiveTokenUrlCache.Value);
         }
     }
 }

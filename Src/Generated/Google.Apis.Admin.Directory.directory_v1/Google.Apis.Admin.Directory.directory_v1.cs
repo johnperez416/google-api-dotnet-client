@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -54,6 +54,8 @@ namespace Google.Apis.Admin.Directory.directory_v1
             TwoStepVerification = new TwoStepVerificationResource(this);
             Users = new UsersResource(this);
             VerificationCodes = new VerificationCodesResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://admin.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://admin.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -63,23 +65,16 @@ namespace Google.Apis.Admin.Directory.directory_v1
         public override string Name => "admin";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://admin.googleapis.com/";
-        #else
-            "https://admin.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://admin.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Admin SDK API.</summary>
         public class Scope
@@ -98,10 +93,10 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// <summary>View customer related information</summary>
             public static string AdminDirectoryCustomerReadonly = "https://www.googleapis.com/auth/admin.directory.customer.readonly";
 
-            /// <summary>View and manage your Chrome OS devices' metadata</summary>
+            /// <summary>View and manage your ChromeOS devices' metadata</summary>
             public static string AdminDirectoryDeviceChromeos = "https://www.googleapis.com/auth/admin.directory.device.chromeos";
 
-            /// <summary>View your Chrome OS devices' metadata</summary>
+            /// <summary>View your ChromeOS devices' metadata</summary>
             public static string AdminDirectoryDeviceChromeosReadonly = "https://www.googleapis.com/auth/admin.directory.device.chromeos.readonly";
 
             /// <summary>View and manage your mobile devices' metadata</summary>
@@ -194,10 +189,10 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// <summary>View customer related information</summary>
             public const string AdminDirectoryCustomerReadonly = "https://www.googleapis.com/auth/admin.directory.customer.readonly";
 
-            /// <summary>View and manage your Chrome OS devices' metadata</summary>
+            /// <summary>View and manage your ChromeOS devices' metadata</summary>
             public const string AdminDirectoryDeviceChromeos = "https://www.googleapis.com/auth/admin.directory.device.chromeos";
 
-            /// <summary>View your Chrome OS devices' metadata</summary>
+            /// <summary>View your ChromeOS devices' metadata</summary>
             public const string AdminDirectoryDeviceChromeosReadonly = "https://www.googleapis.com/auth/admin.directory.device.chromeos.readonly";
 
             /// <summary>View and manage your mobile devices' metadata</summary>
@@ -537,7 +532,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="codeId">The unique ID of the ASP to be deleted.</param>
         public virtual DeleteRequest Delete(string userKey, int codeId)
         {
-            return new DeleteRequest(service, userKey, codeId);
+            return new DeleteRequest(this.service, userKey, codeId);
         }
 
         /// <summary>Deletes an ASP issued by a user.</summary>
@@ -602,7 +597,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="codeId">The unique ID of the ASP.</param>
         public virtual GetRequest Get(string userKey, int codeId)
         {
-            return new GetRequest(service, userKey, codeId);
+            return new GetRequest(this.service, userKey, codeId);
         }
 
         /// <summary>Gets information about an ASP issued by a user.</summary>
@@ -666,7 +661,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual ListRequest List(string userKey)
         {
-            return new ListRequest(service, userKey);
+            return new ListRequest(this.service, userKey);
         }
 
         /// <summary>Lists the ASPs issued by a user.</summary>
@@ -729,7 +724,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="body">The body of the request.</param>
         public virtual StopRequest Stop(Google.Apis.Admin.Directory.directory_v1.Data.Channel body)
         {
-            return new StopRequest(service, body);
+            return new StopRequest(this.service, body);
         }
 
         /// <summary>Stops watching resources through this channel.</summary>
@@ -780,12 +775,14 @@ namespace Google.Apis.Admin.Directory.directory_v1
         }
 
         /// <summary>
-        /// Takes an action that affects a Chrome OS Device. This includes deprovisioning, disabling, and re-enabling
-        /// devices. *Warning:* * Deprovisioning a device will stop device policy syncing and remove device-level
-        /// printers. After a device is deprovisioned, it must be wiped before it can be re-enrolled. * Lost or stolen
-        /// devices should use the disable action. * Re-enabling a disabled device will consume a device license. If you
-        /// do not have sufficient licenses available when completing the re-enable action, you will receive an error.
-        /// For more information about deprovisioning and disabling devices, visit the [help
+        /// Use
+        /// [BatchChangeChromeOsDeviceStatus](/admin-sdk/directory/reference/rest/v1/customer.devices.chromeos/batchChangeStatus)
+        /// instead. Takes an action that affects a Chrome OS Device. This includes deprovisioning, disabling, and
+        /// re-enabling devices. *Warning:* * Deprovisioning a device will stop device policy syncing and remove
+        /// device-level printers. After a device is deprovisioned, it must be wiped before it can be re-enrolled. *
+        /// Lost or stolen devices should use the disable action. * Re-enabling a disabled device will consume a device
+        /// license. If you do not have sufficient licenses available when completing the re-enable action, you will
+        /// receive an error. For more information about deprovisioning and disabling devices, visit the [help
         /// center](https://support.google.com/chrome/a/answer/3523633).
         /// </summary>
         /// <param name="body">The body of the request.</param>
@@ -800,16 +797,18 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual ActionRequest Action(Google.Apis.Admin.Directory.directory_v1.Data.ChromeOsDeviceAction body, string customerId, string resourceId)
         {
-            return new ActionRequest(service, body, customerId, resourceId);
+            return new ActionRequest(this.service, body, customerId, resourceId);
         }
 
         /// <summary>
-        /// Takes an action that affects a Chrome OS Device. This includes deprovisioning, disabling, and re-enabling
-        /// devices. *Warning:* * Deprovisioning a device will stop device policy syncing and remove device-level
-        /// printers. After a device is deprovisioned, it must be wiped before it can be re-enrolled. * Lost or stolen
-        /// devices should use the disable action. * Re-enabling a disabled device will consume a device license. If you
-        /// do not have sufficient licenses available when completing the re-enable action, you will receive an error.
-        /// For more information about deprovisioning and disabling devices, visit the [help
+        /// Use
+        /// [BatchChangeChromeOsDeviceStatus](/admin-sdk/directory/reference/rest/v1/customer.devices.chromeos/batchChangeStatus)
+        /// instead. Takes an action that affects a Chrome OS Device. This includes deprovisioning, disabling, and
+        /// re-enabling devices. *Warning:* * Deprovisioning a device will stop device policy syncing and remove
+        /// device-level printers. After a device is deprovisioned, it must be wiped before it can be re-enrolled. *
+        /// Lost or stolen devices should use the disable action. * Re-enabling a disabled device will consume a device
+        /// license. If you do not have sufficient licenses available when completing the re-enable action, you will
+        /// receive an error. For more information about deprovisioning and disabling devices, visit the [help
         /// center](https://support.google.com/chrome/a/answer/3523633).
         /// </summary>
         public class ActionRequest : DirectoryBaseServiceRequest<string>
@@ -888,7 +887,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual GetRequest Get(string customerId, string deviceId)
         {
-            return new GetRequest(service, customerId, deviceId);
+            return new GetRequest(this.service, customerId, deviceId);
         }
 
         /// <summary>Retrieves a Chrome OS device's properties.</summary>
@@ -987,7 +986,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual ListRequest List(string customerId)
         {
-            return new ListRequest(service, customerId);
+            return new ListRequest(this.service, customerId);
         }
 
         /// <summary>Retrieves a paginated list of Chrome OS devices within an account.</summary>
@@ -1009,13 +1008,13 @@ namespace Google.Apis.Admin.Directory.directory_v1
             public virtual string CustomerId { get; private set; }
 
             /// <summary>
-            /// Return devices from all child orgunits, as well as the specified org unit. If this is set to true
+            /// Return devices from all child orgunits, as well as the specified org unit. If this is set to true,
             /// 'orgUnitPath' must be provided.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("includeChildOrgunits", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<bool> IncludeChildOrgunits { get; set; }
 
-            /// <summary>Maximum number of results to return.</summary>
+            /// <summary>Maximum number of results to return. Value should not exceed 300.</summary>
             [Google.Apis.Util.RequestParameterAttribute("maxResults", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<int> MaxResults { get; set; }
 
@@ -1055,15 +1054,9 @@ namespace Google.Apis.Admin.Directory.directory_v1
                 /// </summary>
                 [Google.Apis.Util.StringValueAttribute("status")]
                 Status = 5,
-
-                /// <summary>
-                /// Chrome device support end date. This is applicable only for devices purchased directly from Google.
-                /// </summary>
-                [Google.Apis.Util.StringValueAttribute("supportEndDate")]
-                SupportEndDate = 6,
             }
 
-            /// <summary>The full path of the organizational unit or its unique ID.</summary>
+            /// <summary>The full path of the organizational unit (minus the leading `/`) or its unique ID.</summary>
             [Google.Apis.Util.RequestParameterAttribute("orgUnitPath", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string OrgUnitPath { get; set; }
 
@@ -1074,11 +1067,15 @@ namespace Google.Apis.Admin.Directory.directory_v1
             [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string PageToken { get; set; }
 
-            /// <summary>Restrict information returned to a set of selected fields.</summary>
+            /// <summary>
+            /// Determines whether the response contains the full list of properties or only a subset.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("projection", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<ProjectionEnum> Projection { get; set; }
 
-            /// <summary>Restrict information returned to a set of selected fields.</summary>
+            /// <summary>
+            /// Determines whether the response contains the full list of properties or only a subset.
+            /// </summary>
             public enum ProjectionEnum
             {
                 /// <summary>
@@ -1212,11 +1209,11 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// once.
         /// </summary>
         /// <param name="body">The body of the request.</param>
-        /// <param name="customerId">Immutable ID of the Google Workspace account</param>
+        /// <param name="customerId">Immutable. ID of the Google Workspace account</param>
         /// <param name="orgUnitPath">Full path of the target organizational unit or its ID</param>
         public virtual MoveDevicesToOuRequest MoveDevicesToOu(Google.Apis.Admin.Directory.directory_v1.Data.ChromeOsMoveDevicesToOu body, string customerId, string orgUnitPath)
         {
-            return new MoveDevicesToOuRequest(service, body, customerId, orgUnitPath);
+            return new MoveDevicesToOuRequest(this.service, body, customerId, orgUnitPath);
         }
 
         /// <summary>
@@ -1234,7 +1231,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
                 InitParameters();
             }
 
-            /// <summary>Immutable ID of the Google Workspace account</summary>
+            /// <summary>Immutable. ID of the Google Workspace account</summary>
             [Google.Apis.Util.RequestParameterAttribute("customerId", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string CustomerId { get; private set; }
 
@@ -1297,7 +1294,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual PatchRequest Patch(Google.Apis.Admin.Directory.directory_v1.Data.ChromeOsDevice body, string customerId, string deviceId)
         {
-            return new PatchRequest(service, body, customerId, deviceId);
+            return new PatchRequest(this.service, body, customerId, deviceId);
         }
 
         /// <summary>
@@ -1331,11 +1328,15 @@ namespace Google.Apis.Admin.Directory.directory_v1
             [Google.Apis.Util.RequestParameterAttribute("deviceId", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string DeviceId { get; private set; }
 
-            /// <summary>Restrict information returned to a set of selected fields.</summary>
+            /// <summary>
+            /// Determines whether the response contains the full list of properties or only a subset.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("projection", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<ProjectionEnum> Projection { get; set; }
 
-            /// <summary>Restrict information returned to a set of selected fields.</summary>
+            /// <summary>
+            /// Determines whether the response contains the full list of properties or only a subset.
+            /// </summary>
             public enum ProjectionEnum
             {
                 /// <summary>
@@ -1411,7 +1412,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.Admin.Directory.directory_v1.Data.ChromeOsDevice body, string customerId, string deviceId)
         {
-            return new UpdateRequest(service, body, customerId, deviceId);
+            return new UpdateRequest(this.service, body, customerId, deviceId);
         }
 
         /// <summary>
@@ -1444,11 +1445,15 @@ namespace Google.Apis.Admin.Directory.directory_v1
             [Google.Apis.Util.RequestParameterAttribute("deviceId", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string DeviceId { get; private set; }
 
-            /// <summary>Restrict information returned to a set of selected fields.</summary>
+            /// <summary>
+            /// Determines whether the response contains the full list of properties or only a subset.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("projection", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<ProjectionEnum> Projection { get; set; }
 
-            /// <summary>Restrict information returned to a set of selected fields.</summary>
+            /// <summary>
+            /// Determines whether the response contains the full list of properties or only a subset.
+            /// </summary>
             public enum ProjectionEnum
             {
                 /// <summary>
@@ -1578,12 +1583,12 @@ namespace Google.Apis.Admin.Directory.directory_v1
                     }
 
                     /// <summary>Gets command data a specific command issued to the device.</summary>
-                    /// <param name="customerId">Immutable. Immutable ID of the Google Workspace account.</param>
-                    /// <param name="deviceId">Immutable. Immutable ID of Chrome OS Device.</param>
-                    /// <param name="commandId">Immutable. Immutable ID of Chrome OS Device Command.</param>
+                    /// <param name="customerId">Immutable. ID of the Google Workspace account.</param>
+                    /// <param name="deviceId">Immutable. ID of Chrome OS Device.</param>
+                    /// <param name="commandId">Immutable. ID of Chrome OS Device Command.</param>
                     public virtual GetRequest Get(string customerId, string deviceId, long commandId)
                     {
-                        return new GetRequest(service, customerId, deviceId, commandId);
+                        return new GetRequest(this.service, customerId, deviceId, commandId);
                     }
 
                     /// <summary>Gets command data a specific command issued to the device.</summary>
@@ -1598,15 +1603,15 @@ namespace Google.Apis.Admin.Directory.directory_v1
                             InitParameters();
                         }
 
-                        /// <summary>Immutable. Immutable ID of the Google Workspace account.</summary>
+                        /// <summary>Immutable. ID of the Google Workspace account.</summary>
                         [Google.Apis.Util.RequestParameterAttribute("customerId", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string CustomerId { get; private set; }
 
-                        /// <summary>Immutable. Immutable ID of Chrome OS Device.</summary>
+                        /// <summary>Immutable. ID of Chrome OS Device.</summary>
                         [Google.Apis.Util.RequestParameterAttribute("deviceId", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string DeviceId { get; private set; }
 
-                        /// <summary>Immutable. Immutable ID of Chrome OS Device Command.</summary>
+                        /// <summary>Immutable. ID of Chrome OS Device Command.</summary>
                         [Google.Apis.Util.RequestParameterAttribute("commandId", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual long CommandId { get; private set; }
 
@@ -1651,13 +1656,74 @@ namespace Google.Apis.Admin.Directory.directory_v1
                     }
                 }
 
+                /// <summary>
+                /// Changes the status of a batch of ChromeOS devices. For more information about changing a ChromeOS
+                /// device state [Repair, repurpose, or retire ChromeOS
+                /// devices](https://support.google.com/chrome/a/answer/3523633).
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="customerId">Required. Immutable ID of the Google Workspace account.</param>
+                public virtual BatchChangeStatusRequest BatchChangeStatus(Google.Apis.Admin.Directory.directory_v1.Data.BatchChangeChromeOsDeviceStatusRequest body, string customerId)
+                {
+                    return new BatchChangeStatusRequest(this.service, body, customerId);
+                }
+
+                /// <summary>
+                /// Changes the status of a batch of ChromeOS devices. For more information about changing a ChromeOS
+                /// device state [Repair, repurpose, or retire ChromeOS
+                /// devices](https://support.google.com/chrome/a/answer/3523633).
+                /// </summary>
+                public class BatchChangeStatusRequest : DirectoryBaseServiceRequest<Google.Apis.Admin.Directory.directory_v1.Data.BatchChangeChromeOsDeviceStatusResponse>
+                {
+                    /// <summary>Constructs a new BatchChangeStatus request.</summary>
+                    public BatchChangeStatusRequest(Google.Apis.Services.IClientService service, Google.Apis.Admin.Directory.directory_v1.Data.BatchChangeChromeOsDeviceStatusRequest body, string customerId) : base(service)
+                    {
+                        CustomerId = customerId;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Immutable ID of the Google Workspace account.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("customerId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CustomerId { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Admin.Directory.directory_v1.Data.BatchChangeChromeOsDeviceStatusRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "batchChangeStatus";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "admin/directory/v1/customer/{customerId}/devices/chromeos:batchChangeStatus";
+
+                    /// <summary>Initializes BatchChangeStatus parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("customerId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "customerId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
                 /// <summary>Issues a command for the device to execute.</summary>
                 /// <param name="body">The body of the request.</param>
-                /// <param name="customerId">Immutable. Immutable ID of the Google Workspace account.</param>
-                /// <param name="deviceId">Immutable. Immutable ID of Chrome OS Device.</param>
+                /// <param name="customerId">Immutable. ID of the Google Workspace account.</param>
+                /// <param name="deviceId">Immutable. ID of Chrome OS Device.</param>
                 public virtual IssueCommandRequest IssueCommand(Google.Apis.Admin.Directory.directory_v1.Data.DirectoryChromeosdevicesIssueCommandRequest body, string customerId, string deviceId)
                 {
-                    return new IssueCommandRequest(service, body, customerId, deviceId);
+                    return new IssueCommandRequest(this.service, body, customerId, deviceId);
                 }
 
                 /// <summary>Issues a command for the device to execute.</summary>
@@ -1672,11 +1738,11 @@ namespace Google.Apis.Admin.Directory.directory_v1
                         InitParameters();
                     }
 
-                    /// <summary>Immutable. Immutable ID of the Google Workspace account.</summary>
+                    /// <summary>Immutable. ID of the Google Workspace account.</summary>
                     [Google.Apis.Util.RequestParameterAttribute("customerId", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string CustomerId { get; private set; }
 
-                    /// <summary>Immutable. Immutable ID of Chrome OS Device.</summary>
+                    /// <summary>Immutable. ID of Chrome OS Device.</summary>
                     [Google.Apis.Util.RequestParameterAttribute("deviceId", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string DeviceId { get; private set; }
 
@@ -1751,7 +1817,519 @@ namespace Google.Apis.Admin.Directory.directory_v1
             public ChromeResource(Google.Apis.Services.IClientService service)
             {
                 this.service = service;
+                PrintServers = new PrintServersResource(service);
                 Printers = new PrintersResource(service);
+            }
+
+            /// <summary>Gets the PrintServers resource.</summary>
+            public virtual PrintServersResource PrintServers { get; }
+
+            /// <summary>The "printServers" collection of methods.</summary>
+            public class PrintServersResource
+            {
+                private const string Resource = "printServers";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public PrintServersResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Creates multiple print servers.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The [unique
+                /// ID](https://developers.google.com/admin-sdk/directory/reference/rest/v1/customers) of the customer's
+                /// Google Workspace account. Format: `customers/{id}`
+                /// </param>
+                public virtual BatchCreatePrintServersRequest BatchCreatePrintServers(Google.Apis.Admin.Directory.directory_v1.Data.BatchCreatePrintServersRequest body, string parent)
+                {
+                    return new BatchCreatePrintServersRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates multiple print servers.</summary>
+                public class BatchCreatePrintServersRequest : DirectoryBaseServiceRequest<Google.Apis.Admin.Directory.directory_v1.Data.BatchCreatePrintServersResponse>
+                {
+                    /// <summary>Constructs a new BatchCreatePrintServers request.</summary>
+                    public BatchCreatePrintServersRequest(Google.Apis.Services.IClientService service, Google.Apis.Admin.Directory.directory_v1.Data.BatchCreatePrintServersRequest body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The [unique
+                    /// ID](https://developers.google.com/admin-sdk/directory/reference/rest/v1/customers) of the
+                    /// customer's Google Workspace account. Format: `customers/{id}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Admin.Directory.directory_v1.Data.BatchCreatePrintServersRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "batchCreatePrintServers";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "admin/directory/v1/{+parent}/chrome/printServers:batchCreatePrintServers";
+
+                    /// <summary>Initializes BatchCreatePrintServers parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^customers/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Deletes multiple print servers.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The [unique
+                /// ID](https://developers.google.com/admin-sdk/directory/reference/rest/v1/customers) of the customer's
+                /// Google Workspace account. Format: `customers/{customer.id}`
+                /// </param>
+                public virtual BatchDeletePrintServersRequest BatchDeletePrintServers(Google.Apis.Admin.Directory.directory_v1.Data.BatchDeletePrintServersRequest body, string parent)
+                {
+                    return new BatchDeletePrintServersRequest(this.service, body, parent);
+                }
+
+                /// <summary>Deletes multiple print servers.</summary>
+                public class BatchDeletePrintServersRequest : DirectoryBaseServiceRequest<Google.Apis.Admin.Directory.directory_v1.Data.BatchDeletePrintServersResponse>
+                {
+                    /// <summary>Constructs a new BatchDeletePrintServers request.</summary>
+                    public BatchDeletePrintServersRequest(Google.Apis.Services.IClientService service, Google.Apis.Admin.Directory.directory_v1.Data.BatchDeletePrintServersRequest body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The [unique
+                    /// ID](https://developers.google.com/admin-sdk/directory/reference/rest/v1/customers) of the
+                    /// customer's Google Workspace account. Format: `customers/{customer.id}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Admin.Directory.directory_v1.Data.BatchDeletePrintServersRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "batchDeletePrintServers";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "admin/directory/v1/{+parent}/chrome/printServers:batchDeletePrintServers";
+
+                    /// <summary>Initializes BatchDeletePrintServers parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^customers/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Creates a print server.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The [unique
+                /// ID](https://developers.google.com/admin-sdk/directory/reference/rest/v1/customers) of the customer's
+                /// Google Workspace account. Format: `customers/{id}`
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.Admin.Directory.directory_v1.Data.PrintServer body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a print server.</summary>
+                public class CreateRequest : DirectoryBaseServiceRequest<Google.Apis.Admin.Directory.directory_v1.Data.PrintServer>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Admin.Directory.directory_v1.Data.PrintServer body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The [unique
+                    /// ID](https://developers.google.com/admin-sdk/directory/reference/rest/v1/customers) of the
+                    /// customer's Google Workspace account. Format: `customers/{id}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Admin.Directory.directory_v1.Data.PrintServer Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "admin/directory/v1/{+parent}/chrome/printServers";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^customers/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Deletes a print server.</summary>
+                /// <param name="name">
+                /// Required. The name of the print server to be deleted. Format:
+                /// `customers/{customer.id}/chrome/printServers/{print_server.id}`
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes a print server.</summary>
+                public class DeleteRequest : DirectoryBaseServiceRequest<Google.Apis.Admin.Directory.directory_v1.Data.Empty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The name of the print server to be deleted. Format:
+                    /// `customers/{customer.id}/chrome/printServers/{print_server.id}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "admin/directory/v1/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^customers/[^/]+/chrome/printServers/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Returns a print server's configuration.</summary>
+                /// <param name="name">
+                /// Required. The [unique
+                /// ID](https://developers.google.com/admin-sdk/directory/reference/rest/v1/customers) of the customer's
+                /// Google Workspace account. Format: `customers/{id}`
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Returns a print server's configuration.</summary>
+                public class GetRequest : DirectoryBaseServiceRequest<Google.Apis.Admin.Directory.directory_v1.Data.PrintServer>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The [unique
+                    /// ID](https://developers.google.com/admin-sdk/directory/reference/rest/v1/customers) of the
+                    /// customer's Google Workspace account. Format: `customers/{id}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "admin/directory/v1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^customers/[^/]+/chrome/printServers/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists print server configurations.</summary>
+                /// <param name="parent">
+                /// Required. The [unique
+                /// ID](https://developers.google.com/admin-sdk/directory/reference/rest/v1/customers) of the customer's
+                /// Google Workspace account. Format: `customers/{id}`
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists print server configurations.</summary>
+                public class ListRequest : DirectoryBaseServiceRequest<Google.Apis.Admin.Directory.directory_v1.Data.ListPrintServersResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The [unique
+                    /// ID](https://developers.google.com/admin-sdk/directory/reference/rest/v1/customers) of the
+                    /// customer's Google Workspace account. Format: `customers/{id}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Search query in [Common Expression Language syntax](https://github.com/google/cel-spec).
+                    /// Supported filters are `display_name`, `description`, and `uri`. Example:
+                    /// `printServer.displayName=='marketing-queue'`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// Sort order for results. Supported values are `display_name`, `description`, or `create_time`.
+                    /// Default order is ascending, but descending order can be returned by appending "desc" to the
+                    /// `order_by` field. For instance, `orderBy=='description desc'` returns the print servers sorted
+                    /// by description in descending order.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string OrderBy { get; set; }
+
+                    /// <summary>
+                    /// If `org_unit_id` is present in the request, only print servers owned or inherited by the
+                    /// organizational unit (OU) are returned. If the `PrintServer` resource's `org_unit_id` matches the
+                    /// one in the request, the OU owns the server. If `org_unit_id` is not specified in the request,
+                    /// all print servers are returned or filtered against.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("orgUnitId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string OrgUnitId { get; set; }
+
+                    /// <summary>
+                    /// The maximum number of objects to return (default `100`, max `100`). The service might return
+                    /// fewer than this value.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// A generated token to paginate results (the `next_page_token` from a previous call).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "admin/directory/v1/{+parent}/chrome/printServers";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^customers/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("orderBy", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "orderBy",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("orgUnitId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "orgUnitId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Updates a print server's configuration.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Immutable. Resource name of the print server. Leave empty when creating. Format:
+                /// `customers/{customer.id}/printServers/{print_server.id}`
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.Admin.Directory.directory_v1.Data.PrintServer body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates a print server's configuration.</summary>
+                public class PatchRequest : DirectoryBaseServiceRequest<Google.Apis.Admin.Directory.directory_v1.Data.PrintServer>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.Admin.Directory.directory_v1.Data.PrintServer body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Immutable. Resource name of the print server. Leave empty when creating. Format:
+                    /// `customers/{customer.id}/printServers/{print_server.id}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// The list of fields to update. Some fields are read-only and cannot be updated. Values for
+                    /// unspecified fields are patched.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Admin.Directory.directory_v1.Data.PrintServer Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "admin/directory/v1/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^customers/[^/]+/chrome/printServers/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
             }
 
             /// <summary>Gets the Printers resource.</summary>
@@ -1776,7 +2354,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
                 /// <param name="parent">Required. The name of the customer. Format: customers/{customer_id}</param>
                 public virtual BatchCreatePrintersRequest BatchCreatePrinters(Google.Apis.Admin.Directory.directory_v1.Data.BatchCreatePrintersRequest body, string parent)
                 {
-                    return new BatchCreatePrintersRequest(service, body, parent);
+                    return new BatchCreatePrintersRequest(this.service, body, parent);
                 }
 
                 /// <summary>Creates printers under given Organization Unit.</summary>
@@ -1829,7 +2407,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
                 /// <param name="parent">Required. The name of the customer. Format: customers/{customer_id}</param>
                 public virtual BatchDeletePrintersRequest BatchDeletePrinters(Google.Apis.Admin.Directory.directory_v1.Data.BatchDeletePrintersRequest body, string parent)
                 {
-                    return new BatchDeletePrintersRequest(service, body, parent);
+                    return new BatchDeletePrintersRequest(this.service, body, parent);
                 }
 
                 /// <summary>Deletes printers in batch.</summary>
@@ -1882,7 +2460,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
                 /// <param name="parent">Required. The name of the customer. Format: customers/{customer_id}</param>
                 public virtual CreateRequest Create(Google.Apis.Admin.Directory.directory_v1.Data.Printer body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Creates a printer under given Organization Unit.</summary>
@@ -1937,7 +2515,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Deletes a `Printer`.</summary>
@@ -1988,7 +2566,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Returns a `Printer` resource (printer's config).</summary>
@@ -2039,7 +2617,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>List printers configs.</summary>
@@ -2064,6 +2642,15 @@ namespace Google.Apis.Admin.Directory.directory_v1
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string Filter { get; set; }
+
+                    /// <summary>
+                    /// The order to sort results by. Must be one of display_name, description, make_and_model, or
+                    /// create_time. Default order is ascending, but descending order can be returned by appending
+                    /// "desc" to the order_by field. For instance, "description desc" will return the printers sorted
+                    /// by description in descending order.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string OrderBy { get; set; }
 
                     /// <summary>
                     /// Organization Unit that we want to list the printers for. When org_unit is not present in the
@@ -2113,6 +2700,14 @@ namespace Google.Apis.Admin.Directory.directory_v1
                             DefaultValue = null,
                             Pattern = null,
                         });
+                        RequestParameters.Add("orderBy", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "orderBy",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
                         RequestParameters.Add("orgUnitId", new Google.Apis.Discovery.Parameter
                         {
                             Name = "orgUnitId",
@@ -2147,7 +2742,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
                 /// </param>
                 public virtual ListPrinterModelsRequest ListPrinterModels(string parent)
                 {
-                    return new ListPrinterModelsRequest(service, parent);
+                    return new ListPrinterModelsRequest(this.service, parent);
                 }
 
                 /// <summary>Lists the supported printer models.</summary>
@@ -2240,7 +2835,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.Admin.Directory.directory_v1.Data.Printer body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>Updates a `Printer` resource.</summary>
@@ -2327,7 +2922,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="customerKey">Id of the customer to be retrieved</param>
         public virtual GetRequest Get(string customerKey)
         {
-            return new GetRequest(service, customerKey);
+            return new GetRequest(this.service, customerKey);
         }
 
         /// <summary>Retrieves a customer.</summary>
@@ -2373,7 +2968,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="customerKey">Id of the customer to be updated</param>
         public virtual PatchRequest Patch(Google.Apis.Admin.Directory.directory_v1.Data.Customer body, string customerKey)
         {
-            return new PatchRequest(service, body, customerKey);
+            return new PatchRequest(this.service, body, customerKey);
         }
 
         /// <summary>Patches a customer.</summary>
@@ -2426,7 +3021,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="customerKey">Id of the customer to be updated</param>
         public virtual UpdateRequest Update(Google.Apis.Admin.Directory.directory_v1.Data.Customer body, string customerKey)
         {
-            return new UpdateRequest(service, body, customerKey);
+            return new UpdateRequest(this.service, body, customerKey);
         }
 
         /// <summary>Updates a customer.</summary>
@@ -2494,7 +3089,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="domainAliasName">Name of domain alias to be retrieved.</param>
         public virtual DeleteRequest Delete(string customer, string domainAliasName)
         {
-            return new DeleteRequest(service, customer, domainAliasName);
+            return new DeleteRequest(this.service, customer, domainAliasName);
         }
 
         /// <summary>Deletes a domain Alias of the customer.</summary>
@@ -2549,11 +3144,17 @@ namespace Google.Apis.Admin.Directory.directory_v1
         }
 
         /// <summary>Retrieves a domain alias of the customer.</summary>
-        /// <param name="customer">Immutable ID of the Google Workspace account.</param>
+        /// <param name="customer">
+        /// The unique ID for the customer's Google Workspace account. In case of a multi-domain account, to fetch all
+        /// groups for a customer, use this field instead of `domain`. You can also use the `my_customer` alias to
+        /// represent your account's `customerId`. The `customerId` is also returned as part of the
+        /// [Users](/admin-sdk/directory/v1/reference/users) resource. You must provide either the `customer` or the
+        /// `domain` parameter.
+        /// </param>
         /// <param name="domainAliasName">Name of domain alias to be retrieved.</param>
         public virtual GetRequest Get(string customer, string domainAliasName)
         {
-            return new GetRequest(service, customer, domainAliasName);
+            return new GetRequest(this.service, customer, domainAliasName);
         }
 
         /// <summary>Retrieves a domain alias of the customer.</summary>
@@ -2567,7 +3168,13 @@ namespace Google.Apis.Admin.Directory.directory_v1
                 InitParameters();
             }
 
-            /// <summary>Immutable ID of the Google Workspace account.</summary>
+            /// <summary>
+            /// The unique ID for the customer's Google Workspace account. In case of a multi-domain account, to fetch
+            /// all groups for a customer, use this field instead of `domain`. You can also use the `my_customer` alias
+            /// to represent your account's `customerId`. The `customerId` is also returned as part of the
+            /// [Users](/admin-sdk/directory/v1/reference/users) resource. You must provide either the `customer` or the
+            /// `domain` parameter.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("customer", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Customer { get; private set; }
 
@@ -2612,7 +3219,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="customer">Immutable ID of the Google Workspace account.</param>
         public virtual InsertRequest Insert(Google.Apis.Admin.Directory.directory_v1.Data.DomainAlias body, string customer)
         {
-            return new InsertRequest(service, body, customer);
+            return new InsertRequest(this.service, body, customer);
         }
 
         /// <summary>Inserts a domain alias of the customer.</summary>
@@ -2661,10 +3268,16 @@ namespace Google.Apis.Admin.Directory.directory_v1
         }
 
         /// <summary>Lists the domain aliases of the customer.</summary>
-        /// <param name="customer">Immutable ID of the Google Workspace account.</param>
+        /// <param name="customer">
+        /// The unique ID for the customer's Google Workspace account. In case of a multi-domain account, to fetch all
+        /// groups for a customer, use this field instead of `domain`. You can also use the `my_customer` alias to
+        /// represent your account's `customerId`. The `customerId` is also returned as part of the
+        /// [Users](/admin-sdk/directory/v1/reference/users) resource. You must provide either the `customer` or the
+        /// `domain` parameter.
+        /// </param>
         public virtual ListRequest List(string customer)
         {
-            return new ListRequest(service, customer);
+            return new ListRequest(this.service, customer);
         }
 
         /// <summary>Lists the domain aliases of the customer.</summary>
@@ -2677,7 +3290,13 @@ namespace Google.Apis.Admin.Directory.directory_v1
                 InitParameters();
             }
 
-            /// <summary>Immutable ID of the Google Workspace account.</summary>
+            /// <summary>
+            /// The unique ID for the customer's Google Workspace account. In case of a multi-domain account, to fetch
+            /// all groups for a customer, use this field instead of `domain`. You can also use the `my_customer` alias
+            /// to represent your account's `customerId`. The `customerId` is also returned as part of the
+            /// [Users](/admin-sdk/directory/v1/reference/users) resource. You must provide either the `customer` or the
+            /// `domain` parameter.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("customer", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Customer { get; private set; }
 
@@ -2737,7 +3356,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="domainName">Name of domain to be deleted</param>
         public virtual DeleteRequest Delete(string customer, string domainName)
         {
-            return new DeleteRequest(service, customer, domainName);
+            return new DeleteRequest(this.service, customer, domainName);
         }
 
         /// <summary>Deletes a domain of the customer.</summary>
@@ -2792,11 +3411,17 @@ namespace Google.Apis.Admin.Directory.directory_v1
         }
 
         /// <summary>Retrieves a domain of the customer.</summary>
-        /// <param name="customer">Immutable ID of the Google Workspace account.</param>
+        /// <param name="customer">
+        /// The unique ID for the customer's Google Workspace account. In case of a multi-domain account, to fetch all
+        /// groups for a customer, use this field instead of `domain`. You can also use the `my_customer` alias to
+        /// represent your account's `customerId`. The `customerId` is also returned as part of the
+        /// [Users](/admin-sdk/directory/v1/reference/users) resource. You must provide either the `customer` or the
+        /// `domain` parameter.
+        /// </param>
         /// <param name="domainName">Name of domain to be retrieved</param>
         public virtual GetRequest Get(string customer, string domainName)
         {
-            return new GetRequest(service, customer, domainName);
+            return new GetRequest(this.service, customer, domainName);
         }
 
         /// <summary>Retrieves a domain of the customer.</summary>
@@ -2810,7 +3435,13 @@ namespace Google.Apis.Admin.Directory.directory_v1
                 InitParameters();
             }
 
-            /// <summary>Immutable ID of the Google Workspace account.</summary>
+            /// <summary>
+            /// The unique ID for the customer's Google Workspace account. In case of a multi-domain account, to fetch
+            /// all groups for a customer, use this field instead of `domain`. You can also use the `my_customer` alias
+            /// to represent your account's `customerId`. The `customerId` is also returned as part of the
+            /// [Users](/admin-sdk/directory/v1/reference/users) resource. You must provide either the `customer` or the
+            /// `domain` parameter.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("customer", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Customer { get; private set; }
 
@@ -2855,7 +3486,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="customer">Immutable ID of the Google Workspace account.</param>
         public virtual InsertRequest Insert(Google.Apis.Admin.Directory.directory_v1.Data.Domains body, string customer)
         {
-            return new InsertRequest(service, body, customer);
+            return new InsertRequest(this.service, body, customer);
         }
 
         /// <summary>Inserts a domain of the customer.</summary>
@@ -2904,10 +3535,16 @@ namespace Google.Apis.Admin.Directory.directory_v1
         }
 
         /// <summary>Lists the domains of the customer.</summary>
-        /// <param name="customer">Immutable ID of the Google Workspace account.</param>
+        /// <param name="customer">
+        /// The unique ID for the customer's Google Workspace account. In case of a multi-domain account, to fetch all
+        /// groups for a customer, use this field instead of `domain`. You can also use the `my_customer` alias to
+        /// represent your account's `customerId`. The `customerId` is also returned as part of the
+        /// [Users](/admin-sdk/directory/v1/reference/users) resource. You must provide either the `customer` or the
+        /// `domain` parameter.
+        /// </param>
         public virtual ListRequest List(string customer)
         {
-            return new ListRequest(service, customer);
+            return new ListRequest(this.service, customer);
         }
 
         /// <summary>Lists the domains of the customer.</summary>
@@ -2920,7 +3557,13 @@ namespace Google.Apis.Admin.Directory.directory_v1
                 InitParameters();
             }
 
-            /// <summary>Immutable ID of the Google Workspace account.</summary>
+            /// <summary>
+            /// The unique ID for the customer's Google Workspace account. In case of a multi-domain account, to fetch
+            /// all groups for a customer, use this field instead of `domain`. You can also use the `my_customer` alias
+            /// to represent your account's `customerId`. The `customerId` is also returned as part of the
+            /// [Users](/admin-sdk/directory/v1/reference/users) resource. You must provide either the `customer` or the
+            /// `domain` parameter.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("customer", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Customer { get; private set; }
 
@@ -2989,7 +3632,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// <param name="alias">The alias to be removed</param>
             public virtual DeleteRequest Delete(string groupKey, string alias)
             {
-                return new DeleteRequest(service, groupKey, alias);
+                return new DeleteRequest(this.service, groupKey, alias);
             }
 
             /// <summary>Removes an alias.</summary>
@@ -3054,7 +3697,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// </param>
             public virtual InsertRequest Insert(Google.Apis.Admin.Directory.directory_v1.Data.Alias body, string groupKey)
             {
-                return new InsertRequest(service, body, groupKey);
+                return new InsertRequest(this.service, body, groupKey);
             }
 
             /// <summary>Adds an alias for the group.</summary>
@@ -3112,7 +3755,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// </param>
             public virtual ListRequest List(string groupKey)
             {
-                return new ListRequest(service, groupKey);
+                return new ListRequest(this.service, groupKey);
             }
 
             /// <summary>Lists all aliases for a group.</summary>
@@ -3164,7 +3807,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual DeleteRequest Delete(string groupKey)
         {
-            return new DeleteRequest(service, groupKey);
+            return new DeleteRequest(this.service, groupKey);
         }
 
         /// <summary>Deletes a group.</summary>
@@ -3215,7 +3858,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual GetRequest Get(string groupKey)
         {
-            return new GetRequest(service, groupKey);
+            return new GetRequest(this.service, groupKey);
         }
 
         /// <summary>Retrieves a group's properties.</summary>
@@ -3263,7 +3906,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="body">The body of the request.</param>
         public virtual InsertRequest Insert(Google.Apis.Admin.Directory.directory_v1.Data.Group body)
         {
-            return new InsertRequest(service, body);
+            return new InsertRequest(this.service, body);
         }
 
         /// <summary>Creates a group.</summary>
@@ -3301,7 +3944,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <summary>Retrieves all groups of a domain or of a user given a userKey (paginated).</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>Retrieves all groups of a domain or of a user given a userKey (paginated).</summary>
@@ -3315,15 +3958,16 @@ namespace Google.Apis.Admin.Directory.directory_v1
 
             /// <summary>
             /// The unique ID for the customer's Google Workspace account. In case of a multi-domain account, to fetch
-            /// all groups for a customer, fill this field instead of domain. As an account administrator, you can also
-            /// use the `my_customer` alias to represent your account's `customerId`. The `customerId` is also returned
-            /// as part of the [Users](/admin-sdk/directory/v1/reference/users)
+            /// all groups for a customer, use this field instead of `domain`. You can also use the `my_customer` alias
+            /// to represent your account's `customerId`. The `customerId` is also returned as part of the
+            /// [Users](/admin-sdk/directory/v1/reference/users) resource. You must provide either the `customer` or the
+            /// `domain` parameter.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("customer", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Customer { get; set; }
 
             /// <summary>
-            /// The domain name. Use this field to get fields from only one domain. To return all domains for a customer
+            /// The domain name. Use this field to get groups from only one domain. To return all domains for a customer
             /// account, use the `customer` query parameter instead.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("domain", Google.Apis.Util.RequestParameterType.Query)]
@@ -3378,7 +4022,8 @@ namespace Google.Apis.Admin.Directory.directory_v1
 
             /// <summary>
             /// Email or immutable ID of the user if only those groups are to be listed, the given user is a member of.
-            /// If it's an ID, it should match with the ID of the user object.
+            /// If it's an ID, it should match with the ID of the user object. Cannot be used with the `customer`
+            /// parameter.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("userKey", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string UserKey { get; set; }
@@ -3474,7 +4119,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual PatchRequest Patch(Google.Apis.Admin.Directory.directory_v1.Data.Group body, string groupKey)
         {
-            return new PatchRequest(service, body, groupKey);
+            return new PatchRequest(this.service, body, groupKey);
         }
 
         /// <summary>
@@ -3536,7 +4181,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.Admin.Directory.directory_v1.Data.Group body, string groupKey)
         {
-            return new UpdateRequest(service, body, groupKey);
+            return new UpdateRequest(this.service, body, groupKey);
         }
 
         /// <summary>Updates a group's properties.</summary>
@@ -3613,7 +4258,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual DeleteRequest Delete(string groupKey, string memberKey)
         {
-            return new DeleteRequest(service, groupKey, memberKey);
+            return new DeleteRequest(this.service, groupKey, memberKey);
         }
 
         /// <summary>Removes a member from a group.</summary>
@@ -3684,7 +4329,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual GetRequest Get(string groupKey, string memberKey)
         {
-            return new GetRequest(service, groupKey, memberKey);
+            return new GetRequest(this.service, groupKey, memberKey);
         }
 
         /// <summary>Retrieves a group member's properties.</summary>
@@ -3745,7 +4390,11 @@ namespace Google.Apis.Admin.Directory.directory_v1
         }
 
         /// <summary>
-        /// Checks whether the given user is a member of the group. Membership can be direct or nested.
+        /// Checks whether the given user is a member of the group. Membership can be direct or nested, but if nested,
+        /// the `memberKey` and `groupKey` must be entities in the same domain or an `Invalid input` error is returned.
+        /// To check for nested memberships that include entities outside of the group's domain, use the
+        /// [`checkTransitiveMembership()`](https://cloud.google.com/identity/docs/reference/rest/v1/groups.memberships/checkTransitiveMembership)
+        /// method in the Cloud Identity Groups API.
         /// </summary>
         /// <param name="groupKey">
         /// Identifies the group in the API request. The value can be the group's email address, group alias, or the
@@ -3757,11 +4406,15 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual HasMemberRequest HasMember(string groupKey, string memberKey)
         {
-            return new HasMemberRequest(service, groupKey, memberKey);
+            return new HasMemberRequest(this.service, groupKey, memberKey);
         }
 
         /// <summary>
-        /// Checks whether the given user is a member of the group. Membership can be direct or nested.
+        /// Checks whether the given user is a member of the group. Membership can be direct or nested, but if nested,
+        /// the `memberKey` and `groupKey` must be entities in the same domain or an `Invalid input` error is returned.
+        /// To check for nested memberships that include entities outside of the group's domain, use the
+        /// [`checkTransitiveMembership()`](https://cloud.google.com/identity/docs/reference/rest/v1/groups.memberships/checkTransitiveMembership)
+        /// method in the Cloud Identity Groups API.
         /// </summary>
         public class HasMemberRequest : DirectoryBaseServiceRequest<Google.Apis.Admin.Directory.directory_v1.Data.MembersHasMember>
         {
@@ -3827,7 +4480,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual InsertRequest Insert(Google.Apis.Admin.Directory.directory_v1.Data.Member body, string groupKey)
         {
-            return new InsertRequest(service, body, groupKey);
+            return new InsertRequest(this.service, body, groupKey);
         }
 
         /// <summary>Adds a user to the specified group.</summary>
@@ -3878,17 +4531,25 @@ namespace Google.Apis.Admin.Directory.directory_v1
             }
         }
 
-        /// <summary>Retrieves a paginated list of all members in a group.</summary>
+        /// <summary>
+        /// Retrieves a paginated list of all members in a group. This method times out after 60 minutes. For more
+        /// information, see [Troubleshoot error
+        /// codes](https://developers.google.com/admin-sdk/directory/v1/guides/troubleshoot-error-codes).
+        /// </summary>
         /// <param name="groupKey">
         /// Identifies the group in the API request. The value can be the group's email address, group alias, or the
         /// unique group ID.
         /// </param>
         public virtual ListRequest List(string groupKey)
         {
-            return new ListRequest(service, groupKey);
+            return new ListRequest(this.service, groupKey);
         }
 
-        /// <summary>Retrieves a paginated list of all members in a group.</summary>
+        /// <summary>
+        /// Retrieves a paginated list of all members in a group. This method times out after 60 minutes. For more
+        /// information, see [Troubleshoot error
+        /// codes](https://developers.google.com/admin-sdk/directory/v1/guides/troubleshoot-error-codes).
+        /// </summary>
         public class ListRequest : DirectoryBaseServiceRequest<Google.Apis.Admin.Directory.directory_v1.Data.Members>
         {
             /// <summary>Constructs a new List request.</summary>
@@ -3995,7 +4656,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual PatchRequest Patch(Google.Apis.Admin.Directory.directory_v1.Data.Member body, string groupKey, string memberKey)
         {
-            return new PatchRequest(service, body, groupKey, memberKey);
+            return new PatchRequest(this.service, body, groupKey, memberKey);
         }
 
         /// <summary>
@@ -4077,7 +4738,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.Admin.Directory.directory_v1.Data.Member body, string groupKey, string memberKey)
         {
-            return new UpdateRequest(service, body, groupKey, memberKey);
+            return new UpdateRequest(this.service, body, groupKey, memberKey);
         }
 
         /// <summary>Updates the membership of a user in the specified group.</summary>
@@ -4169,7 +4830,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="resourceId">The unique ID the API service uses to identify the mobile device.</param>
         public virtual ActionRequest Action(Google.Apis.Admin.Directory.directory_v1.Data.MobileDeviceAction body, string customerId, string resourceId)
         {
-            return new ActionRequest(service, body, customerId, resourceId);
+            return new ActionRequest(this.service, body, customerId, resourceId);
         }
 
         /// <summary>Takes an action that affects a mobile device. For example, remotely wiping a device.</summary>
@@ -4243,7 +4904,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="resourceId">The unique ID the API service uses to identify the mobile device.</param>
         public virtual DeleteRequest Delete(string customerId, string resourceId)
         {
-            return new DeleteRequest(service, customerId, resourceId);
+            return new DeleteRequest(this.service, customerId, resourceId);
         }
 
         /// <summary>Removes a mobile device.</summary>
@@ -4310,7 +4971,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="resourceId">The unique ID the API service uses to identify the mobile device.</param>
         public virtual GetRequest Get(string customerId, string resourceId)
         {
-            return new GetRequest(service, customerId, resourceId);
+            return new GetRequest(this.service, customerId, resourceId);
         }
 
         /// <summary>Retrieves a mobile device's properties.</summary>
@@ -4394,7 +5055,13 @@ namespace Google.Apis.Admin.Directory.directory_v1
             }
         }
 
-        /// <summary>Retrieves a paginated list of all mobile devices for an account.</summary>
+        /// <summary>
+        /// Retrieves a paginated list of all user-owned mobile devices for an account. To retrieve a list that includes
+        /// company-owned devices, use the Cloud Identity [Devices
+        /// API](https://cloud.google.com/identity/docs/concepts/overview-devices) instead. This method times out after
+        /// 60 minutes. For more information, see [Troubleshoot error
+        /// codes](https://developers.google.com/admin-sdk/directory/v1/guides/troubleshoot-error-codes).
+        /// </summary>
         /// <param name="customerId">
         /// The unique ID for the customer's Google Workspace account. As an account administrator, you can also use the
         /// `my_customer` alias to represent your account's `customerId`. The `customerId` is also returned as part of
@@ -4402,10 +5069,16 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual ListRequest List(string customerId)
         {
-            return new ListRequest(service, customerId);
+            return new ListRequest(this.service, customerId);
         }
 
-        /// <summary>Retrieves a paginated list of all mobile devices for an account.</summary>
+        /// <summary>
+        /// Retrieves a paginated list of all user-owned mobile devices for an account. To retrieve a list that includes
+        /// company-owned devices, use the Cloud Identity [Devices
+        /// API](https://cloud.google.com/identity/docs/concepts/overview-devices) instead. This method times out after
+        /// 60 minutes. For more information, see [Troubleshoot error
+        /// codes](https://developers.google.com/admin-sdk/directory/v1/guides/troubleshoot-error-codes).
+        /// </summary>
         public class ListRequest : DirectoryBaseServiceRequest<Google.Apis.Admin.Directory.directory_v1.Data.MobileDevices>
         {
             /// <summary>Constructs a new List request.</summary>
@@ -4612,10 +5285,12 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// `my_customer` alias to represent your account's `customerId`. The `customerId` is also returned as part of
         /// the [Users resource](/admin-sdk/directory/v1/reference/users).
         /// </param>
-        /// <param name="orgUnitPath">The full path of the organizational unit or its unique ID.</param>
+        /// <param name="orgUnitPath">
+        /// The full path of the organizational unit (minus the leading `/`) or its unique ID.
+        /// </param>
         public virtual DeleteRequest Delete(string customerId, string orgUnitPath)
         {
-            return new DeleteRequest(service, customerId, orgUnitPath);
+            return new DeleteRequest(this.service, customerId, orgUnitPath);
         }
 
         /// <summary>Removes an organizational unit.</summary>
@@ -4637,7 +5312,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             [Google.Apis.Util.RequestParameterAttribute("customerId", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string CustomerId { get; private set; }
 
-            /// <summary>The full path of the organizational unit or its unique ID.</summary>
+            /// <summary>The full path of the organizational unit (minus the leading `/`) or its unique ID.</summary>
             [Google.Apis.Util.RequestParameterAttribute("orgUnitPath", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string OrgUnitPath { get; private set; }
 
@@ -4679,10 +5354,12 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// `my_customer` alias to represent your account's `customerId`. The `customerId` is also returned as part of
         /// the [Users resource](/admin-sdk/directory/v1/reference/users).
         /// </param>
-        /// <param name="orgUnitPath">The full path of the organizational unit or its unique ID.</param>
+        /// <param name="orgUnitPath">
+        /// The full path of the organizational unit (minus the leading `/`) or its unique ID.
+        /// </param>
         public virtual GetRequest Get(string customerId, string orgUnitPath)
         {
-            return new GetRequest(service, customerId, orgUnitPath);
+            return new GetRequest(this.service, customerId, orgUnitPath);
         }
 
         /// <summary>Retrieves an organizational unit.</summary>
@@ -4704,7 +5381,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             [Google.Apis.Util.RequestParameterAttribute("customerId", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string CustomerId { get; private set; }
 
-            /// <summary>The full path of the organizational unit or its unique ID.</summary>
+            /// <summary>The full path of the organizational unit (minus the leading `/`) or its unique ID.</summary>
             [Google.Apis.Util.RequestParameterAttribute("orgUnitPath", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string OrgUnitPath { get; private set; }
 
@@ -4749,7 +5426,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual InsertRequest Insert(Google.Apis.Admin.Directory.directory_v1.Data.OrgUnit body, string customerId)
         {
-            return new InsertRequest(service, body, customerId);
+            return new InsertRequest(this.service, body, customerId);
         }
 
         /// <summary>Adds an organizational unit.</summary>
@@ -4809,7 +5486,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual ListRequest List(string customerId)
         {
-            return new ListRequest(service, customerId);
+            return new ListRequest(this.service, customerId);
         }
 
         /// <summary>Retrieves a list of all organizational units for an account.</summary>
@@ -4851,6 +5528,12 @@ namespace Google.Apis.Admin.Directory.directory_v1
                 /// <summary>Immediate children only (default).</summary>
                 [Google.Apis.Util.StringValueAttribute("children")]
                 Children = 1,
+
+                /// <summary>
+                /// All sub-organizational units and the specified organizational unit (root if not specified).
+                /// </summary>
+                [Google.Apis.Util.StringValueAttribute("allIncludingParent")]
+                AllIncludingParent = 2,
             }
 
             /// <summary>Gets the method name.</summary>
@@ -4903,10 +5586,12 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// `my_customer` alias to represent your account's `customerId`. The `customerId` is also returned as part of
         /// the [Users resource](/admin-sdk/directory/v1/reference/users).
         /// </param>
-        /// <param name="orgUnitPath">The full path of the organizational unit or its unique ID.</param>
+        /// <param name="orgUnitPath">
+        /// The full path of the organizational unit (minus the leading `/`) or its unique ID.
+        /// </param>
         public virtual PatchRequest Patch(Google.Apis.Admin.Directory.directory_v1.Data.OrgUnit body, string customerId, string orgUnitPath)
         {
-            return new PatchRequest(service, body, customerId, orgUnitPath);
+            return new PatchRequest(this.service, body, customerId, orgUnitPath);
         }
 
         /// <summary>
@@ -4932,7 +5617,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             [Google.Apis.Util.RequestParameterAttribute("customerId", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string CustomerId { get; private set; }
 
-            /// <summary>The full path of the organizational unit or its unique ID.</summary>
+            /// <summary>The full path of the organizational unit (minus the leading `/`) or its unique ID.</summary>
             [Google.Apis.Util.RequestParameterAttribute("orgUnitPath", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string OrgUnitPath { get; private set; }
 
@@ -4981,10 +5666,12 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// `my_customer` alias to represent your account's `customerId`. The `customerId` is also returned as part of
         /// the [Users resource](/admin-sdk/directory/v1/reference/users).
         /// </param>
-        /// <param name="orgUnitPath">The full path of the organizational unit or its unique ID.</param>
+        /// <param name="orgUnitPath">
+        /// The full path of the organizational unit (minus the leading `/`) or its unique ID.
+        /// </param>
         public virtual UpdateRequest Update(Google.Apis.Admin.Directory.directory_v1.Data.OrgUnit body, string customerId, string orgUnitPath)
         {
-            return new UpdateRequest(service, body, customerId, orgUnitPath);
+            return new UpdateRequest(this.service, body, customerId, orgUnitPath);
         }
 
         /// <summary>Updates an organizational unit.</summary>
@@ -5007,7 +5694,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             [Google.Apis.Util.RequestParameterAttribute("customerId", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string CustomerId { get; private set; }
 
-            /// <summary>The full path of the organizational unit or its unique ID.</summary>
+            /// <summary>The full path of the organizational unit (minus the leading `/`) or its unique ID.</summary>
             [Google.Apis.Util.RequestParameterAttribute("orgUnitPath", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string OrgUnitPath { get; private set; }
 
@@ -5065,10 +5752,16 @@ namespace Google.Apis.Admin.Directory.directory_v1
         }
 
         /// <summary>Retrieves a paginated list of all privileges for a customer.</summary>
-        /// <param name="customer">Immutable ID of the Google Workspace account.</param>
+        /// <param name="customer">
+        /// The unique ID for the customer's Google Workspace account. In case of a multi-domain account, to fetch all
+        /// groups for a customer, use this field instead of `domain`. You can also use the `my_customer` alias to
+        /// represent your account's `customerId`. The `customerId` is also returned as part of the
+        /// [Users](/admin-sdk/directory/v1/reference/users) resource. You must provide either the `customer` or the
+        /// `domain` parameter.
+        /// </param>
         public virtual ListRequest List(string customer)
         {
-            return new ListRequest(service, customer);
+            return new ListRequest(this.service, customer);
         }
 
         /// <summary>Retrieves a paginated list of all privileges for a customer.</summary>
@@ -5081,7 +5774,13 @@ namespace Google.Apis.Admin.Directory.directory_v1
                 InitParameters();
             }
 
-            /// <summary>Immutable ID of the Google Workspace account.</summary>
+            /// <summary>
+            /// The unique ID for the customer's Google Workspace account. In case of a multi-domain account, to fetch
+            /// all groups for a customer, use this field instead of `domain`. You can also use the `my_customer` alias
+            /// to represent your account's `customerId`. The `customerId` is also returned as part of the
+            /// [Users](/admin-sdk/directory/v1/reference/users) resource. You must provide either the `customer` or the
+            /// `domain` parameter.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("customer", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Customer { get; private set; }
 
@@ -5152,7 +5851,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// <param name="buildingId">The id of the building to delete.</param>
             public virtual DeleteRequest Delete(string customer, string buildingId)
             {
-                return new DeleteRequest(service, customer, buildingId);
+                return new DeleteRequest(this.service, customer, buildingId);
             }
 
             /// <summary>Deletes a building.</summary>
@@ -5217,7 +5916,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// <param name="buildingId">The unique ID of the building to retrieve.</param>
             public virtual GetRequest Get(string customer, string buildingId)
             {
-                return new GetRequest(service, customer, buildingId);
+                return new GetRequest(this.service, customer, buildingId);
             }
 
             /// <summary>Retrieves a building.</summary>
@@ -5282,7 +5981,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// </param>
             public virtual InsertRequest Insert(Google.Apis.Admin.Directory.directory_v1.Data.Building body, string customer)
             {
-                return new InsertRequest(service, body, customer);
+                return new InsertRequest(this.service, body, customer);
             }
 
             /// <summary>Inserts a building.</summary>
@@ -5371,7 +6070,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// </param>
             public virtual ListRequest List(string customer)
             {
-                return new ListRequest(service, customer);
+                return new ListRequest(this.service, customer);
             }
 
             /// <summary>Retrieves a list of buildings for an account.</summary>
@@ -5448,7 +6147,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// <param name="buildingId">The id of the building to update.</param>
             public virtual PatchRequest Patch(Google.Apis.Admin.Directory.directory_v1.Data.Building body, string customer, string buildingId)
             {
-                return new PatchRequest(service, body, customer, buildingId);
+                return new PatchRequest(this.service, body, customer, buildingId);
             }
 
             /// <summary>Patches a building.</summary>
@@ -5552,7 +6251,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// <param name="buildingId">The id of the building to update.</param>
             public virtual UpdateRequest Update(Google.Apis.Admin.Directory.directory_v1.Data.Building body, string customer, string buildingId)
             {
-                return new UpdateRequest(service, body, customer, buildingId);
+                return new UpdateRequest(this.service, body, customer, buildingId);
             }
 
             /// <summary>Updates a building.</summary>
@@ -5673,7 +6372,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// <param name="calendarResourceId">The unique ID of the calendar resource to delete.</param>
             public virtual DeleteRequest Delete(string customer, string calendarResourceId)
             {
-                return new DeleteRequest(service, customer, calendarResourceId);
+                return new DeleteRequest(this.service, customer, calendarResourceId);
             }
 
             /// <summary>Deletes a calendar resource.</summary>
@@ -5738,7 +6437,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// <param name="calendarResourceId">The unique ID of the calendar resource to retrieve.</param>
             public virtual GetRequest Get(string customer, string calendarResourceId)
             {
-                return new GetRequest(service, customer, calendarResourceId);
+                return new GetRequest(this.service, customer, calendarResourceId);
             }
 
             /// <summary>Retrieves a calendar resource.</summary>
@@ -5803,7 +6502,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// </param>
             public virtual InsertRequest Insert(Google.Apis.Admin.Directory.directory_v1.Data.CalendarResource body, string customer)
             {
-                return new InsertRequest(service, body, customer);
+                return new InsertRequest(this.service, body, customer);
             }
 
             /// <summary>Inserts a calendar resource.</summary>
@@ -5861,7 +6560,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// </param>
             public virtual ListRequest List(string customer)
             {
-                return new ListRequest(service, customer);
+                return new ListRequest(this.service, customer);
             }
 
             /// <summary>Retrieves a list of calendar resources for an account.</summary>
@@ -5976,7 +6675,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// <param name="calendarResourceId">The unique ID of the calendar resource to update.</param>
             public virtual PatchRequest Patch(Google.Apis.Admin.Directory.directory_v1.Data.CalendarResource body, string customer, string calendarResourceId)
             {
-                return new PatchRequest(service, body, customer, calendarResourceId);
+                return new PatchRequest(this.service, body, customer, calendarResourceId);
             }
 
             /// <summary>Patches a calendar resource.</summary>
@@ -6052,7 +6751,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// <param name="calendarResourceId">The unique ID of the calendar resource to update.</param>
             public virtual UpdateRequest Update(Google.Apis.Admin.Directory.directory_v1.Data.CalendarResource body, string customer, string calendarResourceId)
             {
-                return new UpdateRequest(service, body, customer, calendarResourceId);
+                return new UpdateRequest(this.service, body, customer, calendarResourceId);
             }
 
             /// <summary>
@@ -6145,7 +6844,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// <param name="featureKey">The unique ID of the feature to delete.</param>
             public virtual DeleteRequest Delete(string customer, string featureKey)
             {
-                return new DeleteRequest(service, customer, featureKey);
+                return new DeleteRequest(this.service, customer, featureKey);
             }
 
             /// <summary>Deletes a feature.</summary>
@@ -6210,7 +6909,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// <param name="featureKey">The unique ID of the feature to retrieve.</param>
             public virtual GetRequest Get(string customer, string featureKey)
             {
-                return new GetRequest(service, customer, featureKey);
+                return new GetRequest(this.service, customer, featureKey);
             }
 
             /// <summary>Retrieves a feature.</summary>
@@ -6275,7 +6974,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// </param>
             public virtual InsertRequest Insert(Google.Apis.Admin.Directory.directory_v1.Data.Feature body, string customer)
             {
-                return new InsertRequest(service, body, customer);
+                return new InsertRequest(this.service, body, customer);
             }
 
             /// <summary>Inserts a feature.</summary>
@@ -6333,7 +7032,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// </param>
             public virtual ListRequest List(string customer)
             {
-                return new ListRequest(service, customer);
+                return new ListRequest(this.service, customer);
             }
 
             /// <summary>Retrieves a list of features for an account.</summary>
@@ -6410,7 +7109,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// <param name="featureKey">The unique ID of the feature to update.</param>
             public virtual PatchRequest Patch(Google.Apis.Admin.Directory.directory_v1.Data.Feature body, string customer, string featureKey)
             {
-                return new PatchRequest(service, body, customer, featureKey);
+                return new PatchRequest(this.service, body, customer, featureKey);
             }
 
             /// <summary>Patches a feature.</summary>
@@ -6483,7 +7182,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// <param name="oldName">The unique ID of the feature to rename.</param>
             public virtual RenameRequest Rename(Google.Apis.Admin.Directory.directory_v1.Data.FeatureRename body, string customer, string oldName)
             {
-                return new RenameRequest(service, body, customer, oldName);
+                return new RenameRequest(this.service, body, customer, oldName);
             }
 
             /// <summary>Renames a feature.</summary>
@@ -6556,7 +7255,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// <param name="featureKey">The unique ID of the feature to update.</param>
             public virtual UpdateRequest Update(Google.Apis.Admin.Directory.directory_v1.Data.Feature body, string customer, string featureKey)
             {
-                return new UpdateRequest(service, body, customer, featureKey);
+                return new UpdateRequest(this.service, body, customer, featureKey);
             }
 
             /// <summary>Updates a feature.</summary>
@@ -6641,7 +7340,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="roleAssignmentId">Immutable ID of the role assignment.</param>
         public virtual DeleteRequest Delete(string customer, string roleAssignmentId)
         {
-            return new DeleteRequest(service, customer, roleAssignmentId);
+            return new DeleteRequest(this.service, customer, roleAssignmentId);
         }
 
         /// <summary>Deletes a role assignment.</summary>
@@ -6696,11 +7395,17 @@ namespace Google.Apis.Admin.Directory.directory_v1
         }
 
         /// <summary>Retrieves a role assignment.</summary>
-        /// <param name="customer">Immutable ID of the Google Workspace account.</param>
+        /// <param name="customer">
+        /// The unique ID for the customer's Google Workspace account. In case of a multi-domain account, to fetch all
+        /// groups for a customer, use this field instead of `domain`. You can also use the `my_customer` alias to
+        /// represent your account's `customerId`. The `customerId` is also returned as part of the
+        /// [Users](/admin-sdk/directory/v1/reference/users) resource. You must provide either the `customer` or the
+        /// `domain` parameter.
+        /// </param>
         /// <param name="roleAssignmentId">Immutable ID of the role assignment.</param>
         public virtual GetRequest Get(string customer, string roleAssignmentId)
         {
-            return new GetRequest(service, customer, roleAssignmentId);
+            return new GetRequest(this.service, customer, roleAssignmentId);
         }
 
         /// <summary>Retrieves a role assignment.</summary>
@@ -6714,7 +7419,13 @@ namespace Google.Apis.Admin.Directory.directory_v1
                 InitParameters();
             }
 
-            /// <summary>Immutable ID of the Google Workspace account.</summary>
+            /// <summary>
+            /// The unique ID for the customer's Google Workspace account. In case of a multi-domain account, to fetch
+            /// all groups for a customer, use this field instead of `domain`. You can also use the `my_customer` alias
+            /// to represent your account's `customerId`. The `customerId` is also returned as part of the
+            /// [Users](/admin-sdk/directory/v1/reference/users) resource. You must provide either the `customer` or the
+            /// `domain` parameter.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("customer", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Customer { get; private set; }
 
@@ -6759,7 +7470,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="customer">Immutable ID of the Google Workspace account.</param>
         public virtual InsertRequest Insert(Google.Apis.Admin.Directory.directory_v1.Data.RoleAssignment body, string customer)
         {
-            return new InsertRequest(service, body, customer);
+            return new InsertRequest(this.service, body, customer);
         }
 
         /// <summary>Creates a role assignment.</summary>
@@ -6808,10 +7519,16 @@ namespace Google.Apis.Admin.Directory.directory_v1
         }
 
         /// <summary>Retrieves a paginated list of all roleAssignments.</summary>
-        /// <param name="customer">Immutable ID of the Google Workspace account.</param>
+        /// <param name="customer">
+        /// The unique ID for the customer's Google Workspace account. In case of a multi-domain account, to fetch all
+        /// groups for a customer, use this field instead of `domain`. You can also use the `my_customer` alias to
+        /// represent your account's `customerId`. The `customerId` is also returned as part of the
+        /// [Users](/admin-sdk/directory/v1/reference/users) resource. You must provide either the `customer` or the
+        /// `domain` parameter.
+        /// </param>
         public virtual ListRequest List(string customer)
         {
-            return new ListRequest(service, customer);
+            return new ListRequest(this.service, customer);
         }
 
         /// <summary>Retrieves a paginated list of all roleAssignments.</summary>
@@ -6824,9 +7541,23 @@ namespace Google.Apis.Admin.Directory.directory_v1
                 InitParameters();
             }
 
-            /// <summary>Immutable ID of the Google Workspace account.</summary>
+            /// <summary>
+            /// The unique ID for the customer's Google Workspace account. In case of a multi-domain account, to fetch
+            /// all groups for a customer, use this field instead of `domain`. You can also use the `my_customer` alias
+            /// to represent your account's `customerId`. The `customerId` is also returned as part of the
+            /// [Users](/admin-sdk/directory/v1/reference/users) resource. You must provide either the `customer` or the
+            /// `domain` parameter.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("customer", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Customer { get; private set; }
+
+            /// <summary>
+            /// When set to `true`, fetches indirect role assignments (i.e. role assignment via a group) as well as
+            /// direct ones. Defaults to `false`. You must specify `user_key` or the indirect role assignments will not
+            /// be included.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("includeIndirectRoleAssignments", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> IncludeIndirectRoleAssignments { get; set; }
 
             /// <summary>Maximum number of results to return.</summary>
             [Google.Apis.Util.RequestParameterAttribute("maxResults", Google.Apis.Util.RequestParameterType.Query)]
@@ -6844,8 +7575,8 @@ namespace Google.Apis.Admin.Directory.directory_v1
             public virtual string RoleId { get; set; }
 
             /// <summary>
-            /// The user's primary email address, alias email address, or unique user ID. If included in the request,
-            /// returns role assignments only for this user.
+            /// The primary email address, alias email address, or unique user or group ID. If included in the request,
+            /// returns role assignments only for this user or group.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("userKey", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string UserKey { get; set; }
@@ -6868,6 +7599,14 @@ namespace Google.Apis.Admin.Directory.directory_v1
                     Name = "customer",
                     IsRequired = true,
                     ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("includeIndirectRoleAssignments", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "includeIndirectRoleAssignments",
+                    IsRequired = false,
+                    ParameterType = "query",
                     DefaultValue = null,
                     Pattern = null,
                 });
@@ -6926,7 +7665,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="roleId">Immutable ID of the role.</param>
         public virtual DeleteRequest Delete(string customer, string roleId)
         {
-            return new DeleteRequest(service, customer, roleId);
+            return new DeleteRequest(this.service, customer, roleId);
         }
 
         /// <summary>Deletes a role.</summary>
@@ -6981,11 +7720,17 @@ namespace Google.Apis.Admin.Directory.directory_v1
         }
 
         /// <summary>Retrieves a role.</summary>
-        /// <param name="customer">Immutable ID of the Google Workspace account.</param>
+        /// <param name="customer">
+        /// The unique ID for the customer's Google Workspace account. In case of a multi-domain account, to fetch all
+        /// groups for a customer, use this field instead of `domain`. You can also use the `my_customer` alias to
+        /// represent your account's `customerId`. The `customerId` is also returned as part of the
+        /// [Users](/admin-sdk/directory/v1/reference/users) resource. You must provide either the `customer` or the
+        /// `domain` parameter.
+        /// </param>
         /// <param name="roleId">Immutable ID of the role.</param>
         public virtual GetRequest Get(string customer, string roleId)
         {
-            return new GetRequest(service, customer, roleId);
+            return new GetRequest(this.service, customer, roleId);
         }
 
         /// <summary>Retrieves a role.</summary>
@@ -6999,7 +7744,13 @@ namespace Google.Apis.Admin.Directory.directory_v1
                 InitParameters();
             }
 
-            /// <summary>Immutable ID of the Google Workspace account.</summary>
+            /// <summary>
+            /// The unique ID for the customer's Google Workspace account. In case of a multi-domain account, to fetch
+            /// all groups for a customer, use this field instead of `domain`. You can also use the `my_customer` alias
+            /// to represent your account's `customerId`. The `customerId` is also returned as part of the
+            /// [Users](/admin-sdk/directory/v1/reference/users) resource. You must provide either the `customer` or the
+            /// `domain` parameter.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("customer", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Customer { get; private set; }
 
@@ -7044,7 +7795,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="customer">Immutable ID of the Google Workspace account.</param>
         public virtual InsertRequest Insert(Google.Apis.Admin.Directory.directory_v1.Data.Role body, string customer)
         {
-            return new InsertRequest(service, body, customer);
+            return new InsertRequest(this.service, body, customer);
         }
 
         /// <summary>Creates a role.</summary>
@@ -7093,10 +7844,16 @@ namespace Google.Apis.Admin.Directory.directory_v1
         }
 
         /// <summary>Retrieves a paginated list of all the roles in a domain.</summary>
-        /// <param name="customer">Immutable ID of the Google Workspace account.</param>
+        /// <param name="customer">
+        /// The unique ID for the customer's Google Workspace account. In case of a multi-domain account, to fetch all
+        /// groups for a customer, use this field instead of `domain`. You can also use the `my_customer` alias to
+        /// represent your account's `customerId`. The `customerId` is also returned as part of the
+        /// [Users](/admin-sdk/directory/v1/reference/users) resource. You must provide either the `customer` or the
+        /// `domain` parameter.
+        /// </param>
         public virtual ListRequest List(string customer)
         {
-            return new ListRequest(service, customer);
+            return new ListRequest(this.service, customer);
         }
 
         /// <summary>Retrieves a paginated list of all the roles in a domain.</summary>
@@ -7109,7 +7866,13 @@ namespace Google.Apis.Admin.Directory.directory_v1
                 InitParameters();
             }
 
-            /// <summary>Immutable ID of the Google Workspace account.</summary>
+            /// <summary>
+            /// The unique ID for the customer's Google Workspace account. In case of a multi-domain account, to fetch
+            /// all groups for a customer, use this field instead of `domain`. You can also use the `my_customer` alias
+            /// to represent your account's `customerId`. The `customerId` is also returned as part of the
+            /// [Users](/admin-sdk/directory/v1/reference/users) resource. You must provide either the `customer` or the
+            /// `domain` parameter.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("customer", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Customer { get; private set; }
 
@@ -7167,7 +7930,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="roleId">Immutable ID of the role.</param>
         public virtual PatchRequest Patch(Google.Apis.Admin.Directory.directory_v1.Data.Role body, string customer, string roleId)
         {
-            return new PatchRequest(service, body, customer, roleId);
+            return new PatchRequest(this.service, body, customer, roleId);
         }
 
         /// <summary>Patches a role.</summary>
@@ -7234,7 +7997,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="roleId">Immutable ID of the role.</param>
         public virtual UpdateRequest Update(Google.Apis.Admin.Directory.directory_v1.Data.Role body, string customer, string roleId)
         {
-            return new UpdateRequest(service, body, customer, roleId);
+            return new UpdateRequest(this.service, body, customer, roleId);
         }
 
         /// <summary>Updates a role.</summary>
@@ -7315,7 +8078,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="schemaKey">Name or immutable ID of the schema.</param>
         public virtual DeleteRequest Delete(string customerId, string schemaKey)
         {
-            return new DeleteRequest(service, customerId, schemaKey);
+            return new DeleteRequest(this.service, customerId, schemaKey);
         }
 
         /// <summary>Deletes a schema.</summary>
@@ -7370,11 +8133,17 @@ namespace Google.Apis.Admin.Directory.directory_v1
         }
 
         /// <summary>Retrieves a schema.</summary>
-        /// <param name="customerId">Immutable ID of the Google Workspace account.</param>
+        /// <param name="customerId">
+        /// The unique ID for the customer's Google Workspace account. In case of a multi-domain account, to fetch all
+        /// groups for a customer, use this field instead of `domain`. You can also use the `my_customer` alias to
+        /// represent your account's `customerId`. The `customerId` is also returned as part of the
+        /// [Users](/admin-sdk/directory/v1/reference/users) resource. You must provide either the `customer` or the
+        /// `domain` parameter.
+        /// </param>
         /// <param name="schemaKey">Name or immutable ID of the schema.</param>
         public virtual GetRequest Get(string customerId, string schemaKey)
         {
-            return new GetRequest(service, customerId, schemaKey);
+            return new GetRequest(this.service, customerId, schemaKey);
         }
 
         /// <summary>Retrieves a schema.</summary>
@@ -7388,7 +8157,13 @@ namespace Google.Apis.Admin.Directory.directory_v1
                 InitParameters();
             }
 
-            /// <summary>Immutable ID of the Google Workspace account.</summary>
+            /// <summary>
+            /// The unique ID for the customer's Google Workspace account. In case of a multi-domain account, to fetch
+            /// all groups for a customer, use this field instead of `domain`. You can also use the `my_customer` alias
+            /// to represent your account's `customerId`. The `customerId` is also returned as part of the
+            /// [Users](/admin-sdk/directory/v1/reference/users) resource. You must provide either the `customer` or the
+            /// `domain` parameter.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("customerId", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string CustomerId { get; private set; }
 
@@ -7433,7 +8208,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="customerId">Immutable ID of the Google Workspace account.</param>
         public virtual InsertRequest Insert(Google.Apis.Admin.Directory.directory_v1.Data.Schema body, string customerId)
         {
-            return new InsertRequest(service, body, customerId);
+            return new InsertRequest(this.service, body, customerId);
         }
 
         /// <summary>Creates a schema.</summary>
@@ -7482,10 +8257,16 @@ namespace Google.Apis.Admin.Directory.directory_v1
         }
 
         /// <summary>Retrieves all schemas for a customer.</summary>
-        /// <param name="customerId">Immutable ID of the Google Workspace account.</param>
+        /// <param name="customerId">
+        /// The unique ID for the customer's Google Workspace account. In case of a multi-domain account, to fetch all
+        /// groups for a customer, use this field instead of `domain`. You can also use the `my_customer` alias to
+        /// represent your account's `customerId`. The `customerId` is also returned as part of the
+        /// [Users](/admin-sdk/directory/v1/reference/users) resource. You must provide either the `customer` or the
+        /// `domain` parameter.
+        /// </param>
         public virtual ListRequest List(string customerId)
         {
-            return new ListRequest(service, customerId);
+            return new ListRequest(this.service, customerId);
         }
 
         /// <summary>Retrieves all schemas for a customer.</summary>
@@ -7498,7 +8279,13 @@ namespace Google.Apis.Admin.Directory.directory_v1
                 InitParameters();
             }
 
-            /// <summary>Immutable ID of the Google Workspace account.</summary>
+            /// <summary>
+            /// The unique ID for the customer's Google Workspace account. In case of a multi-domain account, to fetch
+            /// all groups for a customer, use this field instead of `domain`. You can also use the `my_customer` alias
+            /// to represent your account's `customerId`. The `customerId` is also returned as part of the
+            /// [Users](/admin-sdk/directory/v1/reference/users) resource. You must provide either the `customer` or the
+            /// `domain` parameter.
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("customerId", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string CustomerId { get; private set; }
 
@@ -7532,7 +8319,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="schemaKey">Name or immutable ID of the schema.</param>
         public virtual PatchRequest Patch(Google.Apis.Admin.Directory.directory_v1.Data.Schema body, string customerId, string schemaKey)
         {
-            return new PatchRequest(service, body, customerId, schemaKey);
+            return new PatchRequest(this.service, body, customerId, schemaKey);
         }
 
         /// <summary>Patches a schema.</summary>
@@ -7599,7 +8386,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="schemaKey">Name or immutable ID of the schema.</param>
         public virtual UpdateRequest Update(Google.Apis.Admin.Directory.directory_v1.Data.Schema body, string customerId, string schemaKey)
         {
-            return new UpdateRequest(service, body, customerId, schemaKey);
+            return new UpdateRequest(this.service, body, customerId, schemaKey);
         }
 
         /// <summary>Updates a schema.</summary>
@@ -7683,7 +8470,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="clientId">The Client ID of the application the token is issued to.</param>
         public virtual DeleteRequest Delete(string userKey, string clientId)
         {
-            return new DeleteRequest(service, userKey, clientId);
+            return new DeleteRequest(this.service, userKey, clientId);
         }
 
         /// <summary>Deletes all access tokens issued by a user for an application.</summary>
@@ -7748,7 +8535,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="clientId">The Client ID of the application the token is issued to.</param>
         public virtual GetRequest Get(string userKey, string clientId)
         {
-            return new GetRequest(service, userKey, clientId);
+            return new GetRequest(this.service, userKey, clientId);
         }
 
         /// <summary>Gets information about an access token issued by a user.</summary>
@@ -7812,7 +8599,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual ListRequest List(string userKey)
         {
-            return new ListRequest(service, userKey);
+            return new ListRequest(this.service, userKey);
         }
 
         /// <summary>Returns the set of tokens specified user has issued to 3rd party applications.</summary>
@@ -7878,7 +8665,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual TurnOffRequest TurnOff(string userKey)
         {
-            return new TurnOffRequest(service, userKey);
+            return new TurnOffRequest(this.service, userKey);
         }
 
         /// <summary>Turns off 2-Step Verification for user.</summary>
@@ -7964,7 +8751,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// <param name="alias">The alias to be removed.</param>
             public virtual DeleteRequest Delete(string userKey, string alias)
             {
-                return new DeleteRequest(service, userKey, alias);
+                return new DeleteRequest(this.service, userKey, alias);
             }
 
             /// <summary>Removes an alias.</summary>
@@ -8029,7 +8816,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// </param>
             public virtual InsertRequest Insert(Google.Apis.Admin.Directory.directory_v1.Data.Alias body, string userKey)
             {
-                return new InsertRequest(service, body, userKey);
+                return new InsertRequest(this.service, body, userKey);
             }
 
             /// <summary>Adds an alias.</summary>
@@ -8087,7 +8874,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// </param>
             public virtual ListRequest List(string userKey)
             {
-                return new ListRequest(service, userKey);
+                return new ListRequest(this.service, userKey);
             }
 
             /// <summary>Lists all aliases for a user.</summary>
@@ -8160,7 +8947,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// <param name="userKey">Email or immutable ID of the user</param>
             public virtual WatchRequest Watch(Google.Apis.Admin.Directory.directory_v1.Data.Channel body, string userKey)
             {
-                return new WatchRequest(service, body, userKey);
+                return new WatchRequest(this.service, body, userKey);
             }
 
             /// <summary>Watches for changes in users list.</summary>
@@ -8257,7 +9044,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// </param>
             public virtual DeleteRequest Delete(string userKey)
             {
-                return new DeleteRequest(service, userKey);
+                return new DeleteRequest(this.service, userKey);
             }
 
             /// <summary>Removes the user's photo.</summary>
@@ -8308,7 +9095,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// </param>
             public virtual GetRequest Get(string userKey)
             {
-                return new GetRequest(service, userKey);
+                return new GetRequest(this.service, userKey);
             }
 
             /// <summary>Retrieves the user's photo.</summary>
@@ -8363,7 +9150,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.Admin.Directory.directory_v1.Data.UserPhoto body, string userKey)
             {
-                return new PatchRequest(service, body, userKey);
+                return new PatchRequest(this.service, body, userKey);
             }
 
             /// <summary>
@@ -8425,7 +9212,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
             /// </param>
             public virtual UpdateRequest Update(Google.Apis.Admin.Directory.directory_v1.Data.UserPhoto body, string userKey)
             {
-                return new UpdateRequest(service, body, userKey);
+                return new UpdateRequest(this.service, body, userKey);
             }
 
             /// <summary>Adds a photo for the user.</summary>
@@ -8484,7 +9271,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual DeleteRequest Delete(string userKey)
         {
-            return new DeleteRequest(service, userKey);
+            return new DeleteRequest(this.service, userKey);
         }
 
         /// <summary>Deletes a user.</summary>
@@ -8535,7 +9322,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual GetRequest Get(string userKey)
         {
-            return new GetRequest(service, userKey);
+            return new GetRequest(this.service, userKey);
         }
 
         /// <summary>Retrieves a user.</summary>
@@ -8656,14 +9443,30 @@ namespace Google.Apis.Admin.Directory.directory_v1
             }
         }
 
-        /// <summary>Creates a user.</summary>
+        /// <summary>
+        /// Creates a user. Mutate calls immediately following user creation might sometimes fail as the user isn't
+        /// fully created due to propagation delay in our backends. Check the error details for the "User creation is
+        /// not complete" message to see if this is the case. Retrying the calls after some time can help in this case.
+        /// If `resolveConflictAccount` is set to `true`, a `202` response code means that a conflicting unmanaged
+        /// account exists and was invited to join the organization. A `409` response code means that a conflicting
+        /// account exists so the user wasn't created based on the [handling unmanaged user
+        /// accounts](https://support.google.com/a/answer/11112794) option selected.
+        /// </summary>
         /// <param name="body">The body of the request.</param>
         public virtual InsertRequest Insert(Google.Apis.Admin.Directory.directory_v1.Data.User body)
         {
-            return new InsertRequest(service, body);
+            return new InsertRequest(this.service, body);
         }
 
-        /// <summary>Creates a user.</summary>
+        /// <summary>
+        /// Creates a user. Mutate calls immediately following user creation might sometimes fail as the user isn't
+        /// fully created due to propagation delay in our backends. Check the error details for the "User creation is
+        /// not complete" message to see if this is the case. Retrying the calls after some time can help in this case.
+        /// If `resolveConflictAccount` is set to `true`, a `202` response code means that a conflicting unmanaged
+        /// account exists and was invited to join the organization. A `409` response code means that a conflicting
+        /// account exists so the user wasn't created based on the [handling unmanaged user
+        /// accounts](https://support.google.com/a/answer/11112794) option selected.
+        /// </summary>
         public class InsertRequest : DirectoryBaseServiceRequest<Google.Apis.Admin.Directory.directory_v1.Data.User>
         {
             /// <summary>Constructs a new Insert request.</summary>
@@ -8672,6 +9475,13 @@ namespace Google.Apis.Admin.Directory.directory_v1
                 Body = body;
                 InitParameters();
             }
+
+            /// <summary>
+            /// Optional. If set to `true`, the option selected for [handling unmanaged user
+            /// accounts](https://support.google.com/a/answer/11112794) will apply. Default: `false`
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("resolveConflictAccount", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> ResolveConflictAccount { get; set; }
 
             /// <summary>Gets or sets the body of this request.</summary>
             Google.Apis.Admin.Directory.directory_v1.Data.User Body { get; set; }
@@ -8692,13 +9502,21 @@ namespace Google.Apis.Admin.Directory.directory_v1
             protected override void InitParameters()
             {
                 base.InitParameters();
+                RequestParameters.Add("resolveConflictAccount", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "resolveConflictAccount",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
             }
         }
 
         /// <summary>Retrieves a paginated list of either deleted users or all users in a domain.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>Retrieves a paginated list of either deleted users or all users in a domain.</summary>
@@ -8719,16 +9537,16 @@ namespace Google.Apis.Admin.Directory.directory_v1
 
             /// <summary>
             /// The unique ID for the customer's Google Workspace account. In case of a multi-domain account, to fetch
-            /// all groups for a customer, fill this field instead of domain. You can also use the `my_customer` alias
-            /// to represent your account's `customerId`. The `customerId` is also returned as part of the [Users
-            /// resource](/admin-sdk/directory/v1/reference/users). Either the `customer` or the `domain` parameter must
-            /// be provided.
+            /// all users for a customer, use this field instead of `domain`. You can also use the `my_customer` alias
+            /// to represent your account's `customerId`. The `customerId` is also returned as part of the
+            /// [Users](/admin-sdk/directory/v1/reference/users) resource. You must provide either the `customer` or the
+            /// `domain` parameter.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("customer", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Customer { get; set; }
 
             /// <summary>
-            /// The domain name. Use this field to get fields from only one domain. To return all domains for a customer
+            /// The domain name. Use this field to get users from only one domain. To return all domains for a customer
             /// account, use the `customer` query parameter instead. Either the `customer` or the `domain` parameter
             /// must be provided.
             /// </summary>
@@ -8822,11 +9640,11 @@ namespace Google.Apis.Admin.Directory.directory_v1
             [Google.Apis.Util.RequestParameterAttribute("showDeleted", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string ShowDeleted { get; set; }
 
-            /// <summary>Whether to return results in ascending or descending order.</summary>
+            /// <summary>Whether to return results in ascending or descending order, ignoring case.</summary>
             [Google.Apis.Util.RequestParameterAttribute("sortOrder", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<SortOrderEnum> SortOrder { get; set; }
 
-            /// <summary>Whether to return results in ascending or descending order.</summary>
+            /// <summary>Whether to return results in ascending or descending order, ignoring case.</summary>
             public enum SortOrderEnum
             {
                 /// <summary>Ascending order.</summary>
@@ -8984,7 +9802,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual MakeAdminRequest MakeAdmin(Google.Apis.Admin.Directory.directory_v1.Data.UserMakeAdmin body, string userKey)
         {
-            return new MakeAdminRequest(service, body, userKey);
+            return new MakeAdminRequest(this.service, body, userKey);
         }
 
         /// <summary>Makes a user a super administrator.</summary>
@@ -9036,9 +9854,11 @@ namespace Google.Apis.Admin.Directory.directory_v1
         }
 
         /// <summary>
-        /// Updates a user using patch semantics. The update method should be used instead, since it also supports patch
-        /// semantics and has better performance. This method is unable to clear fields that contain repeated objects
-        /// (`addresses`, `phones`, etc). Use the update method instead.
+        /// Updates a user using patch semantics. The update method should be used instead, because it also supports
+        /// patch semantics and has better performance. If you're mapping an external identity to a Google identity, use
+        /// the [`update`](https://developers.google.com/admin-sdk/directory/v1/reference/users/update) method instead
+        /// of the `patch` method. This method is unable to clear fields that contain repeated objects (`addresses`,
+        /// `phones`, etc). Use the update method instead.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="userKey">
@@ -9047,13 +9867,15 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual PatchRequest Patch(Google.Apis.Admin.Directory.directory_v1.Data.User body, string userKey)
         {
-            return new PatchRequest(service, body, userKey);
+            return new PatchRequest(this.service, body, userKey);
         }
 
         /// <summary>
-        /// Updates a user using patch semantics. The update method should be used instead, since it also supports patch
-        /// semantics and has better performance. This method is unable to clear fields that contain repeated objects
-        /// (`addresses`, `phones`, etc). Use the update method instead.
+        /// Updates a user using patch semantics. The update method should be used instead, because it also supports
+        /// patch semantics and has better performance. If you're mapping an external identity to a Google identity, use
+        /// the [`update`](https://developers.google.com/admin-sdk/directory/v1/reference/users/update) method instead
+        /// of the `patch` method. This method is unable to clear fields that contain repeated objects (`addresses`,
+        /// `phones`, etc). Use the update method instead.
         /// </summary>
         public class PatchRequest : DirectoryBaseServiceRequest<Google.Apis.Admin.Directory.directory_v1.Data.User>
         {
@@ -9112,7 +9934,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual SignOutRequest SignOut(string userKey)
         {
-            return new SignOutRequest(service, userKey);
+            return new SignOutRequest(this.service, userKey);
         }
 
         /// <summary>
@@ -9164,7 +9986,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="userKey">The immutable id of the user</param>
         public virtual UndeleteRequest Undelete(Google.Apis.Admin.Directory.directory_v1.Data.UserUndelete body, string userKey)
         {
-            return new UndeleteRequest(service, body, userKey);
+            return new UndeleteRequest(this.service, body, userKey);
         }
 
         /// <summary>Undeletes a deleted user.</summary>
@@ -9213,9 +10035,12 @@ namespace Google.Apis.Admin.Directory.directory_v1
         }
 
         /// <summary>
-        /// Updates a user. This method supports patch semantics, meaning you only need to include the fields you wish
-        /// to update. Fields that are not present in the request will be preserved, and fields set to `null` will be
-        /// cleared.
+        /// Updates a user. This method supports patch semantics, meaning that you only need to include the fields you
+        /// wish to update. Fields that are not present in the request will be preserved, and fields set to `null` will
+        /// be cleared. For repeating fields that contain arrays, individual items in the array can't be patched
+        /// piecemeal; they must be supplied in the request body with the desired values for all items. See the [user
+        /// accounts guide](https://developers.google.com/admin-sdk/directory/v1/guides/manage-users#update_user) for
+        /// more information.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="userKey">
@@ -9224,13 +10049,16 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.Admin.Directory.directory_v1.Data.User body, string userKey)
         {
-            return new UpdateRequest(service, body, userKey);
+            return new UpdateRequest(this.service, body, userKey);
         }
 
         /// <summary>
-        /// Updates a user. This method supports patch semantics, meaning you only need to include the fields you wish
-        /// to update. Fields that are not present in the request will be preserved, and fields set to `null` will be
-        /// cleared.
+        /// Updates a user. This method supports patch semantics, meaning that you only need to include the fields you
+        /// wish to update. Fields that are not present in the request will be preserved, and fields set to `null` will
+        /// be cleared. For repeating fields that contain arrays, individual items in the array can't be patched
+        /// piecemeal; they must be supplied in the request body with the desired values for all items. See the [user
+        /// accounts guide](https://developers.google.com/admin-sdk/directory/v1/guides/manage-users#update_user) for
+        /// more information.
         /// </summary>
         public class UpdateRequest : DirectoryBaseServiceRequest<Google.Apis.Admin.Directory.directory_v1.Data.User>
         {
@@ -9283,7 +10111,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="body">The body of the request.</param>
         public virtual WatchRequest Watch(Google.Apis.Admin.Directory.directory_v1.Data.Channel body)
         {
-            return new WatchRequest(service, body);
+            return new WatchRequest(this.service, body);
         }
 
         /// <summary>Watches for changes in users list.</summary>
@@ -9583,7 +10411,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="userKey">Email or immutable ID of the user</param>
         public virtual GenerateRequest Generate(string userKey)
         {
-            return new GenerateRequest(service, userKey);
+            return new GenerateRequest(this.service, userKey);
         }
 
         /// <summary>Generates new backup verification codes for the user.</summary>
@@ -9628,7 +10456,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// <param name="userKey">Email or immutable ID of the user</param>
         public virtual InvalidateRequest Invalidate(string userKey)
         {
-            return new InvalidateRequest(service, userKey);
+            return new InvalidateRequest(this.service, userKey);
         }
 
         /// <summary>Invalidates the current backup verification codes for the user.</summary>
@@ -9676,7 +10504,7 @@ namespace Google.Apis.Admin.Directory.directory_v1
         /// </param>
         public virtual ListRequest List(string userKey)
         {
-            return new ListRequest(service, userKey);
+            return new ListRequest(this.service, userKey);
         }
 
         /// <summary>Returns the current set of valid backup verification codes for the specified user.</summary>
@@ -9839,6 +10667,88 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Information about the device's backlights.</summary>
+    public class BacklightInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Output only. Current brightness of the backlight, between 0 and max_brightness.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("brightness")]
+        public virtual System.Nullable<int> Brightness { get; set; }
+
+        /// <summary>Output only. Maximum brightness for the backlight.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxBrightness")]
+        public virtual System.Nullable<int> MaxBrightness { get; set; }
+
+        /// <summary>
+        /// Output only. Path to this backlight on the system. Useful if the caller needs to correlate with other
+        /// information.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("path")]
+        public virtual string Path { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A request for changing the status of a batch of ChromeOS devices.</summary>
+    public class BatchChangeChromeOsDeviceStatusRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The action to take on the ChromeOS device in order to change its status.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("changeChromeOsDeviceStatusAction")]
+        public virtual string ChangeChromeOsDeviceStatusAction { get; set; }
+
+        /// <summary>
+        /// Optional. The reason behind a device deprovision. Must be provided if 'changeChromeOsDeviceStatusAction' is
+        /// set to 'CHANGE_CHROME_OS_DEVICE_STATUS_ACTION_DEPROVISION'. Otherwise, omit this field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deprovisionReason")]
+        public virtual string DeprovisionReason { get; set; }
+
+        /// <summary>Required. List of the IDs of the ChromeOS devices to change. Maximum 50.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deviceIds")]
+        public virtual System.Collections.Generic.IList<string> DeviceIds { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The response of changing the status of a batch of ChromeOS devices.</summary>
+    public class BatchChangeChromeOsDeviceStatusResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The results for each of the ChromeOS devices provided in the request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("changeChromeOsDeviceStatusResults")]
+        public virtual System.Collections.Generic.IList<ChangeChromeOsDeviceStatusResult> ChangeChromeOsDeviceStatusResults { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request to add multiple new print servers in a batch.</summary>
+    public class BatchCreatePrintServersRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. A list of `PrintServer` resources to be created (max `50` per batch).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requests")]
+        public virtual System.Collections.Generic.IList<CreatePrintServerRequest> Requests { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class BatchCreatePrintServersResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// A list of create failures. `PrintServer` IDs are not populated, as print servers were not created.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("failures")]
+        public virtual System.Collections.Generic.IList<PrintServerFailureInfo> Failures { get; set; }
+
+        /// <summary>A list of successfully created print servers with their IDs populated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("printServers")]
+        public virtual System.Collections.Generic.IList<PrintServer> PrintServers { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Request for adding new printers in batch.</summary>
     public class BatchCreatePrintersRequest : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -9860,6 +10770,31 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         /// <summary>A list of successfully created printers with their IDs populated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("printers")]
         public virtual System.Collections.Generic.IList<Printer> Printers { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request to delete multiple existing print servers in a batch.</summary>
+    public class BatchDeletePrintServersRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A list of print server IDs that should be deleted (max `100` per batch).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("printServerIds")]
+        public virtual System.Collections.Generic.IList<string> PrintServerIds { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class BatchDeletePrintServersResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A list of update failures.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("failedPrintServers")]
+        public virtual System.Collections.Generic.IList<PrintServerFailureInfo> FailedPrintServers { get; set; }
+
+        /// <summary>A list of print server IDs that were successfully deleted.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("printServerIds")]
+        public virtual System.Collections.Generic.IList<string> PrintServerIds { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -10022,6 +10957,21 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         public virtual string NextPageToken { get; set; }
     }
 
+    /// <summary>Represents a data capacity with some amount of current usage in bytes.</summary>
+    public class ByteUsage : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Output only. The total capacity value, in bytes.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("capacityBytes")]
+        public virtual System.Nullable<long> CapacityBytes { get; set; }
+
+        /// <summary>Output only. The current usage value, in bytes.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("usedBytes")]
+        public virtual System.Nullable<long> UsedBytes { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Public API: Resources.calendars</summary>
     public class CalendarResource : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -10126,6 +11076,32 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         public virtual string NextPageToken { get; set; }
     }
 
+    /// <summary>The result of a single ChromeOS device for a Change state operation.</summary>
+    public class ChangeChromeOsDeviceStatusResult : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The unique ID of the ChromeOS device.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deviceId")]
+        public virtual string DeviceId { get; set; }
+
+        /// <summary>The error result of the operation in case of failure.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("error")]
+        public virtual Status Error { get; set; }
+
+        /// <summary>The device could change its status successfully.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("response")]
+        public virtual ChangeChromeOsDeviceStatusSucceeded Response { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response for a successful ChromeOS device status change.</summary>
+    public class ChangeChromeOsDeviceStatusSucceeded : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>An notification channel used to watch for resource changes.</summary>
     public class Channel : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -10149,7 +11125,11 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
-        /// <summary>Additional parameters controlling delivery channel behavior. Optional.</summary>
+        /// <summary>
+        /// Additional parameters controlling delivery channel behavior. Optional. For example, `params.ttl` specifies
+        /// the time-to-live in seconds for the notification channel, where the default is 2 hours and the maximum TTL
+        /// is 2 days.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("params")]
         public virtual System.Collections.Generic.IDictionary<string, string> Params__ { get; set; }
 
@@ -10189,7 +11169,7 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
     /// </summary>
     public class ChromeOsDevice : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>List of active time ranges (Read-only).</summary>
+        /// <summary>A list of active time ranges (Read-only).</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("activeTimeRanges")]
         public virtual System.Collections.Generic.IList<ActiveTimeRangesData> ActiveTimeRanges { get; set; }
 
@@ -10212,10 +11192,21 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         public virtual string AnnotatedUser { get; set; }
 
         /// <summary>
-        /// (Read-only) The timestamp after which the device will stop receiving Chrome updates or support
+        /// (Read-only) The timestamp after which the device will stop receiving Chrome updates or support. Please use
+        /// "autoUpdateThrough" instead.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("autoUpdateExpiration")]
         public virtual System.Nullable<long> AutoUpdateExpiration { get; set; }
+
+        /// <summary>
+        /// Output only. The timestamp after which the device will stop receiving Chrome updates or support.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("autoUpdateThrough")]
+        public virtual string AutoUpdateThrough { get; set; }
+
+        /// <summary>Output only. Contains backlight information for the device.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("backlightInfo")]
+        public virtual System.Collections.Generic.IList<BacklightInfo> BacklightInfo { get; set; }
 
         /// <summary>
         /// The boot mode for the device. The possible values are: * `Verified`: The device is running a valid version
@@ -10226,6 +11217,10 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("bootMode")]
         public virtual string BootMode { get; set; }
 
+        /// <summary>Output only. Chrome OS type of the device.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("chromeOsType")]
+        public virtual string ChromeOsType { get; set; }
+
         /// <summary>Information regarding CPU specs in the device.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cpuInfo")]
         public virtual System.Collections.Generic.IList<CpuInfoData> CpuInfo { get; set; }
@@ -10234,13 +11229,25 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("cpuStatusReports")]
         public virtual System.Collections.Generic.IList<CpuStatusReportsData> CpuStatusReports { get; set; }
 
-        /// <summary>List of device files to download (Read-only)</summary>
+        /// <summary>(Read-only) Deprovision reason.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deprovisionReason")]
+        public virtual string DeprovisionReason { get; set; }
+
+        /// <summary>A list of device files to download (Read-only)</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deviceFiles")]
         public virtual System.Collections.Generic.IList<DeviceFilesData> DeviceFiles { get; set; }
 
         /// <summary>The unique ID of the Chrome device.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deviceId")]
         public virtual string DeviceId { get; set; }
+
+        /// <summary>Output only. Device license type.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deviceLicenseType")]
+        public virtual string DeviceLicenseType { get; set; }
+
+        /// <summary>Output only. How much disk space the device has available and is currently using.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("diskSpaceUsage")]
+        public virtual ByteUsage DiskSpaceUsage { get; set; }
 
         /// <summary>Reports of disk space and other info about mounted/connected volumes.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("diskVolumeReports")]
@@ -10271,9 +11278,31 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("ethernetMacAddress0")]
         public virtual string EthernetMacAddress0 { get; set; }
 
+        /// <summary>Output only. Whether or not the device requires the extended support opt in.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("extendedSupportEligible")]
+        public virtual System.Nullable<bool> ExtendedSupportEligible { get; set; }
+
+        /// <summary>Output only. Whether extended support policy is enabled on the device.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("extendedSupportEnabled")]
+        public virtual System.Nullable<bool> ExtendedSupportEnabled { get; set; }
+
+        /// <summary>
+        /// Output only. Date of the device when extended support policy for automatic updates starts.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("extendedSupportStart")]
+        public virtual string ExtendedSupportStart { get; set; }
+
+        /// <summary>Output only. Fan information for the device.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fanInfo")]
+        public virtual System.Collections.Generic.IList<FanInfo> FanInfo { get; set; }
+
         /// <summary>The Chrome device's firmware version.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("firmwareVersion")]
         public virtual string FirmwareVersion { get; set; }
+
+        /// <summary>Date and time for the first time the device was enrolled.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("firstEnrollmentTime")]
+        public virtual string FirstEnrollmentTime { get; set; }
 
         /// <summary>
         /// The type of resource. For the Chromeosdevices resource, the value is `admin#directory#chromeosdevice`.
@@ -10281,13 +11310,28 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
+        /// <summary>(Read-only) Date and time for the last deprovision of the device.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lastDeprovisionTimestamp")]
+        public virtual string LastDeprovisionTimestamp { get; set; }
+
         /// <summary>Date and time the device was last enrolled (Read-only)</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastEnrollmentTime")]
         public virtual string LastEnrollmentTimeRaw { get; set; }
 
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastEnrollmentTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastEnrollmentTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(LastEnrollmentTimeRaw);
+            set => LastEnrollmentTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="LastEnrollmentTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> LastEnrollmentTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastEnrollmentTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? LastEnrollmentTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(LastEnrollmentTimeRaw);
             set => LastEnrollmentTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -10304,9 +11348,18 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("lastSync")]
         public virtual string LastSyncRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastSyncRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastSyncDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(LastSyncRaw);
+            set => LastSyncRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="LastSyncRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> LastSync
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastSyncDateTimeOffset instead.")]
+        public virtual System.DateTime? LastSync
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(LastSyncRaw);
             set => LastSyncRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -10359,8 +11412,9 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         /// The unique ID of the organizational unit. orgUnitPath is the human readable version of orgUnitId. While
         /// orgUnitPath may change by renaming an organizational unit within the path, orgUnitId is unchangeable for one
         /// organizational unit. This property can be
-        /// [updated](/admin-sdk/directory/v1/guides/manage-chrome-devices#update_chrome_device) using the API, and this
-        /// will be supported in the future.
+        /// [updated](/admin-sdk/directory/v1/guides/manage-chrome-devices#move_chrome_devices_to_ou) using the API. For
+        /// more information about how to create an organizational structure for your device, see the [administration
+        /// help center](https://support.google.com/a/answer/182433).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("orgUnitId")]
         public virtual string OrgUnitId { get; set; }
@@ -10369,12 +11423,16 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         /// The full parent path with the organizational unit's name associated with the device. Path names are case
         /// insensitive. If the parent organizational unit is the top-level organization, it is represented as a forward
         /// slash, `/`. This property can be
-        /// [updated](/admin-sdk/directory/v1/guides/manage-chrome-devices#update_chrome_device) using the API. For more
-        /// information about how to create an organizational structure for your device, see the [administration help
-        /// center](https://support.google.com/a/answer/182433).
+        /// [updated](/admin-sdk/directory/v1/guides/manage-chrome-devices#move_chrome_devices_to_ou) using the API. For
+        /// more information about how to create an organizational structure for your device, see the [administration
+        /// help center](https://support.google.com/a/answer/182433).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("orgUnitPath")]
         public virtual string OrgUnitPath { get; set; }
+
+        /// <summary>The status of the OS updates for the device.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("osUpdateStatus")]
+        public virtual OsUpdateStatus OsUpdateStatus { get; set; }
 
         /// <summary>The Chrome device's operating system version.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("osVersion")]
@@ -10384,11 +11442,11 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("platformVersion")]
         public virtual string PlatformVersion { get; set; }
 
-        /// <summary>List of recent device users, in descending order, by last login time.</summary>
+        /// <summary>A list of recent device users, in descending order, by last login time.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("recentUsers")]
         public virtual System.Collections.Generic.IList<RecentUsersData> RecentUsers { get; set; }
 
-        /// <summary>List of screenshot files to download. Type is always "SCREENSHOT_FILE". (Read-only)</summary>
+        /// <summary>A list of screenshot files to download. Type is always "SCREENSHOT_FILE". (Read-only)</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("screenshotFiles")]
         public virtual System.Collections.Generic.IList<ScreenshotFilesData> ScreenshotFiles { get; set; }
 
@@ -10407,9 +11465,20 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("supportEndDate")]
         public virtual string SupportEndDateRaw { get; set; }
 
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="SupportEndDateRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? SupportEndDateDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(SupportEndDateRaw);
+            set => SupportEndDateRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="SupportEndDateRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> SupportEndDate
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use SupportEndDateDateTimeOffset instead.")]
+        public virtual System.DateTime? SupportEndDate
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(SupportEndDateRaw);
             set => SupportEndDateRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -10434,7 +11503,7 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("willAutoRenew")]
         public virtual System.Nullable<bool> WillAutoRenew { get; set; }
 
-        /// <summary>List of active time ranges (Read-only).</summary>
+        /// <summary>A list of active time ranges (Read-only).</summary>
         public class ActiveTimeRangesData
         {
             /// <summary>Duration of usage in milliseconds.</summary>
@@ -10507,7 +11576,7 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         /// <summary>Reports of CPU utilization and temperature (Read-only)</summary>
         public class CpuStatusReportsData
         {
-            /// <summary>List of CPU temperature samples.</summary>
+            /// <summary>A list of CPU temperature samples.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("cpuTemperatureInfo")]
             public virtual System.Collections.Generic.IList<CpuTemperatureInfoData> CpuTemperatureInfo { get; set; }
 
@@ -10518,15 +11587,26 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
             [Newtonsoft.Json.JsonPropertyAttribute("reportTime")]
             public virtual string ReportTimeRaw { get; set; }
 
+            /// <summary>
+            /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ReportTimeRaw"/>.
+            /// </summary>
+            [Newtonsoft.Json.JsonIgnoreAttribute]
+            public virtual System.DateTimeOffset? ReportTimeDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(ReportTimeRaw);
+                set => ReportTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+            }
+
             /// <summary><seealso cref="System.DateTime"/> representation of <see cref="ReportTimeRaw"/>.</summary>
             [Newtonsoft.Json.JsonIgnoreAttribute]
-            public virtual System.Nullable<System.DateTime> ReportTime
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ReportTimeDateTimeOffset instead.")]
+            public virtual System.DateTime? ReportTime
             {
                 get => Google.Apis.Util.Utilities.GetDateTimeFromString(ReportTimeRaw);
                 set => ReportTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
             }
 
-            /// <summary>List of CPU temperature samples.</summary>
+            /// <summary>A list of CPU temperature samples.</summary>
             public class CpuTemperatureInfoData
             {
                 /// <summary>CPU label</summary>
@@ -10539,16 +11619,27 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
             }
         }
 
-        /// <summary>List of device files to download (Read-only)</summary>
+        /// <summary>A list of device files to download (Read-only)</summary>
         public class DeviceFilesData
         {
             /// <summary>Date and time the file was created</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
             public virtual string CreateTimeRaw { get; set; }
 
+            /// <summary>
+            /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.
+            /// </summary>
+            [Newtonsoft.Json.JsonIgnoreAttribute]
+            public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(CreateTimeRaw);
+                set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+            }
+
             /// <summary><seealso cref="System.DateTime"/> representation of <see cref="CreateTimeRaw"/>.</summary>
             [Newtonsoft.Json.JsonIgnoreAttribute]
-            public virtual System.Nullable<System.DateTime> CreateTime
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+            public virtual System.DateTime? CreateTime
             {
                 get => Google.Apis.Util.Utilities.GetDateTimeFromString(CreateTimeRaw);
                 set => CreateTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -10603,7 +11694,7 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
             public virtual string WanIpAddress { get; set; }
         }
 
-        /// <summary>List of recent device users, in descending order, by last login time.</summary>
+        /// <summary>A list of recent device users, in descending order, by last login time.</summary>
         public class RecentUsersData
         {
             /// <summary>
@@ -10617,16 +11708,27 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
             public virtual string Type { get; set; }
         }
 
-        /// <summary>List of screenshot files to download. Type is always "SCREENSHOT_FILE". (Read-only)</summary>
+        /// <summary>A list of screenshot files to download. Type is always "SCREENSHOT_FILE". (Read-only)</summary>
         public class ScreenshotFilesData
         {
             /// <summary>Date and time the file was created</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
             public virtual string CreateTimeRaw { get; set; }
 
+            /// <summary>
+            /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.
+            /// </summary>
+            [Newtonsoft.Json.JsonIgnoreAttribute]
+            public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(CreateTimeRaw);
+                set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+            }
+
             /// <summary><seealso cref="System.DateTime"/> representation of <see cref="CreateTimeRaw"/>.</summary>
             [Newtonsoft.Json.JsonIgnoreAttribute]
-            public virtual System.Nullable<System.DateTime> CreateTime
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+            public virtual System.DateTime? CreateTime
             {
                 get => Google.Apis.Util.Utilities.GetDateTimeFromString(CreateTimeRaw);
                 set => CreateTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -10652,9 +11754,20 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
             [Newtonsoft.Json.JsonPropertyAttribute("reportTime")]
             public virtual string ReportTimeRaw { get; set; }
 
+            /// <summary>
+            /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ReportTimeRaw"/>.
+            /// </summary>
+            [Newtonsoft.Json.JsonIgnoreAttribute]
+            public virtual System.DateTimeOffset? ReportTimeDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(ReportTimeRaw);
+                set => ReportTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+            }
+
             /// <summary><seealso cref="System.DateTime"/> representation of <see cref="ReportTimeRaw"/>.</summary>
             [Newtonsoft.Json.JsonIgnoreAttribute]
-            public virtual System.Nullable<System.DateTime> ReportTime
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ReportTimeDateTimeOffset instead.")]
+            public virtual System.DateTime? ReportTime
             {
                 get => Google.Apis.Util.Utilities.GetDateTimeFromString(ReportTimeRaw);
                 set => ReportTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -10698,6 +11811,7 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         }
     }
 
+    /// <summary>Data about an update to the status of a Chrome OS device.</summary>
     public class ChromeOsDeviceAction : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>Action to be taken on the Chrome OS device.</summary>
@@ -10718,7 +11832,7 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
 
     public class ChromeOsDevices : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>List of Chrome OS Device objects.</summary>
+        /// <summary>A list of Chrome OS Device objects.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("chromeosdevices")]
         public virtual System.Collections.Generic.IList<ChromeOsDevice> Chromeosdevices { get; set; }
 
@@ -10743,6 +11857,29 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         /// <summary>Chrome OS devices to be moved to OU</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deviceIds")]
         public virtual System.Collections.Generic.IList<string> DeviceIds { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request for adding a new print server.</summary>
+    public class CreatePrintServerRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The [unique ID](https://developers.google.com/admin-sdk/directory/reference/rest/v1/customers) of
+        /// the customer's Google Workspace account. Format: `customers/{id}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("parent")]
+        public virtual string Parent { get; set; }
+
+        /// <summary>
+        /// Required. A print server to create. If you want to place the print server under a specific organizational
+        /// unit (OU), then populate the `org_unit_id`. Otherwise the print server is created under the root OU. The
+        /// `org_unit_id` can be retrieved using the [Directory
+        /// API](https://developers.google.com/admin-sdk/directory/v1/guides/manage-org-units).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("printServer")]
+        public virtual PrintServer PrintServer { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -10780,10 +11917,21 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         public virtual string CustomerCreationTimeRaw { get; set; }
 
         /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="CustomerCreationTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CustomerCreationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(CustomerCreationTimeRaw);
+            set => CustomerCreationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
+        /// <summary>
         /// <seealso cref="System.DateTime"/> representation of <see cref="CustomerCreationTimeRaw"/>.
         /// </summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> CustomerCreationTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CustomerCreationTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? CustomerCreationTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(CustomerCreationTimeRaw);
             set => CustomerCreationTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -10877,12 +12025,47 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
     /// <summary>Information regarding a command that was issued to a device.</summary>
     public class DirectoryChromeosdevicesCommand : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _commandExpireTimeRaw;
+
+        private object _commandExpireTime;
+
         /// <summary>
         /// The time at which the command will expire. If the device doesn't execute the command within this time the
         /// command will become expired.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("commandExpireTime")]
-        public virtual object CommandExpireTime { get; set; }
+        public virtual string CommandExpireTimeRaw
+        {
+            get => _commandExpireTimeRaw;
+            set
+            {
+                _commandExpireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _commandExpireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CommandExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CommandExpireTimeDateTimeOffset instead.")]
+        public virtual object CommandExpireTime
+        {
+            get => _commandExpireTime;
+            set
+            {
+                _commandExpireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _commandExpireTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="CommandExpireTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CommandExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CommandExpireTimeRaw);
+            set => CommandExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Unique ID of a device command.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("commandId")]
@@ -10892,9 +12075,42 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("commandResult")]
         public virtual DirectoryChromeosdevicesCommandResult CommandResult { get; set; }
 
+        private string _issueTimeRaw;
+
+        private object _issueTime;
+
         /// <summary>The timestamp when the command was issued by the admin.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("issueTime")]
-        public virtual object IssueTime { get; set; }
+        public virtual string IssueTimeRaw
+        {
+            get => _issueTimeRaw;
+            set
+            {
+                _issueTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _issueTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="IssueTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use IssueTimeDateTimeOffset instead.")]
+        public virtual object IssueTime
+        {
+            get => _issueTime;
+            set
+            {
+                _issueTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _issueTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="IssueTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? IssueTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(IssueTimeRaw);
+            set => IssueTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The payload that the command specified, if any.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("payload")]
@@ -10916,14 +12132,55 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
     public class DirectoryChromeosdevicesCommandResult : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// The payload for the command result. The following commands respond with a payload: *
+        /// `DEVICE_START_CRD_SESSION`: Payload is a stringified JSON object in the form: { "url": url }. The URL
+        /// provides a link to the Chrome Remote Desktop session.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("commandResultPayload")]
+        public virtual string CommandResultPayload { get; set; }
+
+        /// <summary>
         /// The error message with a short explanation as to why the command failed. Only present if the command failed.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("errorMessage")]
         public virtual string ErrorMessage { get; set; }
 
+        private string _executeTimeRaw;
+
+        private object _executeTime;
+
         /// <summary>The time at which the command was executed or failed to execute.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("executeTime")]
-        public virtual object ExecuteTime { get; set; }
+        public virtual string ExecuteTimeRaw
+        {
+            get => _executeTimeRaw;
+            set
+            {
+                _executeTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _executeTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExecuteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExecuteTimeDateTimeOffset instead.")]
+        public virtual object ExecuteTime
+        {
+            get => _executeTime;
+            set
+            {
+                _executeTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _executeTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExecuteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExecuteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExecuteTimeRaw);
+            set => ExecuteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The result of the command.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("result")]
@@ -10942,8 +12199,29 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
 
         /// <summary>
         /// The payload for the command, provide it only if command supports it. The following commands support adding
-        /// payload: - SET_VOLUME: Payload is a stringified JSON object in the form: { "volume": 50 }. The volume has to
-        /// be an integer in the range [0,100].
+        /// payload: * `SET_VOLUME`: Payload is a stringified JSON object in the form: { "volume": 50 }. The volume has
+        /// to be an integer in the range [0,100]. * `DEVICE_START_CRD_SESSION`: Payload is optionally a stringified
+        /// JSON object in the form: { "ackedUserPresence": true, "crdSessionType": string }. `ackedUserPresence` is a
+        /// boolean. By default, `ackedUserPresence` is set to `false`. To start a Chrome Remote Desktop session for an
+        /// active device, set `ackedUserPresence` to `true`. `crdSessionType` can only select from values `private`
+        /// (which grants the remote admin exclusive control of the ChromeOS device) or `shared` (which allows the admin
+        /// and the local user to share control of the ChromeOS device). If not set, `crdSessionType` defaults to
+        /// `shared`. * `REBOOT`: Payload is a stringified JSON object in the form: { "user_session_delay_seconds": 300
+        /// }. The `user_session_delay_seconds` is the amount of seconds to wait before rebooting the device if a user
+        /// is logged in. It has to be an integer in the range [0,300]. When payload is not present for reboot, 0 delay
+        /// is the default. Note: This only applies if an actual user is logged in, including a Guest. If the device is
+        /// in the login screen or in Kiosk mode the value is not respected and the device immediately reboots. *
+        /// `FETCH_SUPPORT_PACKET`: Payload is optionally a stringified JSON object in the form:
+        /// {"supportPacketDetails":{ "issueCaseId": optional_support_case_id_string, "issueDescription":
+        /// optional_issue_description_string, "requestedDataCollectors": []}} The list of available
+        /// `data_collector_enums` are as following: Chrome System Information (1), Crash IDs (2), Memory Details (3),
+        /// UI Hierarchy (4), Additional ChromeOS Platform Logs (5), Device Event (6), Intel WiFi NICs Debug Dump (7),
+        /// Touch Events (8), Lacros (9), Lacros System Information (10), ChromeOS Flex Logs (11), DBus Details (12),
+        /// ChromeOS Network Routes (13), ChromeOS Shill (Connection Manager) Logs (14), Policies (15), ChromeOS System
+        /// State and Logs (16), ChromeOS System Logs (17), ChromeOS Chrome User Logs (18), ChromeOS Bluetooth (19),
+        /// ChromeOS Connected Input Devices (20), ChromeOS Traffic Counters (21), ChromeOS Virtual Keyboard (22),
+        /// ChromeOS Network Health (23). See more details in [help
+        /// article](https://support.google.com/chrome/a?p=remote-log).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("payload")]
         public virtual string Payload { get; set; }
@@ -10995,7 +12273,7 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
 
     public class DomainAliases : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>List of domain alias objects.</summary>
+        /// <summary>A list of domain alias objects.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("domainAliases")]
         public virtual System.Collections.Generic.IList<DomainAlias> DomainAliasesValue { get; set; }
 
@@ -11017,7 +12295,7 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("creationTime")]
         public virtual System.Nullable<long> CreationTime { get; set; }
 
-        /// <summary>List of domain alias objects. (Read-only)</summary>
+        /// <summary>A list of domain alias objects. (Read-only)</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("domainAliases")]
         public virtual System.Collections.Generic.IList<DomainAlias> DomainAliases { get; set; }
 
@@ -11044,7 +12322,7 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
 
     public class Domains2 : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>List of domain objects.</summary>
+        /// <summary>A list of domain objects.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("domains")]
         public virtual System.Collections.Generic.IList<Domains> Domains { get; set; }
 
@@ -11060,8 +12338,7 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -11087,6 +12364,17 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         /// <summary>Id of a failed printer.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("printerId")]
         public virtual string PrinterId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Information about the device's fan.</summary>
+    public class FanInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Output only. Fan speed in RPM.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("speedRpm")]
+        public virtual System.Nullable<int> SpeedRpm { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -11160,15 +12448,25 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
     /// <summary>
     /// Google Groups provide your users the ability to send messages to groups of people using the group's email
     /// address. For more information about common tasks, see the [Developer's
-    /// Guide](/admin-sdk/directory/v1/guides/manage-groups).
+    /// Guide](https://developers.google.com/admin-sdk/directory/v1/guides/manage-groups). For information about other
+    /// types of groups, see the [Cloud Identity Groups API
+    /// documentation](https://cloud.google.com/identity/docs/groups). Note: The user calling the API (or being
+    /// impersonated by a service account) must have an assigned
+    /// [role](https://developers.google.com/admin-sdk/directory/v1/guides/manage-roles) that includes Admin API Groups
+    /// permissions, such as Super Admin or Groups Admin.
     /// </summary>
     public class Group : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Value is `true` if this group was created by an administrator rather than a user.</summary>
+        /// <summary>
+        /// Read-only. Value is `true` if this group was created by an administrator rather than a user.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("adminCreated")]
         public virtual System.Nullable<bool> AdminCreated { get; set; }
 
-        /// <summary>List of a group's alias email addresses.</summary>
+        /// <summary>
+        /// Read-only. The list of a group's alias email addresses. To add, update, or remove a group's aliases, use the
+        /// `groups.aliases` methods. If edited in a group's POST or PUT request, the edit is ignored.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("aliases")]
         public virtual System.Collections.Generic.IList<string> Aliases { get; set; }
 
@@ -11201,7 +12499,9 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("etag")]
         public virtual string ETag { get; set; }
 
-        /// <summary>The unique ID of a group. A group `id` can be used as a group request URI's `groupKey`.</summary>
+        /// <summary>
+        /// Read-only. The unique ID of a group. A group `id` can be used as a group request URI's `groupKey`.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("id")]
         public virtual string Id { get; set; }
 
@@ -11214,13 +12514,37 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// List of the group's non-editable alias email addresses that are outside of the account's primary domain or
-        /// subdomains. These are functioning email addresses used by the group. This is a read-only property returned
-        /// in the API's response for a group. If edited in a group's POST or PUT request, the edit is ignored by the
-        /// API service.
+        /// Read-only. The list of the group's non-editable alias email addresses that are outside of the account's
+        /// primary domain or subdomains. These are functioning email addresses used by the group. This is a read-only
+        /// property returned in the API's response for a group. If edited in a group's POST or PUT request, the edit is
+        /// ignored.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nonEditableAliases")]
         public virtual System.Collections.Generic.IList<string> NonEditableAliases { get; set; }
+    }
+
+    /// <summary>The Directory API manages aliases, which are alternative email addresses.</summary>
+    public class GroupAlias : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The alias email address.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("alias")]
+        public virtual string Alias { get; set; }
+
+        /// <summary>ETag of the resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>The unique ID of the group.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>The type of the API resource. For Alias resources, the value is `admin#directory#alias`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
+
+        /// <summary>The primary email address of the group.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("primaryEmail")]
+        public virtual string PrimaryEmail { get; set; }
     }
 
     public class Groups : Google.Apis.Requests.IDirectResponseSchema
@@ -11229,7 +12553,7 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("etag")]
         public virtual string ETag { get; set; }
 
-        /// <summary>List of group objects.</summary>
+        /// <summary>A list of group objects.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("groups")]
         public virtual System.Collections.Generic.IList<Group> GroupsValue { get; set; }
 
@@ -11240,6 +12564,23 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         /// <summary>Token used to access next page of this result.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
+    }
+
+    public class ListPrintServersResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// A token that can be sent as `page_token` in a request to retrieve the next page. If this field is omitted,
+        /// there are no subsequent pages.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>List of print servers.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("printServers")]
+        public virtual System.Collections.Generic.IList<PrintServer> PrintServers { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
     }
 
     /// <summary>Response for listing allowed printer models.</summary>
@@ -11275,7 +12616,7 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
 
         /// <summary>
         /// List of printers. If `org_unit_id` was given in the request, then only printers visible for this OU will be
-        /// returned. If `org_unit_id` was given in the request, then all printers will be returned.
+        /// returned. If `org_unit_id` was not given in the request, then all printers will be returned.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("printers")]
         public virtual System.Collections.Generic.IList<Printer> Printers { get; set; }
@@ -11291,7 +12632,10 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
     /// </summary>
     public class Member : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Defines mail delivery preferences of member. This is only supported by create/update/get.</summary>
+        /// <summary>
+        /// Defines mail delivery preferences of member. This field is only supported by `insert`, `update`, and `get`
+        /// methods.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("delivery_settings")]
         public virtual string DeliverySettings { get; set; }
 
@@ -11346,7 +12690,7 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
-        /// <summary>List of member objects.</summary>
+        /// <summary>A list of member objects.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("members")]
         public virtual System.Collections.Generic.IList<Member> MembersValue { get; set; }
 
@@ -11429,7 +12773,7 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         public virtual string DevicePasswordStatus { get; set; }
 
         /// <summary>
-        /// List of owner's email addresses. If your application needs the current list of user emails, use the
+        /// The list of the owner's email addresses. If your application needs the current list of user emails, use the
         /// [get](/admin-sdk/directory/v1/reference/mobiledevices/get.html) method. For additional information, see the
         /// [retrieve a user](/admin-sdk/directory/v1/guides/manage-users#get_user) method.
         /// </summary>
@@ -11451,9 +12795,18 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("firstSync")]
         public virtual string FirstSyncRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="FirstSyncRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? FirstSyncDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(FirstSyncRaw);
+            set => FirstSyncRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="FirstSyncRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> FirstSync
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use FirstSyncDateTimeOffset instead.")]
+        public virtual System.DateTime? FirstSync
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(FirstSyncRaw);
             set => FirstSyncRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -11492,9 +12845,18 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("lastSync")]
         public virtual string LastSyncRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastSyncRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastSyncDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(LastSyncRaw);
+            set => LastSyncRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="LastSyncRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> LastSync
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastSyncDateTimeOffset instead.")]
+        public virtual System.DateTime? LastSync
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(LastSyncRaw);
             set => LastSyncRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -11521,8 +12883,8 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         public virtual string Model { get; set; }
 
         /// <summary>
-        /// List of the owner's user names. If your application needs the current list of device owner names, use the
-        /// [get](/admin-sdk/directory/v1/reference/mobiledevices/get.html) method. For more information about
+        /// The list of the owner's user names. If your application needs the current list of device owner names, use
+        /// the [get](/admin-sdk/directory/v1/reference/mobiledevices/get.html) method. For more information about
         /// retrieving mobile device user information, see the [Developer's
         /// Guide](/admin-sdk/directory/v1/guides/manage-users#get_user).
         /// </summary>
@@ -11541,7 +12903,7 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("os")]
         public virtual string Os { get; set; }
 
-        /// <summary>List of accounts added on device (Read-only)</summary>
+        /// <summary>The list of accounts added on device (Read-only)</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("otherAccountsInfo")]
         public virtual System.Collections.Generic.IList<string> OtherAccountsInfo { get; set; }
 
@@ -11649,7 +13011,7 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
-        /// <summary>List of Mobile Device objects.</summary>
+        /// <summary>A list of Mobile Device objects.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("mobiledevices")]
         public virtual System.Collections.Generic.IList<MobileDevice> Mobiledevices { get; set; }
 
@@ -11666,12 +13028,7 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
     /// </summary>
     public class OrgUnit : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>
-        /// Determines if a sub-organizational unit can inherit the settings of the parent organization. The default
-        /// value is `false`, meaning a sub-organizational unit inherits the settings of the nearest parent
-        /// organizational unit. For more information on inheritance and users in an organization structure, see the
-        /// [administration help center](https://support.google.com/a/answer/4352075).
-        /// </summary>
+        /// <summary>This field is deprecated and setting its value has no effect.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("blockInheritance")]
         public virtual System.Nullable<bool> BlockInheritance { get; set; }
 
@@ -11740,9 +13097,142 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
-        /// <summary>List of organizational unit objects.</summary>
+        /// <summary>A list of organizational unit objects.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("organizationUnits")]
         public virtual System.Collections.Generic.IList<OrgUnit> OrganizationUnits { get; set; }
+    }
+
+    /// <summary>Contains information regarding the current OS update status.</summary>
+    public class OsUpdateStatus : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Date and time of the last reboot.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rebootTime")]
+        public virtual string RebootTime { get; set; }
+
+        /// <summary>The update state of an OS update.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>New required platform version from the pending updated kiosk app.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targetKioskAppVersion")]
+        public virtual string TargetKioskAppVersion { get; set; }
+
+        /// <summary>
+        /// New platform version of the OS image being downloaded and applied. It is only set when update status is
+        /// UPDATE_STATUS_DOWNLOAD_IN_PROGRESS or UPDATE_STATUS_NEED_REBOOT. Note this could be a dummy "0.0.0.0" for
+        /// UPDATE_STATUS_NEED_REBOOT for some edge cases, e.g. update engine is restarted without a reboot.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targetOsVersion")]
+        public virtual string TargetOsVersion { get; set; }
+
+        /// <summary>Date and time of the last update check.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateCheckTime")]
+        public virtual string UpdateCheckTime { get; set; }
+
+        /// <summary>Date and time of the last successful OS update.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTime { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Configuration for a print server.</summary>
+    public class PrintServer : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. Time when the print server was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Editable. Description of the print server (as shown in the Admin console).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>Editable. Display name of the print server (as shown in the Admin console).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>Immutable. ID of the print server. Leave empty when creating.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>
+        /// Immutable. Resource name of the print server. Leave empty when creating. Format:
+        /// `customers/{customer.id}/printServers/{print_server.id}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// ID of the organization unit (OU) that owns this print server. This value can only be set when the print
+        /// server is initially created. If it's not populated, the print server is placed under the root OU. The
+        /// `org_unit_id` can be retrieved using the [Directory API](/admin-sdk/directory/reference/rest/v1/orgunits).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("orgUnitId")]
+        public virtual string OrgUnitId { get; set; }
+
+        /// <summary>Editable. Print server URI.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Info about failures</summary>
+    public class PrintServerFailureInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Canonical code for why the update failed to apply.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("errorCode")]
+        public virtual string ErrorCode { get; set; }
+
+        /// <summary>Failure reason message.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("errorMessage")]
+        public virtual string ErrorMessage { get; set; }
+
+        /// <summary>Failed print server.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("printServer")]
+        public virtual PrintServer PrintServer { get; set; }
+
+        /// <summary>ID of a failed print server.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("printServerId")]
+        public virtual string PrintServerId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
     }
 
     /// <summary>Printer configuration.</summary>
@@ -11752,9 +13242,42 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("auxiliaryMessages")]
         public virtual System.Collections.Generic.IList<AuxiliaryMessage> AuxiliaryMessages { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Time when printer was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Editable. Description of printer.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
@@ -11926,9 +13449,42 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
     /// <summary>Defines an assignment of a role.</summary>
     public class RoleAssignment : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The unique ID of the user this role is assigned to.</summary>
+        /// <summary>
+        /// The unique ID of the entity this role is assigned to—either the `user_id` of a user, the `group_id` of a
+        /// group, or the `uniqueId` of a service account as defined in [Identity and Access Management
+        /// (IAM)](https://cloud.google.com/iam/docs/reference/rest/v1/projects.serviceAccounts).
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("assignedTo")]
         public virtual string AssignedTo { get; set; }
+
+        /// <summary>Output only. The type of the assignee (`USER` or `GROUP`).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("assigneeType")]
+        public virtual string AssigneeType { get; set; }
+
+        /// <summary>
+        /// Optional. The condition associated with this role assignment. Note: Feature is available to Enterprise
+        /// Standard, Enterprise Plus, Google Workspace for Education Plus and Cloud Identity Premium customers. A
+        /// `RoleAssignment` with the `condition` field set will only take effect when the resource being accessed meets
+        /// the condition. If `condition` is empty, the role (`role_id`) is applied to the actor (`assigned_to`) at the
+        /// scope (`scope_type`) unconditionally. Currently, the following conditions are supported: - To make the
+        /// `RoleAssignment` only applicable to [Security
+        /// Groups](https://cloud.google.com/identity/docs/groups#group_types):
+        /// `api.getAttribute('cloudidentity.googleapis.com/groups.labels', []).hasAny(['groups.security'])
+        /// &amp;amp;&amp;amp; resource.type == 'cloudidentity.googleapis.com/Group'` - To make the `RoleAssignment` not
+        /// applicable to [Security Groups](https://cloud.google.com/identity/docs/groups#group_types):
+        /// `!api.getAttribute('cloudidentity.googleapis.com/groups.labels', []).hasAny(['groups.security'])
+        /// &amp;amp;&amp;amp; resource.type == 'cloudidentity.googleapis.com/Group'` Currently, the condition strings
+        /// have to be verbatim and they only work with the following [pre-built administrator
+        /// roles](https://support.google.com/a/answer/2405986): - Groups Editor - Groups Reader The condition follows
+        /// [Cloud IAM condition syntax](https://cloud.google.com/iam/docs/conditions-overview). Additional conditions
+        /// related to Locked Groups are available under Open Beta. - To make the `RoleAssignment` not applicable to
+        /// [Locked Groups](https://cloud.google.com/identity/docs/groups#group_types):
+        /// `!api.getAttribute('cloudidentity.googleapis.com/groups.labels', []).hasAny(['groups.locked'])
+        /// &amp;amp;&amp;amp; resource.type == 'cloudidentity.googleapis.com/Group'` This condition can also be used in
+        /// conjunction with a Security-related condition.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("condition")]
+        public virtual string Condition { get; set; }
 
         /// <summary>ETag of the resource.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("etag")]
@@ -12114,9 +13670,38 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
-        /// <summary>List of UserSchema objects.</summary>
+        /// <summary>A list of UserSchema objects.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("schemas")]
         public virtual System.Collections.Generic.IList<Schema> SchemasValue { get; set; }
+    }
+
+    /// <summary>
+    /// The `Status` type defines a logical error model that is suitable for different programming environments,
+    /// including REST APIs and RPC APIs. It is used by [gRPC](https://github.com/grpc). Each `Status` message contains
+    /// three pieces of data: error code, error message, and error details. You can find out more about this error model
+    /// and how to work with it in the [API Design Guide](https://cloud.google.com/apis/design/errors).
+    /// </summary>
+    public class Status : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The status code, which should be an enum value of google.rpc.Code.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("code")]
+        public virtual System.Nullable<int> Code { get; set; }
+
+        /// <summary>
+        /// A list of messages that carry the error details. There is a common set of message types for APIs to use.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("details")]
+        public virtual System.Collections.Generic.IList<System.Collections.Generic.IDictionary<string, object>> Details { get; set; }
+
+        /// <summary>
+        /// A developer-facing error message, which should be in English. Any user-facing error message should be
+        /// localized and sent in the google.rpc.Status.details field, or localized by the client.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("message")]
+        public virtual string Message { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
     }
 
     /// <summary>JSON template for token resource in Directory API.</summary>
@@ -12178,14 +13763,14 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
     }
 
     /// <summary>
-    /// The Directory API allows you to create and manage your account's users, user aliases, and user Gmail chat
-    /// profile photos. For more information about common tasks, see the [User Accounts Developer's
+    /// The Directory API allows you to create and manage your account's users, user aliases, and user Google profile
+    /// photos. For more information about common tasks, see the [User Accounts Developer's
     /// Guide](/admin-sdk/directory/v1/guides/manage-users.html) and the [User Aliases Developer's
     /// Guide](/admin-sdk/directory/v1/guides/manage-user-aliases.html).
     /// </summary>
     public class User : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>A list of the user's addresses. The maximum allowed data size for this field is 10Kb.</summary>
+        /// <summary>The list of the user's addresses. The maximum allowed data size for this field is 10KB.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("addresses")]
         public virtual System.Collections.Generic.IList<UserAddress> Addresses { get; set; }
 
@@ -12196,7 +13781,7 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("agreedToTerms")]
         public virtual System.Nullable<bool> AgreedToTerms { get; set; }
 
-        /// <summary>Output only. A list of the user's alias email addresses.</summary>
+        /// <summary>Output only. The list of the user's alias email addresses.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("aliases")]
         public virtual System.Collections.Generic.IList<string> Aliases { get; set; }
 
@@ -12215,9 +13800,18 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("creationTime")]
         public virtual string CreationTimeRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(CreationTimeRaw);
+            set => CreationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="CreationTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> CreationTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreationTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? CreationTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(CreationTimeRaw);
             set => CreationTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
@@ -12242,16 +13836,26 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("deletionTime")]
         public virtual string DeletionTimeRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="DeletionTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? DeletionTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(DeletionTimeRaw);
+            set => DeletionTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="DeletionTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> DeletionTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use DeletionTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? DeletionTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(DeletionTimeRaw);
             set => DeletionTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
         }
 
         /// <summary>
-        /// A list of the user's email addresses. The maximum allowed data size for this field is 10Kb.
+        /// The list of the user's email addresses. The maximum allowed data size for this field is 10KB. This excludes
+        /// `publicKeyEncryptionCertificates`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("emails")]
         public virtual System.Collections.Generic.IList<UserEmail> Emails { get; set; }
@@ -12261,21 +13865,22 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         public virtual string ETag { get; set; }
 
         /// <summary>
-        /// A list of external IDs for the user, such as an employee or network ID. The maximum allowed data size for
-        /// this field is 2Kb.
+        /// The list of external IDs for the user, such as an employee or network ID. The maximum allowed data size for
+        /// this field is 2KB.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("externalIds")]
         public virtual System.Collections.Generic.IList<UserExternalId> ExternalIds { get; set; }
 
-        /// <summary>The user's gender. The maximum allowed data size for this field is 1Kb.</summary>
+        /// <summary>The user's gender. The maximum allowed data size for this field is 1KB.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("gender")]
         public virtual object Gender { get; set; }
 
         /// <summary>
-        /// Stores the hash format of the password property. We recommend sending the `password` property value as a
-        /// base 16 bit hexadecimal-encoded hash value. Set the `hashFunction` values as either the
-        /// [SHA-1](https://wikipedia.org/wiki/SHA-1), [MD5](https://wikipedia.org/wiki/MD5), or
-        /// [crypt](https://en.wikipedia.org/wiki/Crypt_\(C\)) hash format.
+        /// Stores the hash format of the `password` property. The following `hashFunction` values are allowed: * `MD5`
+        /// - Accepts simple hex-encoded values. * `SHA-1` - Accepts simple hex-encoded values. * `crypt` - Compliant
+        /// with the [C crypt library](https://en.wikipedia.org/wiki/Crypt_%28C%29). Supports the DES, MD5 (hash prefix
+        /// `$1$`), SHA-256 (hash prefix `$5$`), and SHA-512 (hash prefix `$6$`) hash algorithms. If rounds are
+        /// specified as part of the prefix, they must be 10,000 or fewer.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("hashFunction")]
         public virtual string HashFunction { get; set; }
@@ -12285,8 +13890,9 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         public virtual string Id { get; set; }
 
         /// <summary>
-        /// The user's Instant Messenger (IM) accounts. A user account can have multiple ims properties. But, only one
-        /// of these ims properties can be the primary IM contact. The maximum allowed data size for this field is 2Kb.
+        /// The list of the user's Instant Messenger (IM) accounts. A user account can have multiple ims properties.
+        /// But, only one of these ims properties can be the primary IM contact. The maximum allowed data size for this
+        /// field is 2KB.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("ims")]
         public virtual System.Collections.Generic.IList<UserIm> Ims { get; set; }
@@ -12300,7 +13906,8 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         public virtual System.Nullable<bool> IncludeInGlobalAddressList { get; set; }
 
         /// <summary>
-        /// If `true`, the user's IP address is [whitelisted](https://support.google.com/a/answer/60752).
+        /// If `true`, the user's IP address is subject to a deprecated IP address
+        /// [`allowlist`](https://support.google.com/a/answer/60752) configuration.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("ipWhitelisted")]
         public virtual System.Nullable<bool> IpWhitelisted { get; set; }
@@ -12340,7 +13947,7 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("isMailboxSetup")]
         public virtual System.Nullable<bool> IsMailboxSetup { get; set; }
 
-        /// <summary>The user's keywords. The maximum allowed data size for this field is 1Kb.</summary>
+        /// <summary>The list of the user's keywords. The maximum allowed data size for this field is 1KB.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("keywords")]
         public virtual object Keywords { get; set; }
 
@@ -12350,7 +13957,7 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
-        /// <summary>The user's languages. The maximum allowed data size for this field is 1Kb.</summary>
+        /// <summary>The user's languages. The maximum allowed data size for this field is 1KB.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("languages")]
         public virtual object Languages { get; set; }
 
@@ -12358,15 +13965,24 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("lastLoginTime")]
         public virtual string LastLoginTimeRaw { get; set; }
 
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastLoginTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastLoginTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseDateTimeToDateTimeOffset(LastLoginTimeRaw);
+            set => LastLoginTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToDateTime(value);
+        }
+
         /// <summary><seealso cref="System.DateTime"/> representation of <see cref="LastLoginTimeRaw"/>.</summary>
         [Newtonsoft.Json.JsonIgnoreAttribute]
-        public virtual System.Nullable<System.DateTime> LastLoginTime
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastLoginTimeDateTimeOffset instead.")]
+        public virtual System.DateTime? LastLoginTime
         {
             get => Google.Apis.Util.Utilities.GetDateTimeFromString(LastLoginTimeRaw);
             set => LastLoginTimeRaw = Google.Apis.Util.Utilities.GetStringFromDateTime(value);
         }
 
-        /// <summary>The user's locations. The maximum allowed data size for this field is 10Kb.</summary>
+        /// <summary>The user's locations. The maximum allowed data size for this field is 10KB.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("locations")]
         public virtual object Locations { get; set; }
 
@@ -12375,13 +13991,13 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         /// characters in the `givenName` and in the `familyName` values is 60. In addition, name values support
         /// unicode/UTF-8 characters, and can contain spaces, letters (a-z), numbers (0-9), dashes (-), forward slashes
         /// (/), and periods (.). For more information about character usage rules, see the [administration help
-        /// center](https://support.google.com/a/answer/9193374). Maximum allowed data size for this field is 1Kb.
+        /// center](https://support.google.com/a/answer/9193374). Maximum allowed data size for this field is 1KB.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual UserName Name { get; set; }
 
         /// <summary>
-        /// Output only. List of the user's non-editable alias email addresses. These are typically outside the
+        /// Output only. The list of the user's non-editable alias email addresses. These are typically outside the
         /// account's primary domain or sub-domain.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nonEditableAliases")]
@@ -12399,7 +14015,7 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         public virtual string OrgUnitPath { get; set; }
 
         /// <summary>
-        /// A list of organizations the user belongs to. The maximum allowed data size for this field is 10Kb.
+        /// The list of organizations the user belongs to. The maximum allowed data size for this field is 10KB.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("organizations")]
         public virtual System.Collections.Generic.IList<UserOrganization> Organizations { get; set; }
@@ -12408,12 +14024,15 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("password")]
         public virtual string Password { get; set; }
 
-        /// <summary>A list of the user's phone numbers. The maximum allowed data size for this field is 1Kb.</summary>
+        /// <summary>
+        /// The list of the user's phone numbers. The maximum allowed data size for this field is 1KB.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("phones")]
         public virtual System.Collections.Generic.IList<UserPhone> Phones { get; set; }
 
         /// <summary>
-        /// A list of [POSIX](https://www.opengroup.org/austin/papers/posix_faq.html) account information for the user.
+        /// The list of [POSIX](https://www.opengroup.org/austin/papers/posix_faq.html) account information for the
+        /// user.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("posixAccounts")]
         public virtual object PosixAccounts { get; set; }
@@ -12437,7 +14056,7 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         public virtual string RecoveryPhone { get; set; }
 
         /// <summary>
-        /// A list of the user's relationships to other users. The maximum allowed data size for this field is 2Kb.
+        /// The list of the user's relationships to other users. The maximum allowed data size for this field is 2KB.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("relations")]
         public virtual System.Collections.Generic.IList<UserRelation> Relations { get; set; }
@@ -12461,11 +14080,11 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("thumbnailPhotoEtag")]
         public virtual string ThumbnailPhotoEtag { get; set; }
 
-        /// <summary>Output only. Photo Url of the user (Read-only)</summary>
+        /// <summary>Output only. The URL of the user's profile photo. The URL might be temporary or private.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("thumbnailPhotoUrl")]
         public virtual string ThumbnailPhotoUrl { get; set; }
 
-        /// <summary>The user's websites. The maximum allowed data size for this field is 2Kb.</summary>
+        /// <summary>The user's websites. The maximum allowed data size for this field is 2KB.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("websites")]
         public virtual System.Collections.Generic.IList<UserWebsite> Websites { get; set; }
     }
@@ -12554,6 +14173,30 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>The Directory API manages aliases, which are alternative email addresses.</summary>
+    public class UserAlias : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The alias email address.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("alias")]
+        public virtual string Alias { get; set; }
+
+        /// <summary>ETag of the resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>The unique ID for the user.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>The type of the API resource. For Alias resources, the value is `admin#directory#alias`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
+
+        /// <summary>The user's primary email address.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("primaryEmail")]
+        public virtual string PrimaryEmail { get; set; }
+    }
+
     /// <summary>JSON template for an email.</summary>
     public class UserEmail : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -12569,6 +14212,10 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("primary")]
         public virtual System.Nullable<bool> Primary { get; set; }
 
+        /// <summary>Public Key Encryption Certificates. Current limit: 1 per email address, and 5 per user.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("public_key_encryption_certificates")]
+        public virtual PublicKeyEncryptionCertificatesData PublicKeyEncryptionCertificates { get; set; }
+
         /// <summary>
         /// Each entry can have a type which indicates standard types of that entry. For example email could be of home,
         /// work etc. In addition to the standard type, an entry can have a custom type and can take any value Such
@@ -12579,6 +14226,27 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
+
+        /// <summary>Public Key Encryption Certificates. Current limit: 1 per email address, and 5 per user.</summary>
+        public class PublicKeyEncryptionCertificatesData
+        {
+            /// <summary>
+            /// X.509 encryption certificate in `PEM` format. Must only be an end-entity (leaf) certificate.
+            /// </summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("certificate")]
+            public virtual string Certificate { get; set; }
+
+            /// <summary>Whether this is the default certificate for the given email address.</summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("is_default")]
+            public virtual System.Nullable<bool> IsDefault { get; set; }
+
+            /// <summary>
+            /// Denotes the certificate's state in its lifecycle. Possible values are `not_yet_validated`, `valid`,
+            /// `invalid`, `expired`, and `revoked`.
+            /// </summary>
+            [Newtonsoft.Json.JsonPropertyAttribute("state")]
+            public virtual string State { get; set; }
+        }
     }
 
     /// <summary>JSON template for an externalId entry.</summary>
@@ -12686,25 +14354,24 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
     public class UserLanguage : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Other language. User can provide own language name if there is no corresponding ISO 639 language code. If
-        /// this is set `languageCode` can't be set.
+        /// Other language. User can provide their own language name if there is no corresponding ISO 639 language code.
+        /// If this is set, `languageCode` can't be set.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("customLanguage")]
         public virtual string CustomLanguage { get; set; }
 
         /// <summary>
-        /// Language Code. Should be used for storing ISO 639 LanguageCode string representation for language. See the
-        /// [Language Codes](/admin-sdk/directory/v1/languages) page for the list of supported codes. Valid language
-        /// codes outside the supported set will be accepted by the API but may lead to unexpected behavior. Illegal
-        /// values cause SchemaException. If this is set `customLanguage` can't be set.
+        /// ISO 639 string representation of a language. See [Language Codes](/admin-sdk/directory/v1/languages) for the
+        /// list of supported codes. Valid language codes outside the supported set will be accepted by the API but may
+        /// lead to unexpected behavior. Illegal values cause `SchemaException`. If this is set, `customLanguage` can't
+        /// be set.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("languageCode")]
         public virtual string LanguageCode { get; set; }
 
         /// <summary>
-        /// Preference. Optional field, which if present, controls whether the specified `languageCode` is stored as the
-        /// user's preferred language. If `customLanguage` is set, this can't be set. Allowed values are `preferred` and
-        /// `not_preferred`.
+        /// Optional. If present, controls whether the specified `languageCode` is the user's preferred language. If
+        /// `customLanguage` is set, this can't be set. Allowed values are `preferred` and `not_preferred`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("preference")]
         public virtual string Preference { get; set; }
@@ -12770,6 +14437,10 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
 
     public class UserName : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The user's display name. Limit: 256 characters.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
         /// <summary>The user's last name. Required when creating a user account.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("familyName")]
         public virtual string FamilyName { get; set; }
@@ -13060,7 +14731,7 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("trigger_event")]
         public virtual string TriggerEvent { get; set; }
 
-        /// <summary>List of user objects.</summary>
+        /// <summary>A list of user objects.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("users")]
         public virtual System.Collections.Generic.IList<User> UsersValue { get; set; }
     }
@@ -13090,7 +14761,7 @@ namespace Google.Apis.Admin.Directory.directory_v1.Data
         public virtual string VerificationCodeValue { get; set; }
     }
 
-    /// <summary>JSON response template for List verification codes operation in Directory API.</summary>
+    /// <summary>JSON response template for list verification codes operation in Directory API.</summary>
     public class VerificationCodes : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>ETag of the resource.</summary>

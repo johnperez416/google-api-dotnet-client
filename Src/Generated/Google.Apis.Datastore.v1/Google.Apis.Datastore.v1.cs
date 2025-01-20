@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.Datastore.v1
         public DatastoreService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://datastore.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://datastore.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.Datastore.v1
         public override string Name => "datastore";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://datastore.googleapis.com/";
-        #else
-            "https://datastore.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://datastore.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Datastore API.</summary>
         public class Scope
@@ -318,7 +313,7 @@ namespace Google.Apis.Datastore.v1
             /// <param name="projectId">Project ID against which to make the request.</param>
             public virtual CreateRequest Create(Google.Apis.Datastore.v1.Data.GoogleDatastoreAdminV1Index body, string projectId)
             {
-                return new CreateRequest(service, body, projectId);
+                return new CreateRequest(this.service, body, projectId);
             }
 
             /// <summary>
@@ -384,7 +379,7 @@ namespace Google.Apis.Datastore.v1
             /// <param name="indexId">The resource ID of the index to delete.</param>
             public virtual DeleteRequest Delete(string projectId, string indexId)
             {
-                return new DeleteRequest(service, projectId, indexId);
+                return new DeleteRequest(this.service, projectId, indexId);
             }
 
             /// <summary>
@@ -449,7 +444,7 @@ namespace Google.Apis.Datastore.v1
             /// <param name="indexId">The resource ID of the index to get.</param>
             public virtual GetRequest Get(string projectId, string indexId)
             {
-                return new GetRequest(service, projectId, indexId);
+                return new GetRequest(this.service, projectId, indexId);
             }
 
             /// <summary>Gets an index.</summary>
@@ -510,7 +505,7 @@ namespace Google.Apis.Datastore.v1
             /// <param name="projectId">Project ID against which to make the request.</param>
             public virtual ListRequest List(string projectId)
             {
-                return new ListRequest(service, projectId);
+                return new ListRequest(this.service, projectId);
             }
 
             /// <summary>
@@ -615,12 +610,12 @@ namespace Google.Apis.Datastore.v1
             /// `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check
             /// whether the cancellation succeeded or whether the operation completed despite cancellation. On
             /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-            /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+            /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
             /// </summary>
             /// <param name="name">The name of the operation resource to be cancelled.</param>
             public virtual CancelRequest Cancel(string name)
             {
-                return new CancelRequest(service, name);
+                return new CancelRequest(this.service, name);
             }
 
             /// <summary>
@@ -629,7 +624,7 @@ namespace Google.Apis.Datastore.v1
             /// `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check
             /// whether the cancellation succeeded or whether the operation completed despite cancellation. On
             /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-            /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+            /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
             /// </summary>
             public class CancelRequest : DatastoreBaseServiceRequest<Google.Apis.Datastore.v1.Data.Empty>
             {
@@ -676,7 +671,7 @@ namespace Google.Apis.Datastore.v1
             /// <param name="name">The name of the operation resource to be deleted.</param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
@@ -728,7 +723,7 @@ namespace Google.Apis.Datastore.v1
             /// <param name="name">The name of the operation resource.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
@@ -774,25 +769,17 @@ namespace Google.Apis.Datastore.v1
 
             /// <summary>
             /// Lists operations that match the specified filter in the request. If the server doesn't support this
-            /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the binding
-            /// to use different resource name schemes, such as `users/*/operations`. To override the binding, API
-            /// services can add a binding such as `"/v1/{name=users/*}/operations"` to their service configuration. For
-            /// backwards compatibility, the default name includes the operations collection id, however overriding
-            /// users must ensure the name binding is the parent resource, without the operations collection id.
+            /// method, it returns `UNIMPLEMENTED`.
             /// </summary>
             /// <param name="name">The name of the operation's parent resource.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>
             /// Lists operations that match the specified filter in the request. If the server doesn't support this
-            /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the binding
-            /// to use different resource name schemes, such as `users/*/operations`. To override the binding, API
-            /// services can add a binding such as `"/v1/{name=users/*}/operations"` to their service configuration. For
-            /// backwards compatibility, the default name includes the operations collection id, however overriding
-            /// users must ensure the name binding is the parent resource, without the operations collection id.
+            /// method, it returns `UNIMPLEMENTED`.
             /// </summary>
             public class ListRequest : DatastoreBaseServiceRequest<Google.Apis.Datastore.v1.Data.GoogleLongrunningListOperationsResponse>
             {
@@ -875,7 +862,7 @@ namespace Google.Apis.Datastore.v1
         /// <param name="projectId">Required. The ID of the project against which to make the request.</param>
         public virtual AllocateIdsRequest AllocateIds(Google.Apis.Datastore.v1.Data.AllocateIdsRequest body, string projectId)
         {
-            return new AllocateIdsRequest(service, body, projectId);
+            return new AllocateIdsRequest(this.service, body, projectId);
         }
 
         /// <summary>
@@ -930,7 +917,7 @@ namespace Google.Apis.Datastore.v1
         /// <param name="projectId">Required. The ID of the project against which to make the request.</param>
         public virtual BeginTransactionRequest BeginTransaction(Google.Apis.Datastore.v1.Data.BeginTransactionRequest body, string projectId)
         {
-            return new BeginTransactionRequest(service, body, projectId);
+            return new BeginTransactionRequest(this.service, body, projectId);
         }
 
         /// <summary>Begins a new transaction.</summary>
@@ -983,7 +970,7 @@ namespace Google.Apis.Datastore.v1
         /// <param name="projectId">Required. The ID of the project against which to make the request.</param>
         public virtual CommitRequest Commit(Google.Apis.Datastore.v1.Data.CommitRequest body, string projectId)
         {
-            return new CommitRequest(service, body, projectId);
+            return new CommitRequest(this.service, body, projectId);
         }
 
         /// <summary>Commits a transaction, optionally creating, deleting or modifying some entities.</summary>
@@ -1042,7 +1029,7 @@ namespace Google.Apis.Datastore.v1
         /// <param name="projectId">Required. Project ID against which to make the request.</param>
         public virtual ExportRequest Export(Google.Apis.Datastore.v1.Data.GoogleDatastoreAdminV1ExportEntitiesRequest body, string projectId)
         {
-            return new ExportRequest(service, body, projectId);
+            return new ExportRequest(this.service, body, projectId);
         }
 
         /// <summary>
@@ -1106,7 +1093,7 @@ namespace Google.Apis.Datastore.v1
         /// <param name="projectId">Required. Project ID against which to make the request.</param>
         public virtual ImportRequest Import(Google.Apis.Datastore.v1.Data.GoogleDatastoreAdminV1ImportEntitiesRequest body, string projectId)
         {
-            return new ImportRequest(service, body, projectId);
+            return new ImportRequest(this.service, body, projectId);
         }
 
         /// <summary>
@@ -1164,7 +1151,7 @@ namespace Google.Apis.Datastore.v1
         /// <param name="projectId">Required. The ID of the project against which to make the request.</param>
         public virtual LookupRequest Lookup(Google.Apis.Datastore.v1.Data.LookupRequest body, string projectId)
         {
-            return new LookupRequest(service, body, projectId);
+            return new LookupRequest(this.service, body, projectId);
         }
 
         /// <summary>Looks up entities by key.</summary>
@@ -1217,7 +1204,7 @@ namespace Google.Apis.Datastore.v1
         /// <param name="projectId">Required. The ID of the project against which to make the request.</param>
         public virtual ReserveIdsRequest ReserveIds(Google.Apis.Datastore.v1.Data.ReserveIdsRequest body, string projectId)
         {
-            return new ReserveIdsRequest(service, body, projectId);
+            return new ReserveIdsRequest(this.service, body, projectId);
         }
 
         /// <summary>Prevents the supplied keys' IDs from being auto-allocated by Cloud Datastore.</summary>
@@ -1270,7 +1257,7 @@ namespace Google.Apis.Datastore.v1
         /// <param name="projectId">Required. The ID of the project against which to make the request.</param>
         public virtual RollbackRequest Rollback(Google.Apis.Datastore.v1.Data.RollbackRequest body, string projectId)
         {
-            return new RollbackRequest(service, body, projectId);
+            return new RollbackRequest(this.service, body, projectId);
         }
 
         /// <summary>Rolls back a transaction.</summary>
@@ -1318,12 +1305,65 @@ namespace Google.Apis.Datastore.v1
             }
         }
 
+        /// <summary>Runs an aggregation query.</summary>
+        /// <param name="body">The body of the request.</param>
+        /// <param name="projectId">Required. The ID of the project against which to make the request.</param>
+        public virtual RunAggregationQueryRequest RunAggregationQuery(Google.Apis.Datastore.v1.Data.RunAggregationQueryRequest body, string projectId)
+        {
+            return new RunAggregationQueryRequest(this.service, body, projectId);
+        }
+
+        /// <summary>Runs an aggregation query.</summary>
+        public class RunAggregationQueryRequest : DatastoreBaseServiceRequest<Google.Apis.Datastore.v1.Data.RunAggregationQueryResponse>
+        {
+            /// <summary>Constructs a new RunAggregationQuery request.</summary>
+            public RunAggregationQueryRequest(Google.Apis.Services.IClientService service, Google.Apis.Datastore.v1.Data.RunAggregationQueryRequest body, string projectId) : base(service)
+            {
+                ProjectId = projectId;
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>Required. The ID of the project against which to make the request.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("projectId", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string ProjectId { get; private set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.Datastore.v1.Data.RunAggregationQueryRequest Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "runAggregationQuery";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/projects/{projectId}:runAggregationQuery";
+
+            /// <summary>Initializes RunAggregationQuery parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("projectId", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "projectId",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
         /// <summary>Queries for entities.</summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="projectId">Required. The ID of the project against which to make the request.</param>
         public virtual RunQueryRequest RunQuery(Google.Apis.Datastore.v1.Data.RunQueryRequest body, string projectId)
         {
-            return new RunQueryRequest(service, body, projectId);
+            return new RunQueryRequest(this.service, body, projectId);
         }
 
         /// <summary>Queries for entities.</summary>
@@ -1374,9 +1414,148 @@ namespace Google.Apis.Datastore.v1
 }
 namespace Google.Apis.Datastore.v1.Data
 {
+    /// <summary>Defines an aggregation that produces a single result.</summary>
+    public class Aggregation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Optional name of the property to store the result of the aggregation. If not provided, Datastore
+        /// will pick a default name following the format `property_`. For example:
+        /// ```
+        /// AGGREGATE COUNT_UP_TO(1) AS
+        /// count_up_to_1, COUNT_UP_TO(2), COUNT_UP_TO(3) AS count_up_to_3, COUNT(*) OVER ( ... );
+        /// ```
+        /// becomes:
+        /// ```
+        /// AGGREGATE COUNT_UP_TO(1) AS count_up_to_1, COUNT_UP_TO(2) AS property_1, COUNT_UP_TO(3) AS count_up_to_3,
+        /// COUNT(*) AS property_2 OVER ( ... );
+        /// ```
+        /// Requires: * Must be unique across all aggregation aliases. *
+        /// Conform to entity property name limitations.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("alias")]
+        public virtual string Alias { get; set; }
+
+        /// <summary>Average aggregator.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("avg")]
+        public virtual Avg Avg { get; set; }
+
+        /// <summary>Count aggregator.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("count")]
+        public virtual Count Count { get; set; }
+
+        /// <summary>Sum aggregator.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sum")]
+        public virtual Sum Sum { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Datastore query for running an aggregation over a Query.</summary>
+    public class AggregationQuery : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Series of aggregations to apply over the results of the `nested_query`. Requires: * A minimum of
+        /// one and maximum of five aggregations per query.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("aggregations")]
+        public virtual System.Collections.Generic.IList<Aggregation> Aggregations { get; set; }
+
+        /// <summary>Nested query for aggregation</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nestedQuery")]
+        public virtual Query NestedQuery { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The result of a single bucket from a Datastore aggregation query. The keys of `aggregate_properties` are the
+    /// same for all results in an aggregation query, unlike entity queries which can have different fields present for
+    /// each result.
+    /// </summary>
+    public class AggregationResult : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The result of the aggregation functions, ex: `COUNT(*) AS total_entities`. The key is the alias assigned to
+        /// the aggregation function on input and the size of this map equals the number of aggregation functions in the
+        /// query.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("aggregateProperties")]
+        public virtual System.Collections.Generic.IDictionary<string, Value> AggregateProperties { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A batch of aggregation results produced by an aggregation query.</summary>
+    public class AggregationResultBatch : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The aggregation results for this batch.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("aggregationResults")]
+        public virtual System.Collections.Generic.IList<AggregationResult> AggregationResults { get; set; }
+
+        /// <summary>
+        /// The state of the query after the current batch. Only COUNT(*) aggregations are supported in the initial
+        /// launch. Therefore, expected result type is limited to `NO_MORE_RESULTS`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("moreResults")]
+        public virtual string MoreResults { get; set; }
+
+        private string _readTimeRaw;
+
+        private object _readTime;
+
+        /// <summary>
+        /// Read timestamp this batch was returned from. In a single transaction, subsequent query result batches for
+        /// the same query can have a greater timestamp. Each batch's read timestamp is valid for all preceding batches.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("readTime")]
+        public virtual string ReadTimeRaw
+        {
+            get => _readTimeRaw;
+            set
+            {
+                _readTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _readTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ReadTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ReadTimeDateTimeOffset instead.")]
+        public virtual object ReadTime
+        {
+            get => _readTime;
+            set
+            {
+                _readTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _readTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ReadTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ReadTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ReadTimeRaw);
+            set => ReadTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The request for Datastore.AllocateIds.</summary>
     public class AllocateIdsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// The ID of the database against which to make the request. '(default)' is not allowed; please use empty
+        /// string '' to refer the default database.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("databaseId")]
+        public virtual string DatabaseId { get; set; }
+
         /// <summary>
         /// Required. A list of keys with incomplete key paths for which to allocate IDs. No key may be
         /// reserved/read-only.
@@ -1416,9 +1595,32 @@ namespace Google.Apis.Datastore.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Average of the values of the requested property. * Only numeric values will be aggregated. All non-numeric
+    /// values including `NULL` are skipped. * If the aggregated values contain `NaN`, returns `NaN`. Infinity math
+    /// follows IEEE-754 standards. * If the aggregated value set is empty, returns `NULL`. * Always returns the result
+    /// as a double.
+    /// </summary>
+    public class Avg : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The property to aggregate on.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("property")]
+        public virtual PropertyReference Property { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The request for Datastore.BeginTransaction.</summary>
     public class BeginTransactionRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// The ID of the database against which to make the request. '(default)' is not allowed; please use empty
+        /// string '' to refer the default database.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("databaseId")]
+        public virtual string DatabaseId { get; set; }
+
         /// <summary>Options for a new transaction.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("transactionOptions")]
         public virtual TransactionOptions TransactionOptions { get; set; }
@@ -1441,6 +1643,13 @@ namespace Google.Apis.Datastore.v1.Data
     /// <summary>The request for Datastore.Commit.</summary>
     public class CommitRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// The ID of the database against which to make the request. '(default)' is not allowed; please use empty
+        /// string '' to refer the default database.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("databaseId")]
+        public virtual string DatabaseId { get; set; }
+
         /// <summary>The type of commit to perform. Defaults to `TRANSACTIONAL`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("mode")]
         public virtual string Mode { get; set; }
@@ -1453,6 +1662,13 @@ namespace Google.Apis.Datastore.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("mutations")]
         public virtual System.Collections.Generic.IList<Mutation> Mutations { get; set; }
+
+        /// <summary>
+        /// Options for beginning a new transaction for this request. The transaction is committed when the request
+        /// completes. If specified, TransactionOptions.mode must be TransactionOptions.ReadWrite.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("singleUseTransaction")]
+        public virtual TransactionOptions SingleUseTransaction { get; set; }
 
         /// <summary>
         /// The identifier of the transaction associated with the commit. A transaction identifier is returned by a call
@@ -1468,6 +1684,43 @@ namespace Google.Apis.Datastore.v1.Data
     /// <summary>The response for Datastore.Commit.</summary>
     public class CommitResponse : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _commitTimeRaw;
+
+        private object _commitTime;
+
+        /// <summary>The transaction commit timestamp. Not set for non-transactional commits.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("commitTime")]
+        public virtual string CommitTimeRaw
+        {
+            get => _commitTimeRaw;
+            set
+            {
+                _commitTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _commitTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CommitTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CommitTimeDateTimeOffset instead.")]
+        public virtual object CommitTime
+        {
+            get => _commitTime;
+            set
+            {
+                _commitTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _commitTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CommitTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CommitTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CommitTimeRaw);
+            set => CommitTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
         /// <summary>The number of index entries updated during the commit, or zero if none were updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("indexUpdates")]
         public virtual System.Nullable<int> IndexUpdates { get; set; }
@@ -1486,7 +1739,7 @@ namespace Google.Apis.Datastore.v1.Data
     /// <summary>A filter that merges multiple other filters using the given operator.</summary>
     public class CompositeFilter : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The list of filters to combine. Must contain at least one filter.</summary>
+        /// <summary>The list of filters to combine. Requires: * At least one filter is present.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("filters")]
         public virtual System.Collections.Generic.IList<Filter> Filters { get; set; }
 
@@ -1499,10 +1752,31 @@ namespace Google.Apis.Datastore.v1.Data
     }
 
     /// <summary>
+    /// Count of entities that match the query. The `COUNT(*)` aggregation function operates on the entire entity so it
+    /// does not require a field reference.
+    /// </summary>
+    public class Count : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Optional constraint on the maximum number of entities to count. This provides a way to set an
+        /// upper bound on the number of entities to scan, limiting latency, and cost. Unspecified is interpreted as no
+        /// bound. If a zero value is provided, a count result of zero should always be expected. High-Level Example:
+        /// ```
+        /// AGGREGATE COUNT_UP_TO(1000) OVER ( SELECT * FROM k );
+        /// ```
+        /// Requires: * Must be non-negative when present.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("upTo")]
+        public virtual System.Nullable<long> UpTo { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1510,10 +1784,7 @@ namespace Google.Apis.Datastore.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>
-    /// A Datastore data object. An entity is limited to 1 megabyte when stored. That _roughly_ corresponds to a limit
-    /// of 1 megabyte for the serialized form of this message.
-    /// </summary>
+    /// <summary>A Datastore data object. Must not exceed 1 MiB - 4 bytes.</summary>
     public class Entity : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
@@ -1526,8 +1797,8 @@ namespace Google.Apis.Datastore.v1.Data
 
         /// <summary>
         /// The entity's properties. The map's keys are property names. A property name matching regex `__.*__` is
-        /// reserved. A reserved property name is forbidden in certain documented contexts. The name must not contain
-        /// more than 500 characters. The name cannot be `""`.
+        /// reserved. A reserved property name is forbidden in certain documented contexts. The map keys, represented as
+        /// UTF-8, must not exceed 1,500 bytes and cannot be empty.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("properties")]
         public virtual System.Collections.Generic.IDictionary<string, Value> Properties { get; set; }
@@ -1539,6 +1810,46 @@ namespace Google.Apis.Datastore.v1.Data
     /// <summary>The result of fetching an entity from Datastore.</summary>
     public class EntityResult : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>
+        /// The time at which the entity was created. This field is set for `FULL` entity results. If this entity is
+        /// missing, this field will not be set.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
         /// <summary>
         /// A cursor that points to the position after the result entity. Set only when the `EntityResult` is part of a
         /// `QueryResultBatch` message.
@@ -1550,6 +1861,46 @@ namespace Google.Apis.Datastore.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("entity")]
         public virtual Entity Entity { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>
+        /// The time at which the entity was last changed. This field is set for `FULL` entity results. If this entity
+        /// is missing, this field will not be set.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
         /// <summary>
         /// The version of the entity, a strictly positive number that monotonically increases with changes to the
         /// entity. This field is set for `FULL` entity results. For missing entities in `LookupResponse`, this is the
@@ -1558,6 +1909,68 @@ namespace Google.Apis.Datastore.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("version")]
         public virtual System.Nullable<long> Version { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Execution statistics for the query.</summary>
+    public class ExecutionStats : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Debugging statistics from the execution of the query. Note that the debugging stats are subject to change as
+        /// Firestore evolves. It could include: { "indexes_entries_scanned": "1000", "documents_scanned": "20",
+        /// "billing_details" : { "documents_billable": "20", "index_entries_billable": "1000", "min_query_cost": "0" }
+        /// }
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("debugStats")]
+        public virtual System.Collections.Generic.IDictionary<string, object> DebugStats { get; set; }
+
+        /// <summary>Total time to execute the query in the backend.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("executionDuration")]
+        public virtual object ExecutionDuration { get; set; }
+
+        /// <summary>Total billable read operations.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("readOperations")]
+        public virtual System.Nullable<long> ReadOperations { get; set; }
+
+        /// <summary>
+        /// Total number of results returned, including documents, projections, aggregation results, keys.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resultsReturned")]
+        public virtual System.Nullable<long> ResultsReturned { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Explain metrics for the query.</summary>
+    public class ExplainMetrics : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Aggregated stats from the execution of the query. Only present when ExplainOptions.analyze is set to true.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("executionStats")]
+        public virtual ExecutionStats ExecutionStats { get; set; }
+
+        /// <summary>Planning phase information for the query.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("planSummary")]
+        public virtual PlanSummary PlanSummary { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Explain options for the query.</summary>
+    public class ExplainOptions : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. Whether to execute this query. When false (the default), the query will be planned, returning only
+        /// metrics from the planning stages. When true, the query will be planned and executed, returning the full
+        /// query results along with both planning and execution stage metrics.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("analyze")]
+        public virtual System.Nullable<bool> Analyze { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1578,12 +1991,95 @@ namespace Google.Apis.Datastore.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Nearest Neighbors search config. The ordering provided by FindNearest supersedes the order_by stage. If multiple
+    /// documents have the same vector distance, the returned document order is not guaranteed to be stable between
+    /// queries.
+    /// </summary>
+    public class FindNearest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The Distance Measure to use, required.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("distanceMeasure")]
+        public virtual string DistanceMeasure { get; set; }
+
+        /// <summary>
+        /// Optional. Optional name of the field to output the result of the vector distance calculation. Must conform
+        /// to entity property limitations.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("distanceResultProperty")]
+        public virtual string DistanceResultProperty { get; set; }
+
+        /// <summary>
+        /// Optional. Option to specify a threshold for which no less similar documents will be returned. The behavior
+        /// of the specified `distance_measure` will affect the meaning of the distance threshold. Since DOT_PRODUCT
+        /// distances increase when the vectors are more similar, the comparison is inverted. * For EUCLIDEAN, COSINE:
+        /// WHERE distance &amp;lt;= distance_threshold * For DOT_PRODUCT: WHERE distance &amp;gt;= distance_threshold
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("distanceThreshold")]
+        public virtual System.Nullable<double> DistanceThreshold { get; set; }
+
+        /// <summary>
+        /// Required. The number of nearest neighbors to return. Must be a positive integer of no more than 100.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("limit")]
+        public virtual System.Nullable<int> Limit { get; set; }
+
+        /// <summary>
+        /// Required. The query vector that we are searching on. Must be a vector of no more than 2048 dimensions.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("queryVector")]
+        public virtual Value QueryVector { get; set; }
+
+        /// <summary>
+        /// Required. An indexed vector property to search upon. Only documents which contain vectors whose
+        /// dimensionality match the query_vector can be returned.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("vectorProperty")]
+        public virtual PropertyReference VectorProperty { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Metadata common to all Datastore Admin operations.</summary>
     public class GoogleDatastoreAdminV1CommonMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>The time the operation ended, either successfully or otherwise.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The client-assigned labels which were provided when the operation was created. May also include additional
@@ -1596,9 +2092,42 @@ namespace Google.Apis.Datastore.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("operationType")]
         public virtual string OperationType { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>The time that work began on the operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The current state of the Operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
@@ -1611,7 +2140,8 @@ namespace Google.Apis.Datastore.v1.Data
     /// <summary>
     /// Metadata for Datastore to Firestore migration operations. The DatastoreFirestoreMigration operation is not
     /// started by the end-user via an explicit "creation" method. This is an intentional deviation from the LRO design
-    /// pattern. This singleton resource can be accessed at: "projects/{project_id}/datastore-firestore-migration"
+    /// pattern. This singleton resource can be accessed at:
+    /// "projects/{project_id}/operations/datastore-firestore-migration"
     /// </summary>
     public class GoogleDatastoreAdminV1DatastoreFirestoreMigrationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1810,7 +2340,10 @@ namespace Google.Apis.Datastore.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
         public virtual string ProjectId { get; set; }
 
-        /// <summary>Required. An ordered sequence of property names and their index attributes.</summary>
+        /// <summary>
+        /// Required. An ordered sequence of property names and their index attributes. Requires: * A maximum of 100
+        /// properties.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("properties")]
         public virtual System.Collections.Generic.IList<GoogleDatastoreAdminV1IndexedProperty> Properties { get; set; }
 
@@ -1871,6 +2404,56 @@ namespace Google.Apis.Datastore.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// An event signifying the start of a new step in a [migration from Cloud Datastore to Cloud Firestore in Datastore
+    /// mode](https://cloud.google.com/datastore/docs/upgrade-to-firestore).
+    /// </summary>
+    public class GoogleDatastoreAdminV1MigrationProgressEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Details for the `PREPARE` step.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("prepareStepDetails")]
+        public virtual GoogleDatastoreAdminV1PrepareStepDetails PrepareStepDetails { get; set; }
+
+        /// <summary>Details for the `REDIRECT_WRITES` step.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("redirectWritesStepDetails")]
+        public virtual GoogleDatastoreAdminV1RedirectWritesStepDetails RedirectWritesStepDetails { get; set; }
+
+        /// <summary>
+        /// The step that is starting. An event with step set to `START` indicates that the migration has been reverted
+        /// back to the initial pre-migration state.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("step")]
+        public virtual string Step { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// An event signifying a change in state of a [migration from Cloud Datastore to Cloud Firestore in Datastore
+    /// mode](https://cloud.google.com/datastore/docs/upgrade-to-firestore).
+    /// </summary>
+    public class GoogleDatastoreAdminV1MigrationStateEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The new state of the migration.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Details for the `PREPARE` step.</summary>
+    public class GoogleDatastoreAdminV1PrepareStepDetails : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The concurrency mode this database will use when it reaches the `REDIRECT_WRITES` step.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("concurrencyMode")]
+        public virtual string ConcurrencyMode { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Measures the progress of a particular metric.</summary>
     public class GoogleDatastoreAdminV1Progress : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1890,12 +2473,56 @@ namespace Google.Apis.Datastore.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Details for the `REDIRECT_WRITES` step.</summary>
+    public class GoogleDatastoreAdminV1RedirectWritesStepDetails : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Ths concurrency mode for this database.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("concurrencyMode")]
+        public virtual string ConcurrencyMode { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Metadata common to all Datastore Admin operations.</summary>
     public class GoogleDatastoreAdminV1beta1CommonMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>The time the operation ended, either successfully or otherwise.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The client-assigned labels which were provided when the operation was created. May also include additional
@@ -1908,9 +2535,42 @@ namespace Google.Apis.Datastore.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("operationType")]
         public virtual string OperationType { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>The time that work began on the operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The current state of the Operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
@@ -2086,8 +2746,8 @@ namespace Google.Apis.Datastore.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -2216,9 +2876,24 @@ namespace Google.Apis.Datastore.v1.Data
     /// <summary>The request for Datastore.Lookup.</summary>
     public class LookupRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// The ID of the database against which to make the request. '(default)' is not allowed; please use empty
+        /// string '' to refer the default database.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("databaseId")]
+        public virtual string DatabaseId { get; set; }
+
         /// <summary>Required. Keys of entities to look up.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("keys")]
         public virtual System.Collections.Generic.IList<Key> Keys { get; set; }
+
+        /// <summary>
+        /// The properties to return. Defaults to returning all properties. If this field is set and an entity has a
+        /// property not referenced in the mask, it will be absent from LookupResponse.found.entity.properties. The
+        /// entity's key is always returned.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("propertyMask")]
+        public virtual PropertyMask PropertyMask { get; set; }
 
         /// <summary>The options for this lookup request.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("readOptions")]
@@ -2252,6 +2927,50 @@ namespace Google.Apis.Datastore.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("missing")]
         public virtual System.Collections.Generic.IList<EntityResult> Missing { get; set; }
 
+        private string _readTimeRaw;
+
+        private object _readTime;
+
+        /// <summary>The time at which these entities were read or found missing.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("readTime")]
+        public virtual string ReadTimeRaw
+        {
+            get => _readTimeRaw;
+            set
+            {
+                _readTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _readTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ReadTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ReadTimeDateTimeOffset instead.")]
+        public virtual object ReadTime
+        {
+            get => _readTime;
+            set
+            {
+                _readTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _readTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ReadTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ReadTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ReadTimeRaw);
+            set => ReadTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// The identifier of the transaction that was started as part of this Lookup request. Set only when
+        /// ReadOptions.new_transaction was set in LookupRequest.read_options.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("transaction")]
+        public virtual string Transaction { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -2267,6 +2986,13 @@ namespace Google.Apis.Datastore.v1.Data
         public virtual System.Nullable<long> BaseVersion { get; set; }
 
         /// <summary>
+        /// The strategy to use when a conflict is detected. Defaults to `SERVER_VALUE`. If this is set, then
+        /// `conflict_detection_strategy` must also be set.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("conflictResolutionStrategy")]
+        public virtual string ConflictResolutionStrategy { get; set; }
+
+        /// <summary>
         /// The key of the entity to delete. The entity may or may not already exist. Must have a complete key path and
         /// must not be reserved/read-only.
         /// </summary>
@@ -2280,9 +3006,66 @@ namespace Google.Apis.Datastore.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("insert")]
         public virtual Entity Insert { get; set; }
 
+        /// <summary>
+        /// The properties to write in this mutation. None of the properties in the mask may have a reserved name,
+        /// except for `__key__`. This field is ignored for `delete`. If the entity already exists, only properties
+        /// referenced in the mask are updated, others are left untouched. Properties referenced in the mask but not in
+        /// the entity are deleted.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("propertyMask")]
+        public virtual PropertyMask PropertyMask { get; set; }
+
+        /// <summary>
+        /// Optional. The transforms to perform on the entity. This field can be set only when the operation is
+        /// `insert`, `update`, or `upsert`. If present, the transforms are be applied to the entity regardless of the
+        /// property mask, in order, after the operation.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("propertyTransforms")]
+        public virtual System.Collections.Generic.IList<PropertyTransform> PropertyTransforms { get; set; }
+
         /// <summary>The entity to update. The entity must already exist. Must have a complete key path.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("update")]
         public virtual Entity Update { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>
+        /// The update time of the entity that this mutation is being applied to. If this does not match the current
+        /// update time on the server, the mutation conflicts.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The entity to upsert. The entity may or may not already exist. The entity key's final path element may be
@@ -2305,9 +3088,91 @@ namespace Google.Apis.Datastore.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("conflictDetected")]
         public virtual System.Nullable<bool> ConflictDetected { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>The create time of the entity. This field will not be set after a 'delete'.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
         /// <summary>The automatically allocated key. Set only when the mutation allocated a key.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("key")]
         public virtual Key Key { get; set; }
+
+        /// <summary>The results of applying each PropertyTransform, in the same order of the request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("transformResults")]
+        public virtual System.Collections.Generic.IList<Value> TransformResults { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>
+        /// The update time of the entity on the server after processing the mutation. If the mutation doesn't change
+        /// anything on the server, then the timestamp will be the update timestamp of the current entity. This field
+        /// will not be set after a 'delete'.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The version of the entity on the server after processing the mutation. If the mutation doesn't change
@@ -2333,6 +3198,10 @@ namespace Google.Apis.Datastore.v1.Data
     /// </summary>
     public class PartitionId : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>If not empty, the ID of the database to which the entities belong.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("databaseId")]
+        public virtual string DatabaseId { get; set; }
+
         /// <summary>If not empty, the ID of the namespace to which the entities belong.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("namespaceId")]
         public virtual string NamespaceId { get; set; }
@@ -2360,17 +3229,33 @@ namespace Google.Apis.Datastore.v1.Data
 
         /// <summary>
         /// The kind of the entity. A kind matching regex `__.*__` is reserved/read-only. A kind must not contain more
-        /// than 1500 bytes when UTF-8 encoded. Cannot be `""`.
+        /// than 1500 bytes when UTF-8 encoded. Cannot be `""`. Must be valid UTF-8 bytes. Legacy values that are not
+        /// valid UTF-8 are encoded as `__bytes__` where `` is the base-64 encoding of the bytes.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kind")]
         public virtual string Kind { get; set; }
 
         /// <summary>
         /// The name of the entity. A name matching regex `__.*__` is reserved/read-only. A name must not be more than
-        /// 1500 bytes when UTF-8 encoded. Cannot be `""`.
+        /// 1500 bytes when UTF-8 encoded. Cannot be `""`. Must be valid UTF-8 bytes. Legacy values that are not valid
+        /// UTF-8 are encoded as `__bytes__` where `` is the base-64 encoding of the bytes.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Planning phase information for the query.</summary>
+    public class PlanSummary : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The indexes selected for the query. For example: [ {"query_scope": "Collection", "properties": "(foo ASC,
+        /// __name__ ASC)"}, {"query_scope": "Collection", "properties": "(bar ASC, __name__ ASC)"} ]
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("indexesUsed")]
+        public virtual System.Collections.Generic.IList<System.Collections.Generic.IDictionary<string, object>> IndexesUsed { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2406,6 +3291,25 @@ namespace Google.Apis.Datastore.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// The set of arbitrarily nested property paths used to restrict an operation to only a subset of properties in an
+    /// entity.
+    /// </summary>
+    public class PropertyMask : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The paths to the properties covered by this mask. A path is a list of property names separated by dots
+        /// (`.`), for example `foo.bar` means the property `bar` inside the entity property `foo` inside the entity
+        /// associated with this path. If a property name contains a dot `.` or a backslash `\`, then that name must be
+        /// escaped. A path must not be empty, and may not reference a value inside an array value.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("paths")]
+        public virtual System.Collections.Generic.IList<string> Paths { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The desired order for a specific property.</summary>
     public class PropertyOrder : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2425,7 +3329,8 @@ namespace Google.Apis.Datastore.v1.Data
     public class PropertyReference : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The name of the property. If name includes "."s, it may be interpreted as a property name path.
+        /// A reference to a property. Requires: * MUST be a dot-delimited (`.`) string of segments, where each segment
+        /// conforms to entity property name limitations.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -2434,12 +3339,93 @@ namespace Google.Apis.Datastore.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A query for entities.</summary>
+    /// <summary>A transformation of an entity property.</summary>
+    public class PropertyTransform : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Appends the given elements in order if they are not already present in the current property value. If the
+        /// property is not an array, or if the property does not yet exist, it is first set to the empty array.
+        /// Equivalent numbers of different types (e.g. 3L and 3.0) are considered equal when checking if a value is
+        /// missing. NaN is equal to NaN, and the null value is equal to the null value. If the input contains multiple
+        /// equivalent values, only the first will be considered. The corresponding transform result will be the null
+        /// value.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("appendMissingElements")]
+        public virtual ArrayValue AppendMissingElements { get; set; }
+
+        /// <summary>
+        /// Adds the given value to the property's current value. This must be an integer or a double value. If the
+        /// property is not an integer or double, or if the property does not yet exist, the transformation will set the
+        /// property to the given value. If either of the given value or the current property value are doubles, both
+        /// values will be interpreted as doubles. Double arithmetic and representation of double values follows IEEE
+        /// 754 semantics. If there is positive/negative integer overflow, the property is resolved to the largest
+        /// magnitude positive/negative integer.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("increment")]
+        public virtual Value Increment { get; set; }
+
+        /// <summary>
+        /// Sets the property to the maximum of its current value and the given value. This must be an integer or a
+        /// double value. If the property is not an integer or double, or if the property does not yet exist, the
+        /// transformation will set the property to the given value. If a maximum operation is applied where the
+        /// property and the input value are of mixed types (that is - one is an integer and one is a double) the
+        /// property takes on the type of the larger operand. If the operands are equivalent (e.g. 3 and 3.0), the
+        /// property does not change. 0, 0.0, and -0.0 are all zero. The maximum of a zero stored value and zero input
+        /// value is always the stored value. The maximum of any numeric value x and NaN is NaN.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maximum")]
+        public virtual Value Maximum { get; set; }
+
+        /// <summary>
+        /// Sets the property to the minimum of its current value and the given value. This must be an integer or a
+        /// double value. If the property is not an integer or double, or if the property does not yet exist, the
+        /// transformation will set the property to the input value. If a minimum operation is applied where the
+        /// property and the input value are of mixed types (that is - one is an integer and one is a double) the
+        /// property takes on the type of the smaller operand. If the operands are equivalent (e.g. 3 and 3.0), the
+        /// property does not change. 0, 0.0, and -0.0 are all zero. The minimum of a zero stored value and zero input
+        /// value is always the stored value. The minimum of any numeric value x and NaN is NaN.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("minimum")]
+        public virtual Value Minimum { get; set; }
+
+        /// <summary>
+        /// Optional. The name of the property. Property paths (a list of property names separated by dots (`.`)) may be
+        /// used to refer to properties inside entity values. For example `foo.bar` means the property `bar` inside the
+        /// entity property `foo`. If a property name contains a dot `.` or a backlslash `\`, then that name must be
+        /// escaped.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("property")]
+        public virtual string Property { get; set; }
+
+        /// <summary>
+        /// Removes all of the given elements from the array in the property. If the property is not an array, or if the
+        /// property does not yet exist, it is set to the empty array. Equivalent numbers of different types (e.g. 3L
+        /// and 3.0) are considered equal when deciding whether an element should be removed. NaN is equal to NaN, and
+        /// the null value is equal to the null value. This will remove all equivalent values if there are duplicates.
+        /// The corresponding transform result will be the null value.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("removeAllFromArray")]
+        public virtual ArrayValue RemoveAllFromArray { get; set; }
+
+        /// <summary>Sets the property to the given server value.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("setToServerValue")]
+        public virtual string SetToServerValue { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A query for entities. The query stages are executed in the following order: 1. kind 2. filter 3. projection 4.
+    /// order + start_cursor + end_cursor 5. offset 6. limit 7. find_nearest
+    /// </summary>
     public class Query : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
         /// The properties to make distinct. The query results will contain the first result for each distinct
-        /// combination of values for the given properties (if empty, all results are returned).
+        /// combination of values for the given properties (if empty, all results are returned). Requires: * If `order`
+        /// is specified, the set of distinct on properties must appear before the non-distinct on properties in
+        /// `order`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("distinctOn")]
         public virtual System.Collections.Generic.IList<PropertyReference> DistinctOn { get; set; }
@@ -2455,6 +3441,13 @@ namespace Google.Apis.Datastore.v1.Data
         /// <summary>The filter to apply.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("filter")]
         public virtual Filter Filter { get; set; }
+
+        /// <summary>
+        /// Optional. A potential Nearest Neighbors Search. Applies after all other filters and ordering. Finds the
+        /// closest vector embeddings to the given query vector.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("findNearest")]
+        public virtual FindNearest FindNearest { get; set; }
 
         /// <summary>
         /// The kinds to query (if empty, returns entities of all kinds). Currently at most 1 kind may be specified.
@@ -2515,6 +3508,49 @@ namespace Google.Apis.Datastore.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("moreResults")]
         public virtual string MoreResults { get; set; }
 
+        private string _readTimeRaw;
+
+        private object _readTime;
+
+        /// <summary>
+        /// Read timestamp this batch was returned from. This applies to the range of results from the query's
+        /// `start_cursor` (or the beginning of the query if no cursor was given) to this batch's `end_cursor` (not the
+        /// query's `end_cursor`). In a single transaction, subsequent query result batches for the same query can have
+        /// a greater timestamp. Each batch's read timestamp is valid for all preceding batches. This value will not be
+        /// set for eventually consistent queries in Cloud Datastore.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("readTime")]
+        public virtual string ReadTimeRaw
+        {
+            get => _readTimeRaw;
+            set
+            {
+                _readTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _readTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ReadTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ReadTimeDateTimeOffset instead.")]
+        public virtual object ReadTime
+        {
+            get => _readTime;
+            set
+            {
+                _readTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _readTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ReadTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ReadTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ReadTimeRaw);
+            set => ReadTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
         /// <summary>
         /// A cursor that points to the position after the last skipped result. Will be set when `skipped_results` != 0.
         /// </summary>
@@ -2542,6 +3578,47 @@ namespace Google.Apis.Datastore.v1.Data
     /// <summary>Options specific to read-only transactions.</summary>
     public class ReadOnly : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _readTimeRaw;
+
+        private object _readTime;
+
+        /// <summary>
+        /// Reads entities at the given time. This must be a microsecond precision timestamp within the past one hour,
+        /// or if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp within the past 7
+        /// days.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("readTime")]
+        public virtual string ReadTimeRaw
+        {
+            get => _readTimeRaw;
+            set
+            {
+                _readTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _readTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ReadTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ReadTimeDateTimeOffset instead.")]
+        public virtual object ReadTime
+        {
+            get => _readTime;
+            set
+            {
+                _readTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _readTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ReadTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ReadTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ReadTimeRaw);
+            set => ReadTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -2550,10 +3627,56 @@ namespace Google.Apis.Datastore.v1.Data
     public class ReadOptions : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The non-transactional read consistency to use. Cannot be set to `STRONG` for global queries.
+        /// Options for beginning a new transaction for this request. The new transaction identifier will be returned in
+        /// the corresponding response as either LookupResponse.transaction or RunQueryResponse.transaction.
         /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("newTransaction")]
+        public virtual TransactionOptions NewTransaction { get; set; }
+
+        /// <summary>The non-transactional read consistency to use.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("readConsistency")]
         public virtual string ReadConsistency { get; set; }
+
+        private string _readTimeRaw;
+
+        private object _readTime;
+
+        /// <summary>
+        /// Reads entities as they were at the given time. This value is only supported for Cloud Firestore in Datastore
+        /// mode. This must be a microsecond precision timestamp within the past one hour, or if Point-in-Time Recovery
+        /// is enabled, can additionally be a whole minute timestamp within the past 7 days.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("readTime")]
+        public virtual string ReadTimeRaw
+        {
+            get => _readTimeRaw;
+            set
+            {
+                _readTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _readTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ReadTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ReadTimeDateTimeOffset instead.")]
+        public virtual object ReadTime
+        {
+            get => _readTime;
+            set
+            {
+                _readTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _readTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ReadTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ReadTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ReadTimeRaw);
+            set => ReadTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The identifier of the transaction in which to read. A transaction identifier is returned by a call to
@@ -2580,7 +3703,10 @@ namespace Google.Apis.Datastore.v1.Data
     /// <summary>The request for Datastore.ReserveIds.</summary>
     public class ReserveIdsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>If not empty, the ID of the database against which to make the request.</summary>
+        /// <summary>
+        /// The ID of the database against which to make the request. '(default)' is not allowed; please use empty
+        /// string '' to refer the default database.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("databaseId")]
         public virtual string DatabaseId { get; set; }
 
@@ -2604,6 +3730,13 @@ namespace Google.Apis.Datastore.v1.Data
     /// <summary>The request for Datastore.Rollback.</summary>
     public class RollbackRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// The ID of the database against which to make the request. '(default)' is not allowed; please use empty
+        /// string '' to refer the default database.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("databaseId")]
+        public virtual string DatabaseId { get; set; }
+
         /// <summary>Required. The transaction identifier, returned by a call to Datastore.BeginTransaction.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("transaction")]
         public virtual string Transaction { get; set; }
@@ -2619,10 +3752,28 @@ namespace Google.Apis.Datastore.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>The request for Datastore.RunQuery.</summary>
-    public class RunQueryRequest : Google.Apis.Requests.IDirectResponseSchema
+    /// <summary>The request for Datastore.RunAggregationQuery.</summary>
+    public class RunAggregationQueryRequest : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The GQL query to run.</summary>
+        /// <summary>The query to run.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("aggregationQuery")]
+        public virtual AggregationQuery AggregationQuery { get; set; }
+
+        /// <summary>
+        /// The ID of the database against which to make the request. '(default)' is not allowed; please use empty
+        /// string '' to refer the default database.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("databaseId")]
+        public virtual string DatabaseId { get; set; }
+
+        /// <summary>
+        /// Optional. Explain options for the query. If set, additional query statistics will be returned. If not, only
+        /// query results will be returned.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("explainOptions")]
+        public virtual ExplainOptions ExplainOptions { get; set; }
+
+        /// <summary>The GQL query to run. This query must be an aggregation query.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("gqlQuery")]
         public virtual GqlQuery GqlQuery { get; set; }
 
@@ -2632,6 +3783,78 @@ namespace Google.Apis.Datastore.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("partitionId")]
         public virtual PartitionId PartitionId { get; set; }
+
+        /// <summary>The options for this query.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("readOptions")]
+        public virtual ReadOptions ReadOptions { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The response for Datastore.RunAggregationQuery.</summary>
+    public class RunAggregationQueryResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A batch of aggregation results. Always present.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("batch")]
+        public virtual AggregationResultBatch Batch { get; set; }
+
+        /// <summary>
+        /// Query explain metrics. This is only present when the RunAggregationQueryRequest.explain_options is provided,
+        /// and it is sent only once with the last response in the stream.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("explainMetrics")]
+        public virtual ExplainMetrics ExplainMetrics { get; set; }
+
+        /// <summary>The parsed form of the `GqlQuery` from the request, if it was set.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("query")]
+        public virtual AggregationQuery Query { get; set; }
+
+        /// <summary>
+        /// The identifier of the transaction that was started as part of this RunAggregationQuery request. Set only
+        /// when ReadOptions.new_transaction was set in RunAggregationQueryRequest.read_options.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("transaction")]
+        public virtual string Transaction { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The request for Datastore.RunQuery.</summary>
+    public class RunQueryRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The ID of the database against which to make the request. '(default)' is not allowed; please use empty
+        /// string '' to refer the default database.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("databaseId")]
+        public virtual string DatabaseId { get; set; }
+
+        /// <summary>
+        /// Optional. Explain options for the query. If set, additional query statistics will be returned. If not, only
+        /// query results will be returned.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("explainOptions")]
+        public virtual ExplainOptions ExplainOptions { get; set; }
+
+        /// <summary>The GQL query to run. This query must be a non-aggregation query.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gqlQuery")]
+        public virtual GqlQuery GqlQuery { get; set; }
+
+        /// <summary>
+        /// Entities are partitioned into subsets, identified by a partition ID. Queries are scoped to a single
+        /// partition. This partition ID is normalized with the standard default context partition ID.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("partitionId")]
+        public virtual PartitionId PartitionId { get; set; }
+
+        /// <summary>
+        /// The properties to return. This field must not be set for a projection query. See
+        /// LookupRequest.property_mask.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("propertyMask")]
+        public virtual PropertyMask PropertyMask { get; set; }
 
         /// <summary>The query to run.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("query")]
@@ -2652,9 +3875,23 @@ namespace Google.Apis.Datastore.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("batch")]
         public virtual QueryResultBatch Batch { get; set; }
 
+        /// <summary>
+        /// Query explain metrics. This is only present when the RunQueryRequest.explain_options is provided, and it is
+        /// sent only once with the last response in the stream.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("explainMetrics")]
+        public virtual ExplainMetrics ExplainMetrics { get; set; }
+
         /// <summary>The parsed form of the `GqlQuery` from the request, if it was set.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("query")]
         public virtual Query Query { get; set; }
+
+        /// <summary>
+        /// The identifier of the transaction that was started as part of this RunQuery request. Set only when
+        /// ReadOptions.new_transaction was set in RunQueryRequest.read_options.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("transaction")]
+        public virtual string Transaction { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2684,6 +3921,27 @@ namespace Google.Apis.Datastore.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("message")]
         public virtual string Message { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Sum of the values of the requested property. * Only numeric values will be aggregated. All non-numeric values
+    /// including `NULL` are skipped. * If the aggregated values contain `NaN`, returns `NaN`. Infinity math follows
+    /// IEEE-754 standards. * If the aggregated value set is empty, returns 0. * Returns a 64-bit integer if all
+    /// aggregated numbers are integers and the sum result does not overflow. Otherwise, the result is returned as a
+    /// double. Note that even if all the aggregated values are integers, the result is returned as a double if it
+    /// cannot fit within a 64-bit signed integer. When this occurs, the returned value will lose precision. * When
+    /// underflow occurs, floating-point aggregation is non-deterministic. This means that running the same query
+    /// repeatedly without any changes to the underlying values could produce slightly different results each time. In
+    /// those cases, values should be stored as integers over floating-point numbers.
+    /// </summary>
+    public class Sum : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The property to aggregate on.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("property")]
+        public virtual PropertyReference Property { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2770,12 +4028,47 @@ namespace Google.Apis.Datastore.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("stringValue")]
         public virtual string StringValue { get; set; }
 
+        private string _timestampValueRaw;
+
+        private object _timestampValue;
+
         /// <summary>
         /// A timestamp value. When stored in the Datastore, precise only to microseconds; any additional precision is
         /// rounded down.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("timestampValue")]
-        public virtual object TimestampValue { get; set; }
+        public virtual string TimestampValueRaw
+        {
+            get => _timestampValueRaw;
+            set
+            {
+                _timestampValue = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _timestampValueRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="TimestampValueRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimestampValueDateTimeOffset instead.")]
+        public virtual object TimestampValue
+        {
+            get => _timestampValue;
+            set
+            {
+                _timestampValueRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _timestampValue = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="TimestampValueRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? TimestampValueDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(TimestampValueRaw);
+            set => TimestampValueRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

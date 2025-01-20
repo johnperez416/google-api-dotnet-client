@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ namespace Google.Apis.Essentialcontacts.v1
             Folders = new FoldersResource(this);
             Organizations = new OrganizationsResource(this);
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://essentialcontacts.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://essentialcontacts.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -46,23 +48,16 @@ namespace Google.Apis.Essentialcontacts.v1
         public override string Name => "essentialcontacts";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://essentialcontacts.googleapis.com/";
-        #else
-            "https://essentialcontacts.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://essentialcontacts.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Essential Contacts API.</summary>
         public class Scope
@@ -317,7 +312,7 @@ namespace Google.Apis.Essentialcontacts.v1
             /// </param>
             public virtual ComputeRequest Compute(string parent)
             {
-                return new ComputeRequest(service, parent);
+                return new ComputeRequest(this.service, parent);
             }
 
             /// <summary>
@@ -493,7 +488,7 @@ namespace Google.Apis.Essentialcontacts.v1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Essentialcontacts.v1.Data.GoogleCloudEssentialcontactsV1Contact body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Adds a new contact for a resource.</summary>
@@ -552,7 +547,7 @@ namespace Google.Apis.Essentialcontacts.v1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes a contact.</summary>
@@ -605,7 +600,7 @@ namespace Google.Apis.Essentialcontacts.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets a single contact.</summary>
@@ -657,7 +652,7 @@ namespace Google.Apis.Essentialcontacts.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists the contacts that have been set on a resource.</summary>
@@ -736,11 +731,11 @@ namespace Google.Apis.Essentialcontacts.v1
             /// <summary>Updates a contact. Note: A contact's email address cannot be changed.</summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
-            /// The identifier for the contact. Format: {resource_type}/{resource_id}/contacts/{contact_id}
+            /// Output only. The identifier for the contact. Format: {resource_type}/{resource_id}/contacts/{contact_id}
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.Essentialcontacts.v1.Data.GoogleCloudEssentialcontactsV1Contact body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Updates a contact. Note: A contact's email address cannot be changed.</summary>
@@ -755,7 +750,8 @@ namespace Google.Apis.Essentialcontacts.v1
                 }
 
                 /// <summary>
-                /// The identifier for the contact. Format: {resource_type}/{resource_id}/contacts/{contact_id}
+                /// Output only. The identifier for the contact. Format:
+                /// {resource_type}/{resource_id}/contacts/{contact_id}
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Name { get; private set; }
@@ -817,7 +813,7 @@ namespace Google.Apis.Essentialcontacts.v1
             /// </param>
             public virtual SendTestMessageRequest SendTestMessage(Google.Apis.Essentialcontacts.v1.Data.GoogleCloudEssentialcontactsV1SendTestMessageRequest body, string resource)
             {
-                return new SendTestMessageRequest(service, body, resource);
+                return new SendTestMessageRequest(this.service, body, resource);
             }
 
             /// <summary>
@@ -916,7 +912,7 @@ namespace Google.Apis.Essentialcontacts.v1
             /// </param>
             public virtual ComputeRequest Compute(string parent)
             {
-                return new ComputeRequest(service, parent);
+                return new ComputeRequest(this.service, parent);
             }
 
             /// <summary>
@@ -1092,7 +1088,7 @@ namespace Google.Apis.Essentialcontacts.v1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Essentialcontacts.v1.Data.GoogleCloudEssentialcontactsV1Contact body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Adds a new contact for a resource.</summary>
@@ -1151,7 +1147,7 @@ namespace Google.Apis.Essentialcontacts.v1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes a contact.</summary>
@@ -1204,7 +1200,7 @@ namespace Google.Apis.Essentialcontacts.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets a single contact.</summary>
@@ -1256,7 +1252,7 @@ namespace Google.Apis.Essentialcontacts.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists the contacts that have been set on a resource.</summary>
@@ -1335,11 +1331,11 @@ namespace Google.Apis.Essentialcontacts.v1
             /// <summary>Updates a contact. Note: A contact's email address cannot be changed.</summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
-            /// The identifier for the contact. Format: {resource_type}/{resource_id}/contacts/{contact_id}
+            /// Output only. The identifier for the contact. Format: {resource_type}/{resource_id}/contacts/{contact_id}
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.Essentialcontacts.v1.Data.GoogleCloudEssentialcontactsV1Contact body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Updates a contact. Note: A contact's email address cannot be changed.</summary>
@@ -1354,7 +1350,8 @@ namespace Google.Apis.Essentialcontacts.v1
                 }
 
                 /// <summary>
-                /// The identifier for the contact. Format: {resource_type}/{resource_id}/contacts/{contact_id}
+                /// Output only. The identifier for the contact. Format:
+                /// {resource_type}/{resource_id}/contacts/{contact_id}
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Name { get; private set; }
@@ -1416,7 +1413,7 @@ namespace Google.Apis.Essentialcontacts.v1
             /// </param>
             public virtual SendTestMessageRequest SendTestMessage(Google.Apis.Essentialcontacts.v1.Data.GoogleCloudEssentialcontactsV1SendTestMessageRequest body, string resource)
             {
-                return new SendTestMessageRequest(service, body, resource);
+                return new SendTestMessageRequest(this.service, body, resource);
             }
 
             /// <summary>
@@ -1515,7 +1512,7 @@ namespace Google.Apis.Essentialcontacts.v1
             /// </param>
             public virtual ComputeRequest Compute(string parent)
             {
-                return new ComputeRequest(service, parent);
+                return new ComputeRequest(this.service, parent);
             }
 
             /// <summary>
@@ -1691,7 +1688,7 @@ namespace Google.Apis.Essentialcontacts.v1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Essentialcontacts.v1.Data.GoogleCloudEssentialcontactsV1Contact body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Adds a new contact for a resource.</summary>
@@ -1750,7 +1747,7 @@ namespace Google.Apis.Essentialcontacts.v1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes a contact.</summary>
@@ -1803,7 +1800,7 @@ namespace Google.Apis.Essentialcontacts.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets a single contact.</summary>
@@ -1855,7 +1852,7 @@ namespace Google.Apis.Essentialcontacts.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists the contacts that have been set on a resource.</summary>
@@ -1934,11 +1931,11 @@ namespace Google.Apis.Essentialcontacts.v1
             /// <summary>Updates a contact. Note: A contact's email address cannot be changed.</summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
-            /// The identifier for the contact. Format: {resource_type}/{resource_id}/contacts/{contact_id}
+            /// Output only. The identifier for the contact. Format: {resource_type}/{resource_id}/contacts/{contact_id}
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.Essentialcontacts.v1.Data.GoogleCloudEssentialcontactsV1Contact body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Updates a contact. Note: A contact's email address cannot be changed.</summary>
@@ -1953,7 +1950,8 @@ namespace Google.Apis.Essentialcontacts.v1
                 }
 
                 /// <summary>
-                /// The identifier for the contact. Format: {resource_type}/{resource_id}/contacts/{contact_id}
+                /// Output only. The identifier for the contact. Format:
+                /// {resource_type}/{resource_id}/contacts/{contact_id}
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Name { get; private set; }
@@ -2015,7 +2013,7 @@ namespace Google.Apis.Essentialcontacts.v1
             /// </param>
             public virtual SendTestMessageRequest SendTestMessage(Google.Apis.Essentialcontacts.v1.Data.GoogleCloudEssentialcontactsV1SendTestMessageRequest body, string resource)
             {
-                return new SendTestMessageRequest(service, body, resource);
+                return new SendTestMessageRequest(this.service, body, resource);
             }
 
             /// <summary>
@@ -2100,13 +2098,14 @@ namespace Google.Apis.Essentialcontacts.v1.Data
     public class GoogleCloudEssentialcontactsV1Contact : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Required. The email address to send notifications to. This does not need to be a Google account.
+        /// Required. The email address to send notifications to. The email address does not need to be a Google
+        /// Account.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("email")]
         public virtual string Email { get; set; }
 
         /// <summary>
-        /// The preferred language for notifications, as a ISO 639-1 language code. See [Supported
+        /// Required. The preferred language for notifications, as a ISO 639-1 language code. See [Supported
         /// languages](https://cloud.google.com/resource-manager/docs/managing-notification-contacts#supported-languages)
         /// for a list of supported languages.
         /// </summary>
@@ -2114,25 +2113,60 @@ namespace Google.Apis.Essentialcontacts.v1.Data
         public virtual string LanguageTag { get; set; }
 
         /// <summary>
-        /// The identifier for the contact. Format: {resource_type}/{resource_id}/contacts/{contact_id}
+        /// Output only. The identifier for the contact. Format: {resource_type}/{resource_id}/contacts/{contact_id}
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
-        /// <summary>The categories of notifications that the contact will receive communications for.</summary>
+        /// <summary>
+        /// Required. The categories of notifications that the contact will receive communications for.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("notificationCategorySubscriptions")]
         public virtual System.Collections.Generic.IList<string> NotificationCategorySubscriptions { get; set; }
+
+        private string _validateTimeRaw;
+
+        private object _validateTime;
 
         /// <summary>
         /// The last time the validation_state was updated, either manually or automatically. A contact is considered
         /// stale if its validation state was updated more than 1 year ago.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("validateTime")]
-        public virtual object ValidateTime { get; set; }
+        public virtual string ValidateTimeRaw
+        {
+            get => _validateTimeRaw;
+            set
+            {
+                _validateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _validateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ValidateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ValidateTimeDateTimeOffset instead.")]
+        public virtual object ValidateTime
+        {
+            get => _validateTime;
+            set
+            {
+                _validateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _validateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ValidateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ValidateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ValidateTimeRaw);
+            set => ValidateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
-        /// The validity of the contact. A contact is considered valid if it is the correct recipient for notifications
-        /// for a particular resource.
+        /// Output only. The validity of the contact. A contact is considered valid if it is the correct recipient for
+        /// notifications for a particular resource.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("validationState")]
         public virtual string ValidationState { get; set; }
@@ -2185,8 +2219,7 @@ namespace Google.Apis.Essentialcontacts.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class GoogleProtobufEmpty : Google.Apis.Requests.IDirectResponseSchema
     {

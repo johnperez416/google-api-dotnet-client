@@ -80,8 +80,8 @@ namespace Google.Apis.Auth.OAuth2
             Task<TokenResponse> refreshTask;
             lock (_lock)
             {
-                // If current token is not soft-expired, then return it.
-                if (_token != null && !_token.IsExpired(_clock))
+                // If current token doesn't need refreshing, then return it.
+                if (_token != null && !_token.ShouldBeRefreshed(_clock))
                 {
                     return _token.AccessToken;
                 }
@@ -92,25 +92,45 @@ namespace Google.Apis.Auth.OAuth2
                     // otherwise _refreshTask is updated in an incorrect order.
                     // And Task.Run also means it can be run here in the lock.
                     _refreshTask = Task.Run(RefreshTokenAsync);
+
+                    // Let's make sure that exceptions in _refreshTask are always observed.
+                    // Note that we don't keep a reference to this new task as we don't really
+                    // care about the errors, and we want calling code explicitly awaiting on _refreshTask
+                    // to actually fail if there's an error. We just schedule it to run and that's enough for
+                    // avoiding exception observavility issues.
+                    _refreshTask.ContinueWith(LogException, TaskContinuationOptions.OnlyOnFaulted);
                 }
-                // If current token is not hard-expired, then return it.
-                if (_token != null && !_token.IsEffectivelyExpired(_clock))
+                // If current token is still valid, then return it.
+                // The refresh above was pre-emptive.
+                if (_token != null && _token.MayBeUsed(_clock))
                 {
                     return _token.AccessToken;
                 }
                 refreshTask = _refreshTask;
+
+                async Task LogException(Task task)
+                {
+                    try
+                    {
+                        await task.ConfigureAwait(false);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Debug($"An error occured on a background token refresh task.{Environment.NewLine}{ex}");
+                    }
+                }
             }
-            // Otherwise block on refresh task.
-            if (cancellationToken.CanBeCanceled)
-            {
-                // Reasonably simple way of creating a task that can be cancelled, based on another task.
-                // (It would be nice if this were simpler.)
-                refreshTask = refreshTask.ContinueWith(
-                    task => ResultWithUnwrappedExceptions(task),
-                    cancellationToken,
-                    TaskContinuationOptions.None,
-                    TaskScheduler.Default);
-            }
+
+            refreshTask = refreshTask.WithCancellationToken(cancellationToken);
+            // Note that strictly speaking, the token returned here may already need redreshing,
+            // be invalid or be really expired.
+            // This may happen for tokens that are short lived enough, or in systems with significant load
+            // where maybe the token itself was obtained quickly but the task could not acquire a thread fast enough
+            // in which to resume.
+            // We don't retry as the conditions under which this may happen are not inmediately recoverable and possibly rare,
+            // and the token will be refreshed again on a subsequent token request.
+            // Also, note that the token is unusable only if it's really expired, if it needs refreshing or has become invalid
+            // it still may be used if fast enough.
             return (await refreshTask.ConfigureAwait(false)).AccessToken;
         }
 
@@ -156,24 +176,6 @@ namespace Google.Apis.Auth.OAuth2
                     _refreshTask = null;
                 }
             }
-        }
-
-        // Helper method used in the continuation when trying to create a cancellable task.
-        private static T ResultWithUnwrappedExceptions<T>(Task<T> task)
-        {
-            try
-            {
-                task.Wait();
-            }
-            catch (AggregateException e)
-            {
-                // Unwrap the first exception, a bit like await would.
-                // It's very unlikely that we'd ever see an AggregateException without an inner exceptions,
-                // but let's handle it relatively gracefully.
-                // Using ExceptionDispatchInfo to keep the original exception stack trace.
-                ExceptionDispatchInfo.Capture(e.InnerExceptions.FirstOrDefault() ?? e).Throw();
-            }
-            return task.Result;
         }
     }
 }

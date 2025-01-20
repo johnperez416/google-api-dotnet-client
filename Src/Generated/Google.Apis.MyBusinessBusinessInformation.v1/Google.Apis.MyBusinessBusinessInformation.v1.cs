@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,6 +40,8 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1
             Chains = new ChainsResource(this);
             GoogleLocations = new GoogleLocationsResource(this);
             Locations = new LocationsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://mybusinessbusinessinformation.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://mybusinessbusinessinformation.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -49,23 +51,16 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1
         public override string Name => "mybusinessbusinessinformation";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://mybusinessbusinessinformation.googleapis.com/";
-        #else
-            "https://mybusinessbusinessinformation.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://mybusinessbusinessinformation.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Gets the Accounts resource.</summary>
         public virtual AccountsResource Accounts { get; }
@@ -304,7 +299,7 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1
             /// <param name="parent">Required. The name of the account in which to create this location.</param>
             public virtual CreateRequest Create(Google.Apis.MyBusinessBusinessInformation.v1.Data.Location body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Creates a new Location that will be owned by the logged in user.</summary>
@@ -389,7 +384,7 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists the locations for the specified account.</summary>
@@ -534,7 +529,7 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
@@ -679,7 +674,7 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1
         /// <summary>Returns a list of business categories for the provided language and GConcept ids.</summary>
         public virtual BatchGetRequest BatchGet()
         {
-            return new BatchGetRequest(service);
+            return new BatchGetRequest(this.service);
         }
 
         /// <summary>Returns a list of business categories for the provided language and GConcept ids.</summary>
@@ -788,7 +783,7 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
@@ -940,7 +935,7 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1
         /// <param name="name">Required. The chain's resource name, in the format `chains/{chain_place_id}`.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>Gets the specified chain. Returns `NOT_FOUND` if the chain does not exist.</summary>
@@ -984,7 +979,7 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1
         /// <summary>Searches the chain based on chain name.</summary>
         public virtual SearchRequest Search()
         {
-            return new SearchRequest(service);
+            return new SearchRequest(this.service);
         }
 
         /// <summary>Searches the chain based on chain name.</summary>
@@ -1061,7 +1056,7 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1
         /// <param name="body">The body of the request.</param>
         public virtual SearchRequest Search(Google.Apis.MyBusinessBusinessInformation.v1.Data.SearchGoogleLocationsRequest body)
         {
-            return new SearchRequest(service, body);
+            return new SearchRequest(this.service, body);
         }
 
         /// <summary>Search all of the possible locations that are a match to the specified request.</summary>
@@ -1135,7 +1130,7 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1
             /// </param>
             public virtual GetGoogleUpdatedRequest GetGoogleUpdated(string name)
             {
-                return new GetGoogleUpdatedRequest(service, name);
+                return new GetGoogleUpdatedRequest(this.service, name);
             }
 
             /// <summary>Gets the Google-updated version of the specified location.</summary>
@@ -1180,140 +1175,20 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1
         }
 
         /// <summary>
-        /// Associates a location to a place ID. Any previous association is overwritten. This operation is only valid
-        /// if the location is unverified. The association must be valid, that is, it appears in the list of
-        /// `SearchGoogleLocations`.
-        /// </summary>
-        /// <param name="body">The body of the request.</param>
-        /// <param name="name">Required. The resource name of the location to associate.</param>
-        public virtual AssociateRequest Associate(Google.Apis.MyBusinessBusinessInformation.v1.Data.AssociateLocationRequest body, string name)
-        {
-            return new AssociateRequest(service, body, name);
-        }
-
-        /// <summary>
-        /// Associates a location to a place ID. Any previous association is overwritten. This operation is only valid
-        /// if the location is unverified. The association must be valid, that is, it appears in the list of
-        /// `SearchGoogleLocations`.
-        /// </summary>
-        public class AssociateRequest : MyBusinessBusinessInformationBaseServiceRequest<Google.Apis.MyBusinessBusinessInformation.v1.Data.Empty>
-        {
-            /// <summary>Constructs a new Associate request.</summary>
-            public AssociateRequest(Google.Apis.Services.IClientService service, Google.Apis.MyBusinessBusinessInformation.v1.Data.AssociateLocationRequest body, string name) : base(service)
-            {
-                Name = name;
-                Body = body;
-                InitParameters();
-            }
-
-            /// <summary>Required. The resource name of the location to associate.</summary>
-            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
-            public virtual string Name { get; private set; }
-
-            /// <summary>Gets or sets the body of this request.</summary>
-            Google.Apis.MyBusinessBusinessInformation.v1.Data.AssociateLocationRequest Body { get; set; }
-
-            /// <summary>Returns the body of the request.</summary>
-            protected override object GetBody() => Body;
-
-            /// <summary>Gets the method name.</summary>
-            public override string MethodName => "associate";
-
-            /// <summary>Gets the HTTP method.</summary>
-            public override string HttpMethod => "POST";
-
-            /// <summary>Gets the REST path.</summary>
-            public override string RestPath => "v1/{+name}:associate";
-
-            /// <summary>Initializes Associate parameter list.</summary>
-            protected override void InitParameters()
-            {
-                base.InitParameters();
-                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
-                {
-                    Name = "name",
-                    IsRequired = true,
-                    ParameterType = "path",
-                    DefaultValue = null,
-                    Pattern = @"^locations/[^/]+$",
-                });
-            }
-        }
-
-        /// <summary>
-        /// Clears an association between a location and its place ID. This operation is only valid if the location is
-        /// unverified.
-        /// </summary>
-        /// <param name="body">The body of the request.</param>
-        /// <param name="name">Required. The resource name of the location to disassociate.</param>
-        public virtual ClearLocationAssociationRequest ClearLocationAssociation(Google.Apis.MyBusinessBusinessInformation.v1.Data.ClearLocationAssociationRequest body, string name)
-        {
-            return new ClearLocationAssociationRequest(service, body, name);
-        }
-
-        /// <summary>
-        /// Clears an association between a location and its place ID. This operation is only valid if the location is
-        /// unverified.
-        /// </summary>
-        public class ClearLocationAssociationRequest : MyBusinessBusinessInformationBaseServiceRequest<Google.Apis.MyBusinessBusinessInformation.v1.Data.Empty>
-        {
-            /// <summary>Constructs a new ClearLocationAssociation request.</summary>
-            public ClearLocationAssociationRequest(Google.Apis.Services.IClientService service, Google.Apis.MyBusinessBusinessInformation.v1.Data.ClearLocationAssociationRequest body, string name) : base(service)
-            {
-                Name = name;
-                Body = body;
-                InitParameters();
-            }
-
-            /// <summary>Required. The resource name of the location to disassociate.</summary>
-            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
-            public virtual string Name { get; private set; }
-
-            /// <summary>Gets or sets the body of this request.</summary>
-            Google.Apis.MyBusinessBusinessInformation.v1.Data.ClearLocationAssociationRequest Body { get; set; }
-
-            /// <summary>Returns the body of the request.</summary>
-            protected override object GetBody() => Body;
-
-            /// <summary>Gets the method name.</summary>
-            public override string MethodName => "clearLocationAssociation";
-
-            /// <summary>Gets the HTTP method.</summary>
-            public override string HttpMethod => "POST";
-
-            /// <summary>Gets the REST path.</summary>
-            public override string RestPath => "v1/{+name}:clearLocationAssociation";
-
-            /// <summary>Initializes ClearLocationAssociation parameter list.</summary>
-            protected override void InitParameters()
-            {
-                base.InitParameters();
-                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
-                {
-                    Name = "name",
-                    IsRequired = true,
-                    ParameterType = "path",
-                    DefaultValue = null,
-                    Pattern = @"^locations/[^/]+$",
-                });
-            }
-        }
-
-        /// <summary>
         /// Deletes a location. If this location cannot be deleted using the API and it is marked so in the
-        /// `google.mybusiness.businessinformation.v1.LocationState`, use the [Google My
-        /// Business](https://business.google.com/manage/) website.
+        /// `google.mybusiness.businessinformation.v1.LocationState`, use the [Google Business
+        /// Profile](https://business.google.com/manage/) website.
         /// </summary>
         /// <param name="name">Required. The name of the location to delete.</param>
         public virtual DeleteRequest Delete(string name)
         {
-            return new DeleteRequest(service, name);
+            return new DeleteRequest(this.service, name);
         }
 
         /// <summary>
         /// Deletes a location. If this location cannot be deleted using the API and it is marked so in the
-        /// `google.mybusiness.businessinformation.v1.LocationState`, use the [Google My
-        /// Business](https://business.google.com/manage/) website.
+        /// `google.mybusiness.businessinformation.v1.LocationState`, use the [Google Business
+        /// Profile](https://business.google.com/manage/) website.
         /// </summary>
         public class DeleteRequest : MyBusinessBusinessInformationBaseServiceRequest<Google.Apis.MyBusinessBusinessInformation.v1.Data.Empty>
         {
@@ -1356,7 +1231,7 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1
         /// <param name="name">Required. The name of the location to fetch.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>Returns the specified location.</summary>
@@ -1415,7 +1290,7 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1
         /// </param>
         public virtual GetAttributesRequest GetAttributes(string name)
         {
-            return new GetAttributesRequest(service, name);
+            return new GetAttributesRequest(this.service, name);
         }
 
         /// <summary>Looks up all the attributes set for a given location.</summary>
@@ -1462,7 +1337,7 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1
         /// <param name="name">Required. The name of the location to fetch.</param>
         public virtual GetGoogleUpdatedRequest GetGoogleUpdated(string name)
         {
-            return new GetGoogleUpdatedRequest(service, name);
+            return new GetGoogleUpdatedRequest(this.service, name);
         }
 
         /// <summary>Gets the Google-updated version of the specified location.</summary>
@@ -1520,7 +1395,7 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1
         /// <param name="name">Google identifier for this location in the form: `locations/{location_id}`.</param>
         public virtual PatchRequest Patch(Google.Apis.MyBusinessBusinessInformation.v1.Data.Location body, string name)
         {
-            return new PatchRequest(service, body, name);
+            return new PatchRequest(this.service, body, name);
         }
 
         /// <summary>Updates the specified location.</summary>
@@ -1603,7 +1478,7 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1
         /// </param>
         public virtual UpdateAttributesRequest UpdateAttributes(Google.Apis.MyBusinessBusinessInformation.v1.Data.Attributes body, string name)
         {
-            return new UpdateAttributesRequest(service, body, name);
+            return new UpdateAttributesRequest(this.service, body, name);
         }
 
         /// <summary>Update attributes for a given location.</summary>
@@ -1685,17 +1560,6 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("adPhone")]
         public virtual string AdPhone { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
-    }
-
-    /// <summary>Request message for Locations.AssociateLocationRequest.</summary>
-    public class AssociateLocationRequest : Google.Apis.Requests.IDirectResponseSchema
-    {
-        /// <summary>The association to establish. If not set, it indicates no match.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("placeId")]
-        public virtual string PlaceId { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1972,20 +1836,13 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Request message for Locations.ClearLocationAssociationRequest.</summary>
-    public class ClearLocationAssociationRequest : Google.Apis.Requests.IDirectResponseSchema
-    {
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
-    }
-
     /// <summary>
     /// Represents a whole or partial calendar date, such as a birthday. The time of day and time zone are either
     /// specified elsewhere or are insignificant. The date is relative to the Gregorian Calendar. This can represent one
-    /// of the following: * A full date, with non-zero year, month, and day values * A month and day value, with a zero
-    /// year, such as an anniversary * A year on its own, with zero month and day values * A year and month value, with
-    /// a zero day, such as a credit card expiration date Related types are google.type.TimeOfDay and
-    /// `google.protobuf.Timestamp`.
+    /// of the following: * A full date, with non-zero year, month, and day values. * A month and day, with a zero year
+    /// (for example, an anniversary). * A year on its own, with a zero month and a zero day. * A year and month, with a
+    /// zero day (for example, a credit card expiration date). Related types: * google.type.TimeOfDay *
+    /// google.type.DateTime * google.protobuf.Timestamp
     /// </summary>
     public class Date : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2011,8 +1868,7 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2185,7 +2041,10 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
 
-        /// <summary>The approximate number of Locations in the list irrespective of pagination.</summary>
+        /// <summary>
+        /// The approximate number of Locations in the list irrespective of pagination. This field will only be returned
+        /// if `filter` is used as a query parameter.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("totalSize")]
         public virtual System.Nullable<int> TotalSize { get; set; }
 
@@ -2222,8 +2081,8 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1.Data
         /// <summary>
         /// Optional. User-provided latitude and longitude. When creating a location, this field is ignored if the
         /// provided address geocodes successfully. This field is only returned on get requests if the user-provided
-        /// `latlng` value was accepted during create, or the `latlng` value was updated through the Google My Business
-        /// website. This field can only be updated by approved clients.
+        /// `latlng` value was accepted during create, or the `latlng` value was updated through the Google Business
+        /// Profile website. This field can only be updated by approved clients.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("latlng")]
         public virtual LatLng Latlng { get; set; }
@@ -2251,8 +2110,9 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1.Data
         public virtual PhoneNumbers PhoneNumbers { get; set; }
 
         /// <summary>
-        /// Required. Describes your business in your own voice and shares with users the unique story of your business
-        /// and offerings.
+        /// Optional. Describes your business in your own voice and shares with users the unique story of your business
+        /// and offerings. This field is required for all categories except lodging categories (e.g. hotels, motels,
+        /// inns).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("profile")]
         public virtual Profile Profile { get; set; }
@@ -2261,7 +2121,7 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("regularHours")]
         public virtual BusinessHours RegularHours { get; set; }
 
-        /// <summary>Output only. All locations and chain related to this one.</summary>
+        /// <summary>Optional. All locations and chain related to this one.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("relationshipData")]
         public virtual RelationshipData RelationshipData { get; set; }
 
@@ -2298,7 +2158,7 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1.Data
         /// Optional. A precise, accurate address to describe your business location. PO boxes or mailboxes located at
         /// remote locations are not acceptable. At this time, you can specify a maximum of five `address_lines` values
         /// in the address. This field should only be set for businesses that have a storefront. This field should not
-        /// be set for locations of type `CUSTOMER_LOCATION_ONLY`.
+        /// be set for locations of type `CUSTOMER_LOCATION_ONLY` but if set, any value provided will be discarded.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("storefrontAddress")]
         public virtual PostalAddress StorefrontAddress { get; set; }
@@ -2374,6 +2234,13 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("hasPendingEdits")]
         public virtual System.Nullable<bool> HasPendingEdits { get; set; }
+
+        /// <summary>
+        /// Output only. Indicates if the listing has Voice of Merchant. If this boolean is false, you should call the
+        /// locations.getVoiceOfMerchantState API to get details as to why they do not have Voice of Merchant.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hasVoiceOfMerchant")]
+        public virtual System.Nullable<bool> HasVoiceOfMerchant { get; set; }
 
         /// <summary>Output only. A link to the location on Maps.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("mapsUri")]
@@ -2544,29 +2411,29 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1.Data
     }
 
     /// <summary>
-    /// Represents a postal address, e.g. for postal delivery or payments addresses. Given a postal address, a postal
-    /// service can deliver items to a premise, P.O. Box or similar. It is not intended to model geographical locations
-    /// (roads, towns, mountains). In typical usage an address would be created via user input or from importing
-    /// existing data, depending on the type of process. Advice on address input / editing: - Use an i18n-ready address
-    /// widget such as https://github.com/google/libaddressinput) - Users should not be presented with UI elements for
-    /// input or editing of fields outside countries where that field is used. For more guidance on how to use this
-    /// schema, please see: https://support.google.com/business/answer/6397478
+    /// Represents a postal address. For example for postal delivery or payments addresses. Given a postal address, a
+    /// postal service can deliver items to a premise, P.O. Box or similar. It is not intended to model geographical
+    /// locations (roads, towns, mountains). In typical usage an address would be created by user input or from
+    /// importing existing data, depending on the type of process. Advice on address input / editing: - Use an
+    /// internationalization-ready address widget such as https://github.com/google/libaddressinput) - Users should not
+    /// be presented with UI elements for input or editing of fields outside countries where that field is used. For
+    /// more guidance on how to use this schema, see: https://support.google.com/business/answer/6397478
     /// </summary>
     public class PostalAddress : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
         /// Unstructured address lines describing the lower levels of an address. Because values in address_lines do not
-        /// have type information and may sometimes contain multiple values in a single field (e.g. "Austin, TX"), it is
-        /// important that the line order is clear. The order of address lines should be "envelope order" for the
-        /// country/region of the address. In places where this can vary (e.g. Japan), address_language is used to make
-        /// it explicit (e.g. "ja" for large-to-small ordering and "ja-Latn" or "en" for small-to-large). This way, the
-        /// most specific line of an address can be selected based on the language. The minimum permitted structural
-        /// representation of an address consists of a region_code with all remaining information placed in the
-        /// address_lines. It would be possible to format such an address very approximately without geocoding, but no
-        /// semantic reasoning could be made about any of the address components until it was at least partially
-        /// resolved. Creating an address only containing a region_code and address_lines, and then geocoding is the
-        /// recommended way to handle completely unstructured addresses (as opposed to guessing which parts of the
-        /// address should be localities or administrative areas).
+        /// have type information and may sometimes contain multiple values in a single field (For example "Austin,
+        /// TX"), it is important that the line order is clear. The order of address lines should be "envelope order"
+        /// for the country/region of the address. In places where this can vary (For example Japan), address_language
+        /// is used to make it explicit (For example "ja" for large-to-small ordering and "ja-Latn" or "en" for
+        /// small-to-large). This way, the most specific line of an address can be selected based on the language. The
+        /// minimum permitted structural representation of an address consists of a region_code with all remaining
+        /// information placed in the address_lines. It would be possible to format such an address very approximately
+        /// without geocoding, but no semantic reasoning could be made about any of the address components until it was
+        /// at least partially resolved. Creating an address only containing a region_code and address_lines, and then
+        /// geocoding is the recommended way to handle completely unstructured addresses (as opposed to guessing which
+        /// parts of the address should be localities or administrative areas).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("addressLines")]
         public virtual System.Collections.Generic.IList<string> AddressLines { get; set; }
@@ -2574,8 +2441,9 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1.Data
         /// <summary>
         /// Optional. Highest administrative subdivision which is used for postal addresses of a country or region. For
         /// example, this can be a state, a province, an oblast, or a prefecture. Specifically, for Spain this is the
-        /// province and not the autonomous community (e.g. "Barcelona" and not "Catalonia"). Many countries don't use
-        /// an administrative area in postal addresses. E.g. in Switzerland this should be left unpopulated.
+        /// province and not the autonomous community (For example "Barcelona" and not "Catalonia"). Many countries
+        /// don't use an administrative area in postal addresses. For example in Switzerland this should be left
+        /// unpopulated.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("administrativeArea")]
         public virtual string AdministrativeArea { get; set; }
@@ -2605,7 +2473,7 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1.Data
 
         /// <summary>
         /// Optional. Postal code of the address. Not all countries use or require postal codes to be present, but where
-        /// they are used, they may trigger additional validation with other parts of the address (e.g. state/zip
+        /// they are used, they may trigger additional validation with other parts of the address (For example state/zip
         /// validation in the U.S.A.).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("postalCode")]
@@ -2620,9 +2488,9 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1.Data
 
         /// <summary>
         /// Required. CLDR region code of the country/region of the address. This is never inferred and it is up to the
-        /// user to ensure the value is correct. See http://cldr.unicode.org/ and
-        /// http://www.unicode.org/cldr/charts/30/supplemental/territory_information.html for details. Example: "CH" for
-        /// Switzerland.
+        /// user to ensure the value is correct. See https://cldr.unicode.org/ and
+        /// https://www.unicode.org/cldr/charts/30/supplemental/territory_information.html for details. Example: "CH"
+        /// for Switzerland.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("regionCode")]
         public virtual string RegionCode { get; set; }
@@ -2636,9 +2504,9 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1.Data
 
         /// <summary>
         /// Optional. Additional, country-specific, sorting code. This is not used in most regions. Where it is used,
-        /// the value is either a string like "CEDEX", optionally followed by a number (e.g. "CEDEX 7"), or just a
-        /// number alone, representing the "sector code" (Jamaica), "delivery area indicator" (Malawi) or "post office
-        /// indicator" (e.g. Côte d'Ivoire).
+        /// the value is either a string like "CEDEX", optionally followed by a number (For example "CEDEX 7"), or just
+        /// a number alone, representing the "sector code" (Jamaica), "delivery area indicator" (Malawi) or "post office
+        /// indicator" (For example Côte d'Ivoire).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sortingCode")]
         public virtual string SortingCode { get; set; }
@@ -2932,23 +2800,26 @@ namespace Google.Apis.MyBusinessBusinessInformation.v1.Data
     public class TimeOfDay : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for
-        /// scenarios like business closing time.
+        /// Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or
+        /// equal to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("hours")]
         public virtual System.Nullable<int> Hours { get; set; }
 
-        /// <summary>Minutes of hour of day. Must be from 0 to 59.</summary>
+        /// <summary>Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minutes")]
         public virtual System.Nullable<int> Minutes { get; set; }
 
-        /// <summary>Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.</summary>
+        /// <summary>
+        /// Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to
+        /// 999,999,999.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nanos")]
         public virtual System.Nullable<int> Nanos { get; set; }
 
         /// <summary>
-        /// Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows
-        /// leap-seconds.
+        /// Seconds of a minute. Must be greater than or equal to 0 and typically must be less than or equal to 59. An
+        /// API may allow the value 60 if it allows leap-seconds.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("seconds")]
         public virtual System.Nullable<int> Seconds { get; set; }

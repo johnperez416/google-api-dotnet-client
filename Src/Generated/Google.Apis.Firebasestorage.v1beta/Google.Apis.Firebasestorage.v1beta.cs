@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.Firebasestorage.v1beta
         public FirebasestorageService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://firebasestorage.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://firebasestorage.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.Firebasestorage.v1beta
         public override string Name => "firebasestorage";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://firebasestorage.googleapis.com/";
-        #else
-            "https://firebasestorage.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://firebasestorage.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Storage for Firebase API.</summary>
         public class Scope
@@ -286,6 +281,7 @@ namespace Google.Apis.Firebasestorage.v1beta
         {
             this.service = service;
             Buckets = new BucketsResource(service);
+            DefaultBucket = new DefaultBucketResource(service);
         }
 
         /// <summary>Gets the Buckets resource.</summary>
@@ -309,11 +305,11 @@ namespace Google.Apis.Firebasestorage.v1beta
             /// <param name="body">The body of the request.</param>
             /// <param name="bucket">
             /// Required. Resource name of the bucket, mirrors the ID of the underlying Google Cloud Storage bucket,
-            /// `projects/{project_number}/buckets/{bucket_id}`.
+            /// `projects/{project_id_or_number}/buckets/{bucket_id}`.
             /// </param>
             public virtual AddFirebaseRequest AddFirebase(Google.Apis.Firebasestorage.v1beta.Data.AddFirebaseRequest body, string bucket)
             {
-                return new AddFirebaseRequest(service, body, bucket);
+                return new AddFirebaseRequest(this.service, body, bucket);
             }
 
             /// <summary>Links a Google Cloud Storage bucket to a Firebase project.</summary>
@@ -329,7 +325,7 @@ namespace Google.Apis.Firebasestorage.v1beta
 
                 /// <summary>
                 /// Required. Resource name of the bucket, mirrors the ID of the underlying Google Cloud Storage bucket,
-                /// `projects/{project_number}/buckets/{bucket_id}`.
+                /// `projects/{project_id_or_number}/buckets/{bucket_id}`.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("bucket", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Bucket { get; private set; }
@@ -367,11 +363,11 @@ namespace Google.Apis.Firebasestorage.v1beta
             /// <summary>Gets a single linked storage bucket.</summary>
             /// <param name="name">
             /// Required. Resource name of the bucket, mirrors the ID of the underlying Google Cloud Storage bucket,
-            /// `projects/{project_number}/buckets/{bucket_id}`.
+            /// `projects/{project_id_or_number}/buckets/{bucket_id}`.
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets a single linked storage bucket.</summary>
@@ -386,7 +382,7 @@ namespace Google.Apis.Firebasestorage.v1beta
 
                 /// <summary>
                 /// Required. Resource name of the bucket, mirrors the ID of the underlying Google Cloud Storage bucket,
-                /// `projects/{project_number}/buckets/{bucket_id}`.
+                /// `projects/{project_id_or_number}/buckets/{bucket_id}`.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Name { get; private set; }
@@ -417,11 +413,11 @@ namespace Google.Apis.Firebasestorage.v1beta
 
             /// <summary>Lists the linked storage buckets for a project.</summary>
             /// <param name="parent">
-            /// Required. Resource name of the parent Firebase project, `projects/{project_number}`.
+            /// Required. Resource name of the parent Firebase project, `projects/{project_id_or_number}`.
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists the linked storage buckets for a project.</summary>
@@ -435,7 +431,7 @@ namespace Google.Apis.Firebasestorage.v1beta
                 }
 
                 /// <summary>
-                /// Required. Resource name of the parent Firebase project, `projects/{project_number}`.
+                /// Required. Resource name of the parent Firebase project, `projects/{project_id_or_number}`.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -498,11 +494,11 @@ namespace Google.Apis.Firebasestorage.v1beta
             /// <param name="body">The body of the request.</param>
             /// <param name="bucket">
             /// Required. Resource name of the bucket, mirrors the ID of the underlying Google Cloud Storage bucket,
-            /// `projects/{project_number}/buckets/{bucket_id}`.
+            /// `projects/{project_id_or_number}/buckets/{bucket_id}`.
             /// </param>
             public virtual RemoveFirebaseRequest RemoveFirebase(Google.Apis.Firebasestorage.v1beta.Data.RemoveFirebaseRequest body, string bucket)
             {
-                return new RemoveFirebaseRequest(service, body, bucket);
+                return new RemoveFirebaseRequest(this.service, body, bucket);
             }
 
             /// <summary>Unlinks a linked Google Cloud Storage bucket from a Firebase project.</summary>
@@ -518,7 +514,7 @@ namespace Google.Apis.Firebasestorage.v1beta
 
                 /// <summary>
                 /// Required. Resource name of the bucket, mirrors the ID of the underlying Google Cloud Storage bucket,
-                /// `projects/{project_number}/buckets/{bucket_id}`.
+                /// `projects/{project_id_or_number}/buckets/{bucket_id}`.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("bucket", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Bucket { get; private set; }
@@ -553,6 +549,189 @@ namespace Google.Apis.Firebasestorage.v1beta
                 }
             }
         }
+
+        /// <summary>Gets the DefaultBucket resource.</summary>
+        public virtual DefaultBucketResource DefaultBucket { get; }
+
+        /// <summary>The "defaultBucket" collection of methods.</summary>
+        public class DefaultBucketResource
+        {
+            private const string Resource = "defaultBucket";
+
+            /// <summary>The service which this resource belongs to.</summary>
+            private readonly Google.Apis.Services.IClientService service;
+
+            /// <summary>Constructs a new resource.</summary>
+            public DefaultBucketResource(Google.Apis.Services.IClientService service)
+            {
+                this.service = service;
+            }
+
+            /// <summary>
+            /// Creates a Spark tier-eligible Cloud Storage bucket and links it to your Firebase project. If the default
+            /// bucket already exists, this method will re-link it to your Firebase project. See
+            /// https://firebase.google.com/pricing for pricing details.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="parent">
+            /// Required. The parent resource where the default bucket will be created,
+            /// `projects/{project_id_or_number}`.
+            /// </param>
+            public virtual CreateRequest Create(Google.Apis.Firebasestorage.v1beta.Data.DefaultBucket body, string parent)
+            {
+                return new CreateRequest(this.service, body, parent);
+            }
+
+            /// <summary>
+            /// Creates a Spark tier-eligible Cloud Storage bucket and links it to your Firebase project. If the default
+            /// bucket already exists, this method will re-link it to your Firebase project. See
+            /// https://firebase.google.com/pricing for pricing details.
+            /// </summary>
+            public class CreateRequest : FirebasestorageBaseServiceRequest<Google.Apis.Firebasestorage.v1beta.Data.DefaultBucket>
+            {
+                /// <summary>Constructs a new Create request.</summary>
+                public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Firebasestorage.v1beta.Data.DefaultBucket body, string parent) : base(service)
+                {
+                    Parent = parent;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The parent resource where the default bucket will be created,
+                /// `projects/{project_id_or_number}`.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.Firebasestorage.v1beta.Data.DefaultBucket Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "create";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1beta/{+parent}/defaultBucket";
+
+                /// <summary>Initializes Create parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+$",
+                    });
+                }
+            }
+        }
+
+        /// <summary>Unlinks and deletes the default bucket.</summary>
+        /// <param name="name">
+        /// Required. The name of the default bucket to delete, `projects/{project_id_or_number}/defaultBucket`.
+        /// </param>
+        public virtual DeleteDefaultBucketRequest DeleteDefaultBucket(string name)
+        {
+            return new DeleteDefaultBucketRequest(this.service, name);
+        }
+
+        /// <summary>Unlinks and deletes the default bucket.</summary>
+        public class DeleteDefaultBucketRequest : FirebasestorageBaseServiceRequest<Google.Apis.Firebasestorage.v1beta.Data.Empty>
+        {
+            /// <summary>Constructs a new DeleteDefaultBucket request.</summary>
+            public DeleteDefaultBucketRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+            {
+                Name = name;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. The name of the default bucket to delete, `projects/{project_id_or_number}/defaultBucket`.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "deleteDefaultBucket";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "DELETE";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1beta/{+name}";
+
+            /// <summary>Initializes DeleteDefaultBucket parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^projects/[^/]+/defaultBucket$",
+                });
+            }
+        }
+
+        /// <summary>Gets the default bucket.</summary>
+        /// <param name="name">
+        /// Required. The name of the default bucket to retrieve, `projects/{project_id_or_number}/defaultBucket`.
+        /// </param>
+        public virtual GetDefaultBucketRequest GetDefaultBucket(string name)
+        {
+            return new GetDefaultBucketRequest(this.service, name);
+        }
+
+        /// <summary>Gets the default bucket.</summary>
+        public class GetDefaultBucketRequest : FirebasestorageBaseServiceRequest<Google.Apis.Firebasestorage.v1beta.Data.DefaultBucket>
+        {
+            /// <summary>Constructs a new GetDefaultBucket request.</summary>
+            public GetDefaultBucketRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+            {
+                Name = name;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. The name of the default bucket to retrieve, `projects/{project_id_or_number}/defaultBucket`.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "getDefaultBucket";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1beta/{+name}";
+
+            /// <summary>Initializes GetDefaultBucket parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^projects/[^/]+/defaultBucket$",
+                });
+            }
+        }
     }
 }
 namespace Google.Apis.Firebasestorage.v1beta.Data
@@ -567,20 +746,39 @@ namespace Google.Apis.Firebasestorage.v1beta.Data
     /// <summary>A storage bucket and its relation to a parent Firebase project.</summary>
     public class Bucket : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Output only. Location of the storage bucket.</summary>
+        /// <summary>Output only. Resource name of the bucket.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Spark tier-eligible Cloud Storage bucket. One per project. This resource exists if the underlying Cloud Storage
+    /// bucket exists and it is linked to your Firebase project. See https://firebase.google.com/pricing for pricing
+    /// details.
+    /// </summary>
+    public class DefaultBucket : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Output only. Underlying bucket resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bucket")]
+        public virtual Bucket Bucket { get; set; }
+
+        /// <summary>Immutable. Location of the default bucket.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("location")]
         public virtual string Location { get; set; }
 
-        /// <summary>Resource name of the bucket.</summary>
+        /// <summary>Resource name of the default bucket.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// Output only. Represents whether a bucket is being moved to a new location, in which case reconciling is set
-        /// to true.
+        /// Immutable. Storage class of the default bucket. Supported values are available at
+        /// https://cloud.google.com/storage/docs/storage-classes#classes.
         /// </summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("reconciling")]
-        public virtual System.Nullable<bool> Reconciling { get; set; }
+        [Newtonsoft.Json.JsonPropertyAttribute("storageClass")]
+        public virtual string StorageClass { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -589,49 +787,10 @@ namespace Google.Apis.Firebasestorage.v1beta.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
-    }
-
-    /// <summary>Metadata for MigrateLocationDestructively LRO.</summary>
-    public class GoogleFirebaseStorageControlplaneV1alphaMigrateLocationDestructivelyMetadata : Google.Apis.Requests.IDirectResponseSchema
-    {
-        /// <summary>The time the LRO was created.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
-
-        /// <summary>The time the LRO was last updated.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("lastUpdateTime")]
-        public virtual object LastUpdateTime { get; set; }
-
-        /// <summary>The current state of the migration.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("state")]
-        public virtual string State { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
-    }
-
-    /// <summary>Metadata for MigrateLocationDestructively LRO.</summary>
-    public class GoogleFirebaseStorageControlplaneV1betaMigrateLocationDestructivelyMetadata : Google.Apis.Requests.IDirectResponseSchema
-    {
-        /// <summary>The time the LRO was created.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
-
-        /// <summary>The time the LRO was last updated.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("lastUpdateTime")]
-        public virtual object LastUpdateTime { get; set; }
-
-        /// <summary>The current state of the migration.</summary>
-        [Newtonsoft.Json.JsonPropertyAttribute("state")]
-        public virtual string State { get; set; }
-
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }

@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.DataLabeling.v1beta1
         public DataLabelingService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://datalabeling.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://datalabeling.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.DataLabeling.v1beta1
         public override string Name => "datalabeling";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://datalabeling.googleapis.com/";
-        #else
-            "https://datalabeling.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://datalabeling.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Data Labeling API.</summary>
         public class Scope
@@ -309,7 +304,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// <param name="parent">Required. AnnotationSpecSet resource parent, format: projects/{project_id}</param>
             public virtual CreateRequest Create(Google.Apis.DataLabeling.v1beta1.Data.GoogleCloudDatalabelingV1beta1CreateAnnotationSpecSetRequest body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Creates an annotation spec set by providing a set of labels.</summary>
@@ -364,7 +359,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes an annotation spec set by resource name.</summary>
@@ -415,7 +410,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets an annotation spec set by resource name.</summary>
@@ -465,7 +460,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists annotation spec sets for a project. Pagination is supported.</summary>
@@ -619,7 +614,7 @@ namespace Google.Apis.DataLabeling.v1beta1
                     /// </param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -676,7 +671,7 @@ namespace Google.Apis.DataLabeling.v1beta1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>
@@ -792,7 +787,7 @@ namespace Google.Apis.DataLabeling.v1beta1
                     /// </param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Gets an example by resource name, including both data and annotation.</summary>
@@ -856,7 +851,7 @@ namespace Google.Apis.DataLabeling.v1beta1
                     /// <param name="parent">Required. Example resource parent.</param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Lists examples in an annotated dataset. Pagination is supported.</summary>
@@ -988,7 +983,7 @@ namespace Google.Apis.DataLabeling.v1beta1
                         /// </param>
                         public virtual CreateRequest Create(Google.Apis.DataLabeling.v1beta1.Data.GoogleCloudDatalabelingV1beta1FeedbackMessage body, string parent)
                         {
-                            return new CreateRequest(service, body, parent);
+                            return new CreateRequest(this.service, body, parent);
                         }
 
                         /// <summary>Create a FeedbackMessage object.</summary>
@@ -1046,7 +1041,7 @@ namespace Google.Apis.DataLabeling.v1beta1
                         /// </param>
                         public virtual DeleteRequest Delete(string name)
                         {
-                            return new DeleteRequest(service, name);
+                            return new DeleteRequest(this.service, name);
                         }
 
                         /// <summary>Delete a FeedbackMessage.</summary>
@@ -1097,7 +1092,7 @@ namespace Google.Apis.DataLabeling.v1beta1
                         /// </param>
                         public virtual GetRequest Get(string name)
                         {
-                            return new GetRequest(service, name);
+                            return new GetRequest(this.service, name);
                         }
 
                         /// <summary>Get a FeedbackMessage object.</summary>
@@ -1148,7 +1143,7 @@ namespace Google.Apis.DataLabeling.v1beta1
                         /// </param>
                         public virtual ListRequest List(string parent)
                         {
-                            return new ListRequest(service, parent);
+                            return new ListRequest(this.service, parent);
                         }
 
                         /// <summary>List FeedbackMessages with pagination.</summary>
@@ -1231,7 +1226,7 @@ namespace Google.Apis.DataLabeling.v1beta1
                     /// </param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>Delete a FeedbackThread.</summary>
@@ -1282,7 +1277,7 @@ namespace Google.Apis.DataLabeling.v1beta1
                     /// </param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Get a FeedbackThread object.</summary>
@@ -1333,7 +1328,7 @@ namespace Google.Apis.DataLabeling.v1beta1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>List FeedbackThreads with pagination.</summary>
@@ -1416,7 +1411,7 @@ namespace Google.Apis.DataLabeling.v1beta1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Deletes an annotated dataset by resource name.</summary>
@@ -1467,7 +1462,7 @@ namespace Google.Apis.DataLabeling.v1beta1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets an annotated dataset by resource name.</summary>
@@ -1518,7 +1513,7 @@ namespace Google.Apis.DataLabeling.v1beta1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists annotated datasets for a dataset. Pagination is supported.</summary>
@@ -1633,7 +1628,7 @@ namespace Google.Apis.DataLabeling.v1beta1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -1690,7 +1685,7 @@ namespace Google.Apis.DataLabeling.v1beta1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
@@ -1828,7 +1823,7 @@ namespace Google.Apis.DataLabeling.v1beta1
                     /// </param>
                     public virtual SearchRequest Search(Google.Apis.DataLabeling.v1beta1.Data.GoogleCloudDatalabelingV1beta1SearchExampleComparisonsRequest body, string parent)
                     {
-                        return new SearchRequest(service, body, parent);
+                        return new SearchRequest(this.service, body, parent);
                     }
 
                     /// <summary>
@@ -1891,7 +1886,7 @@ namespace Google.Apis.DataLabeling.v1beta1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets an evaluation by resource name (to search, use projects.evaluations.search).</summary>
@@ -1964,7 +1959,7 @@ namespace Google.Apis.DataLabeling.v1beta1
                 /// </param>
                 public virtual LabelRequest Label(Google.Apis.DataLabeling.v1beta1.Data.GoogleCloudDatalabelingV1beta1LabelImageRequest body, string parent)
                 {
-                    return new LabelRequest(service, body, parent);
+                    return new LabelRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -2047,7 +2042,7 @@ namespace Google.Apis.DataLabeling.v1beta1
                 /// </param>
                 public virtual LabelRequest Label(Google.Apis.DataLabeling.v1beta1.Data.GoogleCloudDatalabelingV1beta1LabelTextRequest body, string parent)
                 {
-                    return new LabelRequest(service, body, parent);
+                    return new LabelRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -2130,7 +2125,7 @@ namespace Google.Apis.DataLabeling.v1beta1
                 /// </param>
                 public virtual LabelRequest Label(Google.Apis.DataLabeling.v1beta1.Data.GoogleCloudDatalabelingV1beta1LabelVideoRequest body, string parent)
                 {
-                    return new LabelRequest(service, body, parent);
+                    return new LabelRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -2190,7 +2185,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// <param name="parent">Required. Dataset resource parent, format: projects/{project_id}</param>
             public virtual CreateRequest Create(Google.Apis.DataLabeling.v1beta1.Data.GoogleCloudDatalabelingV1beta1CreateDatasetRequest body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Creates dataset. If success return a Dataset resource.</summary>
@@ -2244,7 +2239,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes a dataset by resource name.</summary>
@@ -2294,7 +2289,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// </param>
             public virtual ExportDataRequest ExportData(Google.Apis.DataLabeling.v1beta1.Data.GoogleCloudDatalabelingV1beta1ExportDataRequest body, string name)
             {
-                return new ExportDataRequest(service, body, name);
+                return new ExportDataRequest(this.service, body, name);
             }
 
             /// <summary>Exports data and annotations from dataset.</summary>
@@ -2350,7 +2345,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets dataset by resource name.</summary>
@@ -2405,7 +2400,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// </param>
             public virtual ImportDataRequest ImportData(Google.Apis.DataLabeling.v1beta1.Data.GoogleCloudDatalabelingV1beta1ImportDataRequest body, string name)
             {
-                return new ImportDataRequest(service, body, name);
+                return new ImportDataRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -2464,7 +2459,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// <param name="parent">Required. Dataset resource parent, format: projects/{project_id}</param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists datasets under a project. Pagination is supported.</summary>
@@ -2570,7 +2565,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// <param name="parent">Required. Evaluation job resource parent. Format: "projects/{project_id}"</param>
             public virtual CreateRequest Create(Google.Apis.DataLabeling.v1beta1.Data.GoogleCloudDatalabelingV1beta1CreateEvaluationJobRequest body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Creates an evaluation job.</summary>
@@ -2625,7 +2620,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Stops and deletes an evaluation job.</summary>
@@ -2676,7 +2671,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets an evaluation job by resource name.</summary>
@@ -2726,7 +2721,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// <param name="parent">Required. Evaluation job resource parent. Format: "projects/{project_id}"</param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
@@ -2829,7 +2824,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.DataLabeling.v1beta1.Data.GoogleCloudDatalabelingV1beta1EvaluationJob body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -2911,7 +2906,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// </param>
             public virtual PauseRequest Pause(Google.Apis.DataLabeling.v1beta1.Data.GoogleCloudDatalabelingV1beta1PauseEvaluationJobRequest body, string name)
             {
-                return new PauseRequest(service, body, name);
+                return new PauseRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -2975,7 +2970,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// </param>
             public virtual ResumeRequest Resume(Google.Apis.DataLabeling.v1beta1.Data.GoogleCloudDatalabelingV1beta1ResumeEvaluationJobRequest body, string name)
             {
-                return new ResumeRequest(service, body, name);
+                return new ResumeRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -3053,7 +3048,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// </param>
             public virtual SearchRequest Search(string parent)
             {
-                return new SearchRequest(service, parent);
+                return new SearchRequest(this.service, parent);
             }
 
             /// <summary>Searches evaluations within a project.</summary>
@@ -3172,7 +3167,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// <param name="parent">Required. Instruction resource parent, format: projects/{project_id}</param>
             public virtual CreateRequest Create(Google.Apis.DataLabeling.v1beta1.Data.GoogleCloudDatalabelingV1beta1CreateInstructionRequest body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Creates an instruction for how data should be labeled.</summary>
@@ -3226,7 +3221,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes an instruction object by resource name.</summary>
@@ -3275,7 +3270,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets an instruction by resource name.</summary>
@@ -3322,7 +3317,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// <param name="parent">Required. Instruction resource parent, format: projects/{project_id}</param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists instructions for a project. Pagination is supported.</summary>
@@ -3429,12 +3424,12 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check
             /// whether the cancellation succeeded or whether the operation completed despite cancellation. On
             /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-            /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+            /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
             /// </summary>
             /// <param name="name">The name of the operation resource to be cancelled.</param>
             public virtual CancelRequest Cancel(string name)
             {
-                return new CancelRequest(service, name);
+                return new CancelRequest(this.service, name);
             }
 
             /// <summary>
@@ -3443,7 +3438,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check
             /// whether the cancellation succeeded or whether the operation completed despite cancellation. On
             /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-            /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+            /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
             /// </summary>
             public class CancelRequest : DataLabelingBaseServiceRequest<Google.Apis.DataLabeling.v1beta1.Data.GoogleProtobufEmpty>
             {
@@ -3490,7 +3485,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// <param name="name">The name of the operation resource to be deleted.</param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
@@ -3542,7 +3537,7 @@ namespace Google.Apis.DataLabeling.v1beta1
             /// <param name="name">The name of the operation resource.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
@@ -3588,25 +3583,17 @@ namespace Google.Apis.DataLabeling.v1beta1
 
             /// <summary>
             /// Lists operations that match the specified filter in the request. If the server doesn't support this
-            /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the binding
-            /// to use different resource name schemes, such as `users/*/operations`. To override the binding, API
-            /// services can add a binding such as `"/v1/{name=users/*}/operations"` to their service configuration. For
-            /// backwards compatibility, the default name includes the operations collection id, however overriding
-            /// users must ensure the name binding is the parent resource, without the operations collection id.
+            /// method, it returns `UNIMPLEMENTED`.
             /// </summary>
             /// <param name="name">The name of the operation's parent resource.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>
             /// Lists operations that match the specified filter in the request. If the server doesn't support this
-            /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the binding
-            /// to use different resource name schemes, such as `users/*/operations`. To override the binding, API
-            /// services can add a binding such as `"/v1/{name=users/*}/operations"` to their service configuration. For
-            /// backwards compatibility, the default name includes the operations collection id, however overriding
-            /// users must ensure the name binding is the parent resource, without the operations collection id.
+            /// method, it returns `UNIMPLEMENTED`.
             /// </summary>
             public class ListRequest : DataLabelingBaseServiceRequest<Google.Apis.DataLabeling.v1beta1.Data.GoogleLongrunningListOperationsResponse>
             {
@@ -3688,9 +3675,42 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
     /// <summary>Metadata of a CreateInstruction operation.</summary>
     public class GoogleCloudDatalabelingV1alpha1CreateInstructionMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Timestamp when create instruction request was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The name of the created Instruction. projects/{project_id}/instructions/{instruction_id}</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("instruction")]
@@ -3716,9 +3736,42 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("annotatedDataset")]
         public virtual string AnnotatedDataset { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Timestamp when export dataset request was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The name of dataset to be exported. "projects/*/datasets/*"</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dataset")]
@@ -3868,9 +3921,42 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
     /// <summary>Metadata of an ImportData operation.</summary>
     public class GoogleCloudDatalabelingV1alpha1ImportDataOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Timestamp when import dataset request was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The name of imported dataset. "projects/*/datasets/*"</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dataset")]
@@ -3981,9 +4067,42 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("annotatedDataset")]
         public virtual string AnnotatedDataset { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Timestamp when labeling request was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The name of dataset to be labeled. "projects/*/datasets/*"</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dataset")]
@@ -4177,9 +4296,42 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("completedExampleCount")]
         public virtual System.Nullable<long> CompletedExampleCount { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Time the AnnotatedDataset was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. The description of the AnnotatedDataset. It is specified in HumanAnnotationConfig when user
@@ -4462,8 +4614,41 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
     /// <summary>Records a failed evaluation job run.</summary>
     public class GoogleCloudDatalabelingV1beta1Attempt : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _attemptTimeRaw;
+
+        private object _attemptTime;
+
         [Newtonsoft.Json.JsonPropertyAttribute("attemptTime")]
-        public virtual object AttemptTime { get; set; }
+        public virtual string AttemptTimeRaw
+        {
+            get => _attemptTimeRaw;
+            set
+            {
+                _attemptTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _attemptTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="AttemptTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use AttemptTimeDateTimeOffset instead.")]
+        public virtual object AttemptTime
+        {
+            get => _attemptTime;
+            set
+            {
+                _attemptTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _attemptTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="AttemptTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? AttemptTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(AttemptTimeRaw);
+            set => AttemptTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Details of errors that occurred.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("partialFailures")]
@@ -4684,9 +4869,42 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
     /// <summary>Metadata of a CreateInstruction operation.</summary>
     public class GoogleCloudDatalabelingV1beta1CreateInstructionMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Timestamp when create instruction request was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The name of the created Instruction. projects/{project_id}/instructions/{instruction_id}</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("instruction")]
@@ -4761,9 +4979,42 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("blockingResources")]
         public virtual System.Collections.Generic.IList<string> BlockingResources { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Time the dataset is created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The number of data items in the dataset.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dataItemCount")]
@@ -4787,12 +5038,47 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("inputConfigs")]
         public virtual System.Collections.Generic.IList<GoogleCloudDatalabelingV1beta1InputConfig> InputConfigs { get; set; }
 
+        private string _lastMigrateTimeRaw;
+
+        private object _lastMigrateTime;
+
         /// <summary>
         /// Last time that the Dataset is migrated to AI Platform V2. If any of the AnnotatedDataset is migrated, the
         /// last_migration_time in Dataset is also updated.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastMigrateTime")]
-        public virtual object LastMigrateTime { get; set; }
+        public virtual string LastMigrateTimeRaw
+        {
+            get => _lastMigrateTimeRaw;
+            set
+            {
+                _lastMigrateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastMigrateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastMigrateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastMigrateTimeDateTimeOffset instead.")]
+        public virtual object LastMigrateTime
+        {
+            get => _lastMigrateTime;
+            set
+            {
+                _lastMigrateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastMigrateTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastMigrateTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastMigrateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastMigrateTimeRaw);
+            set => LastMigrateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. Dataset resource name, format is: projects/{project_id}/datasets/{dataset_id}
@@ -4821,9 +5107,42 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("config")]
         public virtual GoogleCloudDatalabelingV1beta1EvaluationConfig Config { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Timestamp for when this evaluation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. The number of items in the ground truth dataset that were used for this evaluation. Only
@@ -4832,9 +5151,44 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("evaluatedItemCount")]
         public virtual System.Nullable<long> EvaluatedItemCount { get; set; }
 
+        private string _evaluationJobRunTimeRaw;
+
+        private object _evaluationJobRunTime;
+
         /// <summary>Output only. Timestamp for when the evaluation job that created this evaluation ran.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("evaluationJobRunTime")]
-        public virtual object EvaluationJobRunTime { get; set; }
+        public virtual string EvaluationJobRunTimeRaw
+        {
+            get => _evaluationJobRunTimeRaw;
+            set
+            {
+                _evaluationJobRunTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _evaluationJobRunTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EvaluationJobRunTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EvaluationJobRunTimeDateTimeOffset instead.")]
+        public virtual object EvaluationJobRunTime
+        {
+            get => _evaluationJobRunTime;
+            set
+            {
+                _evaluationJobRunTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _evaluationJobRunTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="EvaluationJobRunTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EvaluationJobRunTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EvaluationJobRunTimeRaw);
+            set => EvaluationJobRunTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. Metrics comparing predictions to ground truth labels.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("evaluationMetrics")]
@@ -4886,9 +5240,42 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("attempts")]
         public virtual System.Collections.Generic.IList<GoogleCloudDatalabelingV1beta1Attempt> Attempts { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Timestamp of when this evaluation job was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Required. Description of the job. The description can be up to 25,000 characters long.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
@@ -5155,9 +5542,42 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("annotatedDataset")]
         public virtual string AnnotatedDataset { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Timestamp when export dataset request was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The name of dataset to be exported. "projects/*/datasets/*"</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dataset")]
@@ -5244,9 +5664,42 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("body")]
         public virtual string Body { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Create time.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The image storing this feedback if the feedback is an image representing operator's comments.
@@ -5291,13 +5744,81 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
 
     public class GoogleCloudDatalabelingV1beta1FeedbackThreadMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>When the thread is created</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _lastUpdateTimeRaw;
+
+        private object _lastUpdateTime;
 
         /// <summary>When the thread is last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastUpdateTime")]
-        public virtual object LastUpdateTime { get; set; }
+        public virtual string LastUpdateTimeRaw
+        {
+            get => _lastUpdateTimeRaw;
+            set
+            {
+                _lastUpdateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastUpdateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastUpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastUpdateTimeDateTimeOffset instead.")]
+        public virtual object LastUpdateTime
+        {
+            get => _lastUpdateTime;
+            set
+            {
+                _lastUpdateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastUpdateTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastUpdateTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastUpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastUpdateTimeRaw);
+            set => LastUpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         [Newtonsoft.Json.JsonPropertyAttribute("status")]
         public virtual string Status { get; set; }
@@ -5536,9 +6057,42 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
     /// <summary>Metadata of an ImportData operation.</summary>
     public class GoogleCloudDatalabelingV1beta1ImportDataOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Timestamp when import dataset request was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The name of imported dataset. "projects/*/datasets/*"</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dataset")]
@@ -5644,9 +6198,42 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("blockingResources")]
         public virtual System.Collections.Generic.IList<string> BlockingResources { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Creation time of instruction.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Deprecated: this instruction format is not supported any more. Instruction from a CSV file, such as for
@@ -5681,9 +6268,42 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("pdfInstruction")]
         public virtual GoogleCloudDatalabelingV1beta1PdfInstruction PdfInstruction { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. Last update time of instruction.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5807,9 +6427,42 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("annotatedDataset")]
         public virtual string AnnotatedDataset { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Timestamp when labeling request was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The name of dataset to be labeled. "projects/*/datasets/*"</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dataset")]
@@ -6776,9 +7429,42 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
     /// <summary>Metadata of a CreateInstruction operation.</summary>
     public class GoogleCloudDatalabelingV1p1alpha1CreateInstructionMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Timestamp when create instruction request was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The name of the created Instruction. projects/{project_id}/instructions/{instruction_id}</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("instruction")]
@@ -6804,9 +7490,42 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("annotatedDataset")]
         public virtual string AnnotatedDataset { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Timestamp when export dataset request was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The name of dataset to be exported. "projects/*/datasets/*"</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dataset")]
@@ -6887,9 +7606,42 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
     /// <summary>Metadata of an GenerateAnalysisReport operation.</summary>
     public class GoogleCloudDatalabelingV1p1alpha1GenerateAnalysisReportOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Timestamp when generate report request was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The name of the dataset for which the analysis report is generated. Format: "projects/*/datasets/*"
@@ -6973,9 +7725,42 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
     /// <summary>Metadata of an ImportData operation.</summary>
     public class GoogleCloudDatalabelingV1p1alpha1ImportDataOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Timestamp when import dataset request was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The name of imported dataset. "projects/*/datasets/*"</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dataset")]
@@ -7086,9 +7871,42 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("annotatedDataset")]
         public virtual string AnnotatedDataset { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Timestamp when labeling request was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The name of dataset to be labeled. "projects/*/datasets/*"</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dataset")]
@@ -7261,9 +8079,42 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
     /// <summary>Metadata of a CreateInstruction operation.</summary>
     public class GoogleCloudDatalabelingV1p2alpha1CreateInstructionMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Timestamp when create instruction request was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The name of the created Instruction. projects/{project_id}/instructions/{instruction_id}</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("instruction")]
@@ -7289,9 +8140,42 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("annotatedDataset")]
         public virtual string AnnotatedDataset { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Timestamp when export dataset request was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The name of dataset to be exported. "projects/*/datasets/*"</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dataset")]
@@ -7441,9 +8325,42 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
     /// <summary>Metadata of an ImportData operation.</summary>
     public class GoogleCloudDatalabelingV1p2alpha1ImportDataOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Timestamp when import dataset request was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The name of imported dataset. "projects/*/datasets/*"</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dataset")]
@@ -7554,9 +8471,42 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("annotatedDataset")]
         public virtual string AnnotatedDataset { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Timestamp when labeling request was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The name of dataset to be labeled. "projects/*/datasets/*"</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dataset")]
@@ -7771,8 +8721,8 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -7787,8 +8737,7 @@ namespace Google.Apis.DataLabeling.v1beta1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class GoogleProtobufEmpty : Google.Apis.Requests.IDirectResponseSchema
     {

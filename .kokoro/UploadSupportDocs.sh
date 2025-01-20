@@ -10,9 +10,7 @@ then
   exit 1
 fi
 
-# Make sure we have the most recent version of pip, then install the gcp-docuploader package
-python -m pip install --upgrade pip
-python -m pip install -q gcp-docuploader
+dotnet tool restore > /dev/null
 
 declare -r service_account_json=$(realpath $1)
 declare -r staging_bucket=$2
@@ -22,15 +20,15 @@ cd $repo_root
 # Extract the support libraries version number from the XML.
 # This is pretty horrible, but it works...
 declare -r version=$(grep \<Version\> Src/Support/CommonProjectProperties.xml | sed 's/</>/g' | cut -d\> -f 3)
-declare -r packages="Google.Apis.Core Google.Apis Google.Apis.Auth Google.Apis.Auth.Mvc Google.Apis.Auth.AspNetCore"
+declare -r packages="Google.Apis.Core Google.Apis Google.Apis.Auth Google.Apis.Auth.AspNetCore3"
 
 for pkg in $packages
 do
   pushd Src/Support/$pkg/obj/site
   echo "Generating metadata for $pkg"
-  python -m docuploader create-metadata --name $pkg --version $version --language dotnet --github-repository googleapis/google-api-dotnet-client
+  dotnet docuploader create-metadata --name $pkg --version $version --language dotnet --github-repository googleapis/google-api-dotnet-client
 
   echo "Final upload stage"
-  python -m docuploader upload . --credentials $service_account_json --staging-bucket $staging_bucket
+  dotnet docuploader upload --documentation-path . --credentials $service_account_json --staging-bucket $staging_bucket
   popd > /dev/null
 done

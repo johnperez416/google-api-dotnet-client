@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,6 +41,8 @@ namespace Google.Apis.Safebrowsing.v4
             ThreatListUpdates = new ThreatListUpdatesResource(this);
             ThreatLists = new ThreatListsResource(this);
             ThreatMatches = new ThreatMatchesResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://safebrowsing.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://safebrowsing.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -50,23 +52,16 @@ namespace Google.Apis.Safebrowsing.v4
         public override string Name => "safebrowsing";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://safebrowsing.googleapis.com/";
-        #else
-            "https://safebrowsing.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://safebrowsing.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Gets the EncodedFullHashes resource.</summary>
         public virtual EncodedFullHashesResource EncodedFullHashes { get; }
@@ -289,7 +284,7 @@ namespace Google.Apis.Safebrowsing.v4
         /// <param name="encodedRequest">A serialized FindFullHashesRequest proto.</param>
         public virtual GetRequest Get(string encodedRequest)
         {
-            return new GetRequest(service, encodedRequest);
+            return new GetRequest(this.service, encodedRequest);
         }
 
         /// <summary></summary>
@@ -375,7 +370,7 @@ namespace Google.Apis.Safebrowsing.v4
         /// <param name="encodedRequest">A serialized FetchThreatListUpdatesRequest proto.</param>
         public virtual GetRequest Get(string encodedRequest)
         {
-            return new GetRequest(service, encodedRequest);
+            return new GetRequest(this.service, encodedRequest);
         }
 
         /// <summary></summary>
@@ -461,7 +456,7 @@ namespace Google.Apis.Safebrowsing.v4
         /// <param name="body">The body of the request.</param>
         public virtual FindRequest Find(Google.Apis.Safebrowsing.v4.Data.GoogleSecuritySafebrowsingV4FindFullHashesRequest body)
         {
-            return new FindRequest(service, body);
+            return new FindRequest(this.service, body);
         }
 
         /// <summary>Finds the full hashes that match the requested hash prefixes.</summary>
@@ -518,7 +513,7 @@ namespace Google.Apis.Safebrowsing.v4
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.Safebrowsing.v4.Data.GoogleSecuritySafebrowsingV4ThreatHit body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>
@@ -577,7 +572,7 @@ namespace Google.Apis.Safebrowsing.v4
         /// <param name="body">The body of the request.</param>
         public virtual FetchRequest Fetch(Google.Apis.Safebrowsing.v4.Data.GoogleSecuritySafebrowsingV4FetchThreatListUpdatesRequest body)
         {
-            return new FetchRequest(service, body);
+            return new FetchRequest(this.service, body);
         }
 
         /// <summary>
@@ -632,7 +627,7 @@ namespace Google.Apis.Safebrowsing.v4
         /// <summary>Lists the Safe Browsing threat lists available for download.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>Lists the Safe Browsing threat lists available for download.</summary>
@@ -679,7 +674,7 @@ namespace Google.Apis.Safebrowsing.v4
         /// <param name="body">The body of the request.</param>
         public virtual FindRequest Find(Google.Apis.Safebrowsing.v4.Data.GoogleSecuritySafebrowsingV4FindThreatMatchesRequest body)
         {
-            return new FindRequest(service, body);
+            return new FindRequest(this.service, body);
         }
 
         /// <summary>Finds the threat entries that match the Safe Browsing lists.</summary>
@@ -720,8 +715,7 @@ namespace Google.Apis.Safebrowsing.v4.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class GoogleProtobufEmpty : Google.Apis.Requests.IDirectResponseSchema
     {

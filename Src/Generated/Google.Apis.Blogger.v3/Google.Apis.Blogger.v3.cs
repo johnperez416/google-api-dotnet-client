@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,6 +42,8 @@ namespace Google.Apis.Blogger.v3
             PostUserInfos = new PostUserInfosResource(this);
             Posts = new PostsResource(this);
             Users = new UsersResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://blogger.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://blogger.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -51,25 +53,18 @@ namespace Google.Apis.Blogger.v3
         public override string Name => "blogger";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://blogger.googleapis.com/";
-        #else
-            "https://blogger.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://blogger.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
-        /// <summary>Available OAuth 2.0 scopes for use with the Blogger API v3.</summary>
+        /// <summary>Available OAuth 2.0 scopes for use with the Blogger API.</summary>
         public class Scope
         {
             /// <summary>Manage your Blogger account</summary>
@@ -79,7 +74,7 @@ namespace Google.Apis.Blogger.v3
             public static string BloggerReadonly = "https://www.googleapis.com/auth/blogger.readonly";
         }
 
-        /// <summary>Available OAuth 2.0 scope constants for use with the Blogger API v3.</summary>
+        /// <summary>Available OAuth 2.0 scope constants for use with the Blogger API.</summary>
         public static class ScopeConstants
         {
             /// <summary>Manage your Blogger account</summary>
@@ -314,7 +309,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="blogId"><c>null</c></param>
         public virtual GetRequest Get(string userId, string blogId)
         {
-            return new GetRequest(service, userId, blogId);
+            return new GetRequest(this.service, userId, blogId);
         }
 
         /// <summary>Gets one blog and user info pair by blog id and user id.</summary>
@@ -396,7 +391,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="blogId"><c>null</c></param>
         public virtual GetRequest Get(string blogId)
         {
-            return new GetRequest(service, blogId);
+            return new GetRequest(this.service, blogId);
         }
 
         /// <summary>Gets a blog by id.</summary>
@@ -481,7 +476,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="url"><c>null</c></param>
         public virtual GetByUrlRequest GetByUrl(string url)
         {
-            return new GetByUrlRequest(service, url);
+            return new GetByUrlRequest(this.service, url);
         }
 
         /// <summary>Gets a blog by url.</summary>
@@ -555,7 +550,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="userId"><c>null</c></param>
         public virtual ListByUserRequest ListByUser(string userId)
         {
-            return new ListByUserRequest(service, userId);
+            return new ListByUserRequest(this.service, userId);
         }
 
         /// <summary>Lists blogs by user.</summary>
@@ -726,7 +721,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="commentId"><c>null</c></param>
         public virtual ApproveRequest Approve(string blogId, string postId, string commentId)
         {
-            return new ApproveRequest(service, blogId, postId, commentId);
+            return new ApproveRequest(this.service, blogId, postId, commentId);
         }
 
         /// <summary>Marks a comment as not spam by blog id, post id and comment id.</summary>
@@ -796,7 +791,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="commentId"><c>null</c></param>
         public virtual DeleteRequest Delete(string blogId, string postId, string commentId)
         {
-            return new DeleteRequest(service, blogId, postId, commentId);
+            return new DeleteRequest(this.service, blogId, postId, commentId);
         }
 
         /// <summary>Deletes a comment by blog id, post id and comment id.</summary>
@@ -866,7 +861,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="commentId"><c>null</c></param>
         public virtual GetRequest Get(string blogId, string postId, string commentId)
         {
-            return new GetRequest(service, blogId, postId, commentId);
+            return new GetRequest(this.service, blogId, postId, commentId);
         }
 
         /// <summary>Gets a comment by id.</summary>
@@ -965,7 +960,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="postId"><c>null</c></param>
         public virtual ListRequest List(string blogId, string postId)
         {
-            return new ListRequest(service, blogId, postId);
+            return new ListRequest(this.service, blogId, postId);
         }
 
         /// <summary>Lists comments.</summary>
@@ -1136,7 +1131,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="blogId"><c>null</c></param>
         public virtual ListByBlogRequest ListByBlog(string blogId)
         {
-            return new ListByBlogRequest(service, blogId);
+            return new ListByBlogRequest(this.service, blogId);
         }
 
         /// <summary>Lists comments by blog.</summary>
@@ -1270,7 +1265,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="commentId"><c>null</c></param>
         public virtual MarkAsSpamRequest MarkAsSpam(string blogId, string postId, string commentId)
         {
-            return new MarkAsSpamRequest(service, blogId, postId, commentId);
+            return new MarkAsSpamRequest(this.service, blogId, postId, commentId);
         }
 
         /// <summary>Marks a comment as spam by blog id, post id and comment id.</summary>
@@ -1340,7 +1335,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="commentId"><c>null</c></param>
         public virtual RemoveContentRequest RemoveContent(string blogId, string postId, string commentId)
         {
-            return new RemoveContentRequest(service, blogId, postId, commentId);
+            return new RemoveContentRequest(this.service, blogId, postId, commentId);
         }
 
         /// <summary>Removes the content of a comment by blog id, post id and comment id.</summary>
@@ -1423,7 +1418,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="blogId"><c>null</c></param>
         public virtual GetRequest Get(string blogId)
         {
-            return new GetRequest(service, blogId);
+            return new GetRequest(this.service, blogId);
         }
 
         /// <summary>Gets page views by blog id.</summary>
@@ -1512,7 +1507,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="pageId"><c>null</c></param>
         public virtual DeleteRequest Delete(string blogId, string pageId)
         {
-            return new DeleteRequest(service, blogId, pageId);
+            return new DeleteRequest(this.service, blogId, pageId);
         }
 
         /// <summary>Deletes a page by blog id and page id.</summary>
@@ -1531,6 +1526,10 @@ namespace Google.Apis.Blogger.v3
 
             [Google.Apis.Util.RequestParameterAttribute("pageId", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string PageId { get; private set; }
+
+            /// <summary>Move to Trash if possible</summary>
+            [Google.Apis.Util.RequestParameterAttribute("useTrash", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> UseTrash { get; set; }
 
             /// <summary>Gets the method name.</summary>
             public override string MethodName => "delete";
@@ -1561,6 +1560,14 @@ namespace Google.Apis.Blogger.v3
                     DefaultValue = null,
                     Pattern = null,
                 });
+                RequestParameters.Add("useTrash", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "useTrash",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
             }
         }
 
@@ -1569,7 +1576,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="pageId"><c>null</c></param>
         public virtual GetRequest Get(string blogId, string pageId)
         {
-            return new GetRequest(service, blogId, pageId);
+            return new GetRequest(this.service, blogId, pageId);
         }
 
         /// <summary>Gets a page by blog id and page id.</summary>
@@ -1656,7 +1663,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="blogId"><c>null</c></param>
         public virtual InsertRequest Insert(Google.Apis.Blogger.v3.Data.Page body, string blogId)
         {
-            return new InsertRequest(service, body, blogId);
+            return new InsertRequest(this.service, body, blogId);
         }
 
         /// <summary>Inserts a page.</summary>
@@ -1718,7 +1725,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="blogId"><c>null</c></param>
         public virtual ListRequest List(string blogId)
         {
-            return new ListRequest(service, blogId);
+            return new ListRequest(this.service, blogId);
         }
 
         /// <summary>Lists pages.</summary>
@@ -1758,6 +1765,10 @@ namespace Google.Apis.Blogger.v3
                 /// <summary></summary>
                 [Google.Apis.Util.StringValueAttribute("DRAFT")]
                 DRAFT = 1,
+
+                /// <summary></summary>
+                [Google.Apis.Util.StringValueAttribute("SOFT_TRASHED")]
+                SOFTTRASHED = 2,
             }
 
             [Google.Apis.Util.RequestParameterAttribute("view", Google.Apis.Util.RequestParameterType.Query)]
@@ -1852,7 +1863,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="pageId"><c>null</c></param>
         public virtual PatchRequest Patch(Google.Apis.Blogger.v3.Data.Page body, string blogId, string pageId)
         {
-            return new PatchRequest(service, body, blogId, pageId);
+            return new PatchRequest(this.service, body, blogId, pageId);
         }
 
         /// <summary>Patches a page.</summary>
@@ -1938,7 +1949,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="pageId"><c>null</c></param>
         public virtual PublishRequest Publish(string blogId, string pageId)
         {
-            return new PublishRequest(service, blogId, pageId);
+            return new PublishRequest(this.service, blogId, pageId);
         }
 
         /// <summary>Publishes a page.</summary>
@@ -1995,7 +2006,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="pageId"><c>null</c></param>
         public virtual RevertRequest Revert(string blogId, string pageId)
         {
-            return new RevertRequest(service, blogId, pageId);
+            return new RevertRequest(this.service, blogId, pageId);
         }
 
         /// <summary>Reverts a published or scheduled page to draft state.</summary>
@@ -2053,7 +2064,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="pageId"><c>null</c></param>
         public virtual UpdateRequest Update(Google.Apis.Blogger.v3.Data.Page body, string blogId, string pageId)
         {
-            return new UpdateRequest(service, body, blogId, pageId);
+            return new UpdateRequest(this.service, body, blogId, pageId);
         }
 
         /// <summary>Updates a page by blog id and page id.</summary>
@@ -2155,7 +2166,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="postId"><c>null</c></param>
         public virtual GetRequest Get(string userId, string blogId, string postId)
         {
-            return new GetRequest(service, userId, blogId, postId);
+            return new GetRequest(this.service, userId, blogId, postId);
         }
 
         /// <summary>Gets one post and user info pair, by post_id and user_id.</summary>
@@ -2235,7 +2246,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="blogId"><c>null</c></param>
         public virtual ListRequest List(string userId, string blogId)
         {
-            return new ListRequest(service, userId, blogId);
+            return new ListRequest(this.service, userId, blogId);
         }
 
         /// <summary>Lists post and user info pairs.</summary>
@@ -2310,6 +2321,10 @@ namespace Google.Apis.Blogger.v3
                 /// <summary></summary>
                 [Google.Apis.Util.StringValueAttribute("SCHEDULED")]
                 SCHEDULED = 2,
+
+                /// <summary></summary>
+                [Google.Apis.Util.StringValueAttribute("SOFT_TRASHED")]
+                SOFTTRASHED = 3,
             }
 
             [Google.Apis.Util.RequestParameterAttribute("view", Google.Apis.Util.RequestParameterType.Query)]
@@ -2458,7 +2473,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="postId"><c>null</c></param>
         public virtual DeleteRequest Delete(string blogId, string postId)
         {
-            return new DeleteRequest(service, blogId, postId);
+            return new DeleteRequest(this.service, blogId, postId);
         }
 
         /// <summary>Deletes a post by blog id and post id.</summary>
@@ -2477,6 +2492,10 @@ namespace Google.Apis.Blogger.v3
 
             [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string PostId { get; private set; }
+
+            /// <summary>Move to Trash if possible</summary>
+            [Google.Apis.Util.RequestParameterAttribute("useTrash", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> UseTrash { get; set; }
 
             /// <summary>Gets the method name.</summary>
             public override string MethodName => "delete";
@@ -2507,6 +2526,14 @@ namespace Google.Apis.Blogger.v3
                     DefaultValue = null,
                     Pattern = null,
                 });
+                RequestParameters.Add("useTrash", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "useTrash",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
             }
         }
 
@@ -2515,7 +2542,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="postId"><c>null</c></param>
         public virtual GetRequest Get(string blogId, string postId)
         {
-            return new GetRequest(service, blogId, postId);
+            return new GetRequest(this.service, blogId, postId);
         }
 
         /// <summary>Gets a post by blog id and post id</summary>
@@ -2635,7 +2662,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="path"><c>null</c></param>
         public virtual GetByPathRequest GetByPath(string blogId, string path)
         {
-            return new GetByPathRequest(service, blogId, path);
+            return new GetByPathRequest(this.service, blogId, path);
         }
 
         /// <summary>Gets a post by path.</summary>
@@ -2733,7 +2760,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="blogId"><c>null</c></param>
         public virtual InsertRequest Insert(Google.Apis.Blogger.v3.Data.Post body, string blogId)
         {
-            return new InsertRequest(service, body, blogId);
+            return new InsertRequest(this.service, body, blogId);
         }
 
         /// <summary>Inserts a post.</summary>
@@ -2817,7 +2844,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="blogId"><c>null</c></param>
         public virtual ListRequest List(string blogId)
         {
-            return new ListRequest(service, blogId);
+            return new ListRequest(this.service, blogId);
         }
 
         /// <summary>Lists posts.</summary>
@@ -2869,6 +2896,26 @@ namespace Google.Apis.Blogger.v3
             [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string PageToken { get; set; }
 
+            /// <summary>Sort direction applied to post list.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("sortOption", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<SortOptionEnum> SortOption { get; set; }
+
+            /// <summary>Sort direction applied to post list.</summary>
+            public enum SortOptionEnum
+            {
+                /// <summary>The unspecified sort option.</summary>
+                [Google.Apis.Util.StringValueAttribute("SORT_OPTION_UNSPECIFIED")]
+                SORTOPTIONUNSPECIFIED = 0,
+
+                /// <summary>The option to sort posts in descending order in time.</summary>
+                [Google.Apis.Util.StringValueAttribute("DESCENDING")]
+                DESCENDING = 1,
+
+                /// <summary>The option to sort posts in ascending order in time.</summary>
+                [Google.Apis.Util.StringValueAttribute("ASCENDING")]
+                ASCENDING = 2,
+            }
+
             [Google.Apis.Util.RequestParameterAttribute("startDate", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string StartDate { get; set; }
 
@@ -2891,6 +2938,10 @@ namespace Google.Apis.Blogger.v3
                 /// <summary></summary>
                 [Google.Apis.Util.StringValueAttribute("SCHEDULED")]
                 SCHEDULED = 2,
+
+                /// <summary></summary>
+                [Google.Apis.Util.StringValueAttribute("SOFT_TRASHED")]
+                SOFTTRASHED = 3,
             }
 
             [Google.Apis.Util.RequestParameterAttribute("view", Google.Apis.Util.RequestParameterType.Query)]
@@ -2992,6 +3043,14 @@ namespace Google.Apis.Blogger.v3
                     DefaultValue = null,
                     Pattern = null,
                 });
+                RequestParameters.Add("sortOption", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "sortOption",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = "DESCENDING",
+                    Pattern = null,
+                });
                 RequestParameters.Add("startDate", new Google.Apis.Discovery.Parameter
                 {
                     Name = "startDate",
@@ -3025,7 +3084,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="postId"><c>null</c></param>
         public virtual PatchRequest Patch(Google.Apis.Blogger.v3.Data.Post body, string blogId, string postId)
         {
-            return new PatchRequest(service, body, blogId, postId);
+            return new PatchRequest(this.service, body, blogId, postId);
         }
 
         /// <summary>Patches a post.</summary>
@@ -3144,7 +3203,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="postId"><c>null</c></param>
         public virtual PublishRequest Publish(string blogId, string postId)
         {
-            return new PublishRequest(service, blogId, postId);
+            return new PublishRequest(this.service, blogId, postId);
         }
 
         /// <summary>Publishes a post.</summary>
@@ -3212,7 +3271,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="postId"><c>null</c></param>
         public virtual RevertRequest Revert(string blogId, string postId)
         {
-            return new RevertRequest(service, blogId, postId);
+            return new RevertRequest(this.service, blogId, postId);
         }
 
         /// <summary>Reverts a published or scheduled post to draft state.</summary>
@@ -3269,7 +3328,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="q"><c>null</c></param>
         public virtual SearchRequest Search(string blogId, string q)
         {
-            return new SearchRequest(service, blogId, q);
+            return new SearchRequest(this.service, blogId, q);
         }
 
         /// <summary>Searches for posts matching given query terms in the specified blog.</summary>
@@ -3364,7 +3423,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="postId"><c>null</c></param>
         public virtual UpdateRequest Update(Google.Apis.Blogger.v3.Data.Post body, string blogId, string postId)
         {
-            return new UpdateRequest(service, body, blogId, postId);
+            return new UpdateRequest(this.service, body, blogId, postId);
         }
 
         /// <summary>Updates a post by blog id and post id.</summary>
@@ -3497,7 +3556,7 @@ namespace Google.Apis.Blogger.v3
         /// <param name="userId"><c>null</c></param>
         public virtual GetRequest Get(string userId)
         {
-            return new GetRequest(service, userId);
+            return new GetRequest(this.service, userId);
         }
 
         /// <summary>Gets one user by user_id.</summary>
@@ -3875,6 +3934,10 @@ namespace Google.Apis.Blogger.v3.Data
         [Newtonsoft.Json.JsonPropertyAttribute("title")]
         public virtual string Title { get; set; }
 
+        /// <summary>RFC 3339 date-time when this Page was trashed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("trashed")]
+        public virtual string Trashed { get; set; }
+
         /// <summary>RFC 3339 date-time when this Page was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updated")]
         public virtual string Updated { get; set; }
@@ -4038,6 +4101,10 @@ namespace Google.Apis.Blogger.v3.Data
         /// <summary>The title link URL, similar to atom's related link.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("titleLink")]
         public virtual string TitleLink { get; set; }
+
+        /// <summary>RFC 3339 date-time when this Post was last trashed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("trashed")]
+        public virtual string Trashed { get; set; }
 
         /// <summary>RFC 3339 date-time when this Post was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updated")]

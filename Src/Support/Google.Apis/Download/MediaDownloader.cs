@@ -14,18 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+using Google.Apis.Http;
+using Google.Apis.Logging;
+using Google.Apis.Requests;
+using Google.Apis.Responses;
+using Google.Apis.Services;
+using Google.Apis.Util;
 using System;
 using System.IO;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
-
-using Google.Apis.Logging;
-using Google.Apis.Media;
-using Google.Apis.Services;
-using Google.Apis.Util;
-using System.Net.Http.Headers;
-using Google.Apis.Http;
 
 namespace Google.Apis.Download
 {
@@ -88,7 +89,7 @@ namespace Google.Apis.Download
         /// Download progress model, which contains the status of the download, the amount of bytes whose where 
         /// downloaded so far, and an exception in case an error had occurred.
         /// </summary>
-        private class DownloadProgress : IDownloadProgress
+        internal class DownloadProgress : IDownloadProgress
         {
             /// <summary>Constructs a new progress instance.</summary>
             /// <param name="status">The status of the download.</param>
@@ -107,6 +108,7 @@ namespace Google.Apis.Download
                 Status = DownloadStatus.Failed;
                 BytesDownloaded = bytes;
                 Exception = exception;
+                ExceptionDispatchInfo = ExceptionDispatchInfo.Capture(exception);
             }
 
             /// <summary>Gets or sets the status of the download.</summary>
@@ -117,6 +119,12 @@ namespace Google.Apis.Download
 
             /// <summary>Gets or sets the exception which occurred during the download or <c>null</c>.</summary>
             public Exception Exception { get; private set; }
+
+            /// <summary>
+            /// The original dispatch information for <see cref="Exception"/>. This is null
+            /// if and only if <see cref="Exception"/> is null.
+            /// </summary>
+            public ExceptionDispatchInfo ExceptionDispatchInfo { get; }
         }
 
         /// <summary>
@@ -268,7 +276,7 @@ namespace Google.Apis.Download
             request.Headers.Range = Range;
             if (ResponseStreamInterceptorProvider != null)
             {
-                request.Properties[ConfigurableMessageHandler.ResponseStreamInterceptorProviderKey] = ResponseStreamInterceptorProvider;
+                request.SetOption(ConfigurableMessageHandler.ResponseStreamInterceptorProviderKey, ResponseStreamInterceptorProvider);
             }
             ModifyRequest?.Invoke(request);
 
@@ -285,7 +293,12 @@ namespace Google.Apis.Download
                 {
                     if (!response.IsSuccessStatusCode)
                     {
-                        throw await MediaApiErrorHandling.ExceptionForResponseAsync(service, response).ConfigureAwait(false);
+                        RequestError error = await response.DeserializeErrorAsync(service.Name, service.Serializer).ConfigureAwait(false);
+                        throw new GoogleApiException(service.Name)
+                        {
+                            Error = error,
+                            HttpStatusCode = response.StatusCode
+                        };
                     }
 
                     OnResponseReceived(response);

@@ -14,18 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+using Google.Apis.Core.Util;
+using Google.Apis.Logging;
+using Google.Apis.Testing;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
-using Google.Apis.Logging;
-using Google.Apis.Testing;
-using System.Net.Http.Headers;
 
 namespace Google.Apis.Http
 {
@@ -48,29 +48,39 @@ namespace Google.Apis.Http
         public const int MaxAllowedNumTries = 20;
 
         /// <summary>
-        /// Key for unsuccessful response handlers in an <see cref="HttpRequestMessage"/> properties.
+        /// Key for unsuccessful response handlers in an <see cref="HttpRequestMessage"/> options.
         /// </summary>
         public const string UnsuccessfulResponseHandlerKey = "__UnsuccessfulResponseHandlerKey";
 
         /// <summary>
-        /// Key for exception handlers in an <see cref="HttpRequestMessage"/> properties.
+        /// Key for exception handlers in an <see cref="HttpRequestMessage"/> options.
         /// </summary>
         public const string ExceptionHandlerKey = "__ExceptionHandlerKey";
 
         /// <summary>
-        /// Key for execute handlers in an <see cref="HttpRequestMessage"/> properties.
+        /// Key for execute handlers in an <see cref="HttpRequestMessage"/> options.
         /// </summary>
         public const string ExecuteInterceptorKey = "__ExecuteInterceptorKey";
 
         /// <summary>
-        /// Key for a stream response interceptor provider in an <see cref="HttpRequestMessage"/> properties.
+        /// Key for a stream response interceptor provider in an <see cref="HttpRequestMessage"/> options.
         /// </summary>
         public const string ResponseStreamInterceptorProviderKey = "__ResponseStreamInterceptorProviderKey";
 
         /// <summary>
-        /// Key for a credential in a <see cref="HttpRequestMessage"/> properties.
+        /// Key for a credential in a <see cref="HttpRequestMessage"/> options.
         /// </summary>
         public const string CredentialKey = "__CredentialKey";
+
+        /// <summary>
+        /// Key for a universe domain in a <see cref="HttpRequestMessage"/> options.
+        /// </summary>
+        internal const string UniverseDomainKey = "__UniverseDomainKey";
+
+        /// <summary>
+        /// Key for request specific max retries.
+        /// </summary>
+        public const string MaxRetriesKey = "__MaxRetriesKey";
 
         /// <summary>The current API version of this client library.</summary>
         private static readonly string ApiVersion = Google.Apis.Util.Utilities.GetLibraryVersion();
@@ -340,6 +350,13 @@ namespace Google.Apis.Http
         /// </summary>
         public IHttpExecuteInterceptor Credential { get; set; }
 
+        /// <summary>
+        /// The universe domain to include as an option in the request.
+        /// This may be used by the <see cref="Credential"/> to validate against its own universe domain.
+        /// May be null, in which case no universe domain will be included in the request.
+        /// </summary>
+        public string UniverseDomain { get; set; }
+
         /// <summary>Constructs a new configurable message handler.</summary>
         public ConfigurableMessageHandler(HttpMessageHandler httpMessageHandler)
             : base(httpMessageHandler)
@@ -376,7 +393,7 @@ namespace Google.Apis.Http
             for (int i = 0; i < bodyBytes.Length; i++)
             {
                 var b = bodyBytes[i];
-                bodyChars[i] = b >= 32 && b <= 126 ? (char)b : '.';
+                bodyChars[i] = b >= 32 && b <= 126 ? (char) b : '.';
             }
             InstanceLogger.Debug(fmtText, new string(bodyChars));
         }
@@ -396,7 +413,8 @@ namespace Google.Apis.Http
                 loggingRequestId = Interlocked.Increment(ref _loggingRequestId).ToString("X8");
             }
 
-            int triesRemaining = NumTries;
+            int maxRetries = GetEffectiveMaxRetries(request);
+            int triesRemaining = maxRetries;
             int redirectRemaining = NumRedirects;
 
             Exception lastException = null;
@@ -410,6 +428,13 @@ namespace Google.Apis.Http
             if (apiClientHeader != null)
             {
                 request.Headers.Add("x-goog-api-client", apiClientHeader);
+            }
+
+            // Set the universe domain as a request option. Credentials may use it to validate it
+            // against their own universe domain.
+            if (UniverseDomain is not null)
+            {
+                request.SetOption(UniverseDomainKey, UniverseDomain);
             }
 
             HttpResponseMessage response = null;
@@ -428,8 +453,7 @@ namespace Google.Apis.Http
                 {
                     interceptors = executeInterceptors.ToList();
                 }
-                if (request.Properties.TryGetValue(ExecuteInterceptorKey, out var interceptorsValue) &&
-                    interceptorsValue is List<IHttpExecuteInterceptor> perCallinterceptors)
+                if (request.TryGetOption(ExecuteInterceptorKey, out List<IHttpExecuteInterceptor> perCallinterceptors))
                 {
                     interceptors.AddRange(perCallinterceptors);
                 }
@@ -472,7 +496,7 @@ namespace Google.Apis.Http
                 }
 
                 // Decrease the number of retries.
-                if (response == null || ((int)response.StatusCode >= 400 || (int)response.StatusCode < 200))
+                if (response == null || ((int) response.StatusCode >= 400 || (int) response.StatusCode < 200))
                 {
                     triesRemaining--;
                 }
@@ -488,8 +512,7 @@ namespace Google.Apis.Http
                     {
                         handlers = exceptionHandlers.ToList();
                     }
-                    if (request.Properties.TryGetValue(ExceptionHandlerKey, out var handlersValue) &&
-                        handlersValue is List<IHttpExceptionHandler> perCallHandlers)
+                    if (request.TryGetOption(ExceptionHandlerKey, out List<IHttpExceptionHandler> perCallHandlers))
                     {
                         handlers.AddRange(perCallHandlers);
                     }
@@ -498,13 +521,13 @@ namespace Google.Apis.Http
                     foreach (var handler in handlers)
                     {
                         exceptionHandled |= await handler.HandleExceptionAsync(new HandleExceptionArgs
-                            {
-                                Request = request,
-                                Exception = lastException,
-                                TotalTries = NumTries,
-                                CurrentFailedTry = NumTries - triesRemaining,
-                                CancellationToken = cancellationToken
-                            }).ConfigureAwait(false);
+                        {
+                            Request = request,
+                            Exception = lastException,
+                            TotalTries = maxRetries,
+                            CurrentFailedTry = maxRetries - triesRemaining,
+                            CancellationToken = cancellationToken
+                        }).ConfigureAwait(false);
                     }
 
                     if (!exceptionHandled)
@@ -551,8 +574,7 @@ namespace Google.Apis.Http
                         {
                             handlers = unsuccessfulResponseHandlers.ToList();
                         }
-                        if (request.Properties.TryGetValue(UnsuccessfulResponseHandlerKey, out var handlersValue) &&
-                            handlersValue is List<IHttpUnsuccessfulResponseHandler> perCallHandlers)
+                        if (request.TryGetOption(UnsuccessfulResponseHandlerKey, out List<IHttpUnsuccessfulResponseHandler> perCallHandlers))
                         {
                             handlers.AddRange(perCallHandlers);
                         }
@@ -561,8 +583,8 @@ namespace Google.Apis.Http
                         {
                             Request = request,
                             Response = response,
-                            TotalTries = NumTries,
-                            CurrentFailedTry = NumTries - triesRemaining,
+                            TotalTries = maxRetries,
+                            CurrentFailedTry = maxRetries - triesRemaining,
                             CancellationToken = cancellationToken
                         };
 
@@ -664,8 +686,10 @@ namespace Google.Apis.Http
         }
 
         private IHttpExecuteInterceptor GetEffectiveCredential(HttpRequestMessage request) =>
-            (request.Properties.TryGetValue(CredentialKey, out var cred) && cred is IHttpExecuteInterceptor callCredential)
-            ? callCredential : Credential;
+            request.TryGetOption(CredentialKey, out IHttpExecuteInterceptor callCredential) ? callCredential : Credential;
+
+        private int GetEffectiveMaxRetries(HttpRequestMessage request) =>
+            request.TryGetOption(MaxRetriesKey, out int perRequestMaxRetries) ? perRequestMaxRetries : NumTries;
 
         /// <summary>
         /// Handles redirect if the response's status code is redirect, redirects are turned on, and the header has

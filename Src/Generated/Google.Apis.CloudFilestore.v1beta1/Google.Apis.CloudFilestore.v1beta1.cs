@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.CloudFilestore.v1beta1
         public CloudFilestoreService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://file.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://file.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.CloudFilestore.v1beta1
         public override string Name => "file";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://file.googleapis.com/";
-        #else
-            "https://file.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://file.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Filestore API.</summary>
         public class Scope
@@ -323,12 +318,12 @@ namespace Google.Apis.CloudFilestore.v1beta1
                 /// <param name="body">The body of the request.</param>
                 /// <param name="parent">
                 /// Required. The backup's project and location, in the format
-                /// `projects/{project_id}/locations/{location}`. In Cloud Filestore, backup locations map to GCP
+                /// `projects/{project_id}/locations/{location}`. In Filestore, backup locations map to Google Cloud
                 /// regions, for example **us-west1**.
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.CloudFilestore.v1beta1.Data.Backup body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Creates a backup.</summary>
@@ -344,7 +339,7 @@ namespace Google.Apis.CloudFilestore.v1beta1
 
                     /// <summary>
                     /// Required. The backup's project and location, in the format
-                    /// `projects/{project_id}/locations/{location}`. In Cloud Filestore, backup locations map to GCP
+                    /// `projects/{project_id}/locations/{location}`. In Filestore, backup locations map to Google Cloud
                     /// regions, for example **us-west1**.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
@@ -403,7 +398,7 @@ namespace Google.Apis.CloudFilestore.v1beta1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Deletes a backup.</summary>
@@ -454,7 +449,7 @@ namespace Google.Apis.CloudFilestore.v1beta1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets the details of a specific backup.</summary>
@@ -503,13 +498,13 @@ namespace Google.Apis.CloudFilestore.v1beta1
                 /// </summary>
                 /// <param name="parent">
                 /// Required. The project and location for which to retrieve backup information, in the format
-                /// `projects/{project_id}/locations/{location}`. In Cloud Filestore, backup locations map to GCP
+                /// `projects/{project_id}/locations/{location}`. In Filestore, backup locations map to Google Cloud
                 /// regions, for example **us-west1**. To retrieve backup information for all locations, use "-" for the
                 /// `{location}` value.
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
@@ -526,7 +521,7 @@ namespace Google.Apis.CloudFilestore.v1beta1
 
                     /// <summary>
                     /// Required. The project and location for which to retrieve backup information, in the format
-                    /// `projects/{project_id}/locations/{location}`. In Cloud Filestore, backup locations map to GCP
+                    /// `projects/{project_id}/locations/{location}`. In Filestore, backup locations map to Google Cloud
                     /// regions, for example **us-west1**. To retrieve backup information for all locations, use "-" for
                     /// the `{location}` value.
                     /// </summary>
@@ -616,7 +611,7 @@ namespace Google.Apis.CloudFilestore.v1beta1
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.CloudFilestore.v1beta1.Data.Backup body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>Updates the settings of a specific backup.</summary>
@@ -697,7 +692,380 @@ namespace Google.Apis.CloudFilestore.v1beta1
                 public InstancesResource(Google.Apis.Services.IClientService service)
                 {
                     this.service = service;
+                    Shares = new SharesResource(service);
                     Snapshots = new SnapshotsResource(service);
+                }
+
+                /// <summary>Gets the Shares resource.</summary>
+                public virtual SharesResource Shares { get; }
+
+                /// <summary>The "shares" collection of methods.</summary>
+                public class SharesResource
+                {
+                    private const string Resource = "shares";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public SharesResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>Creates a share.</summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="parent">
+                    /// Required. The Filestore Instance to create the share for, in the format
+                    /// `projects/{project_id}/locations/{location}/instances/{instance_id}`
+                    /// </param>
+                    public virtual CreateRequest Create(Google.Apis.CloudFilestore.v1beta1.Data.Share body, string parent)
+                    {
+                        return new CreateRequest(this.service, body, parent);
+                    }
+
+                    /// <summary>Creates a share.</summary>
+                    public class CreateRequest : CloudFilestoreBaseServiceRequest<Google.Apis.CloudFilestore.v1beta1.Data.Operation>
+                    {
+                        /// <summary>Constructs a new Create request.</summary>
+                        public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudFilestore.v1beta1.Data.Share body, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The Filestore Instance to create the share for, in the format
+                        /// `projects/{project_id}/locations/{location}/instances/{instance_id}`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>
+                        /// Required. The ID to use for the share. The ID must be unique within the specified instance.
+                        /// This value must start with a lowercase letter followed by up to 62 lowercase letters,
+                        /// numbers, or hyphens, and cannot end with a hyphen.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("shareId", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string ShareId { get; set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.CloudFilestore.v1beta1.Data.Share Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "create";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1beta1/{+parent}/shares";
+
+                        /// <summary>Initializes Create parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
+                            });
+                            RequestParameters.Add("shareId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "shareId",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+
+                    /// <summary>Deletes a share.</summary>
+                    /// <param name="name">
+                    /// Required. The share resource name, in the format
+                    /// `projects/{project_id}/locations/{location}/instances/{instance_id}/share/{share_id}`
+                    /// </param>
+                    public virtual DeleteRequest Delete(string name)
+                    {
+                        return new DeleteRequest(this.service, name);
+                    }
+
+                    /// <summary>Deletes a share.</summary>
+                    public class DeleteRequest : CloudFilestoreBaseServiceRequest<Google.Apis.CloudFilestore.v1beta1.Data.Operation>
+                    {
+                        /// <summary>Constructs a new Delete request.</summary>
+                        public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The share resource name, in the format
+                        /// `projects/{project_id}/locations/{location}/instances/{instance_id}/share/{share_id}`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "delete";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "DELETE";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1beta1/{+name}";
+
+                        /// <summary>Initializes Delete parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/instances/[^/]+/shares/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>Gets the details of a specific share.</summary>
+                    /// <param name="name">
+                    /// Required. The share resource name, in the format
+                    /// `projects/{project_id}/locations/{location}/instances/{instance_id}/shares/{share_id}`
+                    /// </param>
+                    public virtual GetRequest Get(string name)
+                    {
+                        return new GetRequest(this.service, name);
+                    }
+
+                    /// <summary>Gets the details of a specific share.</summary>
+                    public class GetRequest : CloudFilestoreBaseServiceRequest<Google.Apis.CloudFilestore.v1beta1.Data.Share>
+                    {
+                        /// <summary>Constructs a new Get request.</summary>
+                        public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The share resource name, in the format
+                        /// `projects/{project_id}/locations/{location}/instances/{instance_id}/shares/{share_id}`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "get";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1beta1/{+name}";
+
+                        /// <summary>Initializes Get parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/instances/[^/]+/shares/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>Lists all shares for a specified instance.</summary>
+                    /// <param name="parent">
+                    /// Required. The instance for which to retrieve share information, in the format
+                    /// `projects/{project_id}/locations/{location}/instances/{instance_id}`.
+                    /// </param>
+                    public virtual ListRequest List(string parent)
+                    {
+                        return new ListRequest(this.service, parent);
+                    }
+
+                    /// <summary>Lists all shares for a specified instance.</summary>
+                    public class ListRequest : CloudFilestoreBaseServiceRequest<Google.Apis.CloudFilestore.v1beta1.Data.ListSharesResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                        {
+                            Parent = parent;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The instance for which to retrieve share information, in the format
+                        /// `projects/{project_id}/locations/{location}/instances/{instance_id}`.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Parent { get; private set; }
+
+                        /// <summary>List filter.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string Filter { get; set; }
+
+                        /// <summary>Sort results. Supported values are "name", "name desc" or "" (unsorted).</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string OrderBy { get; set; }
+
+                        /// <summary>The maximum number of items to return.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>
+                        /// The next_page_token value to use if there are additional results to retrieve for this list
+                        /// request.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1beta1/{+parent}/shares";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "parent",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
+                            });
+                            RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "filter",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("orderBy", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "orderBy",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+
+                    /// <summary>Updates the settings of a specific share.</summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="name">
+                    /// Output only. The resource name of the share, in the format
+                    /// `projects/{project_id}/locations/{location_id}/instances/{instance_id}/shares/{share_id}`.
+                    /// </param>
+                    public virtual PatchRequest Patch(Google.Apis.CloudFilestore.v1beta1.Data.Share body, string name)
+                    {
+                        return new PatchRequest(this.service, body, name);
+                    }
+
+                    /// <summary>Updates the settings of a specific share.</summary>
+                    public class PatchRequest : CloudFilestoreBaseServiceRequest<Google.Apis.CloudFilestore.v1beta1.Data.Operation>
+                    {
+                        /// <summary>Constructs a new Patch request.</summary>
+                        public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudFilestore.v1beta1.Data.Share body, string name) : base(service)
+                        {
+                            Name = name;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Output only. The resource name of the share, in the format
+                        /// `projects/{project_id}/locations/{location_id}/instances/{instance_id}/shares/{share_id}`.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>
+                        /// Required. Mask of fields to update. At least one path must be supplied in this field. The
+                        /// elements of the repeated paths field may only include these fields: * "description" *
+                        /// "capacity_gb" * "labels" * "nfs_export_options"
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual object UpdateMask { get; set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.CloudFilestore.v1beta1.Data.Share Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "patch";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "PATCH";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1beta1/{+name}";
+
+                        /// <summary>Initializes Patch parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/instances/[^/]+/shares/[^/]+$",
+                            });
+                            RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "updateMask",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
                 }
 
                 /// <summary>Gets the Snapshots resource.</summary>
@@ -725,7 +1093,7 @@ namespace Google.Apis.CloudFilestore.v1beta1
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.CloudFilestore.v1beta1.Data.Snapshot body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>Creates a snapshot.</summary>
@@ -799,7 +1167,7 @@ namespace Google.Apis.CloudFilestore.v1beta1
                     /// </param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>Deletes a snapshot.</summary>
@@ -850,7 +1218,7 @@ namespace Google.Apis.CloudFilestore.v1beta1
                     /// </param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Gets the details of a specific snapshot.</summary>
@@ -903,7 +1271,7 @@ namespace Google.Apis.CloudFilestore.v1beta1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>
@@ -943,6 +1311,12 @@ namespace Google.Apis.CloudFilestore.v1beta1
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                         public virtual string PageToken { get; set; }
+
+                        /// <summary>
+                        /// Optional. If true, allow partial responses for multi-regional Aggregated List requests.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("returnPartialSuccess", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<bool> ReturnPartialSuccess { get; set; }
 
                         /// <summary>Gets the method name.</summary>
                         public override string MethodName => "list";
@@ -997,6 +1371,14 @@ namespace Google.Apis.CloudFilestore.v1beta1
                                 DefaultValue = null,
                                 Pattern = null,
                             });
+                            RequestParameters.Add("returnPartialSuccess", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "returnPartialSuccess",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
                         }
                     }
 
@@ -1008,7 +1390,7 @@ namespace Google.Apis.CloudFilestore.v1beta1
                     /// </param>
                     public virtual PatchRequest Patch(Google.Apis.CloudFilestore.v1beta1.Data.Snapshot body, string name)
                     {
-                        return new PatchRequest(service, body, name);
+                        return new PatchRequest(this.service, body, name);
                     }
 
                     /// <summary>Updates the settings of a specific snapshot.</summary>
@@ -1082,12 +1464,12 @@ namespace Google.Apis.CloudFilestore.v1beta1
                 /// <param name="body">The body of the request.</param>
                 /// <param name="parent">
                 /// Required. The instance's project and location, in the format
-                /// `projects/{project_id}/locations/{location}`. In Cloud Filestore, locations map to GCP zones, for
+                /// `projects/{project_id}/locations/{location}`. In Filestore, locations map to Google Cloud zones, for
                 /// example **us-west1-b**.
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.CloudFilestore.v1beta1.Data.Instance body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -1107,7 +1489,7 @@ namespace Google.Apis.CloudFilestore.v1beta1
 
                     /// <summary>
                     /// Required. The instance's project and location, in the format
-                    /// `projects/{project_id}/locations/{location}`. In Cloud Filestore, locations map to GCP zones,
+                    /// `projects/{project_id}/locations/{location}`. In Filestore, locations map to Google Cloud zones,
                     /// for example **us-west1-b**.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
@@ -1166,7 +1548,7 @@ namespace Google.Apis.CloudFilestore.v1beta1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Deletes an instance.</summary>
@@ -1232,7 +1614,7 @@ namespace Google.Apis.CloudFilestore.v1beta1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets the details of a specific instance.</summary>
@@ -1281,13 +1663,13 @@ namespace Google.Apis.CloudFilestore.v1beta1
                 /// </summary>
                 /// <param name="parent">
                 /// Required. The project and location for which to retrieve instance information, in the format
-                /// `projects/{project_id}/locations/{location}`. In Cloud Filestore, locations map to GCP zones, for
-                /// example **us-west1-b**. To retrieve instance information for all locations, use "-" for the
-                /// `{location}` value.
+                /// `projects/{project_id}/locations/{location}`. In Cloud Filestore, locations map to Google Cloud
+                /// zones, for example **us-west1-b**. To retrieve instance information for all locations, use "-" for
+                /// the `{location}` value.
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
@@ -1304,9 +1686,9 @@ namespace Google.Apis.CloudFilestore.v1beta1
 
                     /// <summary>
                     /// Required. The project and location for which to retrieve instance information, in the format
-                    /// `projects/{project_id}/locations/{location}`. In Cloud Filestore, locations map to GCP zones,
-                    /// for example **us-west1-b**. To retrieve instance information for all locations, use "-" for the
-                    /// `{location}` value.
+                    /// `projects/{project_id}/locations/{location}`. In Cloud Filestore, locations map to Google Cloud
+                    /// zones, for example **us-west1-b**. To retrieve instance information for all locations, use "-"
+                    /// for the `{location}` value.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
@@ -1394,7 +1776,7 @@ namespace Google.Apis.CloudFilestore.v1beta1
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.CloudFilestore.v1beta1.Data.Instance body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>Updates the settings of a specific instance.</summary>
@@ -1418,7 +1800,8 @@ namespace Google.Apis.CloudFilestore.v1beta1
                     /// <summary>
                     /// Required. Mask of fields to update. At least one path must be supplied in this field. The
                     /// elements of the repeated paths field may only include these fields: * "description" *
-                    /// "file_shares" * "labels"
+                    /// "directory_services" * "file_shares" * "labels" * "performance_config" *
+                    /// "deletion_protection_enabled" * "deletion_protection_reason"
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual object UpdateMask { get; set; }
@@ -1461,6 +1844,65 @@ namespace Google.Apis.CloudFilestore.v1beta1
                     }
                 }
 
+                /// <summary>Promote the standby instance (replica).</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. The resource name of the instance, in the format
+                /// `projects/{project_id}/locations/{location_id}/instances/{instance_id}`.
+                /// </param>
+                public virtual PromoteReplicaRequest PromoteReplica(Google.Apis.CloudFilestore.v1beta1.Data.PromoteReplicaRequest body, string name)
+                {
+                    return new PromoteReplicaRequest(this.service, body, name);
+                }
+
+                /// <summary>Promote the standby instance (replica).</summary>
+                public class PromoteReplicaRequest : CloudFilestoreBaseServiceRequest<Google.Apis.CloudFilestore.v1beta1.Data.Operation>
+                {
+                    /// <summary>Constructs a new PromoteReplica request.</summary>
+                    public PromoteReplicaRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudFilestore.v1beta1.Data.PromoteReplicaRequest body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The resource name of the instance, in the format
+                    /// `projects/{project_id}/locations/{location_id}/instances/{instance_id}`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.CloudFilestore.v1beta1.Data.PromoteReplicaRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "promoteReplica";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+name}:promoteReplica";
+
+                    /// <summary>Initializes PromoteReplica parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
+                        });
+                    }
+                }
+
                 /// <summary>
                 /// Restores an existing instance's file share from a backup. The capacity of the instance needs to be
                 /// equal to or larger than the capacity of the backup (and also equal to or larger than the minimum
@@ -1473,7 +1915,7 @@ namespace Google.Apis.CloudFilestore.v1beta1
                 /// </param>
                 public virtual RestoreRequest Restore(Google.Apis.CloudFilestore.v1beta1.Data.RestoreInstanceRequest body, string name)
                 {
-                    return new RestoreRequest(service, body, name);
+                    return new RestoreRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -1531,12 +1973,12 @@ namespace Google.Apis.CloudFilestore.v1beta1
                 /// <summary>Revert an existing instance's file system to a specified snapshot.</summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
-                /// Required. projects/{project_id}/locations/{location_id}/instances/{instance_id}. The resource name
-                /// of the instance, in the format
+                /// Required. The resource name of the instance, in the format
+                /// `projects/{project_id}/locations/{location_id}/instances/{instance_id}`.
                 /// </param>
                 public virtual RevertRequest Revert(Google.Apis.CloudFilestore.v1beta1.Data.RevertInstanceRequest body, string name)
                 {
-                    return new RevertRequest(service, body, name);
+                    return new RevertRequest(this.service, body, name);
                 }
 
                 /// <summary>Revert an existing instance's file system to a specified snapshot.</summary>
@@ -1551,8 +1993,8 @@ namespace Google.Apis.CloudFilestore.v1beta1
                     }
 
                     /// <summary>
-                    /// Required. projects/{project_id}/locations/{location_id}/instances/{instance_id}. The resource
-                    /// name of the instance, in the format
+                    /// Required. The resource name of the instance, in the format
+                    /// `projects/{project_id}/locations/{location_id}/instances/{instance_id}`.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
@@ -1611,13 +2053,13 @@ namespace Google.Apis.CloudFilestore.v1beta1
                 /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
                 /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
                 /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-                /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">The name of the operation resource to be cancelled.</param>
                 public virtual CancelRequest Cancel(Google.Apis.CloudFilestore.v1beta1.Data.CancelOperationRequest body, string name)
                 {
-                    return new CancelRequest(service, body, name);
+                    return new CancelRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -1626,7 +2068,7 @@ namespace Google.Apis.CloudFilestore.v1beta1
                 /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
                 /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
                 /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-                /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
                 /// </summary>
                 public class CancelRequest : CloudFilestoreBaseServiceRequest<Google.Apis.CloudFilestore.v1beta1.Data.Empty>
                 {
@@ -1680,7 +2122,7 @@ namespace Google.Apis.CloudFilestore.v1beta1
                 /// <param name="name">The name of the operation resource to be deleted.</param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -1732,7 +2174,7 @@ namespace Google.Apis.CloudFilestore.v1beta1
                 /// <param name="name">The name of the operation resource.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -1778,27 +2220,17 @@ namespace Google.Apis.CloudFilestore.v1beta1
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the
-                /// binding to use different resource name schemes, such as `users/*/operations`. To override the
-                /// binding, API services can add a binding such as `"/v1/{name=users/*}/operations"` to their service
-                /// configuration. For backwards compatibility, the default name includes the operations collection id,
-                /// however overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns `UNIMPLEMENTED`.
                 /// </summary>
                 /// <param name="name">The name of the operation's parent resource.</param>
                 public virtual ListRequest List(string name)
                 {
-                    return new ListRequest(service, name);
+                    return new ListRequest(this.service, name);
                 }
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the
-                /// binding to use different resource name schemes, such as `users/*/operations`. To override the
-                /// binding, API services can add a binding such as `"/v1/{name=users/*}/operations"` to their service
-                /// configuration. For backwards compatibility, the default name includes the operations collection id,
-                /// however overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns `UNIMPLEMENTED`.
                 /// </summary>
                 public class ListRequest : CloudFilestoreBaseServiceRequest<Google.Apis.CloudFilestore.v1beta1.Data.ListOperationsResponse>
                 {
@@ -1878,7 +2310,7 @@ namespace Google.Apis.CloudFilestore.v1beta1
             /// <param name="name">Resource name for the location.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets information about a location.</summary>
@@ -1923,7 +2355,7 @@ namespace Google.Apis.CloudFilestore.v1beta1
             /// <param name="name">The resource that owns the locations collection, if applicable.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>Lists information about the supported locations for this service.</summary>
@@ -1942,7 +2374,7 @@ namespace Google.Apis.CloudFilestore.v1beta1
 
                 /// <summary>
                 /// A filter to narrow down results to a preferred subset. The filtering language accepts strings like
-                /// "displayName=tokyo", and is documented in more detail in [AIP-160](https://google.aip.dev/160).
+                /// `"displayName=tokyo"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
@@ -2024,16 +2456,49 @@ namespace Google.Apis.CloudFilestore.v1beta1
 }
 namespace Google.Apis.CloudFilestore.v1beta1.Data
 {
-    /// <summary>A Cloud Filestore backup.</summary>
+    /// <summary>A Filestore backup.</summary>
     public class Backup : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>Output only. Capacity of the source file share when the backup was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("capacityGb")]
         public virtual System.Nullable<long> CapacityGb { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time when the backup was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// A description of the backup with 2048 characters or less. Requests with longer descriptions will be
@@ -2045,6 +2510,16 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         /// <summary>Output only. Amount of bytes that will be downloaded if the backup is restored</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("downloadBytes")]
         public virtual System.Nullable<long> DownloadBytes { get; set; }
+
+        /// <summary>
+        /// Output only. The file system protocol of the source Filestore instance that this backup is created from.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileSystemProtocol")]
+        public virtual string FileSystemProtocol { get; set; }
+
+        /// <summary>Immutable. KMS key name used for data encryption.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kmsKeyName")]
+        public virtual string KmsKeyName { get; set; }
 
         /// <summary>Resource labels to represent user provided metadata.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("labels")]
@@ -2058,24 +2533,26 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         public virtual string Name { get; set; }
 
         /// <summary>Output only. Reserved for future use.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("satisfiesPzi")]
+        public virtual System.Nullable<bool> SatisfiesPzi { get; set; }
+
+        /// <summary>Output only. Reserved for future use.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("satisfiesPzs")]
         public virtual System.Nullable<bool> SatisfiesPzs { get; set; }
 
-        /// <summary>
-        /// Name of the file share in the source Cloud Filestore instance that the backup is created from.
-        /// </summary>
+        /// <summary>Name of the file share in the source Filestore instance that the backup is created from.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sourceFileShare")]
         public virtual string SourceFileShare { get; set; }
 
         /// <summary>
-        /// The resource name of the source Cloud Filestore instance, in the format
+        /// The resource name of the source Filestore instance, in the format
         /// `projects/{project_id}/locations/{location_id}/instances/{instance_id}`, used to create this backup.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sourceInstance")]
         public virtual string SourceInstance { get; set; }
 
         /// <summary>
-        /// Output only. The service tier of the source Cloud Filestore instance that this backup is created from.
+        /// Output only. The service tier of the source Filestore instance that this backup is created from.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sourceInstanceTier")]
         public virtual string SourceInstanceTier { get; set; }
@@ -2090,6 +2567,16 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("storageBytes")]
         public virtual System.Nullable<long> StorageBytes { get; set; }
+
+        /// <summary>
+        /// Optional. Input only. Immutable. Tag key-value pairs bound to this resource. Each key must be a namespaced
+        /// name and each value a short name. Example: "123456789012/environment" : "production",
+        /// "123456789013/costCenter" : "marketing" See the documentation for more information: - Namespaced name:
+        /// https://cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing#retrieving_tag_key - Short
+        /// name: https://cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing#retrieving_tag_value
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tags")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Tags { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2120,10 +2607,10 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
     /// <summary>
     /// Represents a whole or partial calendar date, such as a birthday. The time of day and time zone are either
     /// specified elsewhere or are insignificant. The date is relative to the Gregorian Calendar. This can represent one
-    /// of the following: * A full date, with non-zero year, month, and day values * A month and day value, with a zero
-    /// year, such as an anniversary * A year on its own, with zero month and day values * A year and month value, with
-    /// a zero day, such as a credit card expiration date Related types are google.type.TimeOfDay and
-    /// `google.protobuf.Timestamp`.
+    /// of the following: * A full date, with non-zero year, month, and day values. * A month and day, with a zero year
+    /// (for example, an anniversary). * A year on its own, with a zero month and a zero day. * A year and month, with a
+    /// zero day (for example, a credit card expiration date). Related types: * google.type.TimeOfDay *
+    /// google.type.DateTime * google.protobuf.Timestamp
     /// </summary>
     public class Date : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2179,11 +2666,21 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Directory Services configuration for Kerberos-based authentication.</summary>
+    public class DirectoryServicesConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Configuration for Managed Service for Microsoft Active Directory.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("managedActiveDirectory")]
+        public virtual ManagedActiveDirectoryConfig ManagedActiveDirectory { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2194,13 +2691,14 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
     /// <summary>File share configuration for the instance.</summary>
     public class FileShareConfig : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>File share capacity in gigabytes (GB). Cloud Filestore defines 1 GB as 1024^3 bytes.</summary>
+        /// <summary>File share capacity in gigabytes (GB). Filestore defines 1 GB as 1024^3 bytes.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("capacityGb")]
         public virtual System.Nullable<long> CapacityGb { get; set; }
 
         /// <summary>
-        /// The name of the file share (must be 32 characters or less for Enterprise and High Scale SSD tiers and 16
-        /// characters or less for all other tiers).
+        /// Required. The name of the file share. Must use 1-16 characters for the basic service tier and 1-63
+        /// characters for all other service tiers. Must use lowercase letters, numbers, or underscores `[a-z0-9_]`.
+        /// Must start with a letter. Immutable.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -2221,19 +2719,92 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Fixed IOPS (input/output operations per second) parameters.</summary>
+    public class FixedIOPS : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Maximum IOPS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxIops")]
+        public virtual System.Nullable<long> MaxIops { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Instance represents the interface for SLM services to actuate the state of control plane resources. Example
+    /// Instance in JSON, where consumer-project-number=123456, producer-project-id=cloud-sql:
+    /// ```
+    /// json Instance: {
+    /// "name": "projects/123456/locations/us-east1/instances/prod-instance", "create_time": { "seconds": 1526406431, },
+    /// "labels": { "env": "prod", "foo": "bar" }, "state": READY, "software_versions": { "software_update":
+    /// "cloud-sql-09-28-2018", }, "maintenance_policy_names": { "UpdatePolicy":
+    /// "projects/123456/locations/us-east1/maintenancePolicies/prod-update-policy", } "tenant_project_id":
+    /// "cloud-sql-test-tenant", "producer_metadata": { "cloud-sql-tier": "basic", "cloud-sql-instance-size": "1G", },
+    /// "provisioned_resources": [ { "resource-type": "compute-instance", "resource-url":
+    /// "https://www.googleapis.com/compute/v1/projects/cloud-sql/zones/us-east1-b/instances/vm-1", } ],
+    /// "maintenance_schedules": { "csa_rollout": { "start_time": { "seconds": 1526406431, }, "end_time": { "seconds":
+    /// 1535406431, }, }, "ncsa_rollout": { "start_time": { "seconds": 1526406431, }, "end_time": { "seconds":
+    /// 1535406431, }, } }, "consumer_defined_name": "my-sql-instance1", }
+    /// ```
+    /// LINT.IfChange
+    /// </summary>
     public class GoogleCloudSaasacceleratorManagementProvidersV1Instance : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// consumer_defined_name is the name that is set by the consumer. On the other hand Name field represents
-        /// system-assigned id of an instance so consumers are not necessarily aware of it. consumer_defined_name is
-        /// used for notification/UI purposes for consumer to recognize their instances.
+        /// consumer_defined_name is the name of the instance set by the service consumers. Generally this is different
+        /// from the `name` field which reperesents the system-assigned id of the instance which the service consumers
+        /// do not recognize. This is a required field for tenants onboarding to Maintenance Window notifications
+        /// (go/slm-rollout-maintenance-policies#prerequisites).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("consumerDefinedName")]
         public virtual string ConsumerDefinedName { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Timestamp when the resource was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Optional. The instance_type of this instance of format:
+        /// projects/{project_number}/locations/{location_id}/instanceTypes/{instance_type_id}. Instance Type represents
+        /// a high-level tier or SKU of the service that this instance belong to. When enabled(eg: Maintenance Rollout),
+        /// Rollout uses 'instance_type' along with 'software_versions' to determine whether instance needs an update or
+        /// not.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("instanceType")]
+        public virtual string InstanceType { get; set; }
 
         /// <summary>
         /// Optional. Resource labels to represent user provided metadata. Each label is a key-value pair, where both
@@ -2243,9 +2814,10 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
 
         /// <summary>
-        /// Deprecated. The MaintenancePolicies that have been attached to the instance. The key must be of the type
-        /// name of the oneof policy name defined in MaintenancePolicy, and the referenced policy must define the same
-        /// policy type. For complete details of MaintenancePolicy, please refer to go/cloud-saas-mw-ug.
+        /// Optional. The MaintenancePolicies that have been attached to the instance. The key must be of the type name
+        /// of the oneof policy name defined in MaintenancePolicy, and the referenced policy must define the same policy
+        /// type. For details, please refer to go/mr-user-guide. Should not be set if
+        /// maintenance_settings.maintenance_policies is set.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("maintenancePolicyNames")]
         public virtual System.Collections.Generic.IDictionary<string, string> MaintenancePolicyNames { get; set; }
@@ -2263,11 +2835,21 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
 
         /// <summary>
         /// Unique name of the resource. It uses the form:
-        /// `projects/{project_id|project_number}/locations/{location_id}/instances/{instance_id}` Note: Either
-        /// project_id or project_number can be used, but keep it consistent with other APIs (e.g. RescheduleUpdate)
+        /// `projects/{project_number}/locations/{location_id}/instances/{instance_id}` Note: This name is passed,
+        /// stored and logged across the rollout system. So use of consumer project_id or any other consumer PII in the
+        /// name is strongly discouraged for wipeout (go/wipeout) compliance. See
+        /// go/elysium/project_ids#storage-guidance for more details.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Optional. notification_parameter are information that service producers may like to include that is not
+        /// relevant to Rollout. This parameter will only be passed to Gamma and Cloud Logging for notification/logging
+        /// purpose.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("notificationParameters")]
+        public virtual System.Collections.Generic.IDictionary<string, GoogleCloudSaasacceleratorManagementProvidersV1NotificationParameter> NotificationParameters { get; set; }
 
         /// <summary>
         /// Output only. Custom string attributes used primarily to expose producer-specific information in monitoring
@@ -2314,9 +2896,42 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("tenantProjectId")]
         public virtual string TenantProjectId { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. Timestamp when the resource was last modified.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2335,9 +2950,42 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("canReschedule")]
         public virtual System.Nullable<bool> CanReschedule { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>The scheduled end time for the maintenance.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The rollout management policy this maintenance schedule is associated with. When doing reschedule update
@@ -2346,17 +2994,85 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("rolloutManagementPolicy")]
         public virtual string RolloutManagementPolicy { get; set; }
 
+        private string _scheduleDeadlineTimeRaw;
+
+        private object _scheduleDeadlineTime;
+
         /// <summary>
         /// schedule_deadline_time is the time deadline any schedule start time cannot go beyond, including reschedule.
         /// It's normally the initial schedule start time plus maintenance window length (1 day or 1 week). Maintenance
         /// cannot be scheduled to start beyond this deadline.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("scheduleDeadlineTime")]
-        public virtual object ScheduleDeadlineTime { get; set; }
+        public virtual string ScheduleDeadlineTimeRaw
+        {
+            get => _scheduleDeadlineTimeRaw;
+            set
+            {
+                _scheduleDeadlineTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _scheduleDeadlineTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ScheduleDeadlineTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ScheduleDeadlineTimeDateTimeOffset instead.")]
+        public virtual object ScheduleDeadlineTime
+        {
+            get => _scheduleDeadlineTime;
+            set
+            {
+                _scheduleDeadlineTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _scheduleDeadlineTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ScheduleDeadlineTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ScheduleDeadlineTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ScheduleDeadlineTimeRaw);
+            set => ScheduleDeadlineTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
 
         /// <summary>The scheduled start time for the maintenance.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2382,9 +3098,8 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         /// <summary>
         /// Optional. The MaintenancePolicies that have been attached to the instance. The key must be of the type name
         /// of the oneof policy name defined in MaintenancePolicy, and the embedded policy must define the same policy
-        /// type. For complete details of MaintenancePolicy, please refer to go/cloud-saas-mw-ug. If only the name is
-        /// needed (like in the deprecated Instance.maintenance_policy_names field) then only populate
-        /// MaintenancePolicy.name.
+        /// type. For details, please refer to go/mr-user-guide. Should not be set if maintenance_policy_names is set.
+        /// If only the name is needed, then only populate MaintenancePolicy.name.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("maintenancePolicies")]
         public virtual System.Collections.Generic.IDictionary<string, MaintenancePolicy> MaintenancePolicies { get; set; }
@@ -2414,6 +3129,17 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("perSliEligibility")]
         public virtual GoogleCloudSaasacceleratorManagementProvidersV1PerSliSloEligibility PerSliEligibility { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Contains notification related data.</summary>
+    public class GoogleCloudSaasacceleratorManagementProvidersV1NotificationParameter : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. Array of string values. e.g. instance's replica information.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("values")]
+        public virtual System.Collections.Generic.IList<string> Values { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2506,16 +3232,93 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A Cloud Filestore instance.</summary>
+    /// <summary>IOPS per TB. Filestore defines TB as 1024^4 bytes (TiB).</summary>
+    public class IOPSPerTB : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Maximum IOPS per TiB.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxIopsPerTb")]
+        public virtual System.Nullable<long> MaxIopsPerTb { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A Filestore instance.</summary>
     public class Instance : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// The storage capacity of the instance in gigabytes (GB = 1024^3 bytes). This capacity can be increased up to
+        /// `max_capacity_gb` GB in multipliers of `capacity_step_size_gb` GB.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("capacityGb")]
+        public virtual System.Nullable<long> CapacityGb { get; set; }
+
+        /// <summary>Output only. The increase/decrease capacity step size.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("capacityStepSizeGb")]
+        public virtual System.Nullable<long> CapacityStepSizeGb { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time when the instance was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Output only. Indicates whether this instance supports configuring its performance. If true, the user can
+        /// configure the instance's performance by using the 'performance_config' field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customPerformanceSupported")]
+        public virtual System.Nullable<bool> CustomPerformanceSupported { get; set; }
+
+        /// <summary>Optional. Indicates whether the instance is protected against deletion.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deletionProtectionEnabled")]
+        public virtual System.Nullable<bool> DeletionProtectionEnabled { get; set; }
+
+        /// <summary>Optional. The reason for enabling deletion protection.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deletionProtectionReason")]
+        public virtual string DeletionProtectionReason { get; set; }
 
         /// <summary>The description of the instance (2048 characters or less).</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
         public virtual string Description { get; set; }
+
+        /// <summary>
+        /// Optional. Directory Services configuration for Kerberos-based authentication. Should only be set if protocol
+        /// is "NFS_V4_1".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("directoryServices")]
+        public virtual DirectoryServicesConfig DirectoryServices { get; set; }
 
         /// <summary>
         /// Server-specified ETag for the instance resource to prevent simultaneous updates from overwriting each other.
@@ -2537,6 +3340,21 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("labels")]
         public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
 
+        /// <summary>Output only. The max capacity of the instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxCapacityGb")]
+        public virtual System.Nullable<long> MaxCapacityGb { get; set; }
+
+        /// <summary>The max number of shares allowed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxShareCount")]
+        public virtual System.Nullable<long> MaxShareCount { get; set; }
+
+        /// <summary>
+        /// Indicates whether this instance uses a multi-share configuration with which it can have more than one
+        /// file-share or none at all. File-shares are added, updated and removed through the separate file-share APIs.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("multiShareEnabled")]
+        public virtual System.Nullable<bool> MultiShareEnabled { get; set; }
+
         /// <summary>
         /// Output only. The resource name of the instance, in the format
         /// `projects/{project_id}/locations/{location_id}/instances/{instance_id}`.
@@ -2550,6 +3368,29 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("networks")]
         public virtual System.Collections.Generic.IList<NetworkConfig> Networks { get; set; }
 
+        /// <summary>Optional. Used to configure performance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("performanceConfig")]
+        public virtual PerformanceConfig PerformanceConfig { get; set; }
+
+        /// <summary>Output only. Used for getting performance limits.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("performanceLimits")]
+        public virtual PerformanceLimits PerformanceLimits { get; set; }
+
+        /// <summary>
+        /// Immutable. The protocol indicates the access protocol for all shares in the instance. This field is
+        /// immutable and it cannot be changed after the instance has been created. Default value: `NFS_V3`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("protocol")]
+        public virtual string Protocol { get; set; }
+
+        /// <summary>Optional. Replication configuration.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("replication")]
+        public virtual Replication Replication { get; set; }
+
+        /// <summary>Output only. Reserved for future use.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("satisfiesPzi")]
+        public virtual System.Nullable<bool> SatisfiesPzi { get; set; }
+
         /// <summary>Output only. Reserved for future use.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("satisfiesPzs")]
         public virtual System.Nullable<bool> SatisfiesPzs { get; set; }
@@ -2562,9 +3403,19 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("statusMessage")]
         public virtual string StatusMessage { get; set; }
 
-        /// <summary>Output only. field indicates all the reasons the instance is in "SUSPENDED" state.</summary>
+        /// <summary>Output only. Field indicates all the reasons the instance is in "SUSPENDED" state.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("suspensionReasons")]
         public virtual System.Collections.Generic.IList<string> SuspensionReasons { get; set; }
+
+        /// <summary>
+        /// Optional. Input only. Immutable. Tag key-value pairs bound to this resource. Each key must be a namespaced
+        /// name and each value a short name. Example: "123456789012/environment" : "production",
+        /// "123456789013/costCenter" : "marketing" See the documentation for more information: - Namespaced name:
+        /// https://cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing#retrieving_tag_key - Short
+        /// name: https://cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing#retrieving_tag_value
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tags")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Tags { get; set; }
 
         /// <summary>The service tier of the instance.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("tier")]
@@ -2590,7 +3441,7 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
 
-        /// <summary>Locations that could not be reached.</summary>
+        /// <summary>Unordered list. Locations that could not be reached.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("unreachable")]
         public virtual System.Collections.Generic.IList<string> Unreachable { get; set; }
 
@@ -2617,7 +3468,7 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
 
-        /// <summary>Locations that could not be reached.</summary>
+        /// <summary>Unordered list. Locations that could not be reached.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("unreachable")]
         public virtual System.Collections.Generic.IList<string> Unreachable { get; set; }
 
@@ -2655,6 +3506,28 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>ListSharesResponse is the result of ListSharesRequest.</summary>
+    public class ListSharesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The token you can use to retrieve the next page of results. Not returned if there are no more results in the
+        /// list.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>A list of shares in the project for the specified instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("shares")]
+        public virtual System.Collections.Generic.IList<Share> Shares { get; set; }
+
+        /// <summary>Unordered list. Locations that could not be reached.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("unreachable")]
+        public virtual System.Collections.Generic.IList<string> Unreachable { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>ListSnapshotsResponse is the result of ListSnapshotsRequest.</summary>
     public class ListSnapshotsResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2669,11 +3542,15 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("snapshots")]
         public virtual System.Collections.Generic.IList<Snapshot> Snapshots { get; set; }
 
+        /// <summary>Unordered list. Locations that could not be reached.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("unreachable")]
+        public virtual System.Collections.Generic.IList<string> Unreachable { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A resource that represents Google Cloud Platform location.</summary>
+    /// <summary>A resource that represents a Google Cloud location.</summary>
     public class Location : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The friendly name for this location, typically a nearby city name. For example, "Tokyo".</summary>
@@ -2708,9 +3585,42 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
     /// <summary>Defines policies to service maintenance events.</summary>
     public class MaintenancePolicy : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time when the resource was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Optional. Description of what this policy is for. Create/Update methods return INVALID_ARGUMENT if the
@@ -2744,9 +3654,42 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("updatePolicy")]
         public virtual UpdatePolicy UpdatePolicy { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The time when the resource was updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2762,6 +3705,30 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         /// <summary>Weekly cycle.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("weeklyCycle")]
         public virtual WeeklyCycle WeeklyCycle { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// ManagedActiveDirectoryConfig contains all the parameters for connecting to Managed Service for Microsoft Active
+    /// Directory (Managed Microsoft AD).
+    /// </summary>
+    public class ManagedActiveDirectoryConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The computer name is used as a prefix in the command to mount the remote target. For example: if
+        /// the computer is `my-computer`, the mount command will look like: `$mount -o vers=4.1,sec=krb5
+        /// my-computer.filestore.: `.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("computer")]
+        public virtual string Computer { get; set; }
+
+        /// <summary>
+        /// Required. The domain resource name, in the format `projects/{project_id}/locations/global/domains/{domain}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("domain")]
+        public virtual string Domain { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2804,11 +3771,12 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         /// range](https://cloud.google.com/compute/docs/ip-addresses/reserve-static-internal-ip-address) when using
         /// PRIVATE_SERVICE_ACCESS connect mode. When the name of an allocated IP address range is specified, it must be
         /// one of the ranges associated with the private service access connection. When specified as a direct CIDR
-        /// value, it must be a /29 CIDR block for Basic tier or a /24 CIDR block for High Scale or Enterprise tier in
-        /// one of the [internal IP address ranges](https://www.arin.net/reference/research/statistics/address_filters/)
-        /// that identifies the range of IP addresses reserved for this instance. For example, 10.0.0.0/29 or
-        /// 192.168.0.0/24. The range you specify can't overlap with either existing subnets or assigned IP address
-        /// ranges for other Cloud Filestore instances in the selected VPC network.
+        /// value, it must be a /29 CIDR block for Basic tier, a /24 CIDR block for High Scale tier, or a /26 CIDR block
+        /// for Enterprise tier in one of the [internal IP address
+        /// ranges](https://www.arin.net/reference/research/statistics/address_filters/) that identifies the range of IP
+        /// addresses reserved for this instance. For example, 10.0.0.0/29, 192.168.0.0/24, or 192.168.0.0/26,
+        /// respectively. The range you specify can't overlap with either existing subnets or assigned IP address ranges
+        /// for other Filestore instances in the selected VPC network.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("reservedIpRange")]
         public virtual string ReservedIpRange { get; set; }
@@ -2852,6 +3820,10 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("ipRanges")]
         public virtual System.Collections.Generic.IList<string> IpRanges { get; set; }
 
+        /// <summary>The security flavors allowed for mount operations. The default is AUTH_SYS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("securityFlavors")]
+        public virtual System.Collections.Generic.IList<string> SecurityFlavors { get; set; }
+
         /// <summary>
         /// Either NO_ROOT_SQUASH, for allowing root access on the exported directory, or ROOT_SQUASH, for not allowing
         /// root access. The default is NO_ROOT_SQUASH.
@@ -2893,8 +3865,8 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -2915,19 +3887,85 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
 
         /// <summary>
         /// Output only. Identifies whether the user has requested cancellation of the operation. Operations that have
-        /// been cancelled successfully have Operation.error value with a google.rpc.Status.code of 1, corresponding to
-        /// `Code.CANCELLED`.
+        /// been cancelled successfully have google.longrunning.Operation.error value with a google.rpc.Status.code of
+        /// `1`, corresponding to `Code.CANCELLED`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cancelRequested")]
         public virtual System.Nullable<bool> CancelRequested { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time the operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
 
         /// <summary>Output only. The time the operation finished running.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. Human-readable status of the operation, if any.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("statusDetail")]
@@ -2945,11 +3983,157 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>RestoreInstanceRequest restores an existing instance's file share from a snapshot or backup.</summary>
+    /// <summary>
+    /// Used for setting the performance configuration. If the user doesn't specify PerformanceConfig, automatically
+    /// provision the default performance settings as described in https://cloud.google.com/filestore/docs/performance.
+    /// Larger instances will be linearly set to more IOPS. If the instance's capacity is increased or decreased, its
+    /// performance will be automatically adjusted upwards or downwards accordingly (respectively).
+    /// </summary>
+    public class PerformanceConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Choose a fixed provisioned IOPS value for the instance, which will remain constant regardless of instance
+        /// capacity. Value must be a multiple of 1000. If the chosen value is outside the supported range for the
+        /// instance's capacity during instance creation, instance creation will fail with an `InvalidArgument` error.
+        /// Similarly, if an instance capacity update would result in a value outside the supported range, the update
+        /// will fail with an `InvalidArgument` error.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fixedIops")]
+        public virtual FixedIOPS FixedIops { get; set; }
+
+        /// <summary>
+        /// Provision IOPS dynamically based on the capacity of the instance. Provisioned read IOPS will be calculated
+        /// by multiplying the capacity of the instance in TiB by the `iops_per_tb` value. For example, for a 2 TiB
+        /// instance with an `iops_per_tb` value of 17000 the provisioned read IOPS will be 34000. If the calculated
+        /// value is outside the supported range for the instance's capacity during instance creation, instance creation
+        /// will fail with an `InvalidArgument` error. Similarly, if an instance capacity update would result in a value
+        /// outside the supported range, the update will fail with an `InvalidArgument` error.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("iopsPerTb")]
+        public virtual IOPSPerTB IopsPerTb { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The enforced performance limits, calculated from the instance's performance configuration.</summary>
+    public class PerformanceLimits : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Output only. The max IOPS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxIops")]
+        public virtual System.Nullable<long> MaxIops { get; set; }
+
+        /// <summary>Output only. The max read IOPS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxReadIops")]
+        public virtual System.Nullable<long> MaxReadIops { get; set; }
+
+        /// <summary>Output only. The max read throughput in bytes per second.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxReadThroughputBps")]
+        public virtual System.Nullable<long> MaxReadThroughputBps { get; set; }
+
+        /// <summary>Output only. The max write IOPS.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxWriteIops")]
+        public virtual System.Nullable<long> MaxWriteIops { get; set; }
+
+        /// <summary>Output only. The max write throughput in bytes per second.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxWriteThroughputBps")]
+        public virtual System.Nullable<long> MaxWriteThroughputBps { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>PromoteReplicaRequest promotes a Filestore standby instance (replica).</summary>
+    public class PromoteReplicaRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Replica configuration for the instance.</summary>
+    public class ReplicaConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _lastActiveSyncTimeRaw;
+
+        private object _lastActiveSyncTime;
+
+        /// <summary>
+        /// Output only. The timestamp of the latest replication snapshot taken on the active instance and is already
+        /// replicated safely.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lastActiveSyncTime")]
+        public virtual string LastActiveSyncTimeRaw
+        {
+            get => _lastActiveSyncTimeRaw;
+            set
+            {
+                _lastActiveSyncTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastActiveSyncTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastActiveSyncTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastActiveSyncTimeDateTimeOffset instead.")]
+        public virtual object LastActiveSyncTime
+        {
+            get => _lastActiveSyncTime;
+            set
+            {
+                _lastActiveSyncTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastActiveSyncTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastActiveSyncTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastActiveSyncTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastActiveSyncTimeRaw);
+            set => LastActiveSyncTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The peer instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("peerInstance")]
+        public virtual string PeerInstance { get; set; }
+
+        /// <summary>Output only. The replica state.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>Output only. Additional information about the replication state, if available.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("stateReasons")]
+        public virtual System.Collections.Generic.IList<string> StateReasons { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Replication specifications.</summary>
+    public class Replication : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Replication configuration for the replica instance associated with this instance. Only a single replica is
+        /// supported.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("replicas")]
+        public virtual System.Collections.Generic.IList<ReplicaConfig> Replicas { get; set; }
+
+        /// <summary>Output only. The replication role.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("role")]
+        public virtual string Role { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>RestoreInstanceRequest restores an existing instance's file share from a backup.</summary>
     public class RestoreInstanceRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Required. Name of the file share in the Cloud Filestore instance that the snapshot is being restored to.
+        /// Required. Name of the file share in the Filestore instance that the backup is being restored to.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("fileShare")]
         public virtual string FileShare { get; set; }
@@ -2978,7 +4162,7 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         /// <summary>
         /// Required. The snapshot resource ID, in the format 'my-snapshot', where the specified ID is the {snapshot_id}
         /// of the fully qualified name like
-        /// projects/{project_id}/locations/{location_id}/instances/{instance_id}/snapshots/{snapshot_id}
+        /// `projects/{project_id}/locations/{location_id}/instances/{instance_id}/snapshots/{snapshot_id}`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("targetSnapshotId")]
         public virtual string TargetSnapshotId { get; set; }
@@ -3006,12 +4190,135 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A Cloud Filestore snapshot.</summary>
+    /// <summary>A Filestore share.</summary>
+    public class Share : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Immutable. Full name of the Cloud Filestore Backup resource that this Share is restored from, in the format
+        /// of projects/{project_id}/locations/{location_id}/backups/{backup_id}. Empty, if the Share is created from
+        /// scratch and not restored from a backup.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("backup")]
+        public virtual string Backup { get; set; }
+
+        /// <summary>
+        /// File share capacity in gigabytes (GB). Filestore defines 1 GB as 1024^3 bytes. Must be greater than 0.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("capacityGb")]
+        public virtual System.Nullable<long> CapacityGb { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. The time when the share was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// A description of the share with 2048 characters or less. Requests with longer descriptions will be rejected.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>Resource labels to represent user provided metadata.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labels")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
+
+        /// <summary>
+        /// The mount name of the share. Must be 63 characters or less and consist of uppercase or lowercase letters,
+        /// numbers, and underscores.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mountName")]
+        public virtual string MountName { get; set; }
+
+        /// <summary>
+        /// Output only. The resource name of the share, in the format
+        /// `projects/{project_id}/locations/{location_id}/instances/{instance_id}/shares/{share_id}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Nfs Export Options. There is a limit of 10 export options per file share.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nfsExportOptions")]
+        public virtual System.Collections.Generic.IList<NfsExportOptions> NfsExportOptions { get; set; }
+
+        /// <summary>Output only. The share state.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A Filestore snapshot.</summary>
     public class Snapshot : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time when the snapshot was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// A description of the snapshot with 2048 characters or less. Requests with longer descriptions will be
@@ -3038,6 +4345,16 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         /// <summary>Output only. The snapshot state.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
+
+        /// <summary>
+        /// Optional. Input only. Immutable. Tag key-value pairs bound to this resource. Each key must be a namespaced
+        /// name and each value a short name. Example: "123456789012/environment" : "production",
+        /// "123456789013/costCenter" : "marketing" See the documentation for more information: - Namespaced name:
+        /// https://cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing#retrieving_tag_key - Short
+        /// name: https://cloud.google.com/resource-manager/docs/tags/tags-creating-and-managing#retrieving_tag_value
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tags")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Tags { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3079,23 +4396,26 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
     public class TimeOfDay : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for
-        /// scenarios like business closing time.
+        /// Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or
+        /// equal to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("hours")]
         public virtual System.Nullable<int> Hours { get; set; }
 
-        /// <summary>Minutes of hour of day. Must be from 0 to 59.</summary>
+        /// <summary>Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minutes")]
         public virtual System.Nullable<int> Minutes { get; set; }
 
-        /// <summary>Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.</summary>
+        /// <summary>
+        /// Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to
+        /// 999,999,999.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nanos")]
         public virtual System.Nullable<int> Nanos { get; set; }
 
         /// <summary>
-        /// Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows
-        /// leap-seconds.
+        /// Seconds of a minute. Must be greater than or equal to 0 and typically must be less than or equal to 59. An
+        /// API may allow the value 60 if it allows leap-seconds.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("seconds")]
         public virtual System.Nullable<int> Seconds { get; set; }
@@ -3112,9 +4432,8 @@ namespace Google.Apis.CloudFilestore.v1beta1.Data
         public virtual string Channel { get; set; }
 
         /// <summary>
-        /// Deny Maintenance Period that is applied to resource to indicate when maintenance is forbidden. User can
-        /// specify zero or more non-overlapping deny periods. Maximum number of deny_maintenance_periods expected is
-        /// one.
+        /// Deny Maintenance Period that is applied to resource to indicate when maintenance is forbidden. The protocol
+        /// supports zero-to-many such periods, but the current SLM Rollout implementation only supports zero-to-one.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("denyMaintenancePeriods")]
         public virtual System.Collections.Generic.IList<DenyMaintenancePeriod> DenyMaintenancePeriods { get; set; }

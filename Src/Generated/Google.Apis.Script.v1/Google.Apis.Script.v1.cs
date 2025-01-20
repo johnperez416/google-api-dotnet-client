@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ namespace Google.Apis.Script.v1
             Processes = new ProcessesResource(this);
             Projects = new ProjectsResource(this);
             Scripts = new ScriptsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://script.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://script.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -46,23 +48,16 @@ namespace Google.Apis.Script.v1
         public override string Name => "script";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://script.googleapis.com/";
-        #else
-            "https://script.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://script.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Apps Script API.</summary>
         public class Scope
@@ -394,7 +389,7 @@ namespace Google.Apis.Script.v1
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
@@ -426,12 +421,36 @@ namespace Google.Apis.Script.v1
             [Google.Apis.Util.RequestParameterAttribute("userProcessFilter.deploymentId", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string UserProcessFilterDeploymentId { get; set; }
 
+            private object _userProcessFilterEndTime;
+
             /// <summary>
-            /// Optional field used to limit returned processes to those that completed on or before the given
-            /// timestamp.
+            /// String representation of <see cref="UserProcessFilterEndTimeDateTimeOffset"/>, formatted for inclusion
+            /// in the HTTP request.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("userProcessFilter.endTime", Google.Apis.Util.RequestParameterType.Query)]
-            public virtual object UserProcessFilterEndTime { get; set; }
+            public virtual string UserProcessFilterEndTimeRaw { get; private set; }
+
+            /// <summary><seealso cref="object"/> representation of <see cref="UserProcessFilterEndTimeRaw"/>.</summary>
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UserProcessFilterEndTimeDateTimeOffset instead.")]
+            public virtual object UserProcessFilterEndTime
+            {
+                get => _userProcessFilterEndTime;
+                set
+                {
+                    UserProcessFilterEndTimeRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                    _userProcessFilterEndTime = value;
+                }
+            }
+
+            public virtual System.DateTimeOffset? UserProcessFilterEndTimeDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UserProcessFilterEndTimeRaw);
+                set
+                {
+                    UserProcessFilterEndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                    _userProcessFilterEndTime = value;
+                }
+            }
 
             /// <summary>
             /// Optional field used to limit returned processes to those originating from a script function with the
@@ -454,12 +473,38 @@ namespace Google.Apis.Script.v1
             [Google.Apis.Util.RequestParameterAttribute("userProcessFilter.scriptId", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string UserProcessFilterScriptId { get; set; }
 
+            private object _userProcessFilterStartTime;
+
             /// <summary>
-            /// Optional field used to limit returned processes to those that were started on or after the given
-            /// timestamp.
+            /// String representation of <see cref="UserProcessFilterStartTimeDateTimeOffset"/>, formatted for inclusion
+            /// in the HTTP request.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("userProcessFilter.startTime", Google.Apis.Util.RequestParameterType.Query)]
-            public virtual object UserProcessFilterStartTime { get; set; }
+            public virtual string UserProcessFilterStartTimeRaw { get; private set; }
+
+            /// <summary>
+            /// <seealso cref="object"/> representation of <see cref="UserProcessFilterStartTimeRaw"/>.
+            /// </summary>
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UserProcessFilterStartTimeDateTimeOffset instead.")]
+            public virtual object UserProcessFilterStartTime
+            {
+                get => _userProcessFilterStartTime;
+                set
+                {
+                    UserProcessFilterStartTimeRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                    _userProcessFilterStartTime = value;
+                }
+            }
+
+            public virtual System.DateTimeOffset? UserProcessFilterStartTimeDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UserProcessFilterStartTimeRaw);
+                set
+                {
+                    UserProcessFilterStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                    _userProcessFilterStartTime = value;
+                }
+            }
 
             /// <summary>
             /// Optional field used to limit returned processes to those having one of the specified process statuses.
@@ -521,6 +566,10 @@ namespace Google.Apis.Script.v1
                 /// <summary>The process is delayed, waiting for quota.</summary>
                 [Google.Apis.Util.StringValueAttribute("DELAYED")]
                 DELAYED = 8,
+
+                /// <summary>AppsScript executions are disabled by Admin.</summary>
+                [Google.Apis.Util.StringValueAttribute("EXECUTION_DISABLED")]
+                EXECUTIONDISABLED = 9,
             }
 
             /// <summary>
@@ -744,7 +793,7 @@ namespace Google.Apis.Script.v1
         /// </summary>
         public virtual ListScriptProcessesRequest ListScriptProcesses()
         {
-            return new ListScriptProcessesRequest(service);
+            return new ListScriptProcessesRequest(this.service);
         }
 
         /// <summary>
@@ -780,12 +829,38 @@ namespace Google.Apis.Script.v1
             [Google.Apis.Util.RequestParameterAttribute("scriptProcessFilter.deploymentId", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string ScriptProcessFilterDeploymentId { get; set; }
 
+            private object _scriptProcessFilterEndTime;
+
             /// <summary>
-            /// Optional field used to limit returned processes to those that completed on or before the given
-            /// timestamp.
+            /// String representation of <see cref="ScriptProcessFilterEndTimeDateTimeOffset"/>, formatted for inclusion
+            /// in the HTTP request.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("scriptProcessFilter.endTime", Google.Apis.Util.RequestParameterType.Query)]
-            public virtual object ScriptProcessFilterEndTime { get; set; }
+            public virtual string ScriptProcessFilterEndTimeRaw { get; private set; }
+
+            /// <summary>
+            /// <seealso cref="object"/> representation of <see cref="ScriptProcessFilterEndTimeRaw"/>.
+            /// </summary>
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ScriptProcessFilterEndTimeDateTimeOffset instead.")]
+            public virtual object ScriptProcessFilterEndTime
+            {
+                get => _scriptProcessFilterEndTime;
+                set
+                {
+                    ScriptProcessFilterEndTimeRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                    _scriptProcessFilterEndTime = value;
+                }
+            }
+
+            public virtual System.DateTimeOffset? ScriptProcessFilterEndTimeDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ScriptProcessFilterEndTimeRaw);
+                set
+                {
+                    ScriptProcessFilterEndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                    _scriptProcessFilterEndTime = value;
+                }
+            }
 
             /// <summary>
             /// Optional field used to limit returned processes to those originating from a script function with the
@@ -794,12 +869,38 @@ namespace Google.Apis.Script.v1
             [Google.Apis.Util.RequestParameterAttribute("scriptProcessFilter.functionName", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string ScriptProcessFilterFunctionName { get; set; }
 
+            private object _scriptProcessFilterStartTime;
+
             /// <summary>
-            /// Optional field used to limit returned processes to those that were started on or after the given
-            /// timestamp.
+            /// String representation of <see cref="ScriptProcessFilterStartTimeDateTimeOffset"/>, formatted for
+            /// inclusion in the HTTP request.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("scriptProcessFilter.startTime", Google.Apis.Util.RequestParameterType.Query)]
-            public virtual object ScriptProcessFilterStartTime { get; set; }
+            public virtual string ScriptProcessFilterStartTimeRaw { get; private set; }
+
+            /// <summary>
+            /// <seealso cref="object"/> representation of <see cref="ScriptProcessFilterStartTimeRaw"/>.
+            /// </summary>
+            [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ScriptProcessFilterStartTimeDateTimeOffset instead.")]
+            public virtual object ScriptProcessFilterStartTime
+            {
+                get => _scriptProcessFilterStartTime;
+                set
+                {
+                    ScriptProcessFilterStartTimeRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                    _scriptProcessFilterStartTime = value;
+                }
+            }
+
+            public virtual System.DateTimeOffset? ScriptProcessFilterStartTimeDateTimeOffset
+            {
+                get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ScriptProcessFilterStartTimeRaw);
+                set
+                {
+                    ScriptProcessFilterStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                    _scriptProcessFilterStartTime = value;
+                }
+            }
 
             /// <summary>
             /// Optional field used to limit returned processes to those having one of the specified process statuses.
@@ -861,6 +962,10 @@ namespace Google.Apis.Script.v1
                 /// <summary>The process is delayed, waiting for quota.</summary>
                 [Google.Apis.Util.StringValueAttribute("DELAYED")]
                 DELAYED = 8,
+
+                /// <summary>AppsScript executions are disabled by Admin.</summary>
+                [Google.Apis.Util.StringValueAttribute("EXECUTION_DISABLED")]
+                EXECUTIONDISABLED = 9,
             }
 
             /// <summary>
@@ -1111,7 +1216,7 @@ namespace Google.Apis.Script.v1
             /// <param name="scriptId">The script project's Drive ID.</param>
             public virtual CreateRequest Create(Google.Apis.Script.v1.Data.DeploymentConfig body, string scriptId)
             {
-                return new CreateRequest(service, body, scriptId);
+                return new CreateRequest(this.service, body, scriptId);
             }
 
             /// <summary>Creates a deployment of an Apps Script project.</summary>
@@ -1164,7 +1269,7 @@ namespace Google.Apis.Script.v1
             /// <param name="deploymentId">The deployment ID to be undeployed.</param>
             public virtual DeleteRequest Delete(string scriptId, string deploymentId)
             {
-                return new DeleteRequest(service, scriptId, deploymentId);
+                return new DeleteRequest(this.service, scriptId, deploymentId);
             }
 
             /// <summary>Deletes a deployment of an Apps Script project.</summary>
@@ -1223,7 +1328,7 @@ namespace Google.Apis.Script.v1
             /// <param name="deploymentId">The deployment ID.</param>
             public virtual GetRequest Get(string scriptId, string deploymentId)
             {
-                return new GetRequest(service, scriptId, deploymentId);
+                return new GetRequest(this.service, scriptId, deploymentId);
             }
 
             /// <summary>Gets a deployment of an Apps Script project.</summary>
@@ -1281,7 +1386,7 @@ namespace Google.Apis.Script.v1
             /// <param name="scriptId">The script project's Drive ID.</param>
             public virtual ListRequest List(string scriptId)
             {
-                return new ListRequest(service, scriptId);
+                return new ListRequest(this.service, scriptId);
             }
 
             /// <summary>Lists the deployments of an Apps Script project.</summary>
@@ -1355,7 +1460,7 @@ namespace Google.Apis.Script.v1
             /// <param name="deploymentId">The deployment ID for this deployment.</param>
             public virtual UpdateRequest Update(Google.Apis.Script.v1.Data.UpdateDeploymentRequest body, string scriptId, string deploymentId)
             {
-                return new UpdateRequest(service, body, scriptId, deploymentId);
+                return new UpdateRequest(this.service, body, scriptId, deploymentId);
             }
 
             /// <summary>Updates a deployment of an Apps Script project.</summary>
@@ -1439,7 +1544,7 @@ namespace Google.Apis.Script.v1
             /// <param name="scriptId">The script project's Drive ID.</param>
             public virtual CreateRequest Create(Google.Apis.Script.v1.Data.Version body, string scriptId)
             {
-                return new CreateRequest(service, body, scriptId);
+                return new CreateRequest(this.service, body, scriptId);
             }
 
             /// <summary>Creates a new immutable version using the current code, with a unique version number.</summary>
@@ -1492,7 +1597,7 @@ namespace Google.Apis.Script.v1
             /// <param name="versionNumber">The version number.</param>
             public virtual GetRequest Get(string scriptId, int versionNumber)
             {
-                return new GetRequest(service, scriptId, versionNumber);
+                return new GetRequest(this.service, scriptId, versionNumber);
             }
 
             /// <summary>Gets a version of a script project.</summary>
@@ -1550,7 +1655,7 @@ namespace Google.Apis.Script.v1
             /// <param name="scriptId">The script project's Drive ID.</param>
             public virtual ListRequest List(string scriptId)
             {
-                return new ListRequest(service, scriptId);
+                return new ListRequest(this.service, scriptId);
             }
 
             /// <summary>List the versions of a script project.</summary>
@@ -1623,7 +1728,7 @@ namespace Google.Apis.Script.v1
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.Script.v1.Data.CreateProjectRequest body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>Creates a new, empty script project with no script files and a base manifest file.</summary>
@@ -1662,7 +1767,7 @@ namespace Google.Apis.Script.v1
         /// <param name="scriptId">The script project's Drive ID.</param>
         public virtual GetRequest Get(string scriptId)
         {
-            return new GetRequest(service, scriptId);
+            return new GetRequest(this.service, scriptId);
         }
 
         /// <summary>Gets a script project's metadata.</summary>
@@ -1709,7 +1814,7 @@ namespace Google.Apis.Script.v1
         /// <param name="scriptId">The script project's Drive ID.</param>
         public virtual GetContentRequest GetContent(string scriptId)
         {
-            return new GetContentRequest(service, scriptId);
+            return new GetContentRequest(this.service, scriptId);
         }
 
         /// <summary>
@@ -1770,7 +1875,7 @@ namespace Google.Apis.Script.v1
         /// <param name="scriptId">Required field indicating the script to get metrics for.</param>
         public virtual GetMetricsRequest GetMetrics(string scriptId)
         {
-            return new GetMetricsRequest(service, scriptId);
+            return new GetMetricsRequest(this.service, scriptId);
         }
 
         /// <summary>Get metrics data for scripts, such as number of executions and active users.</summary>
@@ -1860,7 +1965,7 @@ namespace Google.Apis.Script.v1
         /// <param name="scriptId">The script project's Drive ID.</param>
         public virtual UpdateContentRequest UpdateContent(Google.Apis.Script.v1.Data.Content body, string scriptId)
         {
-            return new UpdateContentRequest(service, body, scriptId);
+            return new UpdateContentRequest(this.service, body, scriptId);
         }
 
         /// <summary>
@@ -1940,10 +2045,12 @@ namespace Google.Apis.Script.v1
         /// <param name="body">The body of the request.</param>
         /// <param name="scriptId">
         /// The script ID of the script to be executed. Find the script ID on the **Project settings** page under "IDs."
+        /// As multiple executable APIs can be deployed in new IDE for same script, this field should be populated with
+        /// DeploymentID generated while deploying in new IDE instead of script ID.
         /// </param>
         public virtual RunRequest Run(Google.Apis.Script.v1.Data.ExecutionRequest body, string scriptId)
         {
-            return new RunRequest(service, body, scriptId);
+            return new RunRequest(this.service, body, scriptId);
         }
 
         /// <summary>
@@ -1968,7 +2075,8 @@ namespace Google.Apis.Script.v1
 
             /// <summary>
             /// The script ID of the script to be executed. Find the script ID on the **Project settings** page under
-            /// "IDs."
+            /// "IDs." As multiple executable APIs can be deployed in new IDE for same script, this field should be
+            /// populated with DeploymentID generated while deploying in new IDE instead of script ID.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("scriptId", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string ScriptId { get; private set; }
@@ -2058,9 +2166,42 @@ namespace Google.Apis.Script.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("entryPoints")]
         public virtual System.Collections.Generic.IList<EntryPoint> EntryPoints { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Last modified date time stamp.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2092,8 +2233,7 @@ namespace Google.Apis.Script.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2236,12 +2376,45 @@ namespace Google.Apis.Script.v1.Data
     /// </summary>
     public class File : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>
         /// Creation date timestamp. This read-only field is only visible to users who have WRITER permission for the
         /// script project.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The defined set of functions in the script file, if any.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("functionSet")]
@@ -2269,12 +2442,45 @@ namespace Google.Apis.Script.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>
         /// Last modified date timestamp. This read-only field is only visible to users who have WRITER permission for
         /// the script project.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2340,6 +2546,10 @@ namespace Google.Apis.Script.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
+        /// <summary>The ordered list of parameter names of the function in the script project.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("parameters")]
+        public virtual System.Collections.Generic.IList<string> Parameters { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -2382,9 +2592,46 @@ namespace Google.Apis.Script.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("projectName")]
         public virtual string ProjectName { get; set; }
 
+        /// <summary>Which version of maestro to use to execute the script.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("runtimeVersion")]
+        public virtual string RuntimeVersion { get; set; }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>Time the execution started.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The executing users access level to the script.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("userAccessLevel")]
@@ -2546,13 +2793,79 @@ namespace Google.Apis.Script.v1.Data
     /// <summary>Metrics value that holds number of executions counted.</summary>
     public class MetricsValue : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>Required field indicating the end time of the interval.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
 
         /// <summary>Required field indicating the start time of the interval.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Indicates the number of executions counted.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("value")]
@@ -2606,9 +2919,42 @@ namespace Google.Apis.Script.v1.Data
     /// <summary>The script project resource.</summary>
     public class Project : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>When the script was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>User who originally created the script.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creator")]
@@ -2633,9 +2979,42 @@ namespace Google.Apis.Script.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("title")]
         public virtual string Title { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>When the script was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2771,9 +3150,42 @@ namespace Google.Apis.Script.v1.Data
     /// </summary>
     public class Version : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>When the version was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The description for this version.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]

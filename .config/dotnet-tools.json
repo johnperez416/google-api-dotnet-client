@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "docfx": {
+      "version": "2.77.0",
+      "commands": [
+        "docfx"
+      ]
+    },
+    "Google.Cloud.Tools.DocUploader": {
+      "version": "0.2.2",
+      "commands": [
+        "docuploader"
+      ]
+    },
+    "Google.Cloud.Tools.SbomGenerator": {
+      "version": "0.4.0",
+      "commands": [
+        "generate-sbom"
+      ]
+    }
+  }
+}

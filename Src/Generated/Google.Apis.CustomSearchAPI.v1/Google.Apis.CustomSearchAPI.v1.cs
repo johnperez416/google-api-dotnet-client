@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.CustomSearchAPI.v1
         public CustomSearchAPIService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Cse = new CseResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://customsearch.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://customsearch.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.CustomSearchAPI.v1
         public override string Name => "customsearch";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://customsearch.googleapis.com/";
-        #else
-            "https://customsearch.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://customsearch.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Gets the Cse resource.</summary>
         public virtual CseResource Cse { get; }
@@ -285,7 +280,7 @@ namespace Google.Apis.CustomSearchAPI.v1
             /// </summary>
             public virtual ListRequest List()
             {
-                return new ListRequest(service);
+                return new ListRequest(this.service);
             }
 
             /// <summary>
@@ -333,6 +328,12 @@ namespace Google.Apis.CustomSearchAPI.v1
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("dateRestrict", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string DateRestrict { get; set; }
+
+                /// <summary>
+                /// Optional. Enables routing of Programmable Search Engine requests to an alternate search handler.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("enableAlternateSearchHandler", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<bool> EnableAlternateSearchHandler { get; set; }
 
                 /// <summary>Identifies a phrase that all documents in the search results must contain.</summary>
                 [Google.Apis.Util.RequestParameterAttribute("exactTerms", Google.Apis.Util.RequestParameterType.Query)]
@@ -640,9 +641,7 @@ namespace Google.Apis.CustomSearchAPI.v1
                 [Google.Apis.Util.RequestParameterAttribute("q", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Q { get; set; }
 
-                /// <summary>
-                /// Specifies that all search results should be pages that are related to the specified URL.
-                /// </summary>
+                /// <summary>Deprecated.</summary>
                 [Google.Apis.Util.RequestParameterAttribute("relatedSite", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string RelatedSite { get; set; }
 
@@ -744,6 +743,13 @@ namespace Google.Apis.CustomSearchAPI.v1
                 }
 
                 /// <summary>
+                /// Optional. Maximum length of snippet text, in characters, to be returned with results. Note: this
+                /// feature is limited to specific engines. * Valid values are integers between 161 and 1000, inclusive.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("snippetLength", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<int> SnippetLength { get; set; }
+
+                /// <summary>
                 /// The sort expression to apply to the results. The sort parameter specifies that the results be sorted
                 /// according to the specified expression i.e. sort by date. [Example:
                 /// sort=date](https://developers.google.com/custom-search/docs/structured_search#sort-by-attribute).
@@ -801,6 +807,14 @@ namespace Google.Apis.CustomSearchAPI.v1
                     RequestParameters.Add("dateRestrict", new Google.Apis.Discovery.Parameter
                     {
                         Name = "dateRestrict",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("enableAlternateSearchHandler", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "enableAlternateSearchHandler",
                         IsRequired = false,
                         ParameterType = "query",
                         DefaultValue = null,
@@ -1006,6 +1020,14 @@ namespace Google.Apis.CustomSearchAPI.v1
                         DefaultValue = null,
                         Pattern = null,
                     });
+                    RequestParameters.Add("snippetLength", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "snippetLength",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                     RequestParameters.Add("sort", new Google.Apis.Discovery.Parameter
                     {
                         Name = "sort",
@@ -1032,7 +1054,7 @@ namespace Google.Apis.CustomSearchAPI.v1
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
@@ -1080,6 +1102,12 @@ namespace Google.Apis.CustomSearchAPI.v1
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("dateRestrict", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string DateRestrict { get; set; }
+
+            /// <summary>
+            /// Optional. Enables routing of Programmable Search Engine requests to an alternate search handler.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("enableAlternateSearchHandler", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> EnableAlternateSearchHandler { get; set; }
 
             /// <summary>Identifies a phrase that all documents in the search results must contain.</summary>
             [Google.Apis.Util.RequestParameterAttribute("exactTerms", Google.Apis.Util.RequestParameterType.Query)]
@@ -1384,9 +1412,7 @@ namespace Google.Apis.CustomSearchAPI.v1
             [Google.Apis.Util.RequestParameterAttribute("q", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Q { get; set; }
 
-            /// <summary>
-            /// Specifies that all search results should be pages that are related to the specified URL.
-            /// </summary>
+            /// <summary>Deprecated.</summary>
             [Google.Apis.Util.RequestParameterAttribute("relatedSite", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string RelatedSite { get; set; }
 
@@ -1488,6 +1514,13 @@ namespace Google.Apis.CustomSearchAPI.v1
             }
 
             /// <summary>
+            /// Optional. Maximum length of snippet text, in characters, to be returned with results. Note: this feature
+            /// is limited to specific engines. * Valid values are integers between 161 and 1000, inclusive.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("snippetLength", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<int> SnippetLength { get; set; }
+
+            /// <summary>
             /// The sort expression to apply to the results. The sort parameter specifies that the results be sorted
             /// according to the specified expression i.e. sort by date. [Example:
             /// sort=date](https://developers.google.com/custom-search/docs/structured_search#sort-by-attribute).
@@ -1545,6 +1578,14 @@ namespace Google.Apis.CustomSearchAPI.v1
                 RequestParameters.Add("dateRestrict", new Google.Apis.Discovery.Parameter
                 {
                     Name = "dateRestrict",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("enableAlternateSearchHandler", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "enableAlternateSearchHandler",
                     IsRequired = false,
                     ParameterType = "query",
                     DefaultValue = null,
@@ -1750,6 +1791,14 @@ namespace Google.Apis.CustomSearchAPI.v1
                     DefaultValue = null,
                     Pattern = null,
                 });
+                RequestParameters.Add("snippetLength", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "snippetLength",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
                 RequestParameters.Add("sort", new Google.Apis.Discovery.Parameter
                 {
                     Name = "sort",
@@ -1913,7 +1962,7 @@ namespace Google.Apis.CustomSearchAPI.v1.Data
         /// <summary>Image belonging to a custom search result.</summary>
         public class ImageData
         {
-            /// <summary>The size of the image, in pixels.</summary>
+            /// <summary>The size of the image, in bytes.</summary>
             [Newtonsoft.Json.JsonPropertyAttribute("byteSize")]
             public virtual System.Nullable<int> ByteSize { get; set; }
 

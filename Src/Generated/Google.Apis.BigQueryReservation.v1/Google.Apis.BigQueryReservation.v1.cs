@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.BigQueryReservation.v1
         public BigQueryReservationService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://bigqueryreservation.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://bigqueryreservation.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.BigQueryReservation.v1
         public override string Name => "bigqueryreservation";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://bigqueryreservation.googleapis.com/";
-        #else
-            "https://bigqueryreservation.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://bigqueryreservation.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the BigQuery Reservation API.</summary>
         public class Scope
@@ -335,7 +330,7 @@ namespace Google.Apis.BigQueryReservation.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.BigQueryReservation.v1.Data.CapacityCommitment body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Creates a new capacity commitment resource.</summary>
@@ -357,9 +352,9 @@ namespace Google.Apis.BigQueryReservation.v1
 
                     /// <summary>
                     /// The optional capacity commitment ID. Capacity commitment name will be generated automatically if
-                    /// this field is empty. This field must only contain lower case alphanumeric characters or dash.
-                    /// Max length is 64 characters. NOTE: this ID won't be kept if the capacity commitment is split or
-                    /// merged.
+                    /// this field is empty. This field must only contain lower case alphanumeric characters or dashes.
+                    /// The first and last character cannot be a dash. Max length is 64 characters. NOTE: this ID won't
+                    /// be kept if the capacity commitment is split or merged.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("capacityCommitmentId", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string CapacityCommitmentId { get; set; }
@@ -426,7 +421,7 @@ namespace Google.Apis.BigQueryReservation.v1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -495,7 +490,7 @@ namespace Google.Apis.BigQueryReservation.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Returns information about the capacity commitment.</summary>
@@ -545,7 +540,7 @@ namespace Google.Apis.BigQueryReservation.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists all the capacity commitments for the admin project.</summary>
@@ -624,7 +619,7 @@ namespace Google.Apis.BigQueryReservation.v1
                 /// </param>
                 public virtual MergeRequest Merge(Google.Apis.BigQueryReservation.v1.Data.MergeCapacityCommitmentsRequest body, string parent)
                 {
-                    return new MergeRequest(service, body, parent);
+                    return new MergeRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -688,11 +683,13 @@ namespace Google.Apis.BigQueryReservation.v1
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
                 /// Output only. The resource name of the capacity commitment, e.g.,
-                /// `projects/myproject/locations/US/capacityCommitments/123`
+                /// `projects/myproject/locations/US/capacityCommitments/123` The commitment_id must only contain lower
+                /// case alphanumeric characters or dashes. It must start with a letter and must not end with a dash.
+                /// Its maximum length is 64 characters.
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.BigQueryReservation.v1.Data.CapacityCommitment body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -712,7 +709,9 @@ namespace Google.Apis.BigQueryReservation.v1
 
                     /// <summary>
                     /// Output only. The resource name of the capacity commitment, e.g.,
-                    /// `projects/myproject/locations/US/capacityCommitments/123`
+                    /// `projects/myproject/locations/US/capacityCommitments/123` The commitment_id must only contain
+                    /// lower case alphanumeric characters or dashes. It must start with a letter and must not end with
+                    /// a dash. Its maximum length is 64 characters.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
@@ -763,7 +762,7 @@ namespace Google.Apis.BigQueryReservation.v1
                 /// Splits capacity commitment to two commitments of the same plan and `commitment_end_time`. A common
                 /// use case is to enable downgrading commitments. For example, in order to downgrade from 10000 slots
                 /// to 8000, you might split a 10000 capacity commitment into commitments of 2000 and 8000. Then, you
-                /// would change the plan of the first one to `FLEX` and then delete it.
+                /// delete the first one after the commitment end time passes.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
@@ -771,14 +770,14 @@ namespace Google.Apis.BigQueryReservation.v1
                 /// </param>
                 public virtual SplitRequest Split(Google.Apis.BigQueryReservation.v1.Data.SplitCapacityCommitmentRequest body, string name)
                 {
-                    return new SplitRequest(service, body, name);
+                    return new SplitRequest(this.service, body, name);
                 }
 
                 /// <summary>
                 /// Splits capacity commitment to two commitments of the same plan and `commitment_end_time`. A common
                 /// use case is to enable downgrading commitments. For example, in order to downgrade from 10000 slots
                 /// to 8000, you might split a 10000 capacity commitment into commitments of 2000 and 8000. Then, you
-                /// would change the plan of the first one to `FLEX` and then delete it.
+                /// delete the first one after the commitment end time passes.
                 /// </summary>
                 public class SplitRequest : BigQueryReservationBaseServiceRequest<Google.Apis.BigQueryReservation.v1.Data.SplitCapacityCommitmentResponse>
                 {
@@ -888,7 +887,7 @@ namespace Google.Apis.BigQueryReservation.v1
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.BigQueryReservation.v1.Data.Assignment body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>
@@ -929,7 +928,7 @@ namespace Google.Apis.BigQueryReservation.v1
 
                         /// <summary>
                         /// The optional assignment ID. Assignment name will be generated automatically if this field is
-                        /// empty. This field must only contain lower case alphanumeric characters or dash. Max length
+                        /// empty. This field must only contain lower case alphanumeric characters or dashes. Max length
                         /// is 64 characters.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("assignmentId", Google.Apis.Util.RequestParameterType.Query)]
@@ -987,7 +986,7 @@ namespace Google.Apis.BigQueryReservation.v1
                     /// </param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -1055,7 +1054,7 @@ namespace Google.Apis.BigQueryReservation.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>
@@ -1145,7 +1144,7 @@ namespace Google.Apis.BigQueryReservation.v1
                     /// </param>
                     public virtual MoveRequest Move(Google.Apis.BigQueryReservation.v1.Data.MoveAssignmentRequest body, string name)
                     {
-                        return new MoveRequest(service, body, name);
+                        return new MoveRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -1199,6 +1198,81 @@ namespace Google.Apis.BigQueryReservation.v1
                             });
                         }
                     }
+
+                    /// <summary>Updates an existing assignment. Only the `priority` field can be updated.</summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="name">
+                    /// Output only. Name of the resource. E.g.:
+                    /// `projects/myproject/locations/US/reservations/team1-prod/assignments/123`. The assignment_id
+                    /// must only contain lower case alphanumeric characters or dashes and the max length is 64
+                    /// characters.
+                    /// </param>
+                    public virtual PatchRequest Patch(Google.Apis.BigQueryReservation.v1.Data.Assignment body, string name)
+                    {
+                        return new PatchRequest(this.service, body, name);
+                    }
+
+                    /// <summary>Updates an existing assignment. Only the `priority` field can be updated.</summary>
+                    public class PatchRequest : BigQueryReservationBaseServiceRequest<Google.Apis.BigQueryReservation.v1.Data.Assignment>
+                    {
+                        /// <summary>Constructs a new Patch request.</summary>
+                        public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.BigQueryReservation.v1.Data.Assignment body, string name) : base(service)
+                        {
+                            Name = name;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Output only. Name of the resource. E.g.:
+                        /// `projects/myproject/locations/US/reservations/team1-prod/assignments/123`. The assignment_id
+                        /// must only contain lower case alphanumeric characters or dashes and the max length is 64
+                        /// characters.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Standard field mask for the set of fields to be updated.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual object UpdateMask { get; set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.BigQueryReservation.v1.Data.Assignment Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "patch";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "PATCH";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}";
+
+                        /// <summary>Initializes Patch parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/reservations/[^/]+/assignments/[^/]+$",
+                            });
+                            RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "updateMask",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
                 }
 
                 /// <summary>Creates a new reservation resource.</summary>
@@ -1206,7 +1280,7 @@ namespace Google.Apis.BigQueryReservation.v1
                 /// <param name="parent">Required. Project, location. E.g., `projects/myproject/locations/US`</param>
                 public virtual CreateRequest Create(Google.Apis.BigQueryReservation.v1.Data.Reservation body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Creates a new reservation resource.</summary>
@@ -1225,8 +1299,8 @@ namespace Google.Apis.BigQueryReservation.v1
                     public virtual string Parent { get; private set; }
 
                     /// <summary>
-                    /// The reservation ID. This field must only contain lower case alphanumeric characters or dash. Max
-                    /// length is 64 characters.
+                    /// The reservation ID. It must only contain lower case alphanumeric characters or dashes. It must
+                    /// start with a letter and must not end with a dash. Its maximum length is 64 characters.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("reservationId", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string ReservationId { get; set; }
@@ -1279,7 +1353,7 @@ namespace Google.Apis.BigQueryReservation.v1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -1326,6 +1400,75 @@ namespace Google.Apis.BigQueryReservation.v1
                     }
                 }
 
+                /// <summary>
+                /// Fail over a reservation to the secondary location. The operation should be done in the current
+                /// secondary location, which will be promoted to the new primary location for the reservation.
+                /// Attempting to failover a reservation in the current primary location will fail with the error code
+                /// `google.rpc.Code.FAILED_PRECONDITION`.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. Resource name of the reservation to failover. E.g.,
+                /// `projects/myproject/locations/US/reservations/team1-prod`
+                /// </param>
+                public virtual FailoverReservationRequest FailoverReservation(Google.Apis.BigQueryReservation.v1.Data.FailoverReservationRequest body, string name)
+                {
+                    return new FailoverReservationRequest(this.service, body, name);
+                }
+
+                /// <summary>
+                /// Fail over a reservation to the secondary location. The operation should be done in the current
+                /// secondary location, which will be promoted to the new primary location for the reservation.
+                /// Attempting to failover a reservation in the current primary location will fail with the error code
+                /// `google.rpc.Code.FAILED_PRECONDITION`.
+                /// </summary>
+                public class FailoverReservationRequest : BigQueryReservationBaseServiceRequest<Google.Apis.BigQueryReservation.v1.Data.Reservation>
+                {
+                    /// <summary>Constructs a new FailoverReservation request.</summary>
+                    public FailoverReservationRequest(Google.Apis.Services.IClientService service, Google.Apis.BigQueryReservation.v1.Data.FailoverReservationRequest body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Resource name of the reservation to failover. E.g.,
+                    /// `projects/myproject/locations/US/reservations/team1-prod`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.BigQueryReservation.v1.Data.FailoverReservationRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "failoverReservation";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}:failoverReservation";
+
+                    /// <summary>Initializes FailoverReservation parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/reservations/[^/]+$",
+                        });
+                    }
+                }
+
                 /// <summary>Returns information about the reservation.</summary>
                 /// <param name="name">
                 /// Required. Resource name of the reservation to retrieve. E.g.,
@@ -1333,7 +1476,7 @@ namespace Google.Apis.BigQueryReservation.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Returns information about the reservation.</summary>
@@ -1384,7 +1527,7 @@ namespace Google.Apis.BigQueryReservation.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists all the reservations for the project in the specified location.</summary>
@@ -1455,11 +1598,13 @@ namespace Google.Apis.BigQueryReservation.v1
                 /// <summary>Updates an existing reservation resource.</summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
-                /// The resource name of the reservation, e.g., `projects/*/locations/*/reservations/team1-prod`.
+                /// The resource name of the reservation, e.g., `projects/*/locations/*/reservations/team1-prod`. The
+                /// reservation_id must only contain lower case alphanumeric characters or dashes. It must start with a
+                /// letter and must not end with a dash. Its maximum length is 64 characters.
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.BigQueryReservation.v1.Data.Reservation body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>Updates an existing reservation resource.</summary>
@@ -1475,6 +1620,8 @@ namespace Google.Apis.BigQueryReservation.v1
 
                     /// <summary>
                     /// The resource name of the reservation, e.g., `projects/*/locations/*/reservations/team1-prod`.
+                    /// The reservation_id must only contain lower case alphanumeric characters or dashes. It must start
+                    /// with a letter and must not end with a dash. Its maximum length is 64 characters.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
@@ -1529,7 +1676,7 @@ namespace Google.Apis.BigQueryReservation.v1
             /// </param>
             public virtual GetBiReservationRequest GetBiReservation(string name)
             {
-                return new GetBiReservationRequest(service, name);
+                return new GetBiReservationRequest(this.service, name);
             }
 
             /// <summary>Retrieves a BI reservation.</summary>
@@ -1590,7 +1737,7 @@ namespace Google.Apis.BigQueryReservation.v1
             /// </param>
             public virtual SearchAllAssignmentsRequest SearchAllAssignments(string parent)
             {
-                return new SearchAllAssignmentsRequest(service, parent);
+                return new SearchAllAssignmentsRequest(this.service, parent);
             }
 
             /// <summary>
@@ -1700,7 +1847,7 @@ namespace Google.Apis.BigQueryReservation.v1
             /// </param>
             public virtual SearchAssignmentsRequest SearchAssignments(string parent)
             {
-                return new SearchAssignmentsRequest(service, parent);
+                return new SearchAssignmentsRequest(this.service, parent);
             }
 
             /// <summary>
@@ -1805,7 +1952,7 @@ namespace Google.Apis.BigQueryReservation.v1
             /// </param>
             public virtual UpdateBiReservationRequest UpdateBiReservation(Google.Apis.BigQueryReservation.v1.Data.BiReservation body, string name)
             {
-                return new UpdateBiReservationRequest(service, body, name);
+                return new UpdateBiReservationRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -1888,13 +2035,25 @@ namespace Google.Apis.BigQueryReservation.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("assignee")]
         public virtual string Assignee { get; set; }
 
+        /// <summary>
+        /// Optional. This field controls if "Gemini in BigQuery"
+        /// (https://cloud.google.com/gemini/docs/bigquery/overview) features should be enabled for this reservation
+        /// assignment, which is not on by default. "Gemini in BigQuery" has a distinct compliance posture from
+        /// BigQuery. If this field is set to true, the assignment job type is QUERY, and the parent reservation edition
+        /// is ENTERPRISE_PLUS, then the assignment will give the grantee project/organization access to "Gemini in
+        /// BigQuery" features.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("enableGeminiInBigquery")]
+        public virtual System.Nullable<bool> EnableGeminiInBigquery { get; set; }
+
         /// <summary>Which type of jobs will use the reservation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("jobType")]
         public virtual string JobType { get; set; }
 
         /// <summary>
         /// Output only. Name of the resource. E.g.:
-        /// `projects/myproject/locations/US/reservations/team1-prod/assignments/123`.
+        /// `projects/myproject/locations/US/reservations/team1-prod/assignments/123`. The assignment_id must only
+        /// contain lower case alphanumeric characters or dashes and the max length is 64 characters.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -1902,6 +2061,26 @@ namespace Google.Apis.BigQueryReservation.v1.Data
         /// <summary>Output only. State of the assignment.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Auto scaling settings.</summary>
+    public class Autoscale : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. The slot capacity added to this reservation when autoscale happens. Will be between [0,
+        /// max_slots]. Note: after users reduce max_slots, it may take a while before it can be propagated, so
+        /// current_slots may stay in the original value and could be larger than max_slots for that brief period (less
+        /// than one minute)
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("currentSlots")]
+        public virtual System.Nullable<long> CurrentSlots { get; set; }
+
+        /// <summary>Number of slots to be scaled when needed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxSlots")]
+        public virtual System.Nullable<long> MaxSlots { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1917,13 +2096,50 @@ namespace Google.Apis.BigQueryReservation.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
+        /// <summary>Preferred tables to use BI capacity for.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("preferredTables")]
+        public virtual System.Collections.Generic.IList<TableReference> PreferredTables { get; set; }
+
         /// <summary>Size of a reservation, in bytes.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("size")]
         public virtual System.Nullable<long> Size { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The last update timestamp of a reservation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1937,27 +2153,120 @@ namespace Google.Apis.BigQueryReservation.v1.Data
     /// </summary>
     public class CapacityCommitment : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _commitmentEndTimeRaw;
+
+        private object _commitmentEndTime;
+
         /// <summary>
         /// Output only. The end of the current commitment period. It is applicable only for ACTIVE capacity
-        /// commitments.
+        /// commitments. Note after renewal, commitment_end_time is the time the renewed commitment expires. So itwould
+        /// be at a time after commitment_start_time + committed period, because we don't change commitment_start_time ,
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("commitmentEndTime")]
-        public virtual object CommitmentEndTime { get; set; }
+        public virtual string CommitmentEndTimeRaw
+        {
+            get => _commitmentEndTimeRaw;
+            set
+            {
+                _commitmentEndTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _commitmentEndTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CommitmentEndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CommitmentEndTimeDateTimeOffset instead.")]
+        public virtual object CommitmentEndTime
+        {
+            get => _commitmentEndTime;
+            set
+            {
+                _commitmentEndTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _commitmentEndTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="CommitmentEndTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CommitmentEndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CommitmentEndTimeRaw);
+            set => CommitmentEndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _commitmentStartTimeRaw;
+
+        private object _commitmentStartTime;
 
         /// <summary>
         /// Output only. The start of the current commitment period. It is applicable only for ACTIVE capacity
-        /// commitments.
+        /// commitments. Note after the commitment is renewed, commitment_start_time won't be changed. It refers to the
+        /// start time of the original commitment.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("commitmentStartTime")]
-        public virtual object CommitmentStartTime { get; set; }
+        public virtual string CommitmentStartTimeRaw
+        {
+            get => _commitmentStartTimeRaw;
+            set
+            {
+                _commitmentStartTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _commitmentStartTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CommitmentStartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CommitmentStartTimeDateTimeOffset instead.")]
+        public virtual object CommitmentStartTime
+        {
+            get => _commitmentStartTime;
+            set
+            {
+                _commitmentStartTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _commitmentStartTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="CommitmentStartTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CommitmentStartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CommitmentStartTimeRaw);
+            set => CommitmentStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Edition of the capacity commitment.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("edition")]
+        public virtual string Edition { get; set; }
 
         /// <summary>Output only. For FAILED commitment plan, provides the reason of failure.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("failureStatus")]
         public virtual Status FailureStatus { get; set; }
 
         /// <summary>
+        /// Output only. If true, the commitment is a flat-rate commitment, otherwise, it's an edition commitment.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("isFlatRate")]
+        public virtual System.Nullable<bool> IsFlatRate { get; set; }
+
+        /// <summary>
+        /// Applicable only for commitments located within one of the BigQuery multi-regions (US or EU). If set to true,
+        /// this commitment is placed in the organization's secondary region which is designated for disaster recovery
+        /// purposes. If false, this commitment is placed in the organization's default region. NOTE: this is a preview
+        /// feature. Project must be allow-listed in order to set this field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("multiRegionAuxiliary")]
+        public virtual System.Nullable<bool> MultiRegionAuxiliary { get; set; }
+
+        /// <summary>
         /// Output only. The resource name of the capacity commitment, e.g.,
-        /// `projects/myproject/locations/US/capacityCommitments/123`
+        /// `projects/myproject/locations/US/capacityCommitments/123` The commitment_id must only contain lower case
+        /// alphanumeric characters or dashes. It must start with a letter and must not end with a dash. Its maximum
+        /// length is 64 characters.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -1989,10 +2298,16 @@ namespace Google.Apis.BigQueryReservation.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The request for ReservationService.FailoverReservation.</summary>
+    public class FailoverReservationRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2072,6 +2387,13 @@ namespace Google.Apis.BigQueryReservation.v1.Data
     public class MoveAssignmentRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// The optional assignment ID. A new assignment name is generated if this field is empty. This field can
+        /// contain only lowercase alphanumeric characters or dashes. Max length is 64 characters.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("assignmentId")]
+        public virtual string AssignmentId { get; set; }
+
+        /// <summary>
         /// The new reservation ID, e.g.: `projects/myotherproject/locations/US/reservations/team2-prod`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("destinationId")]
@@ -2084,9 +2406,60 @@ namespace Google.Apis.BigQueryReservation.v1.Data
     /// <summary>A reservation is a mechanism used to guarantee slots to users.</summary>
     public class Reservation : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The configuration parameters for the auto scaling feature.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("autoscale")]
+        public virtual Autoscale Autoscale { get; set; }
+
+        /// <summary>
+        /// Job concurrency target which sets a soft upper bound on the number of jobs that can run concurrently in this
+        /// reservation. This is a soft target due to asynchronous nature of the system and various optimizations for
+        /// small queries. Default value is 0 which means that concurrency target will be automatically computed by the
+        /// system. NOTE: this field is exposed as target job concurrency in the Information Schema, DDL and BigQuery
+        /// CLI.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("concurrency")]
+        public virtual System.Nullable<long> Concurrency { get; set; }
+
+        private string _creationTimeRaw;
+
+        private object _creationTime;
+
         /// <summary>Output only. Creation time of the reservation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creationTime")]
-        public virtual object CreationTime { get; set; }
+        public virtual string CreationTimeRaw
+        {
+            get => _creationTimeRaw;
+            set
+            {
+                _creationTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _creationTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreationTimeDateTimeOffset instead.")]
+        public virtual object CreationTime
+        {
+            get => _creationTime;
+            set
+            {
+                _creationTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _creationTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreationTimeRaw);
+            set => CreationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Edition of the reservation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("edition")]
+        public virtual string Edition { get; set; }
 
         /// <summary>
         /// If false, any query or pipeline job using this reservation will use idle slots from other reservations
@@ -2097,26 +2470,101 @@ namespace Google.Apis.BigQueryReservation.v1.Data
         public virtual System.Nullable<bool> IgnoreIdleSlots { get; set; }
 
         /// <summary>
-        /// The resource name of the reservation, e.g., `projects/*/locations/*/reservations/team1-prod`.
+        /// Optional. The labels associated with this reservation. You can use these to organize and group your
+        /// reservations. You can set this property when inserting or updating a reservation.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labels")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
+
+        /// <summary>
+        /// Applicable only for reservations located within one of the BigQuery multi-regions (US or EU). If set to
+        /// true, this reservation is placed in the organization's secondary region which is designated for disaster
+        /// recovery purposes. If false, this reservation is placed in the organization's default region. NOTE: this is
+        /// a preview feature. Project must be allow-listed in order to set this field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("multiRegionAuxiliary")]
+        public virtual System.Nullable<bool> MultiRegionAuxiliary { get; set; }
+
+        /// <summary>
+        /// The resource name of the reservation, e.g., `projects/*/locations/*/reservations/team1-prod`. The
+        /// reservation_id must only contain lower case alphanumeric characters or dashes. It must start with a letter
+        /// and must not end with a dash. Its maximum length is 64 characters.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// Minimum slots available to this reservation. A slot is a unit of computational power in BigQuery, and serves
-        /// as the unit of parallelism. Queries using this reservation might use more slots during runtime if
-        /// ignore_idle_slots is set to false. If the new reservation's slot capacity exceed the project's slot capacity
-        /// or if total slot capacity of the new reservation and its siblings exceeds the project's slot capacity, the
-        /// request will fail with `google.rpc.Code.RESOURCE_EXHAUSTED`. NOTE: for reservations in US or EU
-        /// multi-regions slot capacity constraints are checked separately for default and auxiliary regions. See
-        /// multi_region_auxiliary flag for more details.
+        /// Output only. The location where the reservation was originally created. This is set only during the failover
+        /// reservation's creation. All billing charges for the failover reservation will be applied to this location.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("originalPrimaryLocation")]
+        public virtual string OriginalPrimaryLocation { get; set; }
+
+        /// <summary>
+        /// Output only. The current location of the reservation's primary replica. This field is only set for
+        /// reservations using the managed disaster recovery feature.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("primaryLocation")]
+        public virtual string PrimaryLocation { get; set; }
+
+        /// <summary>
+        /// Optional. The current location of the reservation's secondary replica. This field is only set for
+        /// reservations using the managed disaster recovery feature. Users can set this in create reservation calls to
+        /// create a failover reservation or in update reservation calls to convert a non-failover reservation to a
+        /// failover reservation(or vice versa).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("secondaryLocation")]
+        public virtual string SecondaryLocation { get; set; }
+
+        /// <summary>
+        /// Baseline slots available to this reservation. A slot is a unit of computational power in BigQuery, and
+        /// serves as the unit of parallelism. Queries using this reservation might use more slots during runtime if
+        /// ignore_idle_slots is set to false, or autoscaling is enabled. The total slot_capacity of the reservation and
+        /// its siblings may exceed the total slot_count of capacity commitments. In that case, the exceeding slots will
+        /// be charged with the autoscale SKU. You can increase the number of baseline slots in a reservation every few
+        /// minutes. If you want to decrease your baseline slots, you are limited to once an hour if you have recently
+        /// changed your baseline slot capacity and your baseline slots exceed your committed slots. Otherwise, you can
+        /// decrease your baseline slots every few minutes.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("slotCapacity")]
         public virtual System.Nullable<long> SlotCapacity { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. Last update time of the reservation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2206,6 +2654,27 @@ namespace Google.Apis.BigQueryReservation.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("message")]
         public virtual string Message { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Fully qualified reference to BigQuery table. Internally stored as google.cloud.bi.v1.BqTableReference.
+    /// </summary>
+    public class TableReference : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ID of the dataset in the above project.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("datasetId")]
+        public virtual string DatasetId { get; set; }
+
+        /// <summary>The assigned project ID of the project.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
+        public virtual string ProjectId { get; set; }
+
+        /// <summary>The ID of the table in the above dataset.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tableId")]
+        public virtual string TableId { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

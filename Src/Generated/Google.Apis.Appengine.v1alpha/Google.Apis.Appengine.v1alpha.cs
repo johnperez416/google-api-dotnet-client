@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ namespace Google.Apis.Appengine.v1alpha
         {
             Apps = new AppsResource(this);
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://appengine.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://appengine.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -45,23 +47,16 @@ namespace Google.Apis.Appengine.v1alpha
         public override string Name => "appengine";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://appengine.googleapis.com/";
-        #else
-            "https://appengine.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://appengine.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the App Engine Admin API.</summary>
         public class Scope
@@ -330,7 +325,7 @@ namespace Google.Apis.Appengine.v1alpha
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Appengine.v1alpha.Data.AuthorizedCertificate body, string appsId)
             {
-                return new CreateRequest(service, body, appsId);
+                return new CreateRequest(this.service, body, appsId);
             }
 
             /// <summary>Uploads the specified SSL certificate.</summary>
@@ -385,7 +380,7 @@ namespace Google.Apis.Appengine.v1alpha
             /// <param name="authorizedCertificatesId">Part of `name`. See documentation of `appsId`.</param>
             public virtual DeleteRequest Delete(string appsId, string authorizedCertificatesId)
             {
-                return new DeleteRequest(service, appsId, authorizedCertificatesId);
+                return new DeleteRequest(this.service, appsId, authorizedCertificatesId);
             }
 
             /// <summary>Deletes the specified SSL certificate.</summary>
@@ -448,7 +443,7 @@ namespace Google.Apis.Appengine.v1alpha
             /// <param name="authorizedCertificatesId">Part of `name`. See documentation of `appsId`.</param>
             public virtual GetRequest Get(string appsId, string authorizedCertificatesId)
             {
-                return new GetRequest(service, appsId, authorizedCertificatesId);
+                return new GetRequest(this.service, appsId, authorizedCertificatesId);
             }
 
             /// <summary>Gets the specified SSL certificate.</summary>
@@ -539,7 +534,7 @@ namespace Google.Apis.Appengine.v1alpha
             /// </param>
             public virtual ListRequest List(string appsId)
             {
-                return new ListRequest(service, appsId);
+                return new ListRequest(this.service, appsId);
             }
 
             /// <summary>Lists all SSL certificates the user is authorized to administer.</summary>
@@ -645,7 +640,7 @@ namespace Google.Apis.Appengine.v1alpha
             /// <param name="authorizedCertificatesId">Part of `name`. See documentation of `appsId`.</param>
             public virtual PatchRequest Patch(Google.Apis.Appengine.v1alpha.Data.AuthorizedCertificate body, string appsId, string authorizedCertificatesId)
             {
-                return new PatchRequest(service, body, appsId, authorizedCertificatesId);
+                return new PatchRequest(this.service, body, appsId, authorizedCertificatesId);
             }
 
             /// <summary>
@@ -751,7 +746,7 @@ namespace Google.Apis.Appengine.v1alpha
             /// </param>
             public virtual ListRequest List(string appsId)
             {
-                return new ListRequest(service, appsId);
+                return new ListRequest(this.service, appsId);
             }
 
             /// <summary>Lists all domains the user is authorized to administer.</summary>
@@ -844,7 +839,7 @@ namespace Google.Apis.Appengine.v1alpha
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Appengine.v1alpha.Data.DomainMapping body, string appsId)
             {
-                return new CreateRequest(service, body, appsId);
+                return new CreateRequest(this.service, body, appsId);
             }
 
             /// <summary>
@@ -963,7 +958,7 @@ namespace Google.Apis.Appengine.v1alpha
             /// <param name="domainMappingsId">Part of `name`. See documentation of `appsId`.</param>
             public virtual DeleteRequest Delete(string appsId, string domainMappingsId)
             {
-                return new DeleteRequest(service, appsId, domainMappingsId);
+                return new DeleteRequest(this.service, appsId, domainMappingsId);
             }
 
             /// <summary>
@@ -1029,7 +1024,7 @@ namespace Google.Apis.Appengine.v1alpha
             /// <param name="domainMappingsId">Part of `name`. See documentation of `appsId`.</param>
             public virtual GetRequest Get(string appsId, string domainMappingsId)
             {
-                return new GetRequest(service, appsId, domainMappingsId);
+                return new GetRequest(this.service, appsId, domainMappingsId);
             }
 
             /// <summary>Gets the specified domain mapping.</summary>
@@ -1091,7 +1086,7 @@ namespace Google.Apis.Appengine.v1alpha
             /// </param>
             public virtual ListRequest List(string appsId)
             {
-                return new ListRequest(service, appsId);
+                return new ListRequest(this.service, appsId);
             }
 
             /// <summary>Lists the domain mappings on an application.</summary>
@@ -1168,7 +1163,7 @@ namespace Google.Apis.Appengine.v1alpha
             /// <param name="domainMappingsId">Part of `name`. See documentation of `appsId`.</param>
             public virtual PatchRequest Patch(Google.Apis.Appengine.v1alpha.Data.DomainMapping body, string appsId, string domainMappingsId)
             {
-                return new PatchRequest(service, body, appsId, domainMappingsId);
+                return new PatchRequest(this.service, body, appsId, domainMappingsId);
             }
 
             /// <summary>
@@ -1287,7 +1282,7 @@ namespace Google.Apis.Appengine.v1alpha
             /// <param name="locationsId">Part of `name`. See documentation of `appsId`.</param>
             public virtual GetRequest Get(string appsId, string locationsId)
             {
-                return new GetRequest(service, appsId, locationsId);
+                return new GetRequest(this.service, appsId, locationsId);
             }
 
             /// <summary>Gets information about a location.</summary>
@@ -1347,7 +1342,7 @@ namespace Google.Apis.Appengine.v1alpha
             /// </param>
             public virtual ListRequest List(string appsId)
             {
-                return new ListRequest(service, appsId);
+                return new ListRequest(this.service, appsId);
             }
 
             /// <summary>Lists information about the supported locations for this service.</summary>
@@ -1458,7 +1453,7 @@ namespace Google.Apis.Appengine.v1alpha
             /// <param name="operationsId">Part of `name`. See documentation of `appsId`.</param>
             public virtual GetRequest Get(string appsId, string operationsId)
             {
-                return new GetRequest(service, appsId, operationsId);
+                return new GetRequest(this.service, appsId, operationsId);
             }
 
             /// <summary>
@@ -1517,25 +1512,17 @@ namespace Google.Apis.Appengine.v1alpha
 
             /// <summary>
             /// Lists operations that match the specified filter in the request. If the server doesn't support this
-            /// method, it returns UNIMPLEMENTED.NOTE: the name binding allows API services to override the binding to
-            /// use different resource name schemes, such as users/*/operations. To override the binding, API services
-            /// can add a binding such as "/v1/{name=users/*}/operations" to their service configuration. For backwards
-            /// compatibility, the default name includes the operations collection id, however overriding users must
-            /// ensure the name binding is the parent resource, without the operations collection id.
+            /// method, it returns UNIMPLEMENTED.
             /// </summary>
             /// <param name="appsId">Part of `name`. The name of the operation's parent resource.</param>
             public virtual ListRequest List(string appsId)
             {
-                return new ListRequest(service, appsId);
+                return new ListRequest(this.service, appsId);
             }
 
             /// <summary>
             /// Lists operations that match the specified filter in the request. If the server doesn't support this
-            /// method, it returns UNIMPLEMENTED.NOTE: the name binding allows API services to override the binding to
-            /// use different resource name schemes, such as users/*/operations. To override the binding, API services
-            /// can add a binding such as "/v1/{name=users/*}/operations" to their service configuration. For backwards
-            /// compatibility, the default name includes the operations collection id, however overriding users must
-            /// ensure the name binding is the parent resource, without the operations collection id.
+            /// method, it returns UNIMPLEMENTED.
             /// </summary>
             public class ListRequest : AppengineBaseServiceRequest<Google.Apis.Appengine.v1alpha.Data.ListOperationsResponse>
             {
@@ -1642,7 +1629,146 @@ namespace Google.Apis.Appengine.v1alpha
             public LocationsResource(Google.Apis.Services.IClientService service)
             {
                 this.service = service;
+                Applications = new ApplicationsResource(service);
                 Operations = new OperationsResource(service);
+            }
+
+            /// <summary>Gets the Applications resource.</summary>
+            public virtual ApplicationsResource Applications { get; }
+
+            /// <summary>The "applications" collection of methods.</summary>
+            public class ApplicationsResource
+            {
+                private const string Resource = "applications";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public ApplicationsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                    AuthorizedDomains = new AuthorizedDomainsResource(service);
+                }
+
+                /// <summary>Gets the AuthorizedDomains resource.</summary>
+                public virtual AuthorizedDomainsResource AuthorizedDomains { get; }
+
+                /// <summary>The "authorizedDomains" collection of methods.</summary>
+                public class AuthorizedDomainsResource
+                {
+                    private const string Resource = "authorizedDomains";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public AuthorizedDomainsResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>Lists all domains the user is authorized to administer.</summary>
+                    /// <param name="projectsId">
+                    /// Part of `parent`. Name of the parent Application resource. Example: apps/myapp.
+                    /// </param>
+                    /// <param name="locationsId">Part of `parent`. See documentation of `projectsId`.</param>
+                    /// <param name="applicationsId">Part of `parent`. See documentation of `projectsId`.</param>
+                    public virtual ListRequest List(string projectsId, string locationsId, string applicationsId)
+                    {
+                        return new ListRequest(this.service, projectsId, locationsId, applicationsId);
+                    }
+
+                    /// <summary>Lists all domains the user is authorized to administer.</summary>
+                    public class ListRequest : AppengineBaseServiceRequest<Google.Apis.Appengine.v1alpha.Data.ListAuthorizedDomainsResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string projectsId, string locationsId, string applicationsId) : base(service)
+                        {
+                            ProjectsId = projectsId;
+                            LocationsId = locationsId;
+                            ApplicationsId = applicationsId;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Part of `parent`. Name of the parent Application resource. Example: apps/myapp.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("projectsId", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string ProjectsId { get; private set; }
+
+                        /// <summary>Part of `parent`. See documentation of `projectsId`.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("locationsId", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string LocationsId { get; private set; }
+
+                        /// <summary>Part of `parent`. See documentation of `projectsId`.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("applicationsId", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string ApplicationsId { get; private set; }
+
+                        /// <summary>Maximum results to return per page.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>Continuation token for fetching the next page of results.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1alpha/projects/{projectsId}/locations/{locationsId}/applications/{applicationsId}/authorizedDomains";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("projectsId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "projectsId",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("locationsId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "locationsId",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("applicationsId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "applicationsId",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+                }
             }
 
             /// <summary>Gets the Operations resource.</summary>
@@ -1671,7 +1797,7 @@ namespace Google.Apis.Appengine.v1alpha
                 /// <param name="operationsId">Part of `name`. See documentation of `projectsId`.</param>
                 public virtual GetRequest Get(string projectsId, string locationsId, string operationsId)
                 {
-                    return new GetRequest(service, projectsId, locationsId, operationsId);
+                    return new GetRequest(this.service, projectsId, locationsId, operationsId);
                 }
 
                 /// <summary>
@@ -1743,28 +1869,18 @@ namespace Google.Apis.Appengine.v1alpha
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns UNIMPLEMENTED.NOTE: the name binding allows API services to override the binding
-                /// to use different resource name schemes, such as users/*/operations. To override the binding, API
-                /// services can add a binding such as "/v1/{name=users/*}/operations" to their service configuration.
-                /// For backwards compatibility, the default name includes the operations collection id, however
-                /// overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns UNIMPLEMENTED.
                 /// </summary>
                 /// <param name="projectsId">Part of `name`. The name of the operation's parent resource.</param>
                 /// <param name="locationsId">Part of `name`. See documentation of `projectsId`.</param>
                 public virtual ListRequest List(string projectsId, string locationsId)
                 {
-                    return new ListRequest(service, projectsId, locationsId);
+                    return new ListRequest(this.service, projectsId, locationsId);
                 }
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns UNIMPLEMENTED.NOTE: the name binding allows API services to override the binding
-                /// to use different resource name schemes, such as users/*/operations. To override the binding, API
-                /// services can add a binding such as "/v1/{name=users/*}/operations" to their service configuration.
-                /// For backwards compatibility, the default name includes the operations collection id, however
-                /// overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns UNIMPLEMENTED.
                 /// </summary>
                 public class ListRequest : AppengineBaseServiceRequest<Google.Apis.Appengine.v1alpha.Data.ListOperationsResponse>
                 {
@@ -1858,7 +1974,7 @@ namespace Google.Apis.Appengine.v1alpha
             /// <param name="locationsId">Part of `name`. See documentation of `projectsId`.</param>
             public virtual GetRequest Get(string projectsId, string locationsId)
             {
-                return new GetRequest(service, projectsId, locationsId);
+                return new GetRequest(this.service, projectsId, locationsId);
             }
 
             /// <summary>Gets information about a location.</summary>
@@ -1918,7 +2034,7 @@ namespace Google.Apis.Appengine.v1alpha
             /// </param>
             public virtual ListRequest List(string projectsId)
             {
-                return new ListRequest(service, projectsId);
+                return new ListRequest(this.service, projectsId);
             }
 
             /// <summary>Lists information about the supported locations for this service.</summary>
@@ -2042,13 +2158,46 @@ namespace Google.Apis.Appengine.v1alpha.Data
         [Newtonsoft.Json.JsonPropertyAttribute("domainNames")]
         public virtual System.Collections.Generic.IList<string> DomainNames { get; set; }
 
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
         /// <summary>
         /// The time when this certificate expires. To update the renewal time on this certificate, upload an SSL
         /// certificate with a different expiration time using
         /// AuthorizedCertificates.UpdateAuthorizedCertificate.@OutputOnly
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
-        public virtual object ExpireTime { get; set; }
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Relative name of the certificate. This is a unique value autogenerated on AuthorizedCertificate resource
@@ -2088,7 +2237,7 @@ namespace Google.Apis.Appengine.v1alpha.Data
 
     /// <summary>
     /// A domain that a user has been authorized to administer. To authorize use of a domain, verify ownership via
-    /// Webmaster Central (https://www.google.com/webmasters/verification/home).
+    /// Search Console (https://search.google.com/search-console/welcome).
     /// </summary>
     public class AuthorizedDomain : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2124,6 +2273,38 @@ namespace Google.Apis.Appengine.v1alpha.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("publicCertificate")]
         public virtual string PublicCertificate { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// ContainerState contains the externally-visible container state that is used to communicate the state and
+    /// reasoning for that state to the CLH. This data is not persisted by CCFE, but is instead derived from CCFE's
+    /// internal representation of the container state.
+    /// </summary>
+    public class ContainerState : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("currentReasons")]
+        public virtual Reasons CurrentReasons { get; set; }
+
+        /// <summary>
+        /// The previous and current reasons for a container state will be sent for a container event. CLHs that need to
+        /// know the signal that caused the container event to trigger (edges) as opposed to just knowing the state can
+        /// act upon differences in the previous and current reasons.Reasons will be provided for every system: service
+        /// management, data governance, abuse, and billing.If this is a CCFE-triggered event used for reconciliation
+        /// then the current reasons will be set to their *_CONTROL_PLANE_SYNC state. The previous reasons will contain
+        /// the last known set of non-unknown non-control_plane_sync reasons for the state.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("previousReasons")]
+        public virtual Reasons PreviousReasons { get; set; }
+
+        /// <summary>
+        /// The current state of the container. This state is the culmination of all of the opinions from external
+        /// systems that CCFE knows about of the container.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2200,11 +2381,28 @@ namespace Google.Apis.Appengine.v1alpha.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for Empty is empty JSON
-    /// object {}.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>For use only by GCE. GceTag is a wrapper around the GCE administrative tag with parent info.</summary>
+    public class GceTag : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The parents(s) of the tag. Eg. projects/123, folders/456 It usually contains only one parent. But, in some
+        /// corner cases, it can contain multiple parents. Currently, organizations are not supported.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("parent")]
+        public virtual System.Collections.Generic.IList<string> Parent { get; set; }
+
+        /// <summary>The administrative_tag name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tag")]
+        public virtual string Tag { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -2306,7 +2504,7 @@ namespace Google.Apis.Appengine.v1alpha.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A resource that represents Google Cloud Platform location.</summary>
+    /// <summary>A resource that represents a Google Cloud location.</summary>
     public class Location : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The friendly name for this location, typically a nearby city name. For example, "Tokyo".</summary>
@@ -2363,13 +2561,48 @@ namespace Google.Apis.Appengine.v1alpha.Data
     /// <summary>A certificate managed by App Engine.</summary>
     public class ManagedCertificate : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _lastRenewalTimeRaw;
+
+        private object _lastRenewalTime;
+
         /// <summary>
         /// Time at which the certificate was last renewed. The renewal process is fully managed. Certificate renewal
         /// will automatically occur before the certificate expires. Renewal errors can be tracked via
         /// ManagementStatus.@OutputOnly
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastRenewalTime")]
-        public virtual object LastRenewalTime { get; set; }
+        public virtual string LastRenewalTimeRaw
+        {
+            get => _lastRenewalTimeRaw;
+            set
+            {
+                _lastRenewalTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastRenewalTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastRenewalTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastRenewalTimeDateTimeOffset instead.")]
+        public virtual object LastRenewalTime
+        {
+            get => _lastRenewalTime;
+            set
+            {
+                _lastRenewalTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastRenewalTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastRenewalTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastRenewalTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastRenewalTimeRaw);
+            set => LastRenewalTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Status of certificate management. Refers to the most recent certificate acquisition or renewal
@@ -2412,10 +2645,10 @@ namespace Google.Apis.Appengine.v1alpha.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as Delete, the response is google.protobuf.Empty. If the original method is standard Get/Create/Update,
-        /// the response should be the resource. For other methods, the response should have the type XxxResponse, where
-        /// Xxx is the original method name. For example, if the original method name is TakeSnapshot(), the inferred
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// Delete, the response is google.protobuf.Empty. If the original method is standard Get/Create/Update, the
+        /// response should be the resource. For other methods, the response should have the type XxxResponse, where Xxx
+        /// is the original method name. For example, if the original method name is TakeSnapshot(), the inferred
         /// response type is TakeSnapshotResponse.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("response")]
@@ -2431,17 +2664,83 @@ namespace Google.Apis.Appengine.v1alpha.Data
         [Newtonsoft.Json.JsonPropertyAttribute("createVersionMetadata")]
         public virtual CreateVersionMetadataV1 CreateVersionMetadata { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>Time that this operation completed.@OutputOnly</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Ephemeral message that may change every time the operation is polled. @OutputOnly</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("ephemeralMessage")]
         public virtual string EphemeralMessage { get; set; }
 
+        private string _insertTimeRaw;
+
+        private object _insertTime;
+
         /// <summary>Time that this operation was created.@OutputOnly</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("insertTime")]
-        public virtual object InsertTime { get; set; }
+        public virtual string InsertTimeRaw
+        {
+            get => _insertTimeRaw;
+            set
+            {
+                _insertTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _insertTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="InsertTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use InsertTimeDateTimeOffset instead.")]
+        public virtual object InsertTime
+        {
+            get => _insertTime;
+            set
+            {
+                _insertTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _insertTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="InsertTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? InsertTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(InsertTimeRaw);
+            set => InsertTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// API method that initiated this operation. Example: google.appengine.v1.Versions.CreateVersion.@OutputOnly
@@ -2473,17 +2772,83 @@ namespace Google.Apis.Appengine.v1alpha.Data
         [Newtonsoft.Json.JsonPropertyAttribute("createVersionMetadata")]
         public virtual CreateVersionMetadataV1Alpha CreateVersionMetadata { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>Time that this operation completed.@OutputOnly</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Ephemeral message that may change every time the operation is polled. @OutputOnly</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("ephemeralMessage")]
         public virtual string EphemeralMessage { get; set; }
 
+        private string _insertTimeRaw;
+
+        private object _insertTime;
+
         /// <summary>Time that this operation was created.@OutputOnly</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("insertTime")]
-        public virtual object InsertTime { get; set; }
+        public virtual string InsertTimeRaw
+        {
+            get => _insertTimeRaw;
+            set
+            {
+                _insertTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _insertTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="InsertTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use InsertTimeDateTimeOffset instead.")]
+        public virtual object InsertTime
+        {
+            get => _insertTime;
+            set
+            {
+                _insertTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _insertTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="InsertTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? InsertTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(InsertTimeRaw);
+            set => InsertTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// API method that initiated this operation. Example:
@@ -2516,17 +2881,83 @@ namespace Google.Apis.Appengine.v1alpha.Data
         [Newtonsoft.Json.JsonPropertyAttribute("createVersionMetadata")]
         public virtual CreateVersionMetadataV1Beta CreateVersionMetadata { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>Time that this operation completed.@OutputOnly</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Ephemeral message that may change every time the operation is polled. @OutputOnly</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("ephemeralMessage")]
         public virtual string EphemeralMessage { get; set; }
 
+        private string _insertTimeRaw;
+
+        private object _insertTime;
+
         /// <summary>Time that this operation was created.@OutputOnly</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("insertTime")]
-        public virtual object InsertTime { get; set; }
+        public virtual string InsertTimeRaw
+        {
+            get => _insertTimeRaw;
+            set
+            {
+                _insertTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _insertTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="InsertTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use InsertTimeDateTimeOffset instead.")]
+        public virtual object InsertTime
+        {
+            get => _insertTime;
+            set
+            {
+                _insertTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _insertTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="InsertTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? InsertTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(InsertTimeRaw);
+            set => InsertTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// API method that initiated this operation. Example:
@@ -2548,6 +2979,145 @@ namespace Google.Apis.Appengine.v1alpha.Data
         /// <summary>Durable messages that persist on every operation poll. @OutputOnly</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("warning")]
         public virtual System.Collections.Generic.IList<string> Warning { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The request sent to CLHs during project events.</summary>
+    public class ProjectEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The unique ID for this project event. CLHs can use this value to dedup repeated calls. required
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("eventId")]
+        public virtual string EventId { get; set; }
+
+        /// <summary>
+        /// Phase indicates when in the container event propagation this event is being communicated. Events are sent
+        /// before and after the per-resource events are propagated. required
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("phase")]
+        public virtual string Phase { get; set; }
+
+        /// <summary>The projects metadata for this project. required</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("projectMetadata")]
+        public virtual ProjectsMetadata ProjectMetadata { get; set; }
+
+        /// <summary>The state of the organization that led to this event.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual ContainerState State { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// ProjectsMetadata is the metadata CCFE stores about the all the relevant projects (tenant, consumer, producer).
+    /// </summary>
+    public class ProjectsMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The consumer project id.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("consumerProjectId")]
+        public virtual string ConsumerProjectId { get; set; }
+
+        /// <summary>The consumer project number.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("consumerProjectNumber")]
+        public virtual System.Nullable<long> ConsumerProjectNumber { get; set; }
+
+        /// <summary>
+        /// The CCFE state of the consumer project. It is the same state that is communicated to the CLH during project
+        /// events. Notice that this field is not set in the DB, it is only set in this proto when communicated to CLH
+        /// in the side channel.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("consumerProjectState")]
+        public virtual string ConsumerProjectState { get; set; }
+
+        /// <summary>
+        /// The GCE tags associated with the consumer project and those inherited due to their ancestry, if any. Not
+        /// supported by CCFE.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gceTag")]
+        public virtual System.Collections.Generic.IList<GceTag> GceTag { get; set; }
+
+        /// <summary>
+        /// The service account authorized to operate on the consumer project. Note: CCFE only propagates P4SA with
+        /// default tag to CLH.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("p4ServiceAccount")]
+        public virtual string P4ServiceAccount { get; set; }
+
+        /// <summary>The producer project id.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("producerProjectId")]
+        public virtual string ProducerProjectId { get; set; }
+
+        /// <summary>The producer project number.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("producerProjectNumber")]
+        public virtual System.Nullable<long> ProducerProjectNumber { get; set; }
+
+        /// <summary>The tenant project id.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tenantProjectId")]
+        public virtual string TenantProjectId { get; set; }
+
+        /// <summary>The tenant project number.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tenantProjectNumber")]
+        public virtual System.Nullable<long> TenantProjectNumber { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Containers transition between and within states based on reasons sent from various systems. CCFE will provide
+    /// the CLH with reasons for the current state per system.The current systems that CCFE supports are: Service
+    /// Management (Inception) Data Governance (Wipeout) Abuse (Ares) Billing (Internal Cloud Billing API) Service
+    /// Activation (Service Controller)
+    /// </summary>
+    public class Reasons : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("abuse")]
+        public virtual string Abuse { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("billing")]
+        public virtual string Billing { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("dataGovernance")]
+        public virtual string DataGovernance { get; set; }
+
+        /// <summary>
+        /// Consumer Container denotes if the service is active within a project or not. This information could be used
+        /// to clean up resources in case service in DISABLED_FULL i.e. Service is inactive &amp;gt; 30 days.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serviceActivation")]
+        public virtual string ServiceActivation { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("serviceManagement")]
+        public virtual string ServiceManagement { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The request that is passed to CLH during per-resource events. The request will be sent with update semantics in
+    /// all cases except for data governance purge events. These events will be sent with delete semantics and the CLH
+    /// is expected to delete the resource receiving this event.
+    /// </summary>
+    public class ResourceEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The unique ID for this per-resource event. CLHs can use this value to dedup repeated calls. required
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("eventId")]
+        public virtual string EventId { get; set; }
+
+        /// <summary>The name of the resource for which this event is. required</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The state of the project that led to this event.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual ContainerState State { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

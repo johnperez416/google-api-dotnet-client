@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.CloudTrace.v2
         public CloudTraceService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://cloudtrace.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://cloudtrace.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.CloudTrace.v2
         public override string Name => "cloudtrace";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://cloudtrace.googleapis.com/";
-        #else
-            "https://cloudtrace.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://cloudtrace.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Trace API.</summary>
         public class Scope
@@ -326,15 +321,15 @@ namespace Google.Apis.CloudTrace.v2
                 /// <summary>Creates a new span.</summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
-                /// Required. The resource name of the span in the following format:
-                /// projects/[PROJECT_ID]/traces/[TRACE_ID]/spans/SPAN_ID is a unique identifier for a trace within a
-                /// project; it is a 32-character hexadecimal encoding of a 16-byte array. [SPAN_ID] is a unique
-                /// identifier for a span within a trace; it is a 16-character hexadecimal encoding of an 8-byte array.
-                /// It should not be zero.
+                /// Required. The resource name of the span in the following format: *
+                /// `projects/[PROJECT_ID]/traces/[TRACE_ID]/spans/[SPAN_ID]` `[TRACE_ID]` is a unique identifier for a
+                /// trace within a project; it is a 32-character hexadecimal encoding of a 16-byte array. It should not
+                /// be zero. `[SPAN_ID]` is a unique identifier for a span within a trace; it is a 16-character
+                /// hexadecimal encoding of an 8-byte array. It should not be zero. .
                 /// </param>
                 public virtual CreateSpanRequest CreateSpan(Google.Apis.CloudTrace.v2.Data.Span body, string name)
                 {
-                    return new CreateSpanRequest(service, body, name);
+                    return new CreateSpanRequest(this.service, body, name);
                 }
 
                 /// <summary>Creates a new span.</summary>
@@ -349,11 +344,11 @@ namespace Google.Apis.CloudTrace.v2
                     }
 
                     /// <summary>
-                    /// Required. The resource name of the span in the following format:
-                    /// projects/[PROJECT_ID]/traces/[TRACE_ID]/spans/SPAN_ID is a unique identifier for a trace within
-                    /// a project; it is a 32-character hexadecimal encoding of a 16-byte array. [SPAN_ID] is a unique
-                    /// identifier for a span within a trace; it is a 16-character hexadecimal encoding of an 8-byte
-                    /// array. It should not be zero.
+                    /// Required. The resource name of the span in the following format: *
+                    /// `projects/[PROJECT_ID]/traces/[TRACE_ID]/spans/[SPAN_ID]` `[TRACE_ID]` is a unique identifier
+                    /// for a trace within a project; it is a 32-character hexadecimal encoding of a 16-byte array. It
+                    /// should not be zero. `[SPAN_ID]` is a unique identifier for a span within a trace; it is a
+                    /// 16-character hexadecimal encoding of an 8-byte array. It should not be zero. .
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
@@ -389,17 +384,17 @@ namespace Google.Apis.CloudTrace.v2
                 }
             }
 
-            /// <summary>Sends new spans to new or existing traces. You cannot update existing spans.</summary>
+            /// <summary>Batch writes new spans to new or existing traces. You cannot update existing spans.</summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
             /// Required. The name of the project where the spans belong. The format is `projects/[PROJECT_ID]`.
             /// </param>
             public virtual BatchWriteRequest BatchWrite(Google.Apis.CloudTrace.v2.Data.BatchWriteSpansRequest body, string name)
             {
-                return new BatchWriteRequest(service, body, name);
+                return new BatchWriteRequest(this.service, body, name);
             }
 
-            /// <summary>Sends new spans to new or existing traces. You cannot update existing spans.</summary>
+            /// <summary>Batch writes new spans to new or existing traces. You cannot update existing spans.</summary>
             public class BatchWriteRequest : CloudTraceBaseServiceRequest<Google.Apis.CloudTrace.v2.Data.Empty>
             {
                 /// <summary>Constructs a new BatchWrite request.</summary>
@@ -467,7 +462,7 @@ namespace Google.Apis.CloudTrace.v2.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>The allowed types for [VALUE] in a `[KEY]:[VALUE]` attribute.</summary>
+    /// <summary>The allowed types for `[VALUE]` in a `[KEY]:[VALUE]` attribute.</summary>
     public class AttributeValue : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>A Boolean value represented by `true` or `false`.</summary>
@@ -486,14 +481,14 @@ namespace Google.Apis.CloudTrace.v2.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A set of attributes, each in the format `[KEY]:[VALUE]`.</summary>
+    /// <summary>A set of attributes as key-value pairs.</summary>
     public class Attributes : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The set of attributes. Each attribute's key can be up to 128 bytes long. The value can be a string up to 256
-        /// bytes, a signed 64-bit integer, or the Boolean values `true` and `false`. For example: "/instance_id": {
+        /// A set of attributes. Each attribute's key can be up to 128 bytes long. The value can be a string up to 256
+        /// bytes, a signed 64-bit integer, or the boolean values `true` or `false`. For example: "/instance_id": {
         /// "string_value": { "value": "my-instance" } } "/http/request_bytes": { "int_value": 300 }
-        /// "abc.com/myattribute": { "bool_value": false }
+        /// "example.com/myattribute": { "bool_value": false }
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("attributeMap")]
         public virtual System.Collections.Generic.IDictionary<string, AttributeValue> AttributeMap { get; set; }
@@ -513,7 +508,8 @@ namespace Google.Apis.CloudTrace.v2.Data
     public class BatchWriteSpansRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Required. A list of new spans. The span names must not match existing spans, or the results are undefined.
+        /// Required. A list of new spans. The span names must not match existing spans, otherwise the results are
+        /// undefined.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("spans")]
         public virtual System.Collections.Generic.IList<Span> Spans { get; set; }
@@ -525,8 +521,7 @@ namespace Google.Apis.CloudTrace.v2.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -541,15 +536,15 @@ namespace Google.Apis.CloudTrace.v2.Data
     /// </summary>
     public class Link : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>A set of attributes on the link. You have have up to 32 attributes per link.</summary>
+        /// <summary>A set of attributes on the link. Up to 32 attributes can be specified per link.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("attributes")]
         public virtual Attributes Attributes { get; set; }
 
-        /// <summary>The [SPAN_ID] for a span within a trace.</summary>
+        /// <summary>The `[SPAN_ID]` for a span within a trace.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("spanId")]
         public virtual string SpanId { get; set; }
 
-        /// <summary>The [TRACE_ID] for a trace within a project.</summary>
+        /// <summary>The `[TRACE_ID]` for a trace within a project.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("traceId")]
         public virtual string TraceId { get; set; }
 
@@ -585,14 +580,14 @@ namespace Google.Apis.CloudTrace.v2.Data
     public class MessageEvent : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The number of compressed bytes sent or received. If missing assumed to be the same size as uncompressed.
+        /// The number of compressed bytes sent or received. If missing, the compressed size is assumed to be the same
+        /// size as the uncompressed size.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("compressedSizeBytes")]
         public virtual System.Nullable<long> CompressedSizeBytes { get; set; }
 
         /// <summary>
-        /// An identifier for the MessageEvent's message that can be used to match SENT and RECEIVED MessageEvents. It
-        /// is recommended to be unique within a Span.
+        /// An identifier for the MessageEvent's message that can be used to match `SENT` and `RECEIVED` MessageEvents.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("id")]
         public virtual System.Nullable<long> Id { get; set; }
@@ -630,8 +625,8 @@ namespace Google.Apis.CloudTrace.v2.Data
     /// <summary>
     /// A span represents a single operation within a trace. Spans can be nested to form a trace tree. Often, a trace
     /// contains a root span that describes the end-to-end latency, and one or more subspans for its sub-operations. A
-    /// trace can also contain multiple root spans, or none at all. Spans do not need to be contiguous—there may be gaps
-    /// or overlaps between spans in a trace.
+    /// trace can also contain multiple root spans, or none at all. Spans do not need to be contiguous. There might be
+    /// gaps or overlaps between spans in a trace.
     /// </summary>
     public class Span : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -647,36 +642,70 @@ namespace Google.Apis.CloudTrace.v2.Data
         public virtual System.Nullable<int> ChildSpanCount { get; set; }
 
         /// <summary>
-        /// Required. A description of the span's operation (up to 128 bytes). Trace displays the description in the
-        /// Google Cloud Platform Console. For example, the display name can be a qualified method name or a file name
-        /// and a line number where the operation is called. A best practice is to use the same display name within an
-        /// application and at the same call point. This makes it easier to correlate spans in different traces.
+        /// Required. A description of the span's operation (up to 128 bytes). Cloud Trace displays the description in
+        /// the Cloud console. For example, the display name can be a qualified method name or a file name and a line
+        /// number where the operation is called. A best practice is to use the same display name within an application
+        /// and at the same call point. This makes it easier to correlate spans in different traces.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual TruncatableString DisplayName { get; set; }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
 
         /// <summary>
         /// Required. The end time of the span. On the client side, this is the time kept by the local machine where the
         /// span execution ends. On the server side, this is the time when the server application handler stops running.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Links associated with the span. You can have up to 128 links per Span.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("links")]
         public virtual Links Links { get; set; }
 
         /// <summary>
-        /// Required. The resource name of the span in the following format:
-        /// projects/[PROJECT_ID]/traces/[TRACE_ID]/spans/SPAN_ID is a unique identifier for a trace within a project;
-        /// it is a 32-character hexadecimal encoding of a 16-byte array. [SPAN_ID] is a unique identifier for a span
-        /// within a trace; it is a 16-character hexadecimal encoding of an 8-byte array. It should not be zero.
+        /// Required. The resource name of the span in the following format: *
+        /// `projects/[PROJECT_ID]/traces/[TRACE_ID]/spans/[SPAN_ID]` `[TRACE_ID]` is a unique identifier for a trace
+        /// within a project; it is a 32-character hexadecimal encoding of a 16-byte array. It should not be zero.
+        /// `[SPAN_ID]` is a unique identifier for a span within a trace; it is a 16-character hexadecimal encoding of
+        /// an 8-byte array. It should not be zero. .
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The [SPAN_ID] of this span's parent span. If this is a root span, then this field must be empty.
+        /// The `[SPAN_ID]` of this span's parent span. If this is a root span, then this field must be empty.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("parentSpanId")]
         public virtual string ParentSpanId { get; set; }
@@ -688,7 +717,7 @@ namespace Google.Apis.CloudTrace.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("sameProcessAsParentSpan")]
         public virtual System.Nullable<bool> SameProcessAsParentSpan { get; set; }
 
-        /// <summary>Required. The [SPAN_ID] portion of the span's resource name.</summary>
+        /// <summary>Required. The `[SPAN_ID]` portion of the span's resource name.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("spanId")]
         public virtual string SpanId { get; set; }
 
@@ -703,13 +732,46 @@ namespace Google.Apis.CloudTrace.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("stackTrace")]
         public virtual StackTrace StackTrace { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>
         /// Required. The start time of the span. On the client side, this is the time kept by the local machine where
         /// the span execution starts. On the server side, this is the time when the server's application handler starts
         /// running.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Optional. The final status for this span.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("status")]
@@ -753,9 +815,9 @@ namespace Google.Apis.CloudTrace.v2.Data
         public virtual Module LoadModule { get; set; }
 
         /// <summary>
-        /// An un-mangled function name, if `function_name` is
-        /// [mangled](http://www.avabodh.com/cxxin/namemangling.html). The name can be fully-qualified (up to 1024
-        /// bytes).
+        /// An un-mangled function name, if `function_name` is mangled. To get information about name mangling, run
+        /// [this search](https://www.google.com/search?q=cxx+name+mangling). The name can be fully-qualified (up to
+        /// 1024 bytes).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("originalFunctionName")]
         public virtual TruncatableString OriginalFunctionName { get; set; }
@@ -846,9 +908,42 @@ namespace Google.Apis.CloudTrace.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("messageEvent")]
         public virtual MessageEvent MessageEvent { get; set; }
 
+        private string _timeRaw;
+
+        private object _time;
+
         /// <summary>The timestamp indicating the time the event occurred.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("time")]
-        public virtual object Time { get; set; }
+        public virtual string TimeRaw
+        {
+            get => _timeRaw;
+            set
+            {
+                _time = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _timeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="TimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimeDateTimeOffset instead.")]
+        public virtual object Time
+        {
+            get => _time;
+            set
+            {
+                _timeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _time = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="TimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? TimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(TimeRaw);
+            set => TimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

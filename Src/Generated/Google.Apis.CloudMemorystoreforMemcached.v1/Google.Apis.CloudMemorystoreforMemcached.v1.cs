@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1
         public CloudMemorystoreforMemcachedService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://memcache.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://memcache.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1
         public override string Name => "memcache";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://memcache.googleapis.com/";
-        #else
-            "https://memcache.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://memcache.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Memorystore for Memcached API.</summary>
         public class Scope
@@ -329,7 +324,7 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1
                 /// </param>
                 public virtual ApplyParametersRequest ApplyParameters(Google.Apis.CloudMemorystoreforMemcached.v1.Data.ApplyParametersRequest body, string name)
                 {
-                    return new ApplyParametersRequest(service, body, name);
+                    return new ApplyParametersRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -391,7 +386,7 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.CloudMemorystoreforMemcached.v1.Data.Instance body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Creates a new Instance in a given location.</summary>
@@ -468,7 +463,7 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Deletes a single Instance.</summary>
@@ -521,7 +516,7 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets details of a single Instance.</summary>
@@ -573,7 +568,7 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists Instances in a given location.</summary>
@@ -684,7 +679,7 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.CloudMemorystoreforMemcached.v1.Data.Instance body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>Updates an existing Instance in a given project and location.</summary>
@@ -750,6 +745,67 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1
                     }
                 }
 
+                /// <summary>Reschedules upcoming maintenance event.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="instance">
+                /// Required. Memcache instance resource name using the form:
+                /// `projects/{project_id}/locations/{location_id}/instances/{instance_id}` where `location_id` refers
+                /// to a GCP region.
+                /// </param>
+                public virtual RescheduleMaintenanceRequest RescheduleMaintenance(Google.Apis.CloudMemorystoreforMemcached.v1.Data.RescheduleMaintenanceRequest body, string instance)
+                {
+                    return new RescheduleMaintenanceRequest(this.service, body, instance);
+                }
+
+                /// <summary>Reschedules upcoming maintenance event.</summary>
+                public class RescheduleMaintenanceRequest : CloudMemorystoreforMemcachedBaseServiceRequest<Google.Apis.CloudMemorystoreforMemcached.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new RescheduleMaintenance request.</summary>
+                    public RescheduleMaintenanceRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudMemorystoreforMemcached.v1.Data.RescheduleMaintenanceRequest body, string instance) : base(service)
+                    {
+                        Instance = instance;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Memcache instance resource name using the form:
+                    /// `projects/{project_id}/locations/{location_id}/instances/{instance_id}` where `location_id`
+                    /// refers to a GCP region.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("instance", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Instance { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.CloudMemorystoreforMemcached.v1.Data.RescheduleMaintenanceRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "rescheduleMaintenance";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+instance}:rescheduleMaintenance";
+
+                    /// <summary>Initializes RescheduleMaintenance parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("instance", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "instance",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
+                        });
+                    }
+                }
+
                 /// <summary>
                 /// Updates the defined Memcached parameters for an existing instance. This method only stages the
                 /// parameters, it must be followed by `ApplyParameters` to apply the parameters to nodes of the
@@ -761,7 +817,7 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1
                 /// </param>
                 public virtual UpdateParametersRequest UpdateParameters(Google.Apis.CloudMemorystoreforMemcached.v1.Data.UpdateParametersRequest body, string name)
                 {
-                    return new UpdateParametersRequest(service, body, name);
+                    return new UpdateParametersRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -814,6 +870,71 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1
                         });
                     }
                 }
+
+                /// <summary>
+                /// Upgrades the Memcache instance to a newer memcached engine version specified in the request.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Required. Memcache instance resource name using the form:
+                /// `projects/{project}/locations/{location}/instances/{instance}` where `location_id` refers to a GCP
+                /// region.
+                /// </param>
+                public virtual UpgradeRequest Upgrade(Google.Apis.CloudMemorystoreforMemcached.v1.Data.GoogleCloudMemcacheV1UpgradeInstanceRequest body, string name)
+                {
+                    return new UpgradeRequest(this.service, body, name);
+                }
+
+                /// <summary>
+                /// Upgrades the Memcache instance to a newer memcached engine version specified in the request.
+                /// </summary>
+                public class UpgradeRequest : CloudMemorystoreforMemcachedBaseServiceRequest<Google.Apis.CloudMemorystoreforMemcached.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Upgrade request.</summary>
+                    public UpgradeRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudMemorystoreforMemcached.v1.Data.GoogleCloudMemcacheV1UpgradeInstanceRequest body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Memcache instance resource name using the form:
+                    /// `projects/{project}/locations/{location}/instances/{instance}` where `location_id` refers to a
+                    /// GCP region.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.CloudMemorystoreforMemcached.v1.Data.GoogleCloudMemcacheV1UpgradeInstanceRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "upgrade";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}:upgrade";
+
+                    /// <summary>Initializes Upgrade parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/instances/[^/]+$",
+                        });
+                    }
+                }
             }
 
             /// <summary>Gets the Operations resource.</summary>
@@ -845,7 +966,7 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1
                 /// <param name="name">The name of the operation resource to be cancelled.</param>
                 public virtual CancelRequest Cancel(Google.Apis.CloudMemorystoreforMemcached.v1.Data.CancelOperationRequest body, string name)
                 {
-                    return new CancelRequest(service, body, name);
+                    return new CancelRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -908,7 +1029,7 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1
                 /// <param name="name">The name of the operation resource to be deleted.</param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -960,7 +1081,7 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1
                 /// <param name="name">The name of the operation resource.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -1006,27 +1127,17 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the
-                /// binding to use different resource name schemes, such as `users/*/operations`. To override the
-                /// binding, API services can add a binding such as `"/v1/{name=users/*}/operations"` to their service
-                /// configuration. For backwards compatibility, the default name includes the operations collection id,
-                /// however overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns `UNIMPLEMENTED`.
                 /// </summary>
                 /// <param name="name">The name of the operation's parent resource.</param>
                 public virtual ListRequest List(string name)
                 {
-                    return new ListRequest(service, name);
+                    return new ListRequest(this.service, name);
                 }
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the
-                /// binding to use different resource name schemes, such as `users/*/operations`. To override the
-                /// binding, API services can add a binding such as `"/v1/{name=users/*}/operations"` to their service
-                /// configuration. For backwards compatibility, the default name includes the operations collection id,
-                /// however overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns `UNIMPLEMENTED`.
                 /// </summary>
                 public class ListRequest : CloudMemorystoreforMemcachedBaseServiceRequest<Google.Apis.CloudMemorystoreforMemcached.v1.Data.ListOperationsResponse>
                 {
@@ -1106,7 +1217,7 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1
             /// <param name="name">Resource name for the location.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets information about a location.</summary>
@@ -1151,7 +1262,7 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1
             /// <param name="name">The resource that owns the locations collection, if applicable.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>Lists information about the supported locations for this service.</summary>
@@ -1170,7 +1281,7 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1
 
                 /// <summary>
                 /// A filter to narrow down results to a preferred subset. The filtering language accepts strings like
-                /// "displayName=tokyo", and is documented in more detail in [AIP-160](https://google.aip.dev/160).
+                /// `"displayName=tokyo"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
@@ -1258,9 +1369,82 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Provides the mapping of a cloud asset to a direct physical location or to a proxy that defines the location on
+    /// its behalf.
+    /// </summary>
+    public class AssetLocation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Spanner path of the CCFE RMS database. It is only applicable for CCFE tenants that use CCFE RMS for storing
+        /// resource metadata.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ccfeRmsPath")]
+        public virtual string CcfeRmsPath { get; set; }
+
+        /// <summary>
+        /// Defines the customer expectation around ZI/ZS for this asset and ZI/ZS state of the region at the time of
+        /// asset creation.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expected")]
+        public virtual IsolationExpectations Expected { get; set; }
+
+        /// <summary>Defines extra parameters required for specific asset types.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("extraParameters")]
+        public virtual System.Collections.Generic.IList<ExtraParameter> ExtraParameters { get; set; }
+
+        /// <summary>Contains all kinds of physical location definitions for this asset.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("locationData")]
+        public virtual System.Collections.Generic.IList<LocationData> LocationData { get; set; }
+
+        /// <summary>
+        /// Defines parents assets if any in order to allow later generation of child_asset_location data via child
+        /// assets.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("parentAsset")]
+        public virtual System.Collections.Generic.IList<CloudAsset> ParentAsset { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Policy ID that identified data placement in Blobstore as per
+    /// go/blobstore-user-guide#data-metadata-placement-and-failure-domains
+    /// </summary>
+    public class BlobstoreLocation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("policyId")]
+        public virtual System.Collections.Generic.IList<string> PolicyId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The request message for Operations.CancelOperation.</summary>
     public class CancelOperationRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class CloudAsset : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("assetName")]
+        public virtual string AssetName { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("assetType")]
+        public virtual string AssetType { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class CloudAssetComposition : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("childAsset")]
+        public virtual System.Collections.Generic.IList<CloudAsset> ChildAsset { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -1283,10 +1467,10 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
     /// <summary>
     /// Represents a whole or partial calendar date, such as a birthday. The time of day and time zone are either
     /// specified elsewhere or are insignificant. The date is relative to the Gregorian Calendar. This can represent one
-    /// of the following: * A full date, with non-zero year, month, and day values * A month and day value, with a zero
-    /// year, such as an anniversary * A year on its own, with zero month and day values * A year and month value, with
-    /// a zero day, such as a credit card expiration date Related types are google.type.TimeOfDay and
-    /// `google.protobuf.Timestamp`.
+    /// of the following: * A full date, with non-zero year, month, and day values. * A month and day, with a zero year
+    /// (for example, an anniversary). * A year on its own, with a zero month and a zero day. * A year and month, with a
+    /// zero day (for example, a credit card expiration date). Related types: * google.type.TimeOfDay *
+    /// google.type.DateTime * google.protobuf.Timestamp
     /// </summary>
     public class Date : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1342,14 +1526,35 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    public class DirectLocationAssignment : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual System.Collections.Generic.IList<LocationAssignment> Location { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Defines parameters that should only be used for specific asset types.</summary>
+    public class ExtraParameter : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Details about zones used by regional compute.googleapis.com/InstanceGroupManager to create instances.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("regionalMigDistributionPolicy")]
+        public virtual RegionalMigDistributionPolicy RegionalMigDistributionPolicy { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -1363,6 +1568,101 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("availableZones")]
         public virtual System.Collections.Generic.IDictionary<string, GoogleCloudMemcacheV1ZoneMetadata> AvailableZones { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Maintenance policy per instance.</summary>
+    public class GoogleCloudMemcacheV1MaintenancePolicy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. The time when the policy was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Description of what this policy is for. Create/Update methods return INVALID_ARGUMENT if the length is
+        /// greater than 512.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. The time when the policy was updated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Required. Maintenance window that is applied to resources covered by this policy. Minimum 1. For the current
+        /// version, the maximum number of weekly_maintenance_windows is expected to be one.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("weeklyMaintenanceWindow")]
+        public virtual System.Collections.Generic.IList<WeeklyMaintenanceWindow> WeeklyMaintenanceWindow { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1383,13 +1683,79 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("cancelRequested")]
         public virtual System.Nullable<bool> CancelRequested { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Time when the operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
 
         /// <summary>Output only. Time when the operation finished running.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. Human-readable status of the operation, if any.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("statusDetail")]
@@ -1407,25 +1773,98 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Request for UpgradeInstance.</summary>
+    public class GoogleCloudMemcacheV1UpgradeInstanceRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Specifies the target version of memcached engine to upgrade to.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("memcacheVersion")]
+        public virtual string MemcacheVersion { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     public class GoogleCloudMemcacheV1ZoneMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Instance represents the interface for SLM services to actuate the state of control plane resources. Example
+    /// Instance in JSON, where consumer-project-number=123456, producer-project-id=cloud-sql:
+    /// ```
+    /// json Instance: {
+    /// "name": "projects/123456/locations/us-east1/instances/prod-instance", "create_time": { "seconds": 1526406431, },
+    /// "labels": { "env": "prod", "foo": "bar" }, "state": READY, "software_versions": { "software_update":
+    /// "cloud-sql-09-28-2018", }, "maintenance_policy_names": { "UpdatePolicy":
+    /// "projects/123456/locations/us-east1/maintenancePolicies/prod-update-policy", } "tenant_project_id":
+    /// "cloud-sql-test-tenant", "producer_metadata": { "cloud-sql-tier": "basic", "cloud-sql-instance-size": "1G", },
+    /// "provisioned_resources": [ { "resource-type": "compute-instance", "resource-url":
+    /// "https://www.googleapis.com/compute/v1/projects/cloud-sql/zones/us-east1-b/instances/vm-1", } ],
+    /// "maintenance_schedules": { "csa_rollout": { "start_time": { "seconds": 1526406431, }, "end_time": { "seconds":
+    /// 1535406431, }, }, "ncsa_rollout": { "start_time": { "seconds": 1526406431, }, "end_time": { "seconds":
+    /// 1535406431, }, } }, "consumer_defined_name": "my-sql-instance1", }
+    /// ```
+    /// LINT.IfChange
+    /// </summary>
     public class GoogleCloudSaasacceleratorManagementProvidersV1Instance : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// consumer_defined_name is the name that is set by the consumer. On the other hand Name field represents
-        /// system-assigned id of an instance so consumers are not necessarily aware of it. consumer_defined_name is
-        /// used for notification/UI purposes for consumer to recognize their instances.
+        /// consumer_defined_name is the name of the instance set by the service consumers. Generally this is different
+        /// from the `name` field which reperesents the system-assigned id of the instance which the service consumers
+        /// do not recognize. This is a required field for tenants onboarding to Maintenance Window notifications
+        /// (go/slm-rollout-maintenance-policies#prerequisites).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("consumerDefinedName")]
         public virtual string ConsumerDefinedName { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Timestamp when the resource was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Optional. The instance_type of this instance of format:
+        /// projects/{project_number}/locations/{location_id}/instanceTypes/{instance_type_id}. Instance Type represents
+        /// a high-level tier or SKU of the service that this instance belong to. When enabled(eg: Maintenance Rollout),
+        /// Rollout uses 'instance_type' along with 'software_versions' to determine whether instance needs an update or
+        /// not.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("instanceType")]
+        public virtual string InstanceType { get; set; }
 
         /// <summary>
         /// Optional. Resource labels to represent user provided metadata. Each label is a key-value pair, where both
@@ -1435,9 +1874,10 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
 
         /// <summary>
-        /// Deprecated. The MaintenancePolicies that have been attached to the instance. The key must be of the type
-        /// name of the oneof policy name defined in MaintenancePolicy, and the referenced policy must define the same
-        /// policy type. For complete details of MaintenancePolicy, please refer to go/cloud-saas-mw-ug.
+        /// Optional. The MaintenancePolicies that have been attached to the instance. The key must be of the type name
+        /// of the oneof policy name defined in MaintenancePolicy, and the referenced policy must define the same policy
+        /// type. For details, please refer to go/mr-user-guide. Should not be set if
+        /// maintenance_settings.maintenance_policies is set.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("maintenancePolicyNames")]
         public virtual System.Collections.Generic.IDictionary<string, string> MaintenancePolicyNames { get; set; }
@@ -1455,11 +1895,21 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
 
         /// <summary>
         /// Unique name of the resource. It uses the form:
-        /// `projects/{project_id|project_number}/locations/{location_id}/instances/{instance_id}` Note: Either
-        /// project_id or project_number can be used, but keep it consistent with other APIs (e.g. RescheduleUpdate)
+        /// `projects/{project_number}/locations/{location_id}/instances/{instance_id}` Note: This name is passed,
+        /// stored and logged across the rollout system. So use of consumer project_id or any other consumer PII in the
+        /// name is strongly discouraged for wipeout (go/wipeout) compliance. See
+        /// go/elysium/project_ids#storage-guidance for more details.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Optional. notification_parameter are information that service producers may like to include that is not
+        /// relevant to Rollout. This parameter will only be passed to Gamma and Cloud Logging for notification/logging
+        /// purpose.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("notificationParameters")]
+        public virtual System.Collections.Generic.IDictionary<string, GoogleCloudSaasacceleratorManagementProvidersV1NotificationParameter> NotificationParameters { get; set; }
 
         /// <summary>
         /// Output only. Custom string attributes used primarily to expose producer-specific information in monitoring
@@ -1506,9 +1956,42 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("tenantProjectId")]
         public virtual string TenantProjectId { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. Timestamp when the resource was last modified.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1527,9 +2010,42 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("canReschedule")]
         public virtual System.Nullable<bool> CanReschedule { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>The scheduled end time for the maintenance.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The rollout management policy this maintenance schedule is associated with. When doing reschedule update
@@ -1538,17 +2054,85 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("rolloutManagementPolicy")]
         public virtual string RolloutManagementPolicy { get; set; }
 
+        private string _scheduleDeadlineTimeRaw;
+
+        private object _scheduleDeadlineTime;
+
         /// <summary>
         /// schedule_deadline_time is the time deadline any schedule start time cannot go beyond, including reschedule.
         /// It's normally the initial schedule start time plus maintenance window length (1 day or 1 week). Maintenance
         /// cannot be scheduled to start beyond this deadline.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("scheduleDeadlineTime")]
-        public virtual object ScheduleDeadlineTime { get; set; }
+        public virtual string ScheduleDeadlineTimeRaw
+        {
+            get => _scheduleDeadlineTimeRaw;
+            set
+            {
+                _scheduleDeadlineTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _scheduleDeadlineTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ScheduleDeadlineTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ScheduleDeadlineTimeDateTimeOffset instead.")]
+        public virtual object ScheduleDeadlineTime
+        {
+            get => _scheduleDeadlineTime;
+            set
+            {
+                _scheduleDeadlineTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _scheduleDeadlineTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ScheduleDeadlineTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ScheduleDeadlineTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ScheduleDeadlineTimeRaw);
+            set => ScheduleDeadlineTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
 
         /// <summary>The scheduled start time for the maintenance.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1574,9 +2158,8 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         /// <summary>
         /// Optional. The MaintenancePolicies that have been attached to the instance. The key must be of the type name
         /// of the oneof policy name defined in MaintenancePolicy, and the embedded policy must define the same policy
-        /// type. For complete details of MaintenancePolicy, please refer to go/cloud-saas-mw-ug. If only the name is
-        /// needed (like in the deprecated Instance.maintenance_policy_names field) then only populate
-        /// MaintenancePolicy.name.
+        /// type. For details, please refer to go/mr-user-guide. Should not be set if maintenance_policy_names is set.
+        /// If only the name is needed, then only populate MaintenancePolicy.name.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("maintenancePolicies")]
         public virtual System.Collections.Generic.IDictionary<string, MaintenancePolicy> MaintenancePolicies { get; set; }
@@ -1606,6 +2189,17 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("perSliEligibility")]
         public virtual GoogleCloudSaasacceleratorManagementProvidersV1PerSliSloEligibility PerSliEligibility { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Contains notification related data.</summary>
+    public class GoogleCloudSaasacceleratorManagementProvidersV1NotificationParameter : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. Array of string values. e.g. instance's replica information.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("values")]
+        public virtual System.Collections.Generic.IList<string> Values { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1708,9 +2302,42 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("authorizedNetwork")]
         public virtual string AuthorizedNetwork { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time the instance was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. Endpoint for the Discovery API.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("discoveryEndpoint")]
@@ -1733,6 +2360,17 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("labels")]
         public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
+
+        /// <summary>
+        /// The maintenance policy for the instance. If not provided, the maintenance event will be performed based on
+        /// Memorystore internal rollout schedule.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maintenancePolicy")]
+        public virtual GoogleCloudMemcacheV1MaintenancePolicy MaintenancePolicy { get; set; }
+
+        /// <summary>Output only. Published maintenance schedule.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maintenanceSchedule")]
+        public virtual MaintenanceSchedule MaintenanceSchedule { get; set; }
 
         /// <summary>
         /// Output only. The full version of memcached server running on this instance. System automatically determines
@@ -1776,13 +2414,61 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("parameters")]
         public virtual MemcacheParameters Parameters { get; set; }
 
+        /// <summary>
+        /// Optional. Contains the id of allocated IP address ranges associated with the private service access
+        /// connection for example, "test-default" associated with IP range 10.0.0.0/29.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("reservedIpRangeId")]
+        public virtual System.Collections.Generic.IList<string> ReservedIpRangeId { get; set; }
+
+        /// <summary>Optional. Output only. Reserved for future use.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("satisfiesPzi")]
+        public virtual System.Nullable<bool> SatisfiesPzi { get; set; }
+
+        /// <summary>Optional. Output only. Reserved for future use.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("satisfiesPzs")]
+        public virtual System.Nullable<bool> SatisfiesPzs { get; set; }
+
         /// <summary>Output only. The state of this Memcached instance.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The time the instance was updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Zones in which Memcached nodes should be provisioned. Memcached nodes will be equally distributed across
@@ -1805,6 +2491,48 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         /// <summary>Message on memcached instance which will be exposed to users.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("message")]
         public virtual string Message { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class IsolationExpectations : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Explicit overrides for ZI and ZS requirements to be used for resources that should be excluded from ZI/ZS
+        /// verification logic.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requirementOverride")]
+        public virtual RequirementOverride RequirementOverride { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("ziOrgPolicy")]
+        public virtual string ZiOrgPolicy { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("ziRegionPolicy")]
+        public virtual string ZiRegionPolicy { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("ziRegionState")]
+        public virtual string ZiRegionState { get; set; }
+
+        /// <summary>
+        /// Deprecated: use zi_org_policy, zi_region_policy and zi_region_state instead for setting ZI expectations as
+        /// per go/zicy-publish-physical-location.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("zoneIsolation")]
+        public virtual string ZoneIsolation { get; set; }
+
+        /// <summary>
+        /// Deprecated: use zs_org_policy, and zs_region_stateinstead for setting Zs expectations as per
+        /// go/zicy-publish-physical-location.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("zoneSeparation")]
+        public virtual string ZoneSeparation { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("zsOrgPolicy")]
+        public virtual string ZsOrgPolicy { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("zsRegionState")]
+        public virtual string ZsRegionState { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1865,7 +2593,7 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A resource that represents Google Cloud Platform location.</summary>
+    /// <summary>A resource that represents a Google Cloud location.</summary>
     public class Location : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The friendly name for this location, typically a nearby city name. For example, "Tokyo".</summary>
@@ -1897,6 +2625,42 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    public class LocationAssignment : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual string Location { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("locationType")]
+        public virtual string LocationType { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class LocationData : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("blobstoreLocation")]
+        public virtual BlobstoreLocation BlobstoreLocation { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("childAssetLocation")]
+        public virtual CloudAssetComposition ChildAssetLocation { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("directLocation")]
+        public virtual DirectLocationAssignment DirectLocation { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("gcpProjectProxy")]
+        public virtual TenantProjectProxy GcpProjectProxy { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("placerLocation")]
+        public virtual PlacerLocation PlacerLocation { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("spannerLocation")]
+        public virtual SpannerLocation SpannerLocation { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Metadata for the given google.cloud.location.Location.</summary>
     public class LocationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1914,9 +2678,42 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
     /// <summary>Defines policies to service maintenance events.</summary>
     public class MaintenancePolicy : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time when the resource was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Optional. Description of what this policy is for. Create/Update methods return INVALID_ARGUMENT if the
@@ -1950,9 +2747,164 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("updatePolicy")]
         public virtual UpdatePolicy UpdatePolicy { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The time when the resource was updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Upcoming maintenance schedule.</summary>
+    public class MaintenanceSchedule : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
+        /// <summary>Output only. The end time of any upcoming scheduled maintenance for this instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _scheduleDeadlineTimeRaw;
+
+        private object _scheduleDeadlineTime;
+
+        /// <summary>
+        /// Output only. The deadline that the maintenance schedule start time can not go beyond, including reschedule.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("scheduleDeadlineTime")]
+        public virtual string ScheduleDeadlineTimeRaw
+        {
+            get => _scheduleDeadlineTimeRaw;
+            set
+            {
+                _scheduleDeadlineTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _scheduleDeadlineTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ScheduleDeadlineTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ScheduleDeadlineTimeDateTimeOffset instead.")]
+        public virtual object ScheduleDeadlineTime
+        {
+            get => _scheduleDeadlineTime;
+            set
+            {
+                _scheduleDeadlineTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _scheduleDeadlineTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ScheduleDeadlineTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ScheduleDeadlineTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ScheduleDeadlineTimeRaw);
+            set => ScheduleDeadlineTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
+        /// <summary>Output only. The start time of any upcoming scheduled maintenance for this instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1999,6 +2951,16 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("host")]
         public virtual string Host { get; set; }
+
+        /// <summary>
+        /// Output only. The full version of memcached server running on this node. e.g. - memcached-1.5.16
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("memcacheFullVersion")]
+        public virtual string MemcacheFullVersion { get; set; }
+
+        /// <summary>Output only. Major version of memcached server running on this node, e.g. MEMCACHE_1_5</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("memcacheVersion")]
+        public virtual string MemcacheVersion { get; set; }
 
         /// <summary>
         /// Output only. Identifier of the Memcached node. The node id does not include project or location like the
@@ -2072,8 +3034,8 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -2100,13 +3062,79 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("cancelRequested")]
         public virtual System.Nullable<bool> CancelRequested { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Time when the operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
 
         /// <summary>Output only. Time when the operation finished running.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. Human-readable status of the operation, if any.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("statusDetail")]
@@ -2119,6 +3147,100 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         /// <summary>Output only. Name of the verb executed by the operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("verb")]
         public virtual string Verb { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Message describing that the location of the customer resource is tied to placer allocations</summary>
+    public class PlacerLocation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Directory with a config related to it in placer (e.g. "/placer/prod/home/my-root/my-dir")</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("placerConfig")]
+        public virtual string PlacerConfig { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// To be used for specifying the intended distribution of regional compute.googleapis.com/InstanceGroupManager
+    /// instances
+    /// </summary>
+    public class RegionalMigDistributionPolicy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The shape in which the group converges around distribution of resources. Instance of proto2 enum
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targetShape")]
+        public virtual System.Nullable<int> TargetShape { get; set; }
+
+        /// <summary>Cloud zones used by regional MIG to create instances.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("zones")]
+        public virtual System.Collections.Generic.IList<ZoneConfiguration> Zones { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class RequirementOverride : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("ziOverride")]
+        public virtual string ZiOverride { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("zsOverride")]
+        public virtual string ZsOverride { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request for RescheduleMaintenance.</summary>
+    public class RescheduleMaintenanceRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. If reschedule type is SPECIFIC_TIME, must set up schedule_time as well.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rescheduleType")]
+        public virtual string RescheduleType { get; set; }
+
+        private string _scheduleTimeRaw;
+
+        private object _scheduleTime;
+
+        /// <summary>
+        /// Timestamp when the maintenance shall be rescheduled to if reschedule_type=SPECIFIC_TIME, in RFC 3339 format,
+        /// for example `2012-11-15T16:19:00.094Z`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("scheduleTime")]
+        public virtual string ScheduleTimeRaw
+        {
+            get => _scheduleTimeRaw;
+            set
+            {
+                _scheduleTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _scheduleTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ScheduleTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ScheduleTimeDateTimeOffset instead.")]
+        public virtual object ScheduleTime
+        {
+            get => _scheduleTime;
+            set
+            {
+                _scheduleTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _scheduleTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ScheduleTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ScheduleTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ScheduleTimeRaw);
+            set => ScheduleTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2138,6 +3260,23 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         /// <summary>Time within the window to start the operations.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
         public virtual TimeOfDay StartTime { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class SpannerLocation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Set of backups used by the resource with name in the same format as what is available at
+        /// http://table/spanner_automon.backup_metadata
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("backupName")]
+        public virtual System.Collections.Generic.IList<string> BackupName { get; set; }
+
+        /// <summary>Set of databases used by the resource in format /span//</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dbName")]
+        public virtual System.Collections.Generic.IList<string> DbName { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2172,6 +3311,15 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    public class TenantProjectProxy : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("projectNumbers")]
+        public virtual System.Collections.Generic.IList<string> ProjectNumbers { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// Represents a time of day. The date and time zone are either not significant or are specified elsewhere. An API
     /// may choose to allow leap seconds. Related types are google.type.Date and `google.protobuf.Timestamp`.
@@ -2179,23 +3327,26 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
     public class TimeOfDay : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for
-        /// scenarios like business closing time.
+        /// Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or
+        /// equal to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("hours")]
         public virtual System.Nullable<int> Hours { get; set; }
 
-        /// <summary>Minutes of hour of day. Must be from 0 to 59.</summary>
+        /// <summary>Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minutes")]
         public virtual System.Nullable<int> Minutes { get; set; }
 
-        /// <summary>Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.</summary>
+        /// <summary>
+        /// Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to
+        /// 999,999,999.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nanos")]
         public virtual System.Nullable<int> Nanos { get; set; }
 
         /// <summary>
-        /// Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows
-        /// leap-seconds.
+        /// Seconds of a minute. Must be greater than or equal to 0 and typically must be less than or equal to 59. An
+        /// API may allow the value 60 if it allows leap-seconds.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("seconds")]
         public virtual System.Nullable<int> Seconds { get; set; }
@@ -2227,9 +3378,8 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         public virtual string Channel { get; set; }
 
         /// <summary>
-        /// Deny Maintenance Period that is applied to resource to indicate when maintenance is forbidden. User can
-        /// specify zero or more non-overlapping deny periods. Maximum number of deny_maintenance_periods expected is
-        /// one.
+        /// Deny Maintenance Period that is applied to resource to indicate when maintenance is forbidden. The protocol
+        /// supports zero-to-many such periods, but the current SLM Rollout implementation only supports zero-to-one.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("denyMaintenancePeriods")]
         public virtual System.Collections.Generic.IList<DenyMaintenancePeriod> DenyMaintenancePeriods { get; set; }
@@ -2248,6 +3398,34 @@ namespace Google.Apis.CloudMemorystoreforMemcached.v1.Data
         /// <summary>User can specify multiple windows in a week. Minimum of 1 window.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("schedule")]
         public virtual System.Collections.Generic.IList<Schedule> Schedule { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Time window specified for weekly operations.</summary>
+    public class WeeklyMaintenanceWindow : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Allows to define schedule that runs specified day of the week.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("day")]
+        public virtual string Day { get; set; }
+
+        /// <summary>Required. Duration of the time window.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("duration")]
+        public virtual object Duration { get; set; }
+
+        /// <summary>Required. Start time of the window in UTC.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
+        public virtual TimeOfDay StartTime { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class ZoneConfiguration : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("zone")]
+        public virtual string Zone { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

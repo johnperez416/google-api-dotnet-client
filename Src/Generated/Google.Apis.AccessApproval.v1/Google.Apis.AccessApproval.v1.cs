@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ namespace Google.Apis.AccessApproval.v1
             Folders = new FoldersResource(this);
             Organizations = new OrganizationsResource(this);
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://accessapproval.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://accessapproval.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -46,23 +48,16 @@ namespace Google.Apis.AccessApproval.v1
         public override string Name => "accessapproval";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://accessapproval.googleapis.com/";
-        #else
-            "https://accessapproval.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://accessapproval.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Access Approval API.</summary>
         public class Scope
@@ -315,7 +310,7 @@ namespace Google.Apis.AccessApproval.v1
             /// <param name="name">Name of the approval request to approve.</param>
             public virtual ApproveRequest Approve(Google.Apis.AccessApproval.v1.Data.ApproveApprovalRequestMessage body, string name)
             {
-                return new ApproveRequest(service, body, name);
+                return new ApproveRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -376,7 +371,7 @@ namespace Google.Apis.AccessApproval.v1
             /// <param name="name">Name of the ApprovalRequest to dismiss.</param>
             public virtual DismissRequest Dismiss(Google.Apis.AccessApproval.v1.Data.DismissApprovalRequestMessage body, string name)
             {
-                return new DismissRequest(service, body, name);
+                return new DismissRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -436,7 +431,7 @@ namespace Google.Apis.AccessApproval.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets an approval request. Returns NOT_FOUND if the request does not exist.</summary>
@@ -481,6 +476,67 @@ namespace Google.Apis.AccessApproval.v1
             }
 
             /// <summary>
+            /// Invalidates an existing ApprovalRequest. Returns the updated ApprovalRequest. NOTE: This does not deny
+            /// access to the resource if another request has been made and approved. It only invalidates a single
+            /// approval. Returns FAILED_PRECONDITION if the request exists but is not in an approved state.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">Name of the ApprovalRequest to invalidate.</param>
+            public virtual InvalidateRequest Invalidate(Google.Apis.AccessApproval.v1.Data.InvalidateApprovalRequestMessage body, string name)
+            {
+                return new InvalidateRequest(this.service, body, name);
+            }
+
+            /// <summary>
+            /// Invalidates an existing ApprovalRequest. Returns the updated ApprovalRequest. NOTE: This does not deny
+            /// access to the resource if another request has been made and approved. It only invalidates a single
+            /// approval. Returns FAILED_PRECONDITION if the request exists but is not in an approved state.
+            /// </summary>
+            public class InvalidateRequest : AccessApprovalBaseServiceRequest<Google.Apis.AccessApproval.v1.Data.ApprovalRequest>
+            {
+                /// <summary>Constructs a new Invalidate request.</summary>
+                public InvalidateRequest(Google.Apis.Services.IClientService service, Google.Apis.AccessApproval.v1.Data.InvalidateApprovalRequestMessage body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>Name of the ApprovalRequest to invalidate.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.AccessApproval.v1.Data.InvalidateApprovalRequestMessage Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "invalidate";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}:invalidate";
+
+                /// <summary>Initializes Invalidate parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^folders/[^/]+/approvalRequests/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>
             /// Lists approval requests associated with a project, folder, or organization. Approval requests can be
             /// filtered by state (pending, active, dismissed). The order is reverse chronological.
             /// </summary>
@@ -490,7 +546,7 @@ namespace Google.Apis.AccessApproval.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
@@ -590,7 +646,7 @@ namespace Google.Apis.AccessApproval.v1
         /// <param name="name">Name of the AccessApprovalSettings to delete.</param>
         public virtual DeleteAccessApprovalSettingsRequest DeleteAccessApprovalSettings(string name)
         {
-            return new DeleteAccessApprovalSettingsRequest(service, name);
+            return new DeleteAccessApprovalSettingsRequest(this.service, name);
         }
 
         /// <summary>
@@ -643,7 +699,7 @@ namespace Google.Apis.AccessApproval.v1
         /// </param>
         public virtual GetAccessApprovalSettingsRequest GetAccessApprovalSettings(string name)
         {
-            return new GetAccessApprovalSettingsRequest(service, name);
+            return new GetAccessApprovalSettingsRequest(this.service, name);
         }
 
         /// <summary>Gets the settings associated with a project, folder, or organization.</summary>
@@ -688,6 +744,57 @@ namespace Google.Apis.AccessApproval.v1
         }
 
         /// <summary>
+        /// Retrieves the service account that is used by Access Approval to access KMS keys for signing approved
+        /// approval requests.
+        /// </summary>
+        /// <param name="name">Name of the AccessApprovalServiceAccount to retrieve.</param>
+        public virtual GetServiceAccountRequest GetServiceAccount(string name)
+        {
+            return new GetServiceAccountRequest(this.service, name);
+        }
+
+        /// <summary>
+        /// Retrieves the service account that is used by Access Approval to access KMS keys for signing approved
+        /// approval requests.
+        /// </summary>
+        public class GetServiceAccountRequest : AccessApprovalBaseServiceRequest<Google.Apis.AccessApproval.v1.Data.AccessApprovalServiceAccount>
+        {
+            /// <summary>Constructs a new GetServiceAccount request.</summary>
+            public GetServiceAccountRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+            {
+                Name = name;
+                InitParameters();
+            }
+
+            /// <summary>Name of the AccessApprovalServiceAccount to retrieve.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "getServiceAccount";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/{+name}";
+
+            /// <summary>Initializes GetServiceAccount parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^folders/[^/]+/serviceAccount$",
+                });
+            }
+        }
+
+        /// <summary>
         /// Updates the settings associated with a project, folder, or organization. Settings to update are determined
         /// by the value of field_mask.
         /// </summary>
@@ -698,7 +805,7 @@ namespace Google.Apis.AccessApproval.v1
         /// </param>
         public virtual UpdateAccessApprovalSettingsRequest UpdateAccessApprovalSettings(Google.Apis.AccessApproval.v1.Data.AccessApprovalSettings body, string name)
         {
-            return new UpdateAccessApprovalSettingsRequest(service, body, name);
+            return new UpdateAccessApprovalSettingsRequest(this.service, body, name);
         }
 
         /// <summary>
@@ -812,7 +919,7 @@ namespace Google.Apis.AccessApproval.v1
             /// <param name="name">Name of the approval request to approve.</param>
             public virtual ApproveRequest Approve(Google.Apis.AccessApproval.v1.Data.ApproveApprovalRequestMessage body, string name)
             {
-                return new ApproveRequest(service, body, name);
+                return new ApproveRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -873,7 +980,7 @@ namespace Google.Apis.AccessApproval.v1
             /// <param name="name">Name of the ApprovalRequest to dismiss.</param>
             public virtual DismissRequest Dismiss(Google.Apis.AccessApproval.v1.Data.DismissApprovalRequestMessage body, string name)
             {
-                return new DismissRequest(service, body, name);
+                return new DismissRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -933,7 +1040,7 @@ namespace Google.Apis.AccessApproval.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets an approval request. Returns NOT_FOUND if the request does not exist.</summary>
@@ -978,6 +1085,67 @@ namespace Google.Apis.AccessApproval.v1
             }
 
             /// <summary>
+            /// Invalidates an existing ApprovalRequest. Returns the updated ApprovalRequest. NOTE: This does not deny
+            /// access to the resource if another request has been made and approved. It only invalidates a single
+            /// approval. Returns FAILED_PRECONDITION if the request exists but is not in an approved state.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">Name of the ApprovalRequest to invalidate.</param>
+            public virtual InvalidateRequest Invalidate(Google.Apis.AccessApproval.v1.Data.InvalidateApprovalRequestMessage body, string name)
+            {
+                return new InvalidateRequest(this.service, body, name);
+            }
+
+            /// <summary>
+            /// Invalidates an existing ApprovalRequest. Returns the updated ApprovalRequest. NOTE: This does not deny
+            /// access to the resource if another request has been made and approved. It only invalidates a single
+            /// approval. Returns FAILED_PRECONDITION if the request exists but is not in an approved state.
+            /// </summary>
+            public class InvalidateRequest : AccessApprovalBaseServiceRequest<Google.Apis.AccessApproval.v1.Data.ApprovalRequest>
+            {
+                /// <summary>Constructs a new Invalidate request.</summary>
+                public InvalidateRequest(Google.Apis.Services.IClientService service, Google.Apis.AccessApproval.v1.Data.InvalidateApprovalRequestMessage body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>Name of the ApprovalRequest to invalidate.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.AccessApproval.v1.Data.InvalidateApprovalRequestMessage Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "invalidate";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}:invalidate";
+
+                /// <summary>Initializes Invalidate parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^organizations/[^/]+/approvalRequests/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>
             /// Lists approval requests associated with a project, folder, or organization. Approval requests can be
             /// filtered by state (pending, active, dismissed). The order is reverse chronological.
             /// </summary>
@@ -987,7 +1155,7 @@ namespace Google.Apis.AccessApproval.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
@@ -1087,7 +1255,7 @@ namespace Google.Apis.AccessApproval.v1
         /// <param name="name">Name of the AccessApprovalSettings to delete.</param>
         public virtual DeleteAccessApprovalSettingsRequest DeleteAccessApprovalSettings(string name)
         {
-            return new DeleteAccessApprovalSettingsRequest(service, name);
+            return new DeleteAccessApprovalSettingsRequest(this.service, name);
         }
 
         /// <summary>
@@ -1140,7 +1308,7 @@ namespace Google.Apis.AccessApproval.v1
         /// </param>
         public virtual GetAccessApprovalSettingsRequest GetAccessApprovalSettings(string name)
         {
-            return new GetAccessApprovalSettingsRequest(service, name);
+            return new GetAccessApprovalSettingsRequest(this.service, name);
         }
 
         /// <summary>Gets the settings associated with a project, folder, or organization.</summary>
@@ -1185,6 +1353,57 @@ namespace Google.Apis.AccessApproval.v1
         }
 
         /// <summary>
+        /// Retrieves the service account that is used by Access Approval to access KMS keys for signing approved
+        /// approval requests.
+        /// </summary>
+        /// <param name="name">Name of the AccessApprovalServiceAccount to retrieve.</param>
+        public virtual GetServiceAccountRequest GetServiceAccount(string name)
+        {
+            return new GetServiceAccountRequest(this.service, name);
+        }
+
+        /// <summary>
+        /// Retrieves the service account that is used by Access Approval to access KMS keys for signing approved
+        /// approval requests.
+        /// </summary>
+        public class GetServiceAccountRequest : AccessApprovalBaseServiceRequest<Google.Apis.AccessApproval.v1.Data.AccessApprovalServiceAccount>
+        {
+            /// <summary>Constructs a new GetServiceAccount request.</summary>
+            public GetServiceAccountRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+            {
+                Name = name;
+                InitParameters();
+            }
+
+            /// <summary>Name of the AccessApprovalServiceAccount to retrieve.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "getServiceAccount";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/{+name}";
+
+            /// <summary>Initializes GetServiceAccount parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^organizations/[^/]+/serviceAccount$",
+                });
+            }
+        }
+
+        /// <summary>
         /// Updates the settings associated with a project, folder, or organization. Settings to update are determined
         /// by the value of field_mask.
         /// </summary>
@@ -1195,7 +1414,7 @@ namespace Google.Apis.AccessApproval.v1
         /// </param>
         public virtual UpdateAccessApprovalSettingsRequest UpdateAccessApprovalSettings(Google.Apis.AccessApproval.v1.Data.AccessApprovalSettings body, string name)
         {
-            return new UpdateAccessApprovalSettingsRequest(service, body, name);
+            return new UpdateAccessApprovalSettingsRequest(this.service, body, name);
         }
 
         /// <summary>
@@ -1309,7 +1528,7 @@ namespace Google.Apis.AccessApproval.v1
             /// <param name="name">Name of the approval request to approve.</param>
             public virtual ApproveRequest Approve(Google.Apis.AccessApproval.v1.Data.ApproveApprovalRequestMessage body, string name)
             {
-                return new ApproveRequest(service, body, name);
+                return new ApproveRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -1370,7 +1589,7 @@ namespace Google.Apis.AccessApproval.v1
             /// <param name="name">Name of the ApprovalRequest to dismiss.</param>
             public virtual DismissRequest Dismiss(Google.Apis.AccessApproval.v1.Data.DismissApprovalRequestMessage body, string name)
             {
-                return new DismissRequest(service, body, name);
+                return new DismissRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -1430,7 +1649,7 @@ namespace Google.Apis.AccessApproval.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets an approval request. Returns NOT_FOUND if the request does not exist.</summary>
@@ -1475,6 +1694,67 @@ namespace Google.Apis.AccessApproval.v1
             }
 
             /// <summary>
+            /// Invalidates an existing ApprovalRequest. Returns the updated ApprovalRequest. NOTE: This does not deny
+            /// access to the resource if another request has been made and approved. It only invalidates a single
+            /// approval. Returns FAILED_PRECONDITION if the request exists but is not in an approved state.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">Name of the ApprovalRequest to invalidate.</param>
+            public virtual InvalidateRequest Invalidate(Google.Apis.AccessApproval.v1.Data.InvalidateApprovalRequestMessage body, string name)
+            {
+                return new InvalidateRequest(this.service, body, name);
+            }
+
+            /// <summary>
+            /// Invalidates an existing ApprovalRequest. Returns the updated ApprovalRequest. NOTE: This does not deny
+            /// access to the resource if another request has been made and approved. It only invalidates a single
+            /// approval. Returns FAILED_PRECONDITION if the request exists but is not in an approved state.
+            /// </summary>
+            public class InvalidateRequest : AccessApprovalBaseServiceRequest<Google.Apis.AccessApproval.v1.Data.ApprovalRequest>
+            {
+                /// <summary>Constructs a new Invalidate request.</summary>
+                public InvalidateRequest(Google.Apis.Services.IClientService service, Google.Apis.AccessApproval.v1.Data.InvalidateApprovalRequestMessage body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>Name of the ApprovalRequest to invalidate.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.AccessApproval.v1.Data.InvalidateApprovalRequestMessage Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "invalidate";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}:invalidate";
+
+                /// <summary>Initializes Invalidate parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/approvalRequests/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>
             /// Lists approval requests associated with a project, folder, or organization. Approval requests can be
             /// filtered by state (pending, active, dismissed). The order is reverse chronological.
             /// </summary>
@@ -1484,7 +1764,7 @@ namespace Google.Apis.AccessApproval.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
@@ -1584,7 +1864,7 @@ namespace Google.Apis.AccessApproval.v1
         /// <param name="name">Name of the AccessApprovalSettings to delete.</param>
         public virtual DeleteAccessApprovalSettingsRequest DeleteAccessApprovalSettings(string name)
         {
-            return new DeleteAccessApprovalSettingsRequest(service, name);
+            return new DeleteAccessApprovalSettingsRequest(this.service, name);
         }
 
         /// <summary>
@@ -1637,7 +1917,7 @@ namespace Google.Apis.AccessApproval.v1
         /// </param>
         public virtual GetAccessApprovalSettingsRequest GetAccessApprovalSettings(string name)
         {
-            return new GetAccessApprovalSettingsRequest(service, name);
+            return new GetAccessApprovalSettingsRequest(this.service, name);
         }
 
         /// <summary>Gets the settings associated with a project, folder, or organization.</summary>
@@ -1682,6 +1962,57 @@ namespace Google.Apis.AccessApproval.v1
         }
 
         /// <summary>
+        /// Retrieves the service account that is used by Access Approval to access KMS keys for signing approved
+        /// approval requests.
+        /// </summary>
+        /// <param name="name">Name of the AccessApprovalServiceAccount to retrieve.</param>
+        public virtual GetServiceAccountRequest GetServiceAccount(string name)
+        {
+            return new GetServiceAccountRequest(this.service, name);
+        }
+
+        /// <summary>
+        /// Retrieves the service account that is used by Access Approval to access KMS keys for signing approved
+        /// approval requests.
+        /// </summary>
+        public class GetServiceAccountRequest : AccessApprovalBaseServiceRequest<Google.Apis.AccessApproval.v1.Data.AccessApprovalServiceAccount>
+        {
+            /// <summary>Constructs a new GetServiceAccount request.</summary>
+            public GetServiceAccountRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+            {
+                Name = name;
+                InitParameters();
+            }
+
+            /// <summary>Name of the AccessApprovalServiceAccount to retrieve.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "getServiceAccount";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/{+name}";
+
+            /// <summary>Initializes GetServiceAccount parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^projects/[^/]+/serviceAccount$",
+                });
+            }
+        }
+
+        /// <summary>
         /// Updates the settings associated with a project, folder, or organization. Settings to update are determined
         /// by the value of field_mask.
         /// </summary>
@@ -1692,7 +2023,7 @@ namespace Google.Apis.AccessApproval.v1
         /// </param>
         public virtual UpdateAccessApprovalSettingsRequest UpdateAccessApprovalSettings(Google.Apis.AccessApproval.v1.Data.AccessApprovalSettings body, string name)
         {
-            return new UpdateAccessApprovalSettingsRequest(service, body, name);
+            return new UpdateAccessApprovalSettingsRequest(this.service, body, name);
         }
 
         /// <summary>
@@ -1768,9 +2099,44 @@ namespace Google.Apis.AccessApproval.v1
 }
 namespace Google.Apis.AccessApproval.v1.Data
 {
+    /// <summary>Access Approval service account related to a project/folder/organization.</summary>
+    public class AccessApprovalServiceAccount : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Email address of the service account.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("accountEmail")]
+        public virtual string AccountEmail { get; set; }
+
+        /// <summary>
+        /// The resource name of the Access Approval service account. Format is one of: *
+        /// "projects/{project}/serviceAccount" * "folders/{folder}/serviceAccount" *
+        /// "organizations/{organization}/serviceAccount"
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Settings on a Project/Folder/Organization related to Access Approval.</summary>
     public class AccessApprovalSettings : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// The asymmetric crypto key version to use for signing approval requests. Empty active_key_version indicates
+        /// that a Google-managed key should be used for signing. This property will be ignored if set by an ancestor of
+        /// this resource, and new non-empty values may not be set.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("activeKeyVersion")]
+        public virtual string ActiveKeyVersion { get; set; }
+
+        /// <summary>
+        /// Output only. This field is read only (not settable via UpdateAccessApprovalSettings method). If the field is
+        /// true, that indicates that an ancestor of this Project or Folder has set active_key_version (this field will
+        /// always be unset for the organization since organizations do not have ancestors).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ancestorHasActiveKeyVersion")]
+        public virtual System.Nullable<bool> AncestorHasActiveKeyVersion { get; set; }
+
         /// <summary>
         /// Output only. This field is read only (not settable via UpdateAccessApprovalSettings method). If the field is
         /// true, that indicates that at least one service is enrolled for Access Approval in one or more ancestors of
@@ -1793,6 +2159,16 @@ namespace Google.Apis.AccessApproval.v1.Data
         public virtual System.Collections.Generic.IList<EnrolledService> EnrolledServices { get; set; }
 
         /// <summary>
+        /// Output only. This field is read only (not settable via UpdateAccessApprovalSettings method). If the field is
+        /// true, that indicates that there is some configuration issue with the active_key_version configured at this
+        /// level in the resource hierarchy (e.g. it doesn't exist or the Access Approval service account doesn't have
+        /// the correct permissions on it, etc.) This key version is not necessarily the effective key version at this
+        /// level, as key versions are inherited top-down.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("invalidKeyVersion")]
+        public virtual System.Nullable<bool> InvalidKeyVersion { get; set; }
+
+        /// <summary>
         /// The resource name of the settings. Format is one of: * "projects/{project}/accessApprovalSettings" *
         /// "folders/{folder}/accessApprovalSettings" * "organizations/{organization}/accessApprovalSettings"
         /// </summary>
@@ -1806,6 +2182,34 @@ namespace Google.Apis.AccessApproval.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("notificationEmails")]
         public virtual System.Collections.Generic.IList<string> NotificationEmails { get; set; }
+
+        /// <summary>
+        /// Optional. A pubsub topic to which notifications relating to approval requests should be sent.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("notificationPubsubTopic")]
+        public virtual string NotificationPubsubTopic { get; set; }
+
+        /// <summary>
+        /// This preference is communicated to Google personnel when sending an approval request but can be overridden
+        /// if necessary.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("preferNoBroadApprovalRequests")]
+        public virtual System.Nullable<bool> PreferNoBroadApprovalRequests { get; set; }
+
+        /// <summary>
+        /// This preference is shared with Google personnel, but can be overridden if said personnel deems necessary.
+        /// The approver ultimately can set the expiration at approval time.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("preferredRequestExpirationDays")]
+        public virtual System.Nullable<int> PreferredRequestExpirationDays { get; set; }
+
+        /// <summary>Optional. A setting to indicate the maximum width of an Access Approval request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requestScopeMaxWidthPreference")]
+        public virtual string RequestScopeMaxWidthPreference { get; set; }
+
+        /// <summary>Optional. A setting to require approval request justifications to be customer visible.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requireCustomerVisibleJustification")]
+        public virtual System.Nullable<bool> RequireCustomerVisibleJustification { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1868,16 +2272,92 @@ namespace Google.Apis.AccessApproval.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
+        private string _requestTimeRaw;
+
+        private object _requestTime;
+
         /// <summary>The time at which approval was requested.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requestTime")]
-        public virtual object RequestTime { get; set; }
+        public virtual string RequestTimeRaw
+        {
+            get => _requestTimeRaw;
+            set
+            {
+                _requestTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _requestTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="RequestTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RequestTimeDateTimeOffset instead.")]
+        public virtual object RequestTime
+        {
+            get => _requestTime;
+            set
+            {
+                _requestTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _requestTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="RequestTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RequestTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(RequestTimeRaw);
+            set => RequestTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>This field contains the augmented information of the request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requestedAugmentedInfo")]
+        public virtual AugmentedInfo RequestedAugmentedInfo { get; set; }
+
+        /// <summary>The requested access duration.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requestedDuration")]
+        public virtual object RequestedDuration { get; set; }
+
+        private string _requestedExpirationRaw;
+
+        private object _requestedExpiration;
 
         /// <summary>
-        /// The requested expiration for the approval. If the request is approved, access will be granted from the time
-        /// of approval until the expiration time.
+        /// The original requested expiration for the approval. Calculated by adding the requested_duration to the
+        /// request_time.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requestedExpiration")]
-        public virtual object RequestedExpiration { get; set; }
+        public virtual string RequestedExpirationRaw
+        {
+            get => _requestedExpirationRaw;
+            set
+            {
+                _requestedExpiration = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _requestedExpirationRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="RequestedExpirationRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RequestedExpirationDateTimeOffset instead.")]
+        public virtual object RequestedExpiration
+        {
+            get => _requestedExpiration;
+            set
+            {
+                _requestedExpirationRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _requestedExpiration = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="RequestedExpirationRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RequestedExpirationDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(RequestedExpirationRaw);
+            set => RequestedExpirationRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The locations for which approval is being requested.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requestedLocations")]
@@ -1907,9 +2387,42 @@ namespace Google.Apis.AccessApproval.v1.Data
     /// <summary>Request to approve an ApprovalRequest.</summary>
     public class ApproveApprovalRequestMessage : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
         /// <summary>The expiration time of this approval.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
-        public virtual object ExpireTime { get; set; }
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1918,13 +2431,140 @@ namespace Google.Apis.AccessApproval.v1.Data
     /// <summary>A decision that has been made to approve access to a resource.</summary>
     public class ApproveDecision : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _approveTimeRaw;
+
+        private object _approveTime;
+
         /// <summary>The time at which approval was granted.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("approveTime")]
-        public virtual object ApproveTime { get; set; }
+        public virtual string ApproveTimeRaw
+        {
+            get => _approveTimeRaw;
+            set
+            {
+                _approveTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _approveTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ApproveTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ApproveTimeDateTimeOffset instead.")]
+        public virtual object ApproveTime
+        {
+            get => _approveTime;
+            set
+            {
+                _approveTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _approveTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ApproveTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ApproveTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ApproveTimeRaw);
+            set => ApproveTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>True when the request has been auto-approved.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("autoApproved")]
+        public virtual System.Nullable<bool> AutoApproved { get; set; }
+
+        private string _expireTimeRaw;
+
+        private object _expireTime;
 
         /// <summary>The time at which the approval expires.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
-        public virtual object ExpireTime { get; set; }
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _invalidateTimeRaw;
+
+        private object _invalidateTime;
+
+        /// <summary>If set, denotes the timestamp at which the approval is invalidated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("invalidateTime")]
+        public virtual string InvalidateTimeRaw
+        {
+            get => _invalidateTimeRaw;
+            set
+            {
+                _invalidateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _invalidateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="InvalidateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use InvalidateTimeDateTimeOffset instead.")]
+        public virtual object InvalidateTime
+        {
+            get => _invalidateTime;
+            set
+            {
+                _invalidateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _invalidateTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="InvalidateTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? InvalidateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(InvalidateTimeRaw);
+            set => InvalidateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The signature for the ApprovalRequest and details on how it was signed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("signatureInfo")]
+        public virtual SignatureInfo SignatureInfo { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>This field contains the augmented information of the request.</summary>
+    public class AugmentedInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// For command-line tools, the full command-line exactly as entered by the actor without adding any additional
+        /// characters (such as quotation marks).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("command")]
+        public virtual string Command { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1940,12 +2580,45 @@ namespace Google.Apis.AccessApproval.v1.Data
     /// <summary>A decision that has been made to dismiss an approval request.</summary>
     public class DismissDecision : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _dismissTimeRaw;
+
+        private object _dismissTime;
+
         /// <summary>The time at which the approval request was dismissed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dismissTime")]
-        public virtual object DismissTime { get; set; }
+        public virtual string DismissTimeRaw
+        {
+            get => _dismissTimeRaw;
+            set
+            {
+                _dismissTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _dismissTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="DismissTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use DismissTimeDateTimeOffset instead.")]
+        public virtual object DismissTime
+        {
+            get => _dismissTime;
+            set
+            {
+                _dismissTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _dismissTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="DismissTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? DismissTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(DismissTimeRaw);
+            set => DismissTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
-        /// This field will be true if the ApprovalRequest was implcitly dismissed due to inaction by the access
+        /// This field will be true if the ApprovalRequest was implicitly dismissed due to inaction by the access
         /// approval approvers (the request is not acted on by the approvers before the exiration time).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("implicit")]
@@ -1958,8 +2631,7 @@ namespace Google.Apis.AccessApproval.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1972,19 +2644,22 @@ namespace Google.Apis.AccessApproval.v1.Data
     {
         /// <summary>
         /// The product for which Access Approval will be enrolled. Allowed values are listed below (case-sensitive): *
-        /// all * GA * App Engine * BigQuery * Cloud Bigtable * Cloud Key Management Service * Compute Engine * Cloud
-        /// Dataflow * Cloud DLP * Cloud EKM * Cloud HSM * Cloud Identity and Access Management * Cloud Logging * Cloud
-        /// Pub/Sub * Cloud Spanner * Cloud SQL * Cloud Storage * Google Kubernetes Engine * Organization Policy
-        /// Serivice * Persistent Disk * Resource Manager * Speaker ID Note: These values are supported as input for
-        /// legacy purposes, but will not be returned from the API. * all * ga-only * appengine.googleapis.com *
-        /// bigquery.googleapis.com * bigtable.googleapis.com * container.googleapis.com * cloudkms.googleapis.com *
+        /// all * GA * App Engine * Artifact Registry * BigQuery * Certificate Authority Service * Cloud Bigtable *
+        /// Cloud Key Management Service * Compute Engine * Cloud Composer * Cloud Dataflow * Cloud Dataproc * Cloud DLP
+        /// * Cloud EKM * Cloud Firestore * Cloud HSM * Cloud Identity and Access Management * Cloud Logging * Cloud NAT
+        /// * Cloud Pub/Sub * Cloud Spanner * Cloud SQL * Cloud Storage * Eventarc * Google Kubernetes Engine *
+        /// Organization Policy Serivice * Persistent Disk * Resource Manager * Secret Manager * Speaker ID Note: These
+        /// values are supported as input for legacy purposes, but will not be returned from the API. * all * ga-only *
+        /// appengine.googleapis.com * artifactregistry.googleapis.com * bigquery.googleapis.com *
+        /// bigtable.googleapis.com * container.googleapis.com * cloudkms.googleapis.com *
         /// cloudresourcemanager.googleapis.com * cloudsql.googleapis.com * compute.googleapis.com *
-        /// dataflow.googleapis.com * dlp.googleapis.com * iam.googleapis.com * logging.googleapis.com *
-        /// orgpolicy.googleapis.com * pubsub.googleapis.com * spanner.googleapis.com * speakerid.googleapis.com *
-        /// storage.googleapis.com Calls to UpdateAccessApprovalSettings using 'all' or any of the XXX.googleapis.com
-        /// will be translated to the associated product name ('all', 'App Engine', etc.). Note: 'all' will enroll the
-        /// resource in all products supported at both 'GA' and 'Preview' levels. More information about levels of
-        /// support is available at https://cloud.google.com/access-approval/docs/supported-services
+        /// dataflow.googleapis.com * dataproc.googleapis.com * dlp.googleapis.com * iam.googleapis.com *
+        /// logging.googleapis.com * orgpolicy.googleapis.com * pubsub.googleapis.com * spanner.googleapis.com *
+        /// secretmanager.googleapis.com * speakerid.googleapis.com * storage.googleapis.com Calls to
+        /// UpdateAccessApprovalSettings using 'all' or any of the XXX.googleapis.com will be translated to the
+        /// associated product name ('all', 'App Engine', etc.). Note: 'all' will enroll the resource in all products
+        /// supported at both 'GA' and 'Preview' levels. More information about levels of support is available at
+        /// https://cloud.google.com/access-approval/docs/supported-services
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cloudProduct")]
         public virtual string CloudProduct { get; set; }
@@ -1993,6 +2668,13 @@ namespace Google.Apis.AccessApproval.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("enrollmentLevel")]
         public virtual string EnrollmentLevel { get; set; }
 
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request to invalidate an existing approval.</summary>
+    public class InvalidateApprovalRequestMessage : Google.Apis.Requests.IDirectResponseSchema
+    {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -2018,6 +2700,42 @@ namespace Google.Apis.AccessApproval.v1.Data
         /// <summary>Whether an approval will exclude the descendants of the resource being requested.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("excludesDescendants")]
         public virtual System.Nullable<bool> ExcludesDescendants { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Information about the digital signature of the resource.</summary>
+    public class SignatureInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The resource name of the customer CryptoKeyVersion used for signing.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customerKmsKeyVersion")]
+        public virtual string CustomerKmsKeyVersion { get; set; }
+
+        /// <summary>
+        /// The hashing algorithm used for signature verification. It will only be present in the case of Google managed
+        /// keys.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("googleKeyAlgorithm")]
+        public virtual string GoogleKeyAlgorithm { get; set; }
+
+        /// <summary>
+        /// The public key for the Google default signing, encoded in PEM format. The signature was created using a
+        /// private key which may be verified using this public key.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("googlePublicKeyPem")]
+        public virtual string GooglePublicKeyPem { get; set; }
+
+        /// <summary>
+        /// The ApprovalRequest that is serialized without the SignatureInfo message field. This data is used with the
+        /// hashing algorithm to generate the digital signature, and it can be used for signature verification.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serializedApprovalRequest")]
+        public virtual string SerializedApprovalRequest { get; set; }
+
+        /// <summary>The digital signature.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("signature")]
+        public virtual string Signature { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

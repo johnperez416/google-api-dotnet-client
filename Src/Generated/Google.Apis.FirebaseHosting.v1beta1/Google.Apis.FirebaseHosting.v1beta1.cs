@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ namespace Google.Apis.FirebaseHosting.v1beta1
         {
             Projects = new ProjectsResource(this);
             Sites = new SitesResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://firebasehosting.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://firebasehosting.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -45,23 +47,16 @@ namespace Google.Apis.FirebaseHosting.v1beta1
         public override string Name => "firebasehosting";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://firebasehosting.googleapis.com/";
-        #else
-            "https://firebasehosting.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://firebasehosting.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Firebase Hosting API.</summary>
         public class Scope
@@ -333,7 +328,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// <param name="name">The name of the operation resource.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
@@ -394,6 +389,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             {
                 this.service = service;
                 Channels = new ChannelsResource(service);
+                CustomDomains = new CustomDomainsResource(service);
                 Domains = new DomainsResource(service);
                 Releases = new ReleasesResource(service);
                 Versions = new VersionsResource(service);
@@ -445,7 +441,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.FirebaseHosting.v1beta1.Data.Release body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>
@@ -516,6 +512,67 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                     }
 
                     /// <summary>
+                    /// Gets the specified release for a site or channel. When used to get a release for a site, this
+                    /// can get releases for both the default `live` channel and any active preview channels for the
+                    /// specified site.
+                    /// </summary>
+                    /// <param name="name">
+                    /// Required. The fully-qualified resource name for the Hosting release, in either of the following
+                    /// formats: - sites/SITE_ID/channels/CHANNEL_ID/releases/RELEASE_ID -
+                    /// sites/SITE_ID/releases/RELEASE_ID
+                    /// </param>
+                    public virtual GetRequest Get(string name)
+                    {
+                        return new GetRequest(this.service, name);
+                    }
+
+                    /// <summary>
+                    /// Gets the specified release for a site or channel. When used to get a release for a site, this
+                    /// can get releases for both the default `live` channel and any active preview channels for the
+                    /// specified site.
+                    /// </summary>
+                    public class GetRequest : FirebaseHostingBaseServiceRequest<Google.Apis.FirebaseHosting.v1beta1.Data.Release>
+                    {
+                        /// <summary>Constructs a new Get request.</summary>
+                        public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Required. The fully-qualified resource name for the Hosting release, in either of the
+                        /// following formats: - sites/SITE_ID/channels/CHANNEL_ID/releases/RELEASE_ID -
+                        /// sites/SITE_ID/releases/RELEASE_ID
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "get";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1beta1/{+name}";
+
+                        /// <summary>Initializes Get parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/sites/[^/]+/channels/[^/]+/releases/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>
                     /// Lists the releases that have been created for the specified site or channel. When used to list
                     /// releases for a site, this list includes releases for both the default `live` channel and any
                     /// active preview channels for the specified site.
@@ -526,7 +583,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>
@@ -612,7 +669,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.FirebaseHosting.v1beta1.Data.Channel body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Creates a new channel in the specified site.</summary>
@@ -683,7 +740,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -736,7 +793,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Retrieves information for the specified channel of the specified site.</summary>
@@ -788,7 +845,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
@@ -871,7 +928,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.FirebaseHosting.v1beta1.Data.Channel body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -938,6 +995,646 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 }
             }
 
+            /// <summary>Gets the CustomDomains resource.</summary>
+            public virtual CustomDomainsResource CustomDomains { get; }
+
+            /// <summary>The "customDomains" collection of methods.</summary>
+            public class CustomDomainsResource
+            {
+                private const string Resource = "customDomains";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public CustomDomainsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                    Operations = new OperationsResource(service);
+                }
+
+                /// <summary>Gets the Operations resource.</summary>
+                public virtual OperationsResource Operations { get; }
+
+                /// <summary>The "operations" collection of methods.</summary>
+                public class OperationsResource
+                {
+                    private const string Resource = "operations";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public OperationsResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>
+                    /// Gets the latest state of a long-running operation. Use this method to poll the operation result
+                    /// at intervals as recommended by the API service.
+                    /// </summary>
+                    /// <param name="name">The name of the operation resource.</param>
+                    public virtual GetRequest Get(string name)
+                    {
+                        return new GetRequest(this.service, name);
+                    }
+
+                    /// <summary>
+                    /// Gets the latest state of a long-running operation. Use this method to poll the operation result
+                    /// at intervals as recommended by the API service.
+                    /// </summary>
+                    public class GetRequest : FirebaseHostingBaseServiceRequest<Google.Apis.FirebaseHosting.v1beta1.Data.Operation>
+                    {
+                        /// <summary>Constructs a new Get request.</summary>
+                        public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>The name of the operation resource.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "get";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1beta1/{+name}";
+
+                        /// <summary>Initializes Get parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/sites/[^/]+/customDomains/[^/]+/operations/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>Lists operations that match the specified filter in the request.</summary>
+                    /// <param name="name">The name of the operation's parent resource.</param>
+                    public virtual ListRequest List(string name)
+                    {
+                        return new ListRequest(this.service, name);
+                    }
+
+                    /// <summary>Lists operations that match the specified filter in the request.</summary>
+                    public class ListRequest : FirebaseHostingBaseServiceRequest<Google.Apis.FirebaseHosting.v1beta1.Data.ListOperationsResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                        {
+                            Name = name;
+                            InitParameters();
+                        }
+
+                        /// <summary>The name of the operation's parent resource.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>The standard list filter.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string Filter { get; set; }
+
+                        /// <summary>The standard list page size.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>The standard list page token.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1beta1/{+name}/operations";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/sites/[^/]+/customDomains/[^/]+$",
+                            });
+                            RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "filter",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+                }
+
+                /// <summary>Creates a `CustomDomain`.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The custom domain's parent, specifically a Firebase Hosting `Site`.
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.FirebaseHosting.v1beta1.Data.CustomDomain body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>Creates a `CustomDomain`.</summary>
+                public class CreateRequest : FirebaseHostingBaseServiceRequest<Google.Apis.FirebaseHosting.v1beta1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.FirebaseHosting.v1beta1.Data.CustomDomain body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. The custom domain's parent, specifically a Firebase Hosting `Site`.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Required. The ID of the `CustomDomain`, which is the domain name you'd like to use with Firebase
+                    /// Hosting.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("customDomainId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string CustomDomainId { get; set; }
+
+                    /// <summary>
+                    /// If true, Hosting validates that it's possible to complete your request but doesn't actually
+                    /// create a new `CustomDomain`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("validateOnly", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<bool> ValidateOnly { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.FirebaseHosting.v1beta1.Data.CustomDomain Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+parent}/customDomains";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/sites/[^/]+$",
+                        });
+                        RequestParameters.Add("customDomainId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "customDomainId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("validateOnly", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "validateOnly",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Deletes the specified `CustomDomain`.</summary>
+                /// <param name="name">Required. The name of the `CustomDomain` to delete.</param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes the specified `CustomDomain`.</summary>
+                public class DeleteRequest : FirebaseHostingBaseServiceRequest<Google.Apis.FirebaseHosting.v1beta1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. The name of the `CustomDomain` to delete.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>If true, the request succeeds even if the `CustomDomain` doesn't exist.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("allowMissing", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<bool> AllowMissing { get; set; }
+
+                    /// <summary>
+                    /// A tag that represents the state of the `CustomDomain` as you know it. If present, the supplied
+                    /// tag must match the current value on your `CustomDomain`, or the request fails.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("etag", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Etag { get; set; }
+
+                    /// <summary>
+                    /// If true, Hosting validates that it's possible to complete your request but doesn't actually
+                    /// delete the `CustomDomain`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("validateOnly", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<bool> ValidateOnly { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/sites/[^/]+/customDomains/[^/]+$",
+                        });
+                        RequestParameters.Add("allowMissing", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "allowMissing",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("etag", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "etag",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("validateOnly", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "validateOnly",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Gets the specified `CustomDomain`.</summary>
+                /// <param name="name">Required. The name of the `CustomDomain` to get.</param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets the specified `CustomDomain`.</summary>
+                public class GetRequest : FirebaseHostingBaseServiceRequest<Google.Apis.FirebaseHosting.v1beta1.Data.CustomDomain>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. The name of the `CustomDomain` to get.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/sites/[^/]+/customDomains/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Lists each `CustomDomain` associated with the specified parent Hosting site. Returns `CustomDomain`s
+                /// in a consistent, but undefined, order to facilitate pagination.
+                /// </summary>
+                /// <param name="parent">
+                /// Required. The Firebase Hosting `Site` with `CustomDomain` entities you'd like to list.
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>
+                /// Lists each `CustomDomain` associated with the specified parent Hosting site. Returns `CustomDomain`s
+                /// in a consistent, but undefined, order to facilitate pagination.
+                /// </summary>
+                public class ListRequest : FirebaseHostingBaseServiceRequest<Google.Apis.FirebaseHosting.v1beta1.Data.ListCustomDomainsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The Firebase Hosting `Site` with `CustomDomain` entities you'd like to list.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// The max number of `CustomDomain` entities to return in a request. Defaults to 10.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// A token from a previous call to `ListCustomDomains` that tells the server where to resume
+                    /// listing.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>
+                    /// If true, the request returns soft-deleted `CustomDomain`s that haven't been fully-deleted yet.
+                    /// To restore deleted `CustomDomain`s, make an `UndeleteCustomDomain` request.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("showDeleted", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<bool> ShowDeleted { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+parent}/customDomains";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/sites/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("showDeleted", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "showDeleted",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Updates the specified `CustomDomain`.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">Output only. The fully-qualified name of the `CustomDomain`.</param>
+                public virtual PatchRequest Patch(Google.Apis.FirebaseHosting.v1beta1.Data.CustomDomain body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates the specified `CustomDomain`.</summary>
+                public class PatchRequest : FirebaseHostingBaseServiceRequest<Google.Apis.FirebaseHosting.v1beta1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.FirebaseHosting.v1beta1.Data.CustomDomain body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>Output only. The fully-qualified name of the `CustomDomain`.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>If true, Hosting creates the `CustomDomain` if it doesn't already exist.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("allowMissing", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<bool> AllowMissing { get; set; }
+
+                    /// <summary>
+                    /// The set of field names from your `CustomDomain` that you want to update. A field will be
+                    /// overwritten if, and only if, it's in the mask. If you don't provide a mask, Hosting updates the
+                    /// entire `CustomDomain`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>
+                    /// If true, Hosting validates that it's possible to complete your request but doesn't actually
+                    /// create or update the `CustomDomain`.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("validateOnly", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<bool> ValidateOnly { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.FirebaseHosting.v1beta1.Data.CustomDomain Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/sites/[^/]+/customDomains/[^/]+$",
+                        });
+                        RequestParameters.Add("allowMissing", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "allowMissing",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("validateOnly", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "validateOnly",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Undeletes the specified `CustomDomain` if it has been soft-deleted. Hosting retains soft-deleted
+                /// custom domains for around 30 days before permanently deleting them.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">Required. The name of the `CustomDomain` to delete.</param>
+                public virtual UndeleteRequest Undelete(Google.Apis.FirebaseHosting.v1beta1.Data.UndeleteCustomDomainRequest body, string name)
+                {
+                    return new UndeleteRequest(this.service, body, name);
+                }
+
+                /// <summary>
+                /// Undeletes the specified `CustomDomain` if it has been soft-deleted. Hosting retains soft-deleted
+                /// custom domains for around 30 days before permanently deleting them.
+                /// </summary>
+                public class UndeleteRequest : FirebaseHostingBaseServiceRequest<Google.Apis.FirebaseHosting.v1beta1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Undelete request.</summary>
+                    public UndeleteRequest(Google.Apis.Services.IClientService service, Google.Apis.FirebaseHosting.v1beta1.Data.UndeleteCustomDomainRequest body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. The name of the `CustomDomain` to delete.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.FirebaseHosting.v1beta1.Data.UndeleteCustomDomainRequest Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "undelete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+name}:undelete";
+
+                    /// <summary>Initializes Undelete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/sites/[^/]+/customDomains/[^/]+$",
+                        });
+                    }
+                }
+            }
+
             /// <summary>Gets the Domains resource.</summary>
             public virtual DomainsResource Domains { get; }
 
@@ -962,7 +1659,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.FirebaseHosting.v1beta1.Data.Domain body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Creates a domain mapping on the specified site.</summary>
@@ -1016,7 +1713,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 /// <param name="name">Required. The name of the domain association to delete.</param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Deletes the existing domain mapping on the specified site.</summary>
@@ -1061,7 +1758,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 /// <param name="name">Required. The name of the domain configuration to get.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Gets a domain mapping on the specified site.</summary>
@@ -1108,7 +1805,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists the domains for the specified site.</summary>
@@ -1185,7 +1882,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 /// </param>
                 public virtual UpdateRequest Update(Google.Apis.FirebaseHosting.v1beta1.Data.Domain body, string name)
                 {
-                    return new UpdateRequest(service, body, name);
+                    return new UpdateRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -1267,7 +1964,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.FirebaseHosting.v1beta1.Data.Release body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -1338,6 +2035,67 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 }
 
                 /// <summary>
+                /// Gets the specified release for a site or channel. When used to get a release for a site, this can
+                /// get releases for both the default `live` channel and any active preview channels for the specified
+                /// site.
+                /// </summary>
+                /// <param name="name">
+                /// Required. The fully-qualified resource name for the Hosting release, in either of the following
+                /// formats: - sites/SITE_ID/channels/CHANNEL_ID/releases/RELEASE_ID - sites/SITE_ID/releases/RELEASE_ID
+                /// 
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Gets the specified release for a site or channel. When used to get a release for a site, this can
+                /// get releases for both the default `live` channel and any active preview channels for the specified
+                /// site.
+                /// </summary>
+                public class GetRequest : FirebaseHostingBaseServiceRequest<Google.Apis.FirebaseHosting.v1beta1.Data.Release>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The fully-qualified resource name for the Hosting release, in either of the following
+                    /// formats: - sites/SITE_ID/channels/CHANNEL_ID/releases/RELEASE_ID -
+                    /// sites/SITE_ID/releases/RELEASE_ID
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/sites/[^/]+/releases/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
                 /// Lists the releases that have been created for the specified site or channel. When used to list
                 /// releases for a site, this list includes releases for both the default `live` channel and any active
                 /// preview channels for the specified site.
@@ -1348,7 +2106,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
@@ -1468,7 +2226,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Lists the remaining files to be uploaded for the specified version.</summary>
@@ -1583,7 +2341,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 /// </param>
                 public virtual CloneRequest Clone(Google.Apis.FirebaseHosting.v1beta1.Data.CloneVersionRequest body, string parent)
                 {
-                    return new CloneRequest(service, body, parent);
+                    return new CloneRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -1642,7 +2400,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.FirebaseHosting.v1beta1.Data.Version body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Creates a new version for the specified site.</summary>
@@ -1729,7 +2487,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Deletes the specified version.</summary>
@@ -1774,6 +2532,65 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 }
 
                 /// <summary>
+                /// Get the specified version that has been created for the specified site. This can include versions
+                /// that were created for the default `live` channel or for any active preview channels for the
+                /// specified site.
+                /// </summary>
+                /// <param name="name">
+                /// Required. The fully-qualified resource name for the version, in the format:
+                /// sites/SITE_ID/versions/VERSION_ID
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Get the specified version that has been created for the specified site. This can include versions
+                /// that were created for the default `live` channel or for any active preview channels for the
+                /// specified site.
+                /// </summary>
+                public class GetRequest : FirebaseHostingBaseServiceRequest<Google.Apis.FirebaseHosting.v1beta1.Data.Version>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The fully-qualified resource name for the version, in the format:
+                    /// sites/SITE_ID/versions/VERSION_ID
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/sites/[^/]+/versions/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
                 /// Lists the versions that have been created for the specified site. This list includes versions for
                 /// both the default `live` channel and any active preview channels for the specified site.
                 /// </summary>
@@ -1783,7 +2600,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
@@ -1889,7 +2706,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 /// </param>
                 public virtual PatchRequest Patch(Google.Apis.FirebaseHosting.v1beta1.Data.Version body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -1969,7 +2786,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 /// </param>
                 public virtual PopulateFilesRequest PopulateFiles(Google.Apis.FirebaseHosting.v1beta1.Data.PopulateVersionFilesRequest body, string parent)
                 {
-                    return new PopulateFilesRequest(service, body, parent);
+                    return new PopulateFilesRequest(this.service, body, parent);
                 }
 
                 /// <summary> Adds content files to the specified version. Each file must be under 2 GB.</summary>
@@ -2032,7 +2849,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.FirebaseHosting.v1beta1.Data.Site body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -2064,6 +2881,13 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("siteId", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string SiteId { get; set; }
+
+                /// <summary>
+                /// Optional. If set, validates that the site_id is available and that the request would succeed,
+                /// returning the expected resulting site or error.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("validateOnly", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<bool> ValidateOnly { get; set; }
 
                 /// <summary>Gets or sets the body of this request.</summary>
                 Google.Apis.FirebaseHosting.v1beta1.Data.Site Body { get; set; }
@@ -2100,6 +2924,14 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                         DefaultValue = null,
                         Pattern = null,
                     });
+                    RequestParameters.Add("validateOnly", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "validateOnly",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                 }
             }
 
@@ -2111,7 +2943,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes the specified Hosting Site from the specified parent Firebase project.</summary>
@@ -2165,7 +2997,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets the specified Hosting Site.</summary>
@@ -2218,7 +3050,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// </param>
             public virtual GetConfigRequest GetConfig(string name)
             {
-                return new GetConfigRequest(service, name);
+                return new GetConfigRequest(this.service, name);
             }
 
             /// <summary>Gets the Hosting metadata for a specific site.</summary>
@@ -2268,7 +3100,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists each Hosting Site associated with the specified parent Firebase project.</summary>
@@ -2347,15 +3179,15 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// <param name="name">
             /// Output only. The fully-qualified resource name of the Hosting site, in the format:
             /// projects/PROJECT_IDENTIFIER/sites/SITE_ID PROJECT_IDENTIFIER: the Firebase project's
-            /// [`ProjectNumber`](https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects#FirebaseProject.FIELDS.project_number)
+            /// [`ProjectNumber`](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects#FirebaseProject.FIELDS.project_number)
             /// ***(recommended)*** or its
-            /// [`ProjectId`](https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects#FirebaseProject.FIELDS.project_id).
+            /// [`ProjectId`](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects#FirebaseProject.FIELDS.project_id).
             /// Learn more about using project identifiers in Google's [AIP 2510
             /// standard](https://google.aip.dev/cloud/2510).
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.FirebaseHosting.v1beta1.Data.Site body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Updates attributes of the specified Hosting Site.</summary>
@@ -2372,9 +3204,9 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 /// <summary>
                 /// Output only. The fully-qualified resource name of the Hosting site, in the format:
                 /// projects/PROJECT_IDENTIFIER/sites/SITE_ID PROJECT_IDENTIFIER: the Firebase project's
-                /// [`ProjectNumber`](https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects#FirebaseProject.FIELDS.project_number)
+                /// [`ProjectNumber`](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects#FirebaseProject.FIELDS.project_number)
                 /// ***(recommended)*** or its
-                /// [`ProjectId`](https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects#FirebaseProject.FIELDS.project_id).
+                /// [`ProjectId`](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects#FirebaseProject.FIELDS.project_id).
                 /// Learn more about using project identifiers in Google's [AIP 2510
                 /// standard](https://google.aip.dev/cloud/2510).
                 /// </summary>
@@ -2430,7 +3262,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// </param>
             public virtual UpdateConfigRequest UpdateConfig(Google.Apis.FirebaseHosting.v1beta1.Data.SiteConfig body, string name)
             {
-                return new UpdateConfigRequest(service, body, name);
+                return new UpdateConfigRequest(this.service, body, name);
             }
 
             /// <summary>Sets the Hosting metadata for a specific site.</summary>
@@ -2562,7 +3394,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.FirebaseHosting.v1beta1.Data.Release body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -2633,6 +3465,67 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 }
 
                 /// <summary>
+                /// Gets the specified release for a site or channel. When used to get a release for a site, this can
+                /// get releases for both the default `live` channel and any active preview channels for the specified
+                /// site.
+                /// </summary>
+                /// <param name="name">
+                /// Required. The fully-qualified resource name for the Hosting release, in either of the following
+                /// formats: - sites/SITE_ID/channels/CHANNEL_ID/releases/RELEASE_ID - sites/SITE_ID/releases/RELEASE_ID
+                /// 
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Gets the specified release for a site or channel. When used to get a release for a site, this can
+                /// get releases for both the default `live` channel and any active preview channels for the specified
+                /// site.
+                /// </summary>
+                public class GetRequest : FirebaseHostingBaseServiceRequest<Google.Apis.FirebaseHosting.v1beta1.Data.Release>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The fully-qualified resource name for the Hosting release, in either of the following
+                    /// formats: - sites/SITE_ID/channels/CHANNEL_ID/releases/RELEASE_ID -
+                    /// sites/SITE_ID/releases/RELEASE_ID
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1beta1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^sites/[^/]+/channels/[^/]+/releases/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>
                 /// Lists the releases that have been created for the specified site or channel. When used to list
                 /// releases for a site, this list includes releases for both the default `live` channel and any active
                 /// preview channels for the specified site.
@@ -2643,7 +3536,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
@@ -2729,7 +3622,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.FirebaseHosting.v1beta1.Data.Channel body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Creates a new channel in the specified site.</summary>
@@ -2798,7 +3691,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
@@ -2851,7 +3744,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Retrieves information for the specified channel of the specified site.</summary>
@@ -2899,7 +3792,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// <param name="parent">Required. The site for which to list channels, in the format: sites/SITE_ID</param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists the channels for the specified site. All sites have a default `live` channel.</summary>
@@ -2980,7 +3873,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.FirebaseHosting.v1beta1.Data.Channel body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -3070,7 +3963,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.FirebaseHosting.v1beta1.Data.Domain body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Creates a domain mapping on the specified site.</summary>
@@ -3124,7 +4017,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// <param name="name">Required. The name of the domain association to delete.</param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes the existing domain mapping on the specified site.</summary>
@@ -3169,7 +4062,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// <param name="name">Required. The name of the domain configuration to get.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets a domain mapping on the specified site.</summary>
@@ -3216,7 +4109,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists the domains for the specified site.</summary>
@@ -3289,7 +4182,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// </param>
             public virtual UpdateRequest Update(Google.Apis.FirebaseHosting.v1beta1.Data.Domain body, string name)
             {
-                return new UpdateRequest(service, body, name);
+                return new UpdateRequest(this.service, body, name);
             }
 
             /// <summary>Updates the specified domain mapping, creating the mapping as if it does not exist.</summary>
@@ -3369,7 +4262,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.FirebaseHosting.v1beta1.Data.Release body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -3440,6 +4333,64 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             }
 
             /// <summary>
+            /// Gets the specified release for a site or channel. When used to get a release for a site, this can get
+            /// releases for both the default `live` channel and any active preview channels for the specified site.
+            /// </summary>
+            /// <param name="name">
+            /// Required. The fully-qualified resource name for the Hosting release, in either of the following formats:
+            /// - sites/SITE_ID/channels/CHANNEL_ID/releases/RELEASE_ID - sites/SITE_ID/releases/RELEASE_ID
+            /// </param>
+            public virtual GetRequest Get(string name)
+            {
+                return new GetRequest(this.service, name);
+            }
+
+            /// <summary>
+            /// Gets the specified release for a site or channel. When used to get a release for a site, this can get
+            /// releases for both the default `live` channel and any active preview channels for the specified site.
+            /// </summary>
+            public class GetRequest : FirebaseHostingBaseServiceRequest<Google.Apis.FirebaseHosting.v1beta1.Data.Release>
+            {
+                /// <summary>Constructs a new Get request.</summary>
+                public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                {
+                    Name = name;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The fully-qualified resource name for the Hosting release, in either of the following
+                /// formats: - sites/SITE_ID/channels/CHANNEL_ID/releases/RELEASE_ID - sites/SITE_ID/releases/RELEASE_ID
+                /// 
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "get";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1beta1/{+name}";
+
+                /// <summary>Initializes Get parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^sites/[^/]+/releases/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>
             /// Lists the releases that have been created for the specified site or channel. When used to list releases
             /// for a site, this list includes releases for both the default `live` channel and any active preview
             /// channels for the specified site.
@@ -3450,7 +4401,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
@@ -3570,7 +4521,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists the remaining files to be uploaded for the specified version.</summary>
@@ -3683,7 +4634,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// </param>
             public virtual CloneRequest Clone(Google.Apis.FirebaseHosting.v1beta1.Data.CloneVersionRequest body, string parent)
             {
-                return new CloneRequest(service, body, parent);
+                return new CloneRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -3740,7 +4691,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.FirebaseHosting.v1beta1.Data.Version body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Creates a new version for the specified site.</summary>
@@ -3825,7 +4776,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes the specified version.</summary>
@@ -3870,6 +4821,63 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             }
 
             /// <summary>
+            /// Get the specified version that has been created for the specified site. This can include versions that
+            /// were created for the default `live` channel or for any active preview channels for the specified site.
+            /// </summary>
+            /// <param name="name">
+            /// Required. The fully-qualified resource name for the version, in the format:
+            /// sites/SITE_ID/versions/VERSION_ID
+            /// </param>
+            public virtual GetRequest Get(string name)
+            {
+                return new GetRequest(this.service, name);
+            }
+
+            /// <summary>
+            /// Get the specified version that has been created for the specified site. This can include versions that
+            /// were created for the default `live` channel or for any active preview channels for the specified site.
+            /// </summary>
+            public class GetRequest : FirebaseHostingBaseServiceRequest<Google.Apis.FirebaseHosting.v1beta1.Data.Version>
+            {
+                /// <summary>Constructs a new Get request.</summary>
+                public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                {
+                    Name = name;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The fully-qualified resource name for the version, in the format:
+                /// sites/SITE_ID/versions/VERSION_ID
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "get";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1beta1/{+name}";
+
+                /// <summary>Initializes Get parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^sites/[^/]+/versions/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>
             /// Lists the versions that have been created for the specified site. This list includes versions for both
             /// the default `live` channel and any active preview channels for the specified site.
             /// </summary>
@@ -3879,7 +4887,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
@@ -3985,7 +4993,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.FirebaseHosting.v1beta1.Data.Version body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -4064,7 +5072,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
             /// </param>
             public virtual PopulateFilesRequest PopulateFiles(Google.Apis.FirebaseHosting.v1beta1.Data.PopulateVersionFilesRequest body, string parent)
             {
-                return new PopulateFilesRequest(service, body, parent);
+                return new PopulateFilesRequest(this.service, body, parent);
             }
 
             /// <summary> Adds content files to the specified version. Each file must be under 2 GB.</summary>
@@ -4121,7 +5129,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
         /// </param>
         public virtual GetConfigRequest GetConfig(string name)
         {
-            return new GetConfigRequest(service, name);
+            return new GetConfigRequest(this.service, name);
         }
 
         /// <summary>Gets the Hosting metadata for a specific site.</summary>
@@ -4171,7 +5179,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1
         /// </param>
         public virtual UpdateConfigRequest UpdateConfig(Google.Apis.FirebaseHosting.v1beta1.Data.SiteConfig body, string name)
         {
-            return new UpdateConfigRequest(service, body, name);
+            return new UpdateConfigRequest(this.service, body, name);
         }
 
         /// <summary>Sets the Hosting metadata for a specific site.</summary>
@@ -4293,21 +5301,230 @@ namespace Google.Apis.FirebaseHosting.v1beta1.Data
     }
 
     /// <summary>
+    /// A set of ACME challenges you can use to allow Hosting to create an SSL certificate for your domain name before
+    /// directing traffic to Hosting servers. Use either the DNS or HTTP challenge; it's not necessary to provide both.
+    /// </summary>
+    public class CertVerification : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. A `TXT` record to add to your DNS records that confirms your intent to let Hosting create an
+        /// SSL cert for your domain name.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dns")]
+        public virtual DnsUpdates Dns { get; set; }
+
+        /// <summary>
+        /// Output only. A file to add to your existing, non-Hosting hosting service that confirms your intent to let
+        /// Hosting create an SSL cert for your domain name.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("http")]
+        public virtual HttpUpdate Http { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// An SSL certificate used to provide end-to-end encryption for requests against your domain name. A `Certificate`
+    /// can be an actual SSL certificate or, for newly-created custom domains, Hosting's intent to create one.
+    /// </summary>
+    public class Certificate : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>
+        /// Output only. The certificate's creation time. For `TEMPORARY` certs this is the time Hosting first generated
+        /// challenges for your domain name. For all other cert types, it's the time the actual cert was created.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
+        /// <summary>
+        /// Output only. The certificate's expiration time. After this time, the cert can no longer be used to provide
+        /// secure communication between Hosting and your site's visitors.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Output only. A set of errors Hosting encountered when attempting to create a cert for your domain name.
+        /// Resolve these issues to ensure Hosting is able to provide secure communication with your site's visitors.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("issues")]
+        public virtual System.Collections.Generic.IList<Status> Issues { get; set; }
+
+        /// <summary>
+        /// Output only. The state of the certificate. Only the `CERT_ACTIVE` and `CERT_EXPIRING_SOON` states provide
+        /// SSL coverage for a domain name. If the state is `PROPAGATING` and Hosting had an active cert for the domain
+        /// name before, that formerly-active cert provides SSL coverage for the domain name until the current cert
+        /// propagates.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>Output only. The certificate's type.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        /// <summary>
+        /// Output only. A set of ACME challenges you can add to your DNS records or existing, non-Hosting hosting
+        /// provider to allow Hosting to create an SSL certificate for your domain name before you point traffic toward
+        /// hosting. You can use thse challenges as part of a zero downtime transition from your old provider to
+        /// Hosting.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("verification")]
+        public virtual CertVerification Verification { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
     /// A `Channel` represents a stream of releases for a site. All sites have a default `live` channel that serves
     /// content to the Firebase-provided subdomains and any connected custom domains.
     /// </summary>
     public class Channel : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time at which the channel was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _expireTimeRaw;
+
+        private object _expireTime;
 
         /// <summary>
         /// The time at which the channel will be automatically deleted. If null, the channel will not be automatically
         /// deleted. This field is present in the output whether it's set directly or via the `ttl` field.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
-        public virtual object ExpireTime { get; set; }
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Text labels used for extra metadata and/or filtering.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("labels")]
@@ -4337,9 +5554,42 @@ namespace Google.Apis.FirebaseHosting.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("ttl")]
         public virtual object Ttl { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The time at which the channel was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. The URL at which the content of this channel's current release can be viewed. This URL is a
@@ -4409,6 +5659,419 @@ namespace Google.Apis.FirebaseHosting.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("serviceId")]
         public virtual string ServiceId { get; set; }
 
+        /// <summary>
+        /// Optional. User-provided TrafficConfig tag to send traffic to. When omitted, traffic is sent to the
+        /// service-wide URI
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tag")]
+        public virtual string Tag { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A `CustomDomain` is an entity that links a domain name to a Firebase Hosting site. Add a `CustomDomain` to your
+    /// site to allow Hosting to serve the site's content in response to requests against your domain name.
+    /// </summary>
+    public class CustomDomain : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Annotations you can add to leave both human- and machine-readable metadata about your `CustomDomain`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("annotations")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Annotations { get; set; }
+
+        /// <summary>
+        /// Output only. The SSL certificate Hosting has for this custom domain's domain name. For new custom domains,
+        /// this often represents Hosting's intent to create a certificate, rather than an actual cert. Check the
+        /// `state` field for more.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cert")]
+        public virtual Certificate Cert { get; set; }
+
+        /// <summary>
+        /// A field that lets you specify which SSL certificate type Hosting creates for your domain name. Spark plan
+        /// custom domains only have access to the `GROUPED` cert type, while Blaze plan domains can select any option.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("certPreference")]
+        public virtual string CertPreference { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. The custom domain's create time.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _deleteTimeRaw;
+
+        private object _deleteTime;
+
+        /// <summary>
+        /// Output only. The time the `CustomDomain` was deleted; null for custom domains that haven't been deleted.
+        /// Deleted custom domains persist for approximately 30 days, after which time Hosting removes them completely.
+        /// To restore a deleted custom domain, make an `UndeleteCustomDomain` request.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deleteTime")]
+        public virtual string DeleteTimeRaw
+        {
+            get => _deleteTimeRaw;
+            set
+            {
+                _deleteTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _deleteTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="DeleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use DeleteTimeDateTimeOffset instead.")]
+        public virtual object DeleteTime
+        {
+            get => _deleteTime;
+            set
+            {
+                _deleteTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _deleteTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="DeleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? DeleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(DeleteTimeRaw);
+            set => DeleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Output only. A string that represents the current state of the `CustomDomain` and allows you to confirm its
+        /// initial state in requests that would modify it. Use the tag to ensure consistency when making
+        /// `UpdateCustomDomain`, `DeleteCustomDomain`, and `UndeleteCustomDomain` requests.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
+        /// <summary>
+        /// Output only. The minimum time before a soft-deleted `CustomDomain` is completely removed from Hosting; null
+        /// for custom domains that haven't been deleted.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Output only. The `HostState` of the domain name this `CustomDomain` refers to.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hostState")]
+        public virtual string HostState { get; set; }
+
+        /// <summary>
+        /// Output only. A set of errors Hosting systems encountered when trying to establish Hosting's ability to serve
+        /// secure content for your domain name. Resolve these issues to ensure your `CustomDomain` behaves properly.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("issues")]
+        public virtual System.Collections.Generic.IList<Status> Issues { get; set; }
+
+        /// <summary>Labels used for extra metadata and/or filtering.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labels")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
+
+        /// <summary>Output only. The fully-qualified name of the `CustomDomain`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Output only. The `OwnershipState` of the domain name this `CustomDomain` refers to.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ownershipState")]
+        public virtual string OwnershipState { get; set; }
+
+        /// <summary>
+        /// Output only. A field that, if true, indicates that Hosting's systems are attmepting to make the custom
+        /// domain's state match your preferred state. This is most frequently `true` when initially provisioning a
+        /// `CustomDomain` after a `CreateCustomDomain` request or when creating a new SSL certificate to match an
+        /// updated `cert_preference` after an `UpdateCustomDomain` request.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("reconciling")]
+        public virtual System.Nullable<bool> Reconciling { get; set; }
+
+        /// <summary>
+        /// A domain name that this `CustomDomain` should direct traffic towards. If specified, Hosting will respond to
+        /// requests against this custom domain with an HTTP 301 code, and route traffic to the specified
+        /// `redirect_target` instead.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("redirectTarget")]
+        public virtual string RedirectTarget { get; set; }
+
+        /// <summary>
+        /// Output only. A set of updates you should make to the domain name's DNS records to let Hosting serve secure
+        /// content on its behalf.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requiredDnsUpdates")]
+        public virtual DnsUpdates RequiredDnsUpdates { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. The last time the `CustomDomain` was updated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+    }
+
+    /// <summary>Metadata associated with a`CustomDomain` operation.</summary>
+    public class CustomDomainMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The `CertState` of the domain name's SSL certificate.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("certState")]
+        public virtual string CertState { get; set; }
+
+        /// <summary>The `HostState` of the domain name this `CustomDomain` refers to.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hostState")]
+        public virtual string HostState { get; set; }
+
+        /// <summary>
+        /// A list of issues that are currently preventing Hosting from completing the operation. These are generally
+        /// DNS-related issues that Hosting encounters when querying a domain name's records or attempting to mint an
+        /// SSL certificate.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("issues")]
+        public virtual System.Collections.Generic.IList<Status> Issues { get; set; }
+
+        /// <summary>
+        /// A set of DNS record updates and ACME challenges that allow you to transition domain names to Firebase
+        /// Hosting with zero downtime. These updates allow Hosting to create an SSL certificate and establish ownership
+        /// for your custom domain before Hosting begins serving traffic on it. If your domain name is already in active
+        /// use with another provider, add one of the challenges and make the recommended DNS updates. After adding
+        /// challenges and adjusting DNS records as necessary, wait for the `ownershipState` to be `OWNERSHIP_ACTIVE`
+        /// and the `certState` to be `CERT_ACTIVE` before sending traffic to Hosting.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("liveMigrationSteps")]
+        public virtual System.Collections.Generic.IList<LiveMigrationStep> LiveMigrationSteps { get; set; }
+
+        /// <summary>The `OwnershipState` of the domain name this `CustomDomain` refers to.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ownershipState")]
+        public virtual string OwnershipState { get; set; }
+
+        /// <summary>
+        /// A set of DNS record updates that allow Hosting to serve secure content on your domain name. The record type
+        /// determines the update's purpose: - `A` and `AAAA`: Updates your domain name's IP addresses so that they
+        /// direct traffic to Hosting servers. - `TXT`: Updates ownership permissions on your domain name, letting
+        /// Hosting know that your custom domain's project has permission to perform actions for that domain name. -
+        /// `CAA`: Updates your domain name's list of authorized Certificate Authorities (CAs). Only present if you have
+        /// existing `CAA` records that prohibit Hosting's CA from minting certs for your domain name. These updates
+        /// include all DNS changes you'll need to get started with Hosting, but, if made all at once, can result in a
+        /// brief period of downtime for your domain name--while Hosting creates and uploads an SSL cert, for example.
+        /// If you'd like to add your domain name to Hosting without downtime, complete the `liveMigrationSteps` first,
+        /// before making the remaining updates in this field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("quickSetupUpdates")]
+        public virtual DnsUpdates QuickSetupUpdates { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// DNS records are resource records that define how systems and services should behave when handling requests for a
+    /// domain name. For example, when you add `A` records to your domain name's DNS records, you're informing other
+    /// systems (such as your users' web browsers) to contact those IPv4 addresses to retrieve resources relevant to
+    /// your domain name (such as your Hosting site files).
+    /// </summary>
+    public class DnsRecord : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Output only. The domain name the record pertains to, e.g. `foo.bar.com.`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("domainName")]
+        public virtual string DomainName { get; set; }
+
+        /// <summary>
+        /// Output only. The data of the record. The meaning of the value depends on record type: - A and AAAA: IP
+        /// addresses for the domain name. - CNAME: Another domain to check for records. - TXT: Arbitrary text strings
+        /// associated with the domain name. Hosting uses TXT records to determine which Firebase projects have
+        /// permission to act on the domain name's behalf. - CAA: The record's flags, tag, and value, e.g. `0 issue
+        /// "pki.goog"`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rdata")]
+        public virtual string Rdata { get; set; }
+
+        /// <summary>Output only. An enum that indicates the a required action for this record.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requiredAction")]
+        public virtual string RequiredAction { get; set; }
+
+        /// <summary>Output only. The record's type, which determines what data the record contains.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A set of DNS records relevant to the setup and maintenance of a custom domain in Firebase Hosting.
+    /// </summary>
+    public class DnsRecordSet : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. An error Hosting services encountered when querying your domain name's DNS records. Note:
+        /// Hosting ignores `NXDOMAIN` errors, as those generally just mean that a domain name hasn't been set up yet.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("checkError")]
+        public virtual Status CheckError { get; set; }
+
+        /// <summary>Output only. The domain name the record set pertains to.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("domainName")]
+        public virtual string DomainName { get; set; }
+
+        /// <summary>Output only. Records on the domain.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("records")]
+        public virtual System.Collections.Generic.IList<DnsRecord> Records { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A set of DNS record updates that you should make to allow Hosting to serve secure content in response to
+    /// requests against your domain name. These updates present the current state of your domain name's DNS records
+    /// when Hosting last queried them, and the desired set of records that Hosting needs to see before your custom
+    /// domain can be fully active.
+    /// </summary>
+    public class DnsUpdates : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _checkTimeRaw;
+
+        private object _checkTime;
+
+        /// <summary>The last time Hosting checked your custom domain's DNS records.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("checkTime")]
+        public virtual string CheckTimeRaw
+        {
+            get => _checkTimeRaw;
+            set
+            {
+                _checkTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _checkTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CheckTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CheckTimeDateTimeOffset instead.")]
+        public virtual object CheckTime
+        {
+            get => _checkTime;
+            set
+            {
+                _checkTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _checkTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CheckTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CheckTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CheckTimeRaw);
+            set => CheckTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The set of DNS records Hosting needs to serve secure content on the domain.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("desired")]
+        public virtual System.Collections.Generic.IList<DnsRecordSet> Desired { get; set; }
+
+        /// <summary>The set of DNS records Hosting discovered when inspecting a domain.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("discovered")]
+        public virtual System.Collections.Generic.IList<DnsRecordSet> Discovered { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -4439,9 +6102,42 @@ namespace Google.Apis.FirebaseHosting.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("status")]
         public virtual string Status { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The time at which the domain was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4473,9 +6169,42 @@ namespace Google.Apis.FirebaseHosting.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("discoveredIps")]
         public virtual System.Collections.Generic.IList<string> DiscoveredIps { get; set; }
 
+        private string _dnsFetchTimeRaw;
+
+        private object _dnsFetchTime;
+
         /// <summary>The time at which the last DNS fetch occurred.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dnsFetchTime")]
-        public virtual object DnsFetchTime { get; set; }
+        public virtual string DnsFetchTimeRaw
+        {
+            get => _dnsFetchTimeRaw;
+            set
+            {
+                _dnsFetchTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _dnsFetchTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="DnsFetchTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use DnsFetchTimeDateTimeOffset instead.")]
+        public virtual object DnsFetchTime
+        {
+            get => _dnsFetchTime;
+            set
+            {
+                _dnsFetchTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _dnsFetchTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="DnsFetchTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? DnsFetchTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(DnsFetchTimeRaw);
+            set => DnsFetchTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The DNS record match status as of the last DNS fetch.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dnsStatus")]
@@ -4510,8 +6239,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4539,6 +6267,74 @@ namespace Google.Apis.FirebaseHosting.v1beta1.Data
         /// <summary>The user-supplied RE2 regular expression to match against the request URL path.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("regex")]
         public virtual string Regex { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A file you can add to your existing, non-Hosting hosting service that confirms your intent to allow Hosting's
+    /// Certificate Authorities to create an SSL certificate for your domain.
+    /// </summary>
+    public class HttpUpdate : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. An error encountered during the last contents check. If null, the check completed successfully.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("checkError")]
+        public virtual Status CheckError { get; set; }
+
+        /// <summary>Output only. A text string to serve at the path.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("desired")]
+        public virtual string Desired { get; set; }
+
+        /// <summary>
+        /// Output only. Whether Hosting was able to find the required file contents on the specified path during its
+        /// last check.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("discovered")]
+        public virtual string Discovered { get; set; }
+
+        private string _lastCheckTimeRaw;
+
+        private object _lastCheckTime;
+
+        /// <summary>Output only. The last time Hosting systems checked for the file contents.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lastCheckTime")]
+        public virtual string LastCheckTimeRaw
+        {
+            get => _lastCheckTimeRaw;
+            set
+            {
+                _lastCheckTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastCheckTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastCheckTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastCheckTimeDateTimeOffset instead.")]
+        public virtual object LastCheckTime
+        {
+            get => _lastCheckTime;
+            set
+            {
+                _lastCheckTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastCheckTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastCheckTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastCheckTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastCheckTimeRaw);
+            set => LastCheckTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Output only. The path to the file.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("path")]
+        public virtual string Path { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4575,6 +6371,24 @@ namespace Google.Apis.FirebaseHosting.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>The response from `ListCustomDomains`.</summary>
+    public class ListCustomDomainsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A list of `CustomDomain` entities associated with the specified Firebase `Site`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customDomains")]
+        public virtual System.Collections.Generic.IList<CustomDomain> CustomDomains { get; set; }
+
+        /// <summary>
+        /// The pagination token, if more results exist beyond the ones in this response. Include this token in your
+        /// next call to `ListCustomDomains`. Page tokens are short-lived and should not be stored.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The response to listing Domains.</summary>
     public class ListDomainsResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4585,6 +6399,21 @@ namespace Google.Apis.FirebaseHosting.v1beta1.Data
         /// <summary>The pagination token, if more results exist.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The response message for Operations.ListOperations.</summary>
+    public class ListOperationsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The standard List next-page token.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>A list of operations that matches the specified filter in the request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("operations")]
+        public virtual System.Collections.Generic.IList<Operation> Operations { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4658,6 +6487,41 @@ namespace Google.Apis.FirebaseHosting.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// A set of updates including ACME challenges and DNS records that allow Hosting to create an SSL certificate and
+    /// establish project ownership for your domain name before you direct traffic to Hosting servers. Use these updates
+    /// to facilitate zero downtime migrations to Hosting from other services. After you've made the recommended
+    /// updates, check your custom domain's `ownershipState` and `certState`. To avoid downtime, they should be
+    /// `OWNERSHIP_ACTIVE` and `CERT_ACTIVE`, respectively, before you update your `A` and `AAAA` records.
+    /// </summary>
+    public class LiveMigrationStep : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. A pair of ACME challenges that Hosting's Certificate Authority (CA) can use to create an SSL
+        /// cert for your domain name. Use either the DNS or HTTP challenge; it's not necessary to provide both.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("certVerification")]
+        public virtual CertVerification CertVerification { get; set; }
+
+        /// <summary>Output only. DNS updates to facilitate your domain's zero-downtime migration to Hosting.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dnsUpdates")]
+        public virtual DnsUpdates DnsUpdates { get; set; }
+
+        /// <summary>Output only. Issues that prevent the current step from completing.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("issues")]
+        public virtual System.Collections.Generic.IList<Status> Issues { get; set; }
+
+        /// <summary>
+        /// Output only. The state of the live migration step, indicates whether you should work to complete the step
+        /// now, in the future, or have already completed it.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>This resource represents a long-running operation that is the result of a network API call.</summary>
     public class Operation : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4688,8 +6552,8 @@ namespace Google.Apis.FirebaseHosting.v1beta1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -4802,9 +6666,42 @@ namespace Google.Apis.FirebaseHosting.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
+        private string _releaseTimeRaw;
+
+        private object _releaseTime;
+
         /// <summary>Output only. The time at which the version is set to be public.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("releaseTime")]
-        public virtual object ReleaseTime { get; set; }
+        public virtual string ReleaseTimeRaw
+        {
+            get => _releaseTimeRaw;
+            set
+            {
+                _releaseTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _releaseTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ReleaseTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ReleaseTimeDateTimeOffset instead.")]
+        public virtual object ReleaseTime
+        {
+            get => _releaseTime;
+            set
+            {
+                _releaseTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _releaseTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ReleaseTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ReleaseTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ReleaseTimeRaw);
+            set => ReleaseTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. Identifies the user who created the release.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("releaseUser")]
@@ -4839,6 +6736,13 @@ namespace Google.Apis.FirebaseHosting.v1beta1.Data
         /// <summary>The function to proxy requests to. Must match the exported function name exactly.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("function")]
         public virtual string Function { get; set; }
+
+        /// <summary>
+        /// Optional. Specify a Cloud region for rewritten Functions invocations. If not provided, defaults to
+        /// us-central1.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("functionRegion")]
+        public virtual string FunctionRegion { get; set; }
 
         /// <summary>
         /// The user-supplied [glob](https://firebase.google.com/docs/hosting/full-config#glob_pattern_matching) to
@@ -4917,7 +6821,7 @@ namespace Google.Apis.FirebaseHosting.v1beta1.Data
     {
         /// <summary>
         /// Optional. The [ID of a Web
-        /// App](https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects.webApps#WebApp.FIELDS.app_id)
+        /// App](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects.webApps#WebApp.FIELDS.app_id)
         /// associated with the Hosting site.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("appId")]
@@ -4934,9 +6838,9 @@ namespace Google.Apis.FirebaseHosting.v1beta1.Data
         /// <summary>
         /// Output only. The fully-qualified resource name of the Hosting site, in the format:
         /// projects/PROJECT_IDENTIFIER/sites/SITE_ID PROJECT_IDENTIFIER: the Firebase project's
-        /// [`ProjectNumber`](https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects#FirebaseProject.FIELDS.project_number)
+        /// [`ProjectNumber`](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects#FirebaseProject.FIELDS.project_number)
         /// ***(recommended)*** or its
-        /// [`ProjectId`](https://firebase.google.com/docs/projects/api/reference/rest/v1beta1/projects#FirebaseProject.FIELDS.project_id).
+        /// [`ProjectId`](https://firebase.google.com/docs/reference/firebase-management/rest/v1beta1/projects#FirebaseProject.FIELDS.project_id).
         /// Learn more about using project identifiers in Google's [AIP 2510
         /// standard](https://google.aip.dev/cloud/2510).
         /// </summary>
@@ -5005,6 +6909,24 @@ namespace Google.Apis.FirebaseHosting.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>The request sent to `UndeleteCustomDomain`.</summary>
+    public class UndeleteCustomDomainRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// A tag that represents the state of the `CustomDomain` as you know it. If present, the supplied tag must
+        /// match the current value on your `CustomDomain`, or the request fails.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>
+        /// If true, Hosting validates that it's possible to complete your request but doesn't actually delete the
+        /// `CustomDomain`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("validateOnly")]
+        public virtual System.Nullable<bool> ValidateOnly { get; set; }
+    }
+
     /// <summary>
     /// A `Version` is a configuration and a collection of static files which determine how a site is displayed.
     /// </summary>
@@ -5017,17 +6939,83 @@ namespace Google.Apis.FirebaseHosting.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("config")]
         public virtual ServingConfig Config { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time at which the version was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. Identifies the user who created the version.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createUser")]
         public virtual ActingUser CreateUser { get; set; }
 
+        private string _deleteTimeRaw;
+
+        private object _deleteTime;
+
         /// <summary>Output only. The time at which the version was `DELETED`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deleteTime")]
-        public virtual object DeleteTime { get; set; }
+        public virtual string DeleteTimeRaw
+        {
+            get => _deleteTimeRaw;
+            set
+            {
+                _deleteTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _deleteTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="DeleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use DeleteTimeDateTimeOffset instead.")]
+        public virtual object DeleteTime
+        {
+            get => _deleteTime;
+            set
+            {
+                _deleteTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _deleteTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="DeleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? DeleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(DeleteTimeRaw);
+            set => DeleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. Identifies the user who `DELETED` the version.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deleteUser")]
@@ -5040,9 +7028,42 @@ namespace Google.Apis.FirebaseHosting.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("fileCount")]
         public virtual System.Nullable<long> FileCount { get; set; }
 
+        private string _finalizeTimeRaw;
+
+        private object _finalizeTime;
+
         /// <summary>Output only. The time at which the version was `FINALIZED`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("finalizeTime")]
-        public virtual object FinalizeTime { get; set; }
+        public virtual string FinalizeTimeRaw
+        {
+            get => _finalizeTimeRaw;
+            set
+            {
+                _finalizeTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _finalizeTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="FinalizeTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use FinalizeTimeDateTimeOffset instead.")]
+        public virtual object FinalizeTime
+        {
+            get => _finalizeTime;
+            set
+            {
+                _finalizeTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _finalizeTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="FinalizeTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? FinalizeTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(FinalizeTimeRaw);
+            set => FinalizeTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. Identifies the user who `FINALIZED` the version.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("finalizeUser")]

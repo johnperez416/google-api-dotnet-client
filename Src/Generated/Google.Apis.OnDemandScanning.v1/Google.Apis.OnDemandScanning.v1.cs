@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.OnDemandScanning.v1
         public OnDemandScanningService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://ondemandscanning.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://ondemandscanning.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.OnDemandScanning.v1
         public override string Name => "ondemandscanning";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://ondemandscanning.googleapis.com/";
-        #else
-            "https://ondemandscanning.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://ondemandscanning.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the On-Demand Scanning API.</summary>
         public class Scope
@@ -324,12 +319,12 @@ namespace Google.Apis.OnDemandScanning.v1
                 /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
                 /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
                 /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-                /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
                 /// </summary>
                 /// <param name="name">The name of the operation resource to be cancelled.</param>
                 public virtual CancelRequest Cancel(string name)
                 {
-                    return new CancelRequest(service, name);
+                    return new CancelRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -338,7 +333,7 @@ namespace Google.Apis.OnDemandScanning.v1
                 /// returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to
                 /// check whether the cancellation succeeded or whether the operation completed despite cancellation. On
                 /// successful cancellation, the operation is not deleted; instead, it becomes an operation with an
-                /// Operation.error value with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+                /// Operation.error value with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
                 /// </summary>
                 public class CancelRequest : OnDemandScanningBaseServiceRequest<Google.Apis.OnDemandScanning.v1.Data.Empty>
                 {
@@ -385,7 +380,7 @@ namespace Google.Apis.OnDemandScanning.v1
                 /// <param name="name">The name of the operation resource to be deleted.</param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -437,7 +432,7 @@ namespace Google.Apis.OnDemandScanning.v1
                 /// <param name="name">The name of the operation resource.</param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -483,27 +478,17 @@ namespace Google.Apis.OnDemandScanning.v1
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the
-                /// binding to use different resource name schemes, such as `users/*/operations`. To override the
-                /// binding, API services can add a binding such as `"/v1/{name=users/*}/operations"` to their service
-                /// configuration. For backwards compatibility, the default name includes the operations collection id,
-                /// however overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns `UNIMPLEMENTED`.
                 /// </summary>
                 /// <param name="name">The name of the operation's parent resource.</param>
                 public virtual ListRequest List(string name)
                 {
-                    return new ListRequest(service, name);
+                    return new ListRequest(this.service, name);
                 }
 
                 /// <summary>
                 /// Lists operations that match the specified filter in the request. If the server doesn't support this
-                /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the
-                /// binding to use different resource name schemes, such as `users/*/operations`. To override the
-                /// binding, API services can add a binding such as `"/v1/{name=users/*}/operations"` to their service
-                /// configuration. For backwards compatibility, the default name includes the operations collection id,
-                /// however overriding users must ensure the name binding is the parent resource, without the operations
-                /// collection id.
+                /// method, it returns `UNIMPLEMENTED`.
                 /// </summary>
                 public class ListRequest : OnDemandScanningBaseServiceRequest<Google.Apis.OnDemandScanning.v1.Data.ListOperationsResponse>
                 {
@@ -590,7 +575,7 @@ namespace Google.Apis.OnDemandScanning.v1
                 /// <param name="name">The name of the operation resource to wait on.</param>
                 public virtual WaitRequest Wait(string name)
                 {
-                    return new WaitRequest(service, name);
+                    return new WaitRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -698,7 +683,7 @@ namespace Google.Apis.OnDemandScanning.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Lists vulnerabilities resulting from a successfully completed scan.</summary>
@@ -775,7 +760,7 @@ namespace Google.Apis.OnDemandScanning.v1
                 /// </param>
                 public virtual AnalyzePackagesRequest AnalyzePackages(Google.Apis.OnDemandScanning.v1.Data.AnalyzePackagesRequestV1 body, string parent)
                 {
-                    return new AnalyzePackagesRequest(service, body, parent);
+                    return new AnalyzePackagesRequest(this.service, body, parent);
                 }
 
                 /// <summary>Initiates an analysis of the provided packages.</summary>
@@ -846,12 +831,58 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Indicates which analysis completed successfully. Multiple types of analysis can be performed on a single
+    /// resource.
+    /// </summary>
+    public class AnalysisCompleted : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("analysisType")]
+        public virtual System.Collections.Generic.IList<string> AnalysisType { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>AnalyzePackagesMetadata contains metadata for an active scan of a container image.</summary>
     public class AnalyzePackagesMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>When the scan was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The resource URI of the container image being scanned.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("resourceUri")]
@@ -864,9 +895,42 @@ namespace Google.Apis.OnDemandScanning.v1.Data
     /// <summary>AnalyzePackagesMetadata contains metadata for an active scan of a container image.</summary>
     public class AnalyzePackagesMetadataV1 : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>When the scan was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The resource URI of the container image being scanned.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("resourceUri")]
@@ -987,9 +1051,138 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    public class BinarySourceInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The binary package. This is significant when the source is different than the binary itself. Historically if
+        /// they've differed, we've stored the name of the source and its version in the package/version fields, but we
+        /// should also store the binary package info, as that's what's actually installed. See b/175908657#comment15.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("binaryVersion")]
+        public virtual PackageVersion BinaryVersion { get; set; }
+
+        /// <summary>
+        /// The source package. Similar to the above, this is significant when the source is different than the binary
+        /// itself. Since the top-level package/version fields are based on an if/else, we need a separate field for
+        /// both binary and source if we want to know definitively where the data is coming from.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceVersion")]
+        public virtual PackageVersion SourceVersion { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class BuildDefinition : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("buildType")]
+        public virtual string BuildType { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("externalParameters")]
+        public virtual System.Collections.Generic.IDictionary<string, object> ExternalParameters { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("internalParameters")]
+        public virtual System.Collections.Generic.IDictionary<string, object> InternalParameters { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("resolvedDependencies")]
+        public virtual System.Collections.Generic.IList<ResourceDescriptor> ResolvedDependencies { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class BuildMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _finishedOnRaw;
+
+        private object _finishedOn;
+
+        [Newtonsoft.Json.JsonPropertyAttribute("finishedOn")]
+        public virtual string FinishedOnRaw
+        {
+            get => _finishedOnRaw;
+            set
+            {
+                _finishedOn = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _finishedOnRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="FinishedOnRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use FinishedOnDateTimeOffset instead.")]
+        public virtual object FinishedOn
+        {
+            get => _finishedOn;
+            set
+            {
+                _finishedOnRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _finishedOn = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="FinishedOnRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? FinishedOnDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(FinishedOnRaw);
+            set => FinishedOnRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("invocationId")]
+        public virtual string InvocationId { get; set; }
+
+        private string _startedOnRaw;
+
+        private object _startedOn;
+
+        [Newtonsoft.Json.JsonPropertyAttribute("startedOn")]
+        public virtual string StartedOnRaw
+        {
+            get => _startedOnRaw;
+            set
+            {
+                _startedOn = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startedOnRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartedOnRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartedOnDateTimeOffset instead.")]
+        public virtual object StartedOn
+        {
+            get => _startedOn;
+            set
+            {
+                _startedOnRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startedOn = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartedOnRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartedOnDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartedOnRaw);
+            set => StartedOnRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Details of a build occurrence.</summary>
     public class BuildOccurrence : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// In-Toto Slsa Provenance V1 represents a slsa provenance meeting the slsa spec, wrapped in an in-toto
+        /// statement. This allows for direct jsonification of a to-spec in-toto slsa statement with a to-spec slsa
+        /// provenance.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inTotoSlsaProvenanceV1")]
+        public virtual InTotoSlsaProvenanceV1 InTotoSlsaProvenanceV1 { get; set; }
+
         /// <summary>
         /// Deprecated. See InTotoStatement for the replacement. In-toto Provenance representation as defined in spec.
         /// </summary>
@@ -1047,9 +1240,42 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("commands")]
         public virtual System.Collections.Generic.IList<Command> Commands { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Time at which the build was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// E-mail address of the user who initiated this build. Note that this was the user's e-mail address at the
@@ -1058,9 +1284,42 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("creator")]
         public virtual string Creator { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>Time at which execution of the build was finished.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Required. Unique identifier of the build.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("id")]
@@ -1078,9 +1337,42 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("sourceProvenance")]
         public virtual Source SourceProvenance { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>Time at which execution of the build was started.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Trigger identifier if the build was triggered automatically; empty if not.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("triggerId")]
@@ -1101,9 +1393,8 @@ namespace Google.Apis.OnDemandScanning.v1.Data
 
     /// <summary>
     /// Common Vulnerability Scoring System. For details, see https://www.first.org/cvss/specification-document This is
-    /// a message we will try to use for storing multiple versions of CVSS. The intention is that as new versions of
-    /// CVSS scores get added, we will be able to modify this message rather than adding new protos for each new version
-    /// of the score.
+    /// a message we will try to use for storing various versions of CVSS rather than making a separate proto for
+    /// storing a specific version.
     /// </summary>
     public class CVSS : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1259,6 +1550,32 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("nonCompliantFiles")]
         public virtual System.Collections.Generic.IList<NonCompliantFile> NonCompliantFiles { get; set; }
 
+        /// <summary>The OS and config version the benchmark was run on.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("version")]
+        public virtual ComplianceVersion Version { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Describes the CIS benchmark version that is applicable to a given OS and os version.</summary>
+    public class ComplianceVersion : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The name of the document that defines this benchmark, e.g. "CIS Container-Optimized OS".</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("benchmarkDocument")]
+        public virtual string BenchmarkDocument { get; set; }
+
+        /// <summary>The CPE URI (https://cpe.mitre.org/specification/) this benchmark is applicable to.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cpeUri")]
+        public virtual string CpeUri { get; set; }
+
+        /// <summary>
+        /// The version of the benchmark. This is set to the version of the OS-specific CIS document the benchmark is
+        /// defined in.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("version")]
+        public virtual string Version { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -1292,9 +1609,42 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("config")]
         public virtual string Config { get; set; }
 
+        private string _deployTimeRaw;
+
+        private object _deployTime;
+
         /// <summary>Required. Beginning of the lifetime of this deployment.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deployTime")]
-        public virtual object DeployTime { get; set; }
+        public virtual string DeployTimeRaw
+        {
+            get => _deployTimeRaw;
+            set
+            {
+                _deployTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _deployTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="DeployTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use DeployTimeDateTimeOffset instead.")]
+        public virtual object DeployTime
+        {
+            get => _deployTime;
+            set
+            {
+                _deployTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _deployTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="DeployTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? DeployTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(DeployTimeRaw);
+            set => DeployTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Platform hosting this deployment.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("platform")]
@@ -1307,9 +1657,42 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("resourceUri")]
         public virtual System.Collections.Generic.IList<string> ResourceUri { get; set; }
 
+        private string _undeployTimeRaw;
+
+        private object _undeployTime;
+
         /// <summary>End of the lifetime of this deployment.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("undeployTime")]
-        public virtual object UndeployTime { get; set; }
+        public virtual string UndeployTimeRaw
+        {
+            get => _undeployTimeRaw;
+            set
+            {
+                _undeployTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _undeployTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UndeployTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UndeployTimeDateTimeOffset instead.")]
+        public virtual object UndeployTime
+        {
+            get => _undeployTime;
+            set
+            {
+                _undeployTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _undeployTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UndeployTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UndeployTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UndeployTimeRaw);
+            set => UndeployTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Identity of the user that triggered this deployment.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("userEmail")]
@@ -1322,6 +1705,15 @@ namespace Google.Apis.OnDemandScanning.v1.Data
     /// <summary>Provides information about the analysis status of a discovered resource.</summary>
     public class DiscoveryOccurrence : Google.Apis.Requests.IDirectResponseSchema
     {
+        [Newtonsoft.Json.JsonPropertyAttribute("analysisCompleted")]
+        public virtual AnalysisCompleted AnalysisCompleted { get; set; }
+
+        /// <summary>
+        /// Indicates any errors encountered during analysis of a resource. There could be 0 or more of these errors.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("analysisError")]
+        public virtual System.Collections.Generic.IList<Status> AnalysisError { get; set; }
+
         /// <summary>The status of discovery for the resource.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("analysisStatus")]
         public virtual string AnalysisStatus { get; set; }
@@ -1333,6 +1725,43 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("analysisStatusError")]
         public virtual Status AnalysisStatusError { get; set; }
 
+        private string _archiveTimeRaw;
+
+        private object _archiveTime;
+
+        /// <summary>Output only. The time occurrences related to this discovery occurrence were archived.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("archiveTime")]
+        public virtual string ArchiveTimeRaw
+        {
+            get => _archiveTimeRaw;
+            set
+            {
+                _archiveTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _archiveTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ArchiveTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ArchiveTimeDateTimeOffset instead.")]
+        public virtual object ArchiveTime
+        {
+            get => _archiveTime;
+            set
+            {
+                _archiveTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _archiveTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ArchiveTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ArchiveTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ArchiveTimeRaw);
+            set => ArchiveTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
         /// <summary>Whether the resource is continuously analyzed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("continuousAnalysis")]
         public virtual string ContinuousAnalysis { get; set; }
@@ -1341,9 +1770,46 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("cpe")]
         public virtual string Cpe { get; set; }
 
+        private string _lastScanTimeRaw;
+
+        private object _lastScanTime;
+
         /// <summary>The last time this resource was scanned.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastScanTime")]
-        public virtual object LastScanTime { get; set; }
+        public virtual string LastScanTimeRaw
+        {
+            get => _lastScanTimeRaw;
+            set
+            {
+                _lastScanTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastScanTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastScanTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastScanTimeDateTimeOffset instead.")]
+        public virtual object LastScanTime
+        {
+            get => _lastScanTime;
+            set
+            {
+                _lastScanTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastScanTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastScanTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastScanTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastScanTimeRaw);
+            set => LastScanTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The status of an SBOM generation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sbomStatus")]
+        public virtual SBOMStatus SbomStatus { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1352,8 +1818,7 @@ namespace Google.Apis.OnDemandScanning.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1401,6 +1866,20 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         /// <summary>Required. Collection of file hashes.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("fileHash")]
         public virtual System.Collections.Generic.IList<Hash> FileHash { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Indicates the location at which a package was found.</summary>
+    public class FileLocation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// For jars that are contained inside .war files, this filepath can indicate the path to war file combined with
+        /// the path to jar file.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("filePath")]
+        public virtual string FilePath { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1466,6 +1945,192 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         /// <summary>Git repository URL.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("url")]
         public virtual string Url { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Indicates the location at which a package was found.</summary>
+    public class GrafeasV1FileLocation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// For jars that are contained inside .war files, this filepath can indicate the path to war file combined with
+        /// the path to jar file.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("filePath")]
+        public virtual string FilePath { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Identifies the entity that executed the recipe, which is trusted to have correctly performed the operation and
+    /// populated this provenance.
+    /// </summary>
+    public class GrafeasV1SlsaProvenanceZeroTwoSlsaBuilder : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Indicates that the builder claims certain fields in this message to be complete.</summary>
+    public class GrafeasV1SlsaProvenanceZeroTwoSlsaCompleteness : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("environment")]
+        public virtual System.Nullable<bool> Environment { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("materials")]
+        public virtual System.Nullable<bool> Materials { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("parameters")]
+        public virtual System.Nullable<bool> Parameters { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Describes where the config file that kicked off the build came from. This is effectively a pointer to the source
+    /// where buildConfig came from.
+    /// </summary>
+    public class GrafeasV1SlsaProvenanceZeroTwoSlsaConfigSource : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("digest")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Digest { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("entryPoint")]
+        public virtual string EntryPoint { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Identifies the event that kicked off the build.</summary>
+    public class GrafeasV1SlsaProvenanceZeroTwoSlsaInvocation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("configSource")]
+        public virtual GrafeasV1SlsaProvenanceZeroTwoSlsaConfigSource ConfigSource { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("environment")]
+        public virtual System.Collections.Generic.IDictionary<string, object> Environment { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("parameters")]
+        public virtual System.Collections.Generic.IDictionary<string, object> Parameters { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The collection of artifacts that influenced the build including sources, dependencies, build tools, base images,
+    /// and so on.
+    /// </summary>
+    public class GrafeasV1SlsaProvenanceZeroTwoSlsaMaterial : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("digest")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Digest { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Other properties of the build.</summary>
+    public class GrafeasV1SlsaProvenanceZeroTwoSlsaMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _buildFinishedOnRaw;
+
+        private object _buildFinishedOn;
+
+        [Newtonsoft.Json.JsonPropertyAttribute("buildFinishedOn")]
+        public virtual string BuildFinishedOnRaw
+        {
+            get => _buildFinishedOnRaw;
+            set
+            {
+                _buildFinishedOn = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _buildFinishedOnRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="BuildFinishedOnRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use BuildFinishedOnDateTimeOffset instead.")]
+        public virtual object BuildFinishedOn
+        {
+            get => _buildFinishedOn;
+            set
+            {
+                _buildFinishedOnRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _buildFinishedOn = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="BuildFinishedOnRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? BuildFinishedOnDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(BuildFinishedOnRaw);
+            set => BuildFinishedOnRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("buildInvocationId")]
+        public virtual string BuildInvocationId { get; set; }
+
+        private string _buildStartedOnRaw;
+
+        private object _buildStartedOn;
+
+        [Newtonsoft.Json.JsonPropertyAttribute("buildStartedOn")]
+        public virtual string BuildStartedOnRaw
+        {
+            get => _buildStartedOnRaw;
+            set
+            {
+                _buildStartedOn = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _buildStartedOnRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="BuildStartedOnRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use BuildStartedOnDateTimeOffset instead.")]
+        public virtual object BuildStartedOn
+        {
+            get => _buildStartedOn;
+            set
+            {
+                _buildStartedOnRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _buildStartedOn = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="BuildStartedOnRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? BuildStartedOnDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(BuildStartedOnRaw);
+            set => BuildStartedOnRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("completeness")]
+        public virtual GrafeasV1SlsaProvenanceZeroTwoSlsaCompleteness Completeness { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("reproducible")]
+        public virtual System.Nullable<bool> Reproducible { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1561,17 +2226,36 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    public class InTotoSlsaProvenanceV1 : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>InToto spec defined at https://github.com/in-toto/attestation/tree/main/spec#statement</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("_type")]
+        public virtual string Type { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("predicate")]
+        public virtual SlsaProvenanceV1 Predicate { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("predicateType")]
+        public virtual string PredicateType { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("subject")]
+        public virtual System.Collections.Generic.IList<Subject> Subject { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// Spec defined at https://github.com/in-toto/attestation/tree/main/spec#statement The serialized InTotoStatement
     /// will be stored as Envelope.payload. Envelope.payloadType is always "application/vnd.in-toto+json".
     /// </summary>
     public class InTotoStatement : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Always "https://in-toto.io/Statement/v0.1".</summary>
+        /// <summary>Always `https://in-toto.io/Statement/v0.1`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("_type")]
         public virtual string Type { get; set; }
 
-        /// <summary>"https://slsa.dev/provenance/v0.1" for SlsaProvenance.</summary>
+        /// <summary>`https://slsa.dev/provenance/v0.1` for SlsaProvenance.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("predicateType")]
         public virtual string PredicateType { get; set; }
 
@@ -1581,8 +2265,26 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("slsaProvenance")]
         public virtual SlsaProvenance SlsaProvenance { get; set; }
 
+        [Newtonsoft.Json.JsonPropertyAttribute("slsaProvenanceZeroTwo")]
+        public virtual SlsaProvenanceZeroTwo SlsaProvenanceZeroTwo { get; set; }
+
         [Newtonsoft.Json.JsonPropertyAttribute("subject")]
         public virtual System.Collections.Generic.IList<Subject> Subject { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Justification provides the justification when the state of the assessment if NOT_AFFECTED.</summary>
+    public class Justification : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Additional details on why this justification was chosen.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("details")]
+        public virtual string Details { get; set; }
+
+        /// <summary>The justification type for this vulnerability.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("justificationType")]
+        public virtual string JustificationType { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1601,6 +2303,21 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Indicates a language package available between this package and the customer's resource artifact.
+    /// </summary>
+    public class LanguagePackageDependency : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("package")]
+        public virtual string Package { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("version")]
+        public virtual string Version { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Layer holds metadata specific to a layer of a Docker image.</summary>
     public class Layer : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1614,6 +2331,25 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("directive")]
         public virtual string Directive { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>License information.</summary>
+    public class License : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Comments</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("comments")]
+        public virtual string Comments { get; set; }
+
+        /// <summary>
+        /// Often a single license can be used to represent the licensing terms. Sometimes it is necessary to include a
+        /// choice of one or more licenses or some combination of license identifiers. Examples: "LGPL-2.1-only OR MIT",
+        /// "LGPL-2.1-only AND MIT", "GPL-2.0-or-later WITH Bison-exception-2.2".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expression")]
+        public virtual string Expression { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1657,10 +2393,7 @@ namespace Google.Apis.OnDemandScanning.v1.Data
     /// </summary>
     public class Location : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>
-        /// Required. The CPE URI in [CPE format](https://cpe.mitre.org/specification/) denoting the package manager
-        /// version distributing a package.
-        /// </summary>
+        /// <summary>Deprecated. The CPE URI in [CPE format](https://cpe.mitre.org/specification/)</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cpeUri")]
         public virtual string CpeUri { get; set; }
 
@@ -1668,9 +2401,27 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("path")]
         public virtual string Path { get; set; }
 
-        /// <summary>The version installed at this location.</summary>
+        /// <summary>Deprecated. The version installed at this location.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("version")]
         public virtual Version Version { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class Maintainer : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("email")]
+        public virtual string Email { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("kind")]
+        public virtual string Kind { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("url")]
+        public virtual string Url { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1691,9 +2442,44 @@ namespace Google.Apis.OnDemandScanning.v1.Data
     /// <summary>Other properties of the build.</summary>
     public class Metadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _buildFinishedOnRaw;
+
+        private object _buildFinishedOn;
+
         /// <summary>The timestamp of when the build completed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("buildFinishedOn")]
-        public virtual object BuildFinishedOn { get; set; }
+        public virtual string BuildFinishedOnRaw
+        {
+            get => _buildFinishedOnRaw;
+            set
+            {
+                _buildFinishedOn = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _buildFinishedOnRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="BuildFinishedOnRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use BuildFinishedOnDateTimeOffset instead.")]
+        public virtual object BuildFinishedOn
+        {
+            get => _buildFinishedOn;
+            set
+            {
+                _buildFinishedOnRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _buildFinishedOn = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="BuildFinishedOnRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? BuildFinishedOnDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(BuildFinishedOnRaw);
+            set => BuildFinishedOnRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Identifies the particular build invocation, which can be useful for finding associated logs or other ad-hoc
@@ -1702,9 +2488,44 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("buildInvocationId")]
         public virtual string BuildInvocationId { get; set; }
 
+        private string _buildStartedOnRaw;
+
+        private object _buildStartedOn;
+
         /// <summary>The timestamp of when the build started.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("buildStartedOn")]
-        public virtual object BuildStartedOn { get; set; }
+        public virtual string BuildStartedOnRaw
+        {
+            get => _buildStartedOnRaw;
+            set
+            {
+                _buildStartedOn = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _buildStartedOnRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="BuildStartedOnRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use BuildStartedOnDateTimeOffset instead.")]
+        public virtual object BuildStartedOn
+        {
+            get => _buildStartedOn;
+            set
+            {
+                _buildStartedOnRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _buildStartedOn = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="BuildStartedOnRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? BuildStartedOnDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(BuildStartedOnRaw);
+            set => BuildStartedOnRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Indicates that the builder claims certain fields in this message to be complete.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("completeness")]
@@ -1720,18 +2541,18 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Details about files that caused a compliance check to fail.</summary>
+    /// <summary>
+    /// Details about files that caused a compliance check to fail. display_command is a single command that can be used
+    /// to display a list of non compliant files. When there is no such command, we can also iterate a list of non
+    /// compliant file using 'path'.
+    /// </summary>
     public class NonCompliantFile : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>Command to display the non-compliant files.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayCommand")]
         public virtual string DisplayCommand { get; set; }
 
-        /// <summary>
-        /// display_command is a single command that can be used to display a list of non compliant files. When there is
-        /// no such command, we can also iterate a list of non compliant file using 'path'. Empty if `display_command`
-        /// is set.
-        /// </summary>
+        /// <summary>Empty if `display_command` is set.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("path")]
         public virtual string Path { get; set; }
 
@@ -1758,9 +2579,42 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("compliance")]
         public virtual ComplianceOccurrence Compliance { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time this occurrence was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Describes the deployment of an artifact on a runtime.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deployment")]
@@ -1817,9 +2671,46 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("resourceUri")]
         public virtual string ResourceUri { get; set; }
 
+        /// <summary>Describes a specific SBOM reference occurrences.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sbomReference")]
+        public virtual SBOMReferenceOccurrence SbomReference { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The time this occurrence was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Describes an available package upgrade on the linked resource.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("upgrade")]
@@ -1863,8 +2754,8 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -1878,6 +2769,18 @@ namespace Google.Apis.OnDemandScanning.v1.Data
 
     public class PackageData : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The architecture of the package.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("architecture")]
+        public virtual string Architecture { get; set; }
+
+        /// <summary>A bundle containing the binary and source information.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("binarySourceInfo")]
+        public virtual System.Collections.Generic.IList<BinarySourceInfo> BinarySourceInfo { get; set; }
+
+        /// <summary>DEPRECATED</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("binaryVersion")]
+        public virtual PackageVersion BinaryVersion { get; set; }
+
         /// <summary>
         /// The cpe_uri in [cpe format] (https://cpe.mitre.org/specification/) in which the vulnerability may manifest.
         /// Examples include distro or storage location for vulnerable jar.
@@ -1886,12 +2789,41 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         public virtual string CpeUri { get; set; }
 
         /// <summary>
-        /// The OS affected by a vulnerability This field is deprecated and the information is in cpe_uri
+        /// The dependency chain between this package and the user's artifact. List in order from the customer's package
+        /// under review first, to the current package last. Inclusive of the original package and the current package.
         /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dependencyChain")]
+        public virtual System.Collections.Generic.IList<LanguagePackageDependency> DependencyChain { get; set; }
+
+        /// <summary>The path to the jar file / go binary file.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileLocation")]
+        public virtual System.Collections.Generic.IList<FileLocation> FileLocation { get; set; }
+
+        /// <summary>
+        /// HashDigest stores the SHA512 hash digest of the jar file if the package is of type Maven. This field will be
+        /// unset for non Maven packages.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hashDigest")]
+        public virtual string HashDigest { get; set; }
+
+        /// <summary>
+        /// The list of licenses found that are related to a given package. Note that licenses may also be stored on the
+        /// BinarySourceInfo. If there is no BinarySourceInfo (because there's no concept of source vs binary), then it
+        /// will be stored here, while if there are BinarySourceInfos, it will be stored there, as one source can have
+        /// multiple binaries with different licenses.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("licenses")]
+        public virtual System.Collections.Generic.IList<string> Licenses { get; set; }
+
+        /// <summary>The maintainer of the package.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maintainer")]
+        public virtual Maintainer Maintainer { get; set; }
+
+        /// <summary>The OS affected by a vulnerability Used to generate the cpe_uri for OS packages</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("os")]
         public virtual string Os { get; set; }
 
-        /// <summary>The version of the OS This field is deprecated and the information is in cpe_uri</summary>
+        /// <summary>The version of the OS Used to generate the cpe_uri for OS packages</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("osVersion")]
         public virtual string OsVersion { get; set; }
 
@@ -1902,6 +2834,14 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         /// <summary>The type of package: os, maven, go, etc.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("packageType")]
         public virtual string PackageType { get; set; }
+
+        /// <summary>CVEs that this package is no longer vulnerable to go/drydock-dd-custom-binary-scanning</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("patchedCve")]
+        public virtual System.Collections.Generic.IList<string> PatchedCve { get; set; }
+
+        /// <summary>DEPRECATED</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceVersion")]
+        public virtual PackageVersion SourceVersion { get; set; }
 
         [Newtonsoft.Json.JsonPropertyAttribute("unused")]
         public virtual string Unused { get; set; }
@@ -1943,6 +2883,10 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("effectiveSeverity")]
         public virtual string EffectiveSeverity { get; set; }
 
+        /// <summary>The location at which this package was found.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileLocation")]
+        public virtual System.Collections.Generic.IList<GrafeasV1FileLocation> FileLocation { get; set; }
+
         /// <summary>Output only. Whether a fix is available for this package.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("fixAvailable")]
         public virtual System.Nullable<bool> FixAvailable { get; set; }
@@ -1980,14 +2924,60 @@ namespace Google.Apis.OnDemandScanning.v1.Data
     public class PackageOccurrence : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Required. All of the places within the filesystem versions of this package have been found.
+        /// Output only. The CPU architecture for which packages in this distribution channel were built. Architecture
+        /// will be blank for language packages.
         /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("architecture")]
+        public virtual string Architecture { get; set; }
+
+        /// <summary>
+        /// Output only. The cpe_uri in [CPE format](https://cpe.mitre.org/specification/) denoting the package manager
+        /// version distributing a package. The cpe_uri will be blank for language packages.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cpeUri")]
+        public virtual string CpeUri { get; set; }
+
+        /// <summary>Licenses that have been declared by the authors of the package.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("license")]
+        public virtual License License { get; set; }
+
+        /// <summary>All of the places within the filesystem versions of this package have been found.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("location")]
         public virtual System.Collections.Generic.IList<Location> Location { get; set; }
 
-        /// <summary>Output only. The name of the installed package.</summary>
+        /// <summary>Required. Output only. The name of the installed package.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Output only. The type of package; whether native or non native (e.g., ruby gems, node.js packages, etc.).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("packageType")]
+        public virtual string PackageType { get; set; }
+
+        /// <summary>Output only. The version of the package.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("version")]
+        public virtual Version Version { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class PackageVersion : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The licenses associated with this package. Note that this has to go on the PackageVersion level, because we
+        /// can have cases with images with the same source having different licences. E.g. in Alpine, musl and
+        /// musl-utils both have the same origin musl, but have different sets of licenses.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("licenses")]
+        public virtual System.Collections.Generic.IList<string> Licenses { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("version")]
+        public virtual string Version { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2006,6 +2996,21 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         /// <summary>The name of the repo. Leave empty for the default repo.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("repoName")]
         public virtual string RepoName { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class ProvenanceBuilder : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("builderDependencies")]
+        public virtual System.Collections.Generic.IList<ResourceDescriptor> BuilderDependencies { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("version")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Version { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2077,6 +3082,25 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Specifies details on how to handle (and presumably, fix) a vulnerability.</summary>
+    public class Remediation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Contains a comprehensive human-readable discussion of the remediation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("details")]
+        public virtual string Details { get; set; }
+
+        /// <summary>The type of remediation that can be applied.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("remediationType")]
+        public virtual string RemediationType { get; set; }
+
+        /// <summary>Contains the URL where to obtain the remediation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("remediationUri")]
+        public virtual RelatedUrl RemediationUri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>A unique identifier for a Cloud Repo.</summary>
     public class RepoId : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2087,6 +3111,140 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         /// <summary>A server-assigned, globally unique identifier.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("uid")]
         public virtual string Uid { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class ResourceDescriptor : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("annotations")]
+        public virtual System.Collections.Generic.IDictionary<string, object> Annotations { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("content")]
+        public virtual string Content { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("digest")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Digest { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("downloadLocation")]
+        public virtual string DownloadLocation { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("mediaType")]
+        public virtual string MediaType { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class RunDetails : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("builder")]
+        public virtual ProvenanceBuilder Builder { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("byproducts")]
+        public virtual System.Collections.Generic.IList<ResourceDescriptor> Byproducts { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("metadata")]
+        public virtual BuildMetadata Metadata { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The occurrence representing an SBOM reference as applied to a specific resource. The occurrence follows the DSSE
+    /// specification. See https://github.com/secure-systems-lab/dsse/blob/master/envelope.md for more details.
+    /// </summary>
+    public class SBOMReferenceOccurrence : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The actual payload that contains the SBOM reference data.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("payload")]
+        public virtual SbomReferenceIntotoPayload Payload { get; set; }
+
+        /// <summary>
+        /// The kind of payload that SbomReferenceIntotoPayload takes. Since it's in the intoto format, this value is
+        /// expected to be 'application/vnd.in-toto+json'.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("payloadType")]
+        public virtual string PayloadType { get; set; }
+
+        /// <summary>The signatures over the payload.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("signatures")]
+        public virtual System.Collections.Generic.IList<EnvelopeSignature> Signatures { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The status of an SBOM generation.</summary>
+    public class SBOMStatus : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>If there was an error generating an SBOM, this will indicate what that error was.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("error")]
+        public virtual string Error { get; set; }
+
+        /// <summary>The progress of the SBOM generation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sbomState")]
+        public virtual string SbomState { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The actual payload that contains the SBOM Reference data. The payload follows the intoto statement
+    /// specification. See https://github.com/in-toto/attestation/blob/main/spec/v1.0/statement.md for more details.
+    /// </summary>
+    public class SbomReferenceIntotoPayload : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Identifier for the schema of the Statement.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("_type")]
+        public virtual string Type { get; set; }
+
+        /// <summary>Additional parameters of the Predicate. Includes the actual data about the SBOM.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("predicate")]
+        public virtual SbomReferenceIntotoPredicate Predicate { get; set; }
+
+        /// <summary>URI identifying the type of the Predicate.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("predicateType")]
+        public virtual string PredicateType { get; set; }
+
+        /// <summary>
+        /// Set of software artifacts that the attestation applies to. Each element represents a single software
+        /// artifact.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("subject")]
+        public virtual System.Collections.Generic.IList<Subject> Subject { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A predicate which describes the SBOM being referenced.</summary>
+    public class SbomReferenceIntotoPredicate : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A map of algorithm to digest of the contents of the SBOM.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("digest")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Digest { get; set; }
+
+        /// <summary>The location of the SBOM.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual string Location { get; set; }
+
+        /// <summary>The mime type of the SBOM.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mimeType")]
+        public virtual string MimeType { get; set; }
+
+        /// <summary>The person or system referring this predicate to the consumer.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("referrerId")]
+        public virtual string ReferrerId { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2171,9 +3329,44 @@ namespace Google.Apis.OnDemandScanning.v1.Data
     /// <summary>Other properties of the build.</summary>
     public class SlsaMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _buildFinishedOnRaw;
+
+        private object _buildFinishedOn;
+
         /// <summary>The timestamp of when the build completed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("buildFinishedOn")]
-        public virtual object BuildFinishedOn { get; set; }
+        public virtual string BuildFinishedOnRaw
+        {
+            get => _buildFinishedOnRaw;
+            set
+            {
+                _buildFinishedOn = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _buildFinishedOnRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="BuildFinishedOnRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use BuildFinishedOnDateTimeOffset instead.")]
+        public virtual object BuildFinishedOn
+        {
+            get => _buildFinishedOn;
+            set
+            {
+                _buildFinishedOnRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _buildFinishedOn = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="BuildFinishedOnRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? BuildFinishedOnDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(BuildFinishedOnRaw);
+            set => BuildFinishedOnRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Identifies the particular build invocation, which can be useful for finding associated logs or other ad-hoc
@@ -2182,9 +3375,44 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("buildInvocationId")]
         public virtual string BuildInvocationId { get; set; }
 
+        private string _buildStartedOnRaw;
+
+        private object _buildStartedOn;
+
         /// <summary>The timestamp of when the build started.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("buildStartedOn")]
-        public virtual object BuildStartedOn { get; set; }
+        public virtual string BuildStartedOnRaw
+        {
+            get => _buildStartedOnRaw;
+            set
+            {
+                _buildStartedOn = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _buildStartedOnRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="BuildStartedOnRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use BuildStartedOnDateTimeOffset instead.")]
+        public virtual object BuildStartedOn
+        {
+            get => _buildStartedOn;
+            set
+            {
+                _buildStartedOnRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _buildStartedOn = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="BuildStartedOnRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? BuildStartedOnDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(BuildStartedOnRaw);
+            set => BuildStartedOnRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Indicates that the builder claims certain fields in this message to be complete.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("completeness")]
@@ -2224,6 +3452,48 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("recipe")]
         public virtual SlsaRecipe Recipe { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Keep in sync with schema at
+    /// https://github.com/slsa-framework/slsa/blob/main/docs/provenance/schema/v1/provenance.proto Builder renamed to
+    /// ProvenanceBuilder because of Java conflicts.
+    /// </summary>
+    public class SlsaProvenanceV1 : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("buildDefinition")]
+        public virtual BuildDefinition BuildDefinition { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("runDetails")]
+        public virtual RunDetails RunDetails { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>See full explanation of fields at slsa.dev/provenance/v0.2.</summary>
+    public class SlsaProvenanceZeroTwo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("buildConfig")]
+        public virtual System.Collections.Generic.IDictionary<string, object> BuildConfig { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("buildType")]
+        public virtual string BuildType { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("builder")]
+        public virtual GrafeasV1SlsaProvenanceZeroTwoSlsaBuilder Builder { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("invocation")]
+        public virtual GrafeasV1SlsaProvenanceZeroTwoSlsaInvocation Invocation { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("materials")]
+        public virtual System.Collections.Generic.IList<GrafeasV1SlsaProvenanceZeroTwoSlsaMaterial> Materials { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("metadata")]
+        public virtual GrafeasV1SlsaProvenanceZeroTwoSlsaMetadata Metadata { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2370,7 +3640,7 @@ namespace Google.Apis.OnDemandScanning.v1.Data
     public class Subject : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// "": "" Algorithms can be e.g. sha256, sha512 See
+        /// `"": ""` Algorithms can be e.g. sha256, sha512 See
         /// https://github.com/in-toto/attestation/blob/main/spec/field_types.md#DigestSet
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("digest")]
@@ -2485,6 +3755,57 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// VexAssessment provides all publisher provided Vex information that is related to this vulnerability.
+    /// </summary>
+    public class VexAssessment : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Holds the MITRE standard Common Vulnerabilities and Exposures (CVE) tracking number for the vulnerability.
+        /// Deprecated: Use vulnerability_id instead to denote CVEs.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cve")]
+        public virtual string Cve { get; set; }
+
+        /// <summary>Contains information about the impact of this vulnerability, this will change with time.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("impacts")]
+        public virtual System.Collections.Generic.IList<string> Impacts { get; set; }
+
+        /// <summary>
+        /// Justification provides the justification when the state of the assessment if NOT_AFFECTED.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("justification")]
+        public virtual Justification Justification { get; set; }
+
+        /// <summary>
+        /// The VulnerabilityAssessment note from which this VexAssessment was generated. This will be of the form:
+        /// `projects/[PROJECT_ID]/notes/[NOTE_ID]`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("noteName")]
+        public virtual string NoteName { get; set; }
+
+        /// <summary>Holds a list of references associated with this vulnerability item and assessment.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("relatedUris")]
+        public virtual System.Collections.Generic.IList<RelatedUrl> RelatedUris { get; set; }
+
+        /// <summary>Specifies details on how to handle (and presumably, fix) a vulnerability.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("remediations")]
+        public virtual System.Collections.Generic.IList<Remediation> Remediations { get; set; }
+
+        /// <summary>Provides the state of this Vulnerability assessment.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>
+        /// The vulnerability identifier for this Assessment. Will hold one of common identifiers e.g. CVE, GHSA etc.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("vulnerabilityId")]
+        public virtual string VulnerabilityId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>An occurrence of a severity vulnerability on a resource.</summary>
     public class VulnerabilityOccurrence : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2494,6 +3815,14 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cvssScore")]
         public virtual System.Nullable<float> CvssScore { get; set; }
+
+        /// <summary>The cvss v2 score for the vulnerability.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cvssV2")]
+        public virtual CVSS CvssV2 { get; set; }
+
+        /// <summary>Output only. CVSS version used to populate cvss_score and severity.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cvssVersion")]
+        public virtual string CvssVersion { get; set; }
 
         /// <summary>The cvss v3 score for the vulnerability.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cvssv3")]
@@ -2509,6 +3838,10 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("effectiveSeverity")]
         public virtual string EffectiveSeverity { get; set; }
+
+        /// <summary>Occurrence-specific extra details about the vulnerability.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("extraDetails")]
+        public virtual string ExtraDetails { get; set; }
 
         /// <summary>Output only. Whether at least one of the affected packages has a fix available.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("fixAvailable")]
@@ -2542,6 +3875,9 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
 
+        [Newtonsoft.Json.JsonPropertyAttribute("vexAssessment")]
+        public virtual VexAssessment VexAssessment { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -2569,9 +3905,44 @@ namespace Google.Apis.OnDemandScanning.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("kbArticleIds")]
         public virtual System.Collections.Generic.IList<string> KbArticleIds { get; set; }
 
+        private string _lastPublishedTimestampRaw;
+
+        private object _lastPublishedTimestamp;
+
         /// <summary>The last published timestamp of the update.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastPublishedTimestamp")]
-        public virtual object LastPublishedTimestamp { get; set; }
+        public virtual string LastPublishedTimestampRaw
+        {
+            get => _lastPublishedTimestampRaw;
+            set
+            {
+                _lastPublishedTimestamp = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastPublishedTimestampRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastPublishedTimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastPublishedTimestampDateTimeOffset instead.")]
+        public virtual object LastPublishedTimestamp
+        {
+            get => _lastPublishedTimestamp;
+            set
+            {
+                _lastPublishedTimestampRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastPublishedTimestamp = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastPublishedTimestampRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastPublishedTimestampDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastPublishedTimestampRaw);
+            set => LastPublishedTimestampRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The hyperlink to the support information for the update.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("supportUrl")]

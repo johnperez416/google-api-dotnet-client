@@ -1,0 +1,16 @@
+{
+  "Google.Apis.NetworkServices.v1.NetworkServicesBaseServiceRequest<<TResponse>>.AltEnum": [
+    "json",
+    "media",
+    "proto"
+  ],
+  "Google.Apis.NetworkServices.v1.NetworkServicesBaseServiceRequest<<TResponse>>.XgafvEnum": [
+    "1",
+    "2"
+  ],
+  "Google.Apis.NetworkServices.v1.ProjectsResource+LocationsResource+WasmPluginsResource+GetRequest.ViewEnum": [
+    "WASM_PLUGIN_VIEW_UNSPECIFIED",
+    "WASM_PLUGIN_VIEW_BASIC",
+    "WASM_PLUGIN_VIEW_FULL"
+  ]
+}

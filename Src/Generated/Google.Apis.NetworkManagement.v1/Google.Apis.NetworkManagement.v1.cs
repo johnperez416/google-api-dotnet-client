@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.NetworkManagement.v1
         public NetworkManagementService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://networkmanagement.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://networkmanagement.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.NetworkManagement.v1
         public override string Name => "networkmanagement";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://networkmanagement.googleapis.com/";
-        #else
-            "https://networkmanagement.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://networkmanagement.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Network Management API.</summary>
         public class Scope
@@ -298,6 +293,7 @@ namespace Google.Apis.NetworkManagement.v1
             {
                 this.service = service;
                 Global = new GlobalResource(service);
+                VpcFlowLogsConfigs = new VpcFlowLogsConfigsResource(service);
             }
 
             /// <summary>Gets the Global resource.</summary>
@@ -352,7 +348,7 @@ namespace Google.Apis.NetworkManagement.v1
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.NetworkManagement.v1.Data.ConnectivityTest body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>
@@ -435,7 +431,7 @@ namespace Google.Apis.NetworkManagement.v1
                     /// </param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>Deletes a specific `ConnectivityTest`.</summary>
@@ -486,7 +482,7 @@ namespace Google.Apis.NetworkManagement.v1
                     /// </param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Gets the details of a specific Connectivity Test.</summary>
@@ -535,12 +531,13 @@ namespace Google.Apis.NetworkManagement.v1
                     /// and does not have a policy set.
                     /// </summary>
                     /// <param name="resource">
-                    /// REQUIRED: The resource for which the policy is being requested. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </param>
                     public virtual GetIamPolicyRequest GetIamPolicy(string resource)
                     {
-                        return new GetIamPolicyRequest(service, resource);
+                        return new GetIamPolicyRequest(this.service, resource);
                     }
 
                     /// <summary>
@@ -557,8 +554,9 @@ namespace Google.Apis.NetworkManagement.v1
                         }
 
                         /// <summary>
-                        /// REQUIRED: The resource for which the policy is being requested. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy is being requested. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Resource { get; private set; }
@@ -616,7 +614,7 @@ namespace Google.Apis.NetworkManagement.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Lists all Connectivity Tests owned by a project.</summary>
@@ -726,17 +724,17 @@ namespace Google.Apis.NetworkManagement.v1
                     /// contain non-existent resources in the network, or the user does not have read permissions to the
                     /// network configurations of listed projects), then the reachability result returns a value of
                     /// UNKNOWN. If the endpoint specifications in `ConnectivityTest` are incomplete, the reachability
-                    /// result returns a value of `AMBIGUOUS`. See the documentation in `ConnectivityTest` for for more
+                    /// result returns a value of `AMBIGUOUS`. See the documentation in `ConnectivityTest` for more
                     /// details.
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="name">
-                    /// Required. Unique name of the resource using the form:
+                    /// Identifier. Unique name of the resource using the form:
                     /// `projects/{project_id}/locations/global/connectivityTests/{test_id}`
                     /// </param>
                     public virtual PatchRequest Patch(Google.Apis.NetworkManagement.v1.Data.ConnectivityTest body, string name)
                     {
-                        return new PatchRequest(service, body, name);
+                        return new PatchRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -747,7 +745,7 @@ namespace Google.Apis.NetworkManagement.v1
                     /// contain non-existent resources in the network, or the user does not have read permissions to the
                     /// network configurations of listed projects), then the reachability result returns a value of
                     /// UNKNOWN. If the endpoint specifications in `ConnectivityTest` are incomplete, the reachability
-                    /// result returns a value of `AMBIGUOUS`. See the documentation in `ConnectivityTest` for for more
+                    /// result returns a value of `AMBIGUOUS`. See the documentation in `ConnectivityTest` for more
                     /// details.
                     /// </summary>
                     public class PatchRequest : NetworkManagementBaseServiceRequest<Google.Apis.NetworkManagement.v1.Data.Operation>
@@ -761,7 +759,7 @@ namespace Google.Apis.NetworkManagement.v1
                         }
 
                         /// <summary>
-                        /// Required. Unique name of the resource using the form:
+                        /// Identifier. Unique name of the resource using the form:
                         /// `projects/{project_id}/locations/global/connectivityTests/{test_id}`
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
@@ -827,7 +825,7 @@ namespace Google.Apis.NetworkManagement.v1
                     /// </param>
                     public virtual RerunRequest Rerun(Google.Apis.NetworkManagement.v1.Data.RerunConnectivityTestRequest body, string name)
                     {
-                        return new RerunRequest(service, body, name);
+                        return new RerunRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -892,12 +890,13 @@ namespace Google.Apis.NetworkManagement.v1
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="resource">
-                    /// REQUIRED: The resource for which the policy is being specified. See the operation documentation
-                    /// for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </param>
                     public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.NetworkManagement.v1.Data.SetIamPolicyRequest body, string resource)
                     {
-                        return new SetIamPolicyRequest(service, body, resource);
+                        return new SetIamPolicyRequest(this.service, body, resource);
                     }
 
                     /// <summary>
@@ -915,8 +914,9 @@ namespace Google.Apis.NetworkManagement.v1
                         }
 
                         /// <summary>
-                        /// REQUIRED: The resource for which the policy is being specified. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy is being specified. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Resource { get; private set; }
@@ -959,12 +959,13 @@ namespace Google.Apis.NetworkManagement.v1
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="resource">
-                    /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                    /// documentation for the appropriate value for this field.
+                    /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                    /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this
+                    /// field.
                     /// </param>
                     public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.NetworkManagement.v1.Data.TestIamPermissionsRequest body, string resource)
                     {
-                        return new TestIamPermissionsRequest(service, body, resource);
+                        return new TestIamPermissionsRequest(this.service, body, resource);
                     }
 
                     /// <summary>
@@ -984,8 +985,9 @@ namespace Google.Apis.NetworkManagement.v1
                         }
 
                         /// <summary>
-                        /// REQUIRED: The resource for which the policy detail is being requested. See the operation
-                        /// documentation for the appropriate value for this field.
+                        /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+                        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for
+                        /// this field.
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
                         public virtual string Resource { get; private set; }
@@ -1044,14 +1046,14 @@ namespace Google.Apis.NetworkManagement.v1
                     /// it returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other
                     /// methods to check whether the cancellation succeeded or whether the operation completed despite
                     /// cancellation. On successful cancellation, the operation is not deleted; instead, it becomes an
-                    /// operation with an Operation.error value with a google.rpc.Status.code of 1, corresponding to
+                    /// operation with an Operation.error value with a google.rpc.Status.code of `1`, corresponding to
                     /// `Code.CANCELLED`.
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="name">The name of the operation resource to be cancelled.</param>
                     public virtual CancelRequest Cancel(Google.Apis.NetworkManagement.v1.Data.CancelOperationRequest body, string name)
                     {
-                        return new CancelRequest(service, body, name);
+                        return new CancelRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -1060,7 +1062,7 @@ namespace Google.Apis.NetworkManagement.v1
                     /// it returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other
                     /// methods to check whether the cancellation succeeded or whether the operation completed despite
                     /// cancellation. On successful cancellation, the operation is not deleted; instead, it becomes an
-                    /// operation with an Operation.error value with a google.rpc.Status.code of 1, corresponding to
+                    /// operation with an Operation.error value with a google.rpc.Status.code of `1`, corresponding to
                     /// `Code.CANCELLED`.
                     /// </summary>
                     public class CancelRequest : NetworkManagementBaseServiceRequest<Google.Apis.NetworkManagement.v1.Data.Empty>
@@ -1115,7 +1117,7 @@ namespace Google.Apis.NetworkManagement.v1
                     /// <param name="name">The name of the operation resource to be deleted.</param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -1167,7 +1169,7 @@ namespace Google.Apis.NetworkManagement.v1
                     /// <param name="name">The name of the operation resource.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -1213,27 +1215,17 @@ namespace Google.Apis.NetworkManagement.v1
 
                     /// <summary>
                     /// Lists operations that match the specified filter in the request. If the server doesn't support
-                    /// this method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to
-                    /// override the binding to use different resource name schemes, such as `users/*/operations`. To
-                    /// override the binding, API services can add a binding such as `"/v1/{name=users/*}/operations"`
-                    /// to their service configuration. For backwards compatibility, the default name includes the
-                    /// operations collection id, however overriding users must ensure the name binding is the parent
-                    /// resource, without the operations collection id.
+                    /// this method, it returns `UNIMPLEMENTED`.
                     /// </summary>
                     /// <param name="name">The name of the operation's parent resource.</param>
                     public virtual ListRequest List(string name)
                     {
-                        return new ListRequest(service, name);
+                        return new ListRequest(this.service, name);
                     }
 
                     /// <summary>
                     /// Lists operations that match the specified filter in the request. If the server doesn't support
-                    /// this method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to
-                    /// override the binding to use different resource name schemes, such as `users/*/operations`. To
-                    /// override the binding, API services can add a binding such as `"/v1/{name=users/*}/operations"`
-                    /// to their service configuration. For backwards compatibility, the default name includes the
-                    /// operations collection id, however overriding users must ensure the name binding is the parent
-                    /// resource, without the operations collection id.
+                    /// this method, it returns `UNIMPLEMENTED`.
                     /// </summary>
                     public class ListRequest : NetworkManagementBaseServiceRequest<Google.Apis.NetworkManagement.v1.Data.ListOperationsResponse>
                     {
@@ -1310,11 +1302,404 @@ namespace Google.Apis.NetworkManagement.v1
                 }
             }
 
+            /// <summary>Gets the VpcFlowLogsConfigs resource.</summary>
+            public virtual VpcFlowLogsConfigsResource VpcFlowLogsConfigs { get; }
+
+            /// <summary>The "vpcFlowLogsConfigs" collection of methods.</summary>
+            public class VpcFlowLogsConfigsResource
+            {
+                private const string Resource = "vpcFlowLogsConfigs";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public VpcFlowLogsConfigsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>
+                /// Creates a new `VpcFlowLogsConfig`. If a configuration with the exact same settings already exists
+                /// (even if the ID is different), the creation fails. Notes: 1. Creating a configuration with
+                /// state=DISABLED will fail 2. The following fields are not considered as `settings` for the purpose of
+                /// the check mentioned above, therefore - creating another configuration with the same fields but
+                /// different values for the following fields will fail as well: * name * create_time * update_time *
+                /// labels * description
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="parent">
+                /// Required. The parent resource of the VPC Flow Logs configuration to create:
+                /// `projects/{project_id}/locations/global`
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.NetworkManagement.v1.Data.VpcFlowLogsConfig body, string parent)
+                {
+                    return new CreateRequest(this.service, body, parent);
+                }
+
+                /// <summary>
+                /// Creates a new `VpcFlowLogsConfig`. If a configuration with the exact same settings already exists
+                /// (even if the ID is different), the creation fails. Notes: 1. Creating a configuration with
+                /// state=DISABLED will fail 2. The following fields are not considered as `settings` for the purpose of
+                /// the check mentioned above, therefore - creating another configuration with the same fields but
+                /// different values for the following fields will fail as well: * name * create_time * update_time *
+                /// labels * description
+                /// </summary>
+                public class CreateRequest : NetworkManagementBaseServiceRequest<Google.Apis.NetworkManagement.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkManagement.v1.Data.VpcFlowLogsConfig body, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The parent resource of the VPC Flow Logs configuration to create:
+                    /// `projects/{project_id}/locations/global`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>Required. ID of the `VpcFlowLogsConfig`.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("vpcFlowLogsConfigId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string VpcFlowLogsConfigId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkManagement.v1.Data.VpcFlowLogsConfig Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/vpcFlowLogsConfigs";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("vpcFlowLogsConfigId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "vpcFlowLogsConfigId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>Deletes a specific `VpcFlowLogsConfig`.</summary>
+                /// <param name="name">
+                /// Required. `VpcFlowLogsConfig` resource name using the form:
+                /// `projects/{project_id}/locations/global/vpcFlowLogsConfigs/{vpc_flow_logs_config}`
+                /// </param>
+                public virtual DeleteRequest Delete(string name)
+                {
+                    return new DeleteRequest(this.service, name);
+                }
+
+                /// <summary>Deletes a specific `VpcFlowLogsConfig`.</summary>
+                public class DeleteRequest : NetworkManagementBaseServiceRequest<Google.Apis.NetworkManagement.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. `VpcFlowLogsConfig` resource name using the form:
+                    /// `projects/{project_id}/locations/global/vpcFlowLogsConfigs/{vpc_flow_logs_config}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/vpcFlowLogsConfigs/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Gets the details of a specific `VpcFlowLogsConfig`.</summary>
+                /// <param name="name">
+                /// Required. `VpcFlowLogsConfig` resource name using the form:
+                /// `projects/{project_id}/locations/global/vpcFlowLogsConfigs/{vpc_flow_logs_config}`
+                /// </param>
+                public virtual GetRequest Get(string name)
+                {
+                    return new GetRequest(this.service, name);
+                }
+
+                /// <summary>Gets the details of a specific `VpcFlowLogsConfig`.</summary>
+                public class GetRequest : NetworkManagementBaseServiceRequest<Google.Apis.NetworkManagement.v1.Data.VpcFlowLogsConfig>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. `VpcFlowLogsConfig` resource name using the form:
+                    /// `projects/{project_id}/locations/global/vpcFlowLogsConfigs/{vpc_flow_logs_config}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/vpcFlowLogsConfigs/[^/]+$",
+                        });
+                    }
+                }
+
+                /// <summary>Lists all `VpcFlowLogsConfigs` in a given project.</summary>
+                /// <param name="parent">
+                /// Required. The parent resource of the VpcFlowLogsConfig: `projects/{project_id}/locations/global`
+                /// </param>
+                public virtual ListRequest List(string parent)
+                {
+                    return new ListRequest(this.service, parent);
+                }
+
+                /// <summary>Lists all `VpcFlowLogsConfigs` in a given project.</summary>
+                public class ListRequest : NetworkManagementBaseServiceRequest<Google.Apis.NetworkManagement.v1.Data.ListVpcFlowLogsConfigsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                    {
+                        Parent = parent;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. The parent resource of the VpcFlowLogsConfig: `projects/{project_id}/locations/global`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Parent { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Lists the `VpcFlowLogsConfigs` that match the filter expression. A filter expression
+                    /// must use the supported [CEL logic operators]
+                    /// (https://cloud.google.com/vpc/docs/about-flow-logs-records#supported_cel_logic_operators).
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string Filter { get; set; }
+
+                    /// <summary>Optional. Field to use to sort the list.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string OrderBy { get; set; }
+
+                    /// <summary>Optional. Number of `VpcFlowLogsConfigs` to return.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>Optional. Page token from an earlier query, as returned in `next_page_token`.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+parent}/vpcFlowLogsConfigs";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "parent",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+$",
+                        });
+                        RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filter",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("orderBy", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "orderBy",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Updates an existing `VpcFlowLogsConfig`. If a configuration with the exact same settings already
+                /// exists (even if the ID is different), the creation fails. Notes: 1. Updating a configuration with
+                /// state=DISABLED will fail. 2. The following fields are not considered as `settings` for the purpose
+                /// of the check mentioned above, therefore - updating another configuration with the same fields but
+                /// different values for the following fields will fail as well: * name * create_time * update_time *
+                /// labels * description
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Identifier. Unique name of the configuration using the form:
+                /// `projects/{project_id}/locations/global/vpcFlowLogsConfigs/{vpc_flow_logs_config_id}`
+                /// </param>
+                public virtual PatchRequest Patch(Google.Apis.NetworkManagement.v1.Data.VpcFlowLogsConfig body, string name)
+                {
+                    return new PatchRequest(this.service, body, name);
+                }
+
+                /// <summary>
+                /// Updates an existing `VpcFlowLogsConfig`. If a configuration with the exact same settings already
+                /// exists (even if the ID is different), the creation fails. Notes: 1. Updating a configuration with
+                /// state=DISABLED will fail. 2. The following fields are not considered as `settings` for the purpose
+                /// of the check mentioned above, therefore - updating another configuration with the same fields but
+                /// different values for the following fields will fail as well: * name * create_time * update_time *
+                /// labels * description
+                /// </summary>
+                public class PatchRequest : NetworkManagementBaseServiceRequest<Google.Apis.NetworkManagement.v1.Data.Operation>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.NetworkManagement.v1.Data.VpcFlowLogsConfig body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Identifier. Unique name of the configuration using the form:
+                    /// `projects/{project_id}/locations/global/vpcFlowLogsConfigs/{vpc_flow_logs_config_id}`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>
+                    /// Required. Mask of fields to update. At least one path must be supplied in this field.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.NetworkManagement.v1.Data.VpcFlowLogsConfig Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/vpcFlowLogsConfigs/[^/]+$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
             /// <summary>Gets information about a location.</summary>
             /// <param name="name">Resource name for the location.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets information about a location.</summary>
@@ -1359,7 +1744,7 @@ namespace Google.Apis.NetworkManagement.v1
             /// <param name="name">The resource that owns the locations collection, if applicable.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>Lists information about the supported locations for this service.</summary>
@@ -1378,7 +1763,7 @@ namespace Google.Apis.NetworkManagement.v1
 
                 /// <summary>
                 /// A filter to narrow down results to a preferred subset. The filtering language accepts strings like
-                /// "displayName=tokyo", and is documented in more detail in [AIP-160](https://google.aip.dev/160).
+                /// `"displayName=tokyo"`, and is documented in more detail in [AIP-160](https://google.aip.dev/160).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string Filter { get; set; }
@@ -1455,9 +1840,57 @@ namespace Google.Apis.NetworkManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("cause")]
         public virtual string Cause { get; set; }
 
+        /// <summary>IP address that caused the abort.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ipAddress")]
+        public virtual string IpAddress { get; set; }
+
+        /// <summary>
+        /// List of project IDs the user specified in the request but lacks access to. In this case, analysis is aborted
+        /// with the PERMISSION_DENIED cause.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("projectsMissingPermission")]
+        public virtual System.Collections.Generic.IList<string> ProjectsMissingPermission { get; set; }
+
         /// <summary>URI of the resource that caused the abort.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("resourceUri")]
         public virtual string ResourceUri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Wrapper for the App Engine service version attributes.</summary>
+    public class AppEngineVersionEndpoint : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// An [App Engine](https://cloud.google.com/appengine) [service
+        /// version](https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.services.versions) name.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>For display only. Metadata associated with an App Engine version.</summary>
+    public class AppEngineVersionInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Name of an App Engine version.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>App Engine execution environment for a version.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("environment")]
+        public virtual string Environment { get; set; }
+
+        /// <summary>Runtime of the App Engine version.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("runtime")]
+        public virtual string Runtime { get; set; }
+
+        /// <summary>URI of an App Engine version.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1473,7 +1906,8 @@ namespace Google.Apis.NetworkManagement.v1.Data
     /// }, { "log_type": "DATA_WRITE" }, { "log_type": "ADMIN_READ" } ] }, { "service": "sampleservice.googleapis.com",
     /// "audit_log_configs": [ { "log_type": "DATA_READ" }, { "log_type": "DATA_WRITE", "exempted_members": [
     /// "user:aliya@example.com" ] } ] } ] } For sampleservice, this policy enables DATA_READ, DATA_WRITE and ADMIN_READ
-    /// logging. It also exempts jose@example.com from DATA_READ logging, and aliya@example.com from DATA_WRITE logging.
+    /// logging. It also exempts `jose@example.com` from DATA_READ logging, and `aliya@example.com` from DATA_WRITE
+    /// logging.
     /// </summary>
     public class AuditConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1528,16 +1962,37 @@ namespace Google.Apis.NetworkManagement.v1.Data
         public virtual Expr Condition { get; set; }
 
         /// <summary>
-        /// Specifies the principals requesting access for a Cloud Platform resource. `members` can have the following
+        /// Specifies the principals requesting access for a Google Cloud resource. `members` can have the following
         /// values: * `allUsers`: A special identifier that represents anyone who is on the internet; with or without a
         /// Google account. * `allAuthenticatedUsers`: A special identifier that represents anyone who is authenticated
-        /// with a Google account or a service account. * `user:{emailid}`: An email address that represents a specific
-        /// Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address that
-        /// represents a service account. For example, `my-other-app@appspot.gserviceaccount.com`. * `group:{emailid}`:
-        /// An email address that represents a Google group. For example, `admins@example.com`. *
-        /// `deleted:user:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a user that
-        /// has been recently deleted. For example, `alice@example.com?uid=123456789012345678901`. If the user is
-        /// recovered, this value reverts to `user:{emailid}` and the recovered user retains the role in the binding. *
+        /// with a Google account or a service account. Does not include identities that come from external identity
+        /// providers (IdPs) through identity federation. * `user:{emailid}`: An email address that represents a
+        /// specific Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address
+        /// that represents a Google service account. For example, `my-other-app@appspot.gserviceaccount.com`. *
+        /// `serviceAccount:{projectid}.svc.id.goog[{namespace}/{kubernetes-sa}]`: An identifier for a [Kubernetes
+        /// service account](https://cloud.google.com/kubernetes-engine/docs/how-to/kubernetes-service-accounts). For
+        /// example, `my-project.svc.id.goog[my-namespace/my-kubernetes-sa]`. * `group:{emailid}`: An email address that
+        /// represents a Google group. For example, `admins@example.com`. * `domain:{domain}`: The G Suite domain
+        /// (primary) that represents all the users of that domain. For example, `google.com` or `example.com`. *
+        /// `principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workforce identity pool. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/group/{group_id}`: All
+        /// workforce identities in a group. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All workforce identities with a specific attribute value. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/*`: All identities in a
+        /// workforce identity pool. *
+        /// `principal://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workload identity pool. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/group/{group_id}`:
+        /// A workload identity pool group. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All identities in a workload identity pool with a certain attribute. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/*`:
+        /// All identities in a workload identity pool. * `deleted:user:{emailid}?uid={uniqueid}`: An email address
+        /// (plus unique identifier) representing a user that has been recently deleted. For example,
+        /// `alice@example.com?uid=123456789012345678901`. If the user is recovered, this value reverts to
+        /// `user:{emailid}` and the recovered user retains the role in the binding. *
         /// `deleted:serviceAccount:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a
         /// service account that has been recently deleted. For example,
         /// `my-other-app@appspot.gserviceaccount.com?uid=123456789012345678901`. If the service account is undeleted,
@@ -1545,15 +2000,19 @@ namespace Google.Apis.NetworkManagement.v1.Data
         /// binding. * `deleted:group:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing
         /// a Google group that has been recently deleted. For example, `admins@example.com?uid=123456789012345678901`.
         /// If the group is recovered, this value reverts to `group:{emailid}` and the recovered group retains the role
-        /// in the binding. * `domain:{domain}`: The G Suite domain (primary) that represents all the users of that
-        /// domain. For example, `google.com` or `example.com`.
+        /// in the binding. *
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// Deleted single identity in a workforce identity pool. For example,
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/my-pool-id/subject/my-subject-attribute-value`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("members")]
         public virtual System.Collections.Generic.IList<string> Members { get; set; }
 
         /// <summary>
         /// Role that is assigned to the list of `members`, or principals. For example, `roles/viewer`, `roles/editor`,
-        /// or `roles/owner`.
+        /// or `roles/owner`. For an overview of the IAM roles and permissions, see the [IAM
+        /// documentation](https://cloud.google.com/iam/docs/roles-overview). For a list of the available pre-defined
+        /// roles, see [here](https://cloud.google.com/iam/docs/understanding-roles).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("role")]
         public virtual string Role { get; set; }
@@ -1565,6 +2024,78 @@ namespace Google.Apis.NetworkManagement.v1.Data
     /// <summary>The request message for Operations.CancelOperation.</summary>
     public class CancelOperationRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Wrapper for Cloud Function attributes.</summary>
+    public class CloudFunctionEndpoint : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A [Cloud Function](https://cloud.google.com/functions) name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>For display only. Metadata associated with a Cloud Function.</summary>
+    public class CloudFunctionInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Name of a Cloud Function.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>Location in which the Cloud Function is deployed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual string Location { get; set; }
+
+        /// <summary>URI of a Cloud Function.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
+
+        /// <summary>Latest successfully deployed version id of the Cloud Function.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("versionId")]
+        public virtual System.Nullable<long> VersionId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Wrapper for Cloud Run revision attributes.</summary>
+    public class CloudRunRevisionEndpoint : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// A [Cloud Run](https://cloud.google.com/run)
+        /// [revision](https://cloud.google.com/run/docs/reference/rest/v1/namespaces.revisions/get) URI. The format is:
+        /// projects/{project}/locations/{location}/revisions/{revision}
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>For display only. Metadata associated with a Cloud Run revision.</summary>
+    public class CloudRunRevisionInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Name of a Cloud Run revision.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>Location in which this revision is deployed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual string Location { get; set; }
+
+        /// <summary>URI of Cloud Run service this revision belongs to.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serviceUri")]
+        public virtual string ServiceUri { get; set; }
+
+        /// <summary>URI of a Cloud Run revision.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -1603,9 +2134,46 @@ namespace Google.Apis.NetworkManagement.v1.Data
     /// <summary>A Connectivity Test for a network reachability analysis.</summary>
     public class ConnectivityTest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Whether the test should skip firewall checking. If not provided, we assume false.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bypassFirewallChecks")]
+        public virtual System.Nullable<bool> BypassFirewallChecks { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time the test was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The user-supplied description of the Connectivity Test. Maximum of 512 characters.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
@@ -1632,11 +2200,19 @@ namespace Google.Apis.NetworkManagement.v1.Data
         public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
 
         /// <summary>
-        /// Required. Unique name of the resource using the form:
+        /// Identifier. Unique name of the resource using the form:
         /// `projects/{project_id}/locations/global/connectivityTests/{test_id}`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Output only. The probing details of this test from the latest run, present for applicable tests only. The
+        /// details are updated when creating a new test, updating an existing test, or triggering a one-time rerun of
+        /// an existing test.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("probingDetails")]
+        public virtual ProbingDetails ProbingDetails { get; set; }
 
         /// <summary>IP Protocol of the test. When not provided, "TCP" is assumed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("protocol")]
@@ -1657,6 +2233,20 @@ namespace Google.Apis.NetworkManagement.v1.Data
         public virtual System.Collections.Generic.IList<string> RelatedProjects { get; set; }
 
         /// <summary>
+        /// Output only. The reachability details of this test from the latest run for the return path. The details are
+        /// updated when creating a new test, updating an existing test, or triggering a one-time rerun of an existing
+        /// test.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("returnReachabilityDetails")]
+        public virtual ReachabilityDetails ReturnReachabilityDetails { get; set; }
+
+        /// <summary>
+        /// Whether run analysis for the return path from destination to source. Default value is false.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("roundTrip")]
+        public virtual System.Nullable<bool> RoundTrip { get; set; }
+
+        /// <summary>
         /// Required. Source specification of the Connectivity Test. You can use a combination of source IP address,
         /// virtual machine (VM) instance, or Compute Engine network to uniquely identify the source location. Examples:
         /// If the source IP address is an internal IP address within a Google Cloud Virtual Private Cloud (VPC)
@@ -1671,9 +2261,42 @@ namespace Google.Apis.NetworkManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("source")]
         public virtual Endpoint Source { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The time the test's configuration was updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1682,9 +2305,21 @@ namespace Google.Apis.NetworkManagement.v1.Data
     /// <summary>Details of the final state "deliver" and associated resource.</summary>
     public class DeliverInfo : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>IP address of the target (if applicable).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ipAddress")]
+        public virtual string IpAddress { get; set; }
+
+        /// <summary>PSC Google API target the packet is delivered to (if applicable).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pscGoogleApiTarget")]
+        public virtual string PscGoogleApiTarget { get; set; }
+
         /// <summary>URI of the resource that the packet is delivered to.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("resourceUri")]
         public virtual string ResourceUri { get; set; }
+
+        /// <summary>Name of the Cloud Storage Bucket the packet is delivered to (if applicable).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("storageBucket")]
+        public virtual string StorageBucket { get; set; }
 
         /// <summary>Target type where the packet is delivered to.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("target")]
@@ -1701,9 +2336,34 @@ namespace Google.Apis.NetworkManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("cause")]
         public virtual string Cause { get; set; }
 
+        /// <summary>Destination IP address of the dropped packet (if relevant).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("destinationIp")]
+        public virtual string DestinationIp { get; set; }
+
+        /// <summary>Region of the dropped packet (if relevant).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("region")]
+        public virtual string Region { get; set; }
+
         /// <summary>URI of the resource that caused the drop.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("resourceUri")]
         public virtual string ResourceUri { get; set; }
+
+        /// <summary>Source IP address of the dropped packet (if relevant).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceIp")]
+        public virtual string SourceIp { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Representation of a network edge location as per https://cloud.google.com/vpc/docs/edge-locations.
+    /// </summary>
+    public class EdgeLocation : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Name of the metropolitan area.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("metropolitanArea")]
+        public virtual string MetropolitanArea { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1712,8 +2372,7 @@ namespace Google.Apis.NetworkManagement.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1724,13 +2383,53 @@ namespace Google.Apis.NetworkManagement.v1.Data
     /// <summary>Source or destination of the Connectivity Test.</summary>
     public class Endpoint : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// An [App Engine](https://cloud.google.com/appengine) [service
+        /// version](https://cloud.google.com/appengine/docs/admin-api/reference/rest/v1/apps.services.versions).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("appEngineVersion")]
+        public virtual AppEngineVersionEndpoint AppEngineVersion { get; set; }
+
+        /// <summary>A [Cloud Function](https://cloud.google.com/functions).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cloudFunction")]
+        public virtual CloudFunctionEndpoint CloudFunction { get; set; }
+
+        /// <summary>
+        /// A [Cloud Run](https://cloud.google.com/run)
+        /// [revision](https://cloud.google.com/run/docs/reference/rest/v1/namespaces.revisions/get)
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cloudRunRevision")]
+        public virtual CloudRunRevisionEndpoint CloudRunRevision { get; set; }
+
         /// <summary>A [Cloud SQL](https://cloud.google.com/sql) instance URI.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cloudSqlInstance")]
         public virtual string CloudSqlInstance { get; set; }
 
         /// <summary>
-        /// A cluster URI for [Google Kubernetes Engine
-        /// master](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-architecture).
+        /// A forwarding rule and its corresponding IP address represent the frontend configuration of a Google Cloud
+        /// load balancer. Forwarding rules are also used for protocol forwarding, Private Service Connect and other
+        /// network services to provide forwarding information in the control plane. Format:
+        /// projects/{project}/global/forwardingRules/{id} or projects/{project}/regions/{region}/forwardingRules/{id}
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("forwardingRule")]
+        public virtual string ForwardingRule { get; set; }
+
+        /// <summary>Output only. Specifies the type of the target of the forwarding rule.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("forwardingRuleTarget")]
+        public virtual string ForwardingRuleTarget { get; set; }
+
+        /// <summary>
+        /// DNS endpoint of [Google Kubernetes Engine cluster control
+        /// plane](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-architecture). Requires
+        /// gke_master_cluster to be set, can't be used simultaneoulsly with ip_address or network. Applicable only to
+        /// destination endpoint.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fqdn")]
+        public virtual string Fqdn { get; set; }
+
+        /// <summary>
+        /// A cluster URI for [Google Kubernetes Engine cluster control
+        /// plane](https://cloud.google.com/kubernetes-engine/docs/concepts/cluster-architecture).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("gkeMasterCluster")]
         public virtual string GkeMasterCluster { get; set; }
@@ -1739,12 +2438,20 @@ namespace Google.Apis.NetworkManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("instance")]
         public virtual string Instance { get; set; }
 
-        /// <summary>
-        /// The IP address of the endpoint, which can be an external or internal IP. An IPv6 address is only allowed
-        /// when the test's destination is a [global load balancer VIP](/load-balancing/docs/load-balancing-overview).
-        /// </summary>
+        /// <summary>The IP address of the endpoint, which can be an external or internal IP.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("ipAddress")]
         public virtual string IpAddress { get; set; }
+
+        /// <summary>
+        /// Output only. ID of the load balancer the forwarding rule points to. Empty for forwarding rules not related
+        /// to load balancers.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("loadBalancerId")]
+        public virtual string LoadBalancerId { get; set; }
+
+        /// <summary>Output only. Type of the load balancer the forwarding rule points to.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("loadBalancerType")]
+        public virtual string LoadBalancerType { get; set; }
 
         /// <summary>A Compute Engine network URI.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("network")]
@@ -1764,12 +2471,20 @@ namespace Google.Apis.NetworkManagement.v1.Data
         /// <summary>
         /// Project ID where the endpoint is located. The Project ID can be derived from the URI if you provide a VM
         /// instance or network URI. The following are two cases where you must provide the project ID: 1. Only the IP
-        /// address is specified, and the IP address is within a GCP project. 2. When you are using Shared VPC and the
-        /// IP address that you provide is from the service project. In this case, the network that the IP address
-        /// resides in is defined in the host project.
+        /// address is specified, and the IP address is within a Google Cloud project. 2. When you are using Shared VPC
+        /// and the IP address that you provide is from the service project. In this case, the network that the IP
+        /// address resides in is defined in the host project.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
         public virtual string ProjectId { get; set; }
+
+        /// <summary>A [Redis Cluster](https://cloud.google.com/memorystore/docs/cluster) URI.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("redisCluster")]
+        public virtual string RedisCluster { get; set; }
+
+        /// <summary>A [Redis Instance](https://cloud.google.com/memorystore/docs/redis) URI.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("redisInstance")]
+        public virtual string RedisInstance { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1796,6 +2511,10 @@ namespace Google.Apis.NetworkManagement.v1.Data
         /// <summary>IP protocol in string format, for example: "TCP", "UDP", "ICMP".</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("protocol")]
         public virtual string Protocol { get; set; }
+
+        /// <summary>URI of the source telemetry agent this packet originates from.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceAgentUri")]
+        public virtual string SourceAgentUri { get; set; }
 
         /// <summary>Source IP address.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sourceIp")]
@@ -1858,12 +2577,12 @@ namespace Google.Apis.NetworkManagement.v1.Data
     }
 
     /// <summary>
-    /// For display only. Metadata associated with a VPC firewall rule, an implied VPC firewall rule, or a hierarchical
-    /// firewall policy rule.
+    /// For display only. Metadata associated with a VPC firewall rule, an implied VPC firewall rule, or a firewall
+    /// policy rule.
     /// </summary>
     public class FirewallInfo : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Possible values: ALLOW, DENY</summary>
+        /// <summary>Possible values: ALLOW, DENY, APPLY_SECURITY_PROFILE_GROUP</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("action")]
         public virtual string Action { get; set; }
 
@@ -1872,8 +2591,7 @@ namespace Google.Apis.NetworkManagement.v1.Data
         public virtual string Direction { get; set; }
 
         /// <summary>
-        /// The display name of the VPC firewall rule. This field is not applicable to hierarchical firewall policy
-        /// rules.
+        /// The display name of the firewall rule. This field might be empty for firewall policy rules.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
@@ -1890,11 +2608,18 @@ namespace Google.Apis.NetworkManagement.v1.Data
         public virtual string NetworkUri { get; set; }
 
         /// <summary>
-        /// The hierarchical firewall policy that this rule is associated with. This field is not applicable to VPC
-        /// firewall rules.
+        /// The name of the firewall policy that this rule is associated with. This field is not applicable to VPC
+        /// firewall rules and implied VPC firewall rules.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("policy")]
         public virtual string Policy { get; set; }
+
+        /// <summary>
+        /// The URI of the firewall policy that this rule is associated with. This field is not applicable to VPC
+        /// firewall rules and implied VPC firewall rules.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("policyUri")]
+        public virtual string PolicyUri { get; set; }
 
         /// <summary>The priority of the firewall rule.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("priority")]
@@ -1905,16 +2630,12 @@ namespace Google.Apis.NetworkManagement.v1.Data
         public virtual System.Collections.Generic.IList<string> TargetServiceAccounts { get; set; }
 
         /// <summary>
-        /// The target tags defined by the VPC firewall rule. This field is not applicable to hierarchical firewall
-        /// policy rules.
+        /// The target tags defined by the VPC firewall rule. This field is not applicable to firewall policy rules.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("targetTags")]
         public virtual System.Collections.Generic.IList<string> TargetTags { get; set; }
 
-        /// <summary>
-        /// The URI of the VPC firewall rule. This field is not applicable to implied firewall rules or hierarchical
-        /// firewall policy rules.
-        /// </summary>
+        /// <summary>The URI of the firewall rule. This field is not applicable to implied VPC firewall rules.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("uri")]
         public virtual string Uri { get; set; }
 
@@ -1925,6 +2646,10 @@ namespace Google.Apis.NetworkManagement.v1.Data
     /// <summary>Details of the final state "forward" and associated resource.</summary>
     public class ForwardInfo : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>IP address of the target (if applicable).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ipAddress")]
+        public virtual string IpAddress { get; set; }
+
         /// <summary>URI of the resource that the packet is forwarded to.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("resourceUri")]
         public virtual string ResourceUri { get; set; }
@@ -1940,27 +2665,46 @@ namespace Google.Apis.NetworkManagement.v1.Data
     /// <summary>For display only. Metadata associated with a Compute Engine forwarding rule.</summary>
     public class ForwardingRuleInfo : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Name of a Compute Engine forwarding rule.</summary>
+        /// <summary>Name of the forwarding rule.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
 
-        /// <summary>Port range defined in the forwarding rule that matches the test.</summary>
+        /// <summary>
+        /// Name of the load balancer the forwarding rule belongs to. Empty for forwarding rules not related to load
+        /// balancers (like PSC forwarding rules).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("loadBalancerName")]
+        public virtual string LoadBalancerName { get; set; }
+
+        /// <summary>Port range defined in the forwarding rule that matches the packet.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("matchedPortRange")]
         public virtual string MatchedPortRange { get; set; }
 
-        /// <summary>Protocol defined in the forwarding rule that matches the test.</summary>
+        /// <summary>Protocol defined in the forwarding rule that matches the packet.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("matchedProtocol")]
         public virtual string MatchedProtocol { get; set; }
 
-        /// <summary>Network URI. Only valid for Internal Load Balancer.</summary>
+        /// <summary>Network URI.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("networkUri")]
         public virtual string NetworkUri { get; set; }
+
+        /// <summary>PSC Google API target this forwarding rule targets (if applicable).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pscGoogleApiTarget")]
+        public virtual string PscGoogleApiTarget { get; set; }
+
+        /// <summary>URI of the PSC service attachment this forwarding rule targets (if applicable).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pscServiceAttachmentUri")]
+        public virtual string PscServiceAttachmentUri { get; set; }
+
+        /// <summary>Region of the forwarding rule. Set only for regional forwarding rules.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("region")]
+        public virtual string Region { get; set; }
 
         /// <summary>Target type of the forwarding rule.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("target")]
         public virtual string Target { get; set; }
 
-        /// <summary>URI of a Compute Engine forwarding rule.</summary>
+        /// <summary>URI of the forwarding rule.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("uri")]
         public virtual string Uri { get; set; }
 
@@ -1983,13 +2727,36 @@ namespace Google.Apis.NetworkManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("clusterUri")]
         public virtual string ClusterUri { get; set; }
 
-        /// <summary>External IP address of a GKE cluster master.</summary>
+        /// <summary>DNS endpoint of a GKE cluster control plane.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dnsEndpoint")]
+        public virtual string DnsEndpoint { get; set; }
+
+        /// <summary>External IP address of a GKE cluster control plane.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("externalIp")]
         public virtual string ExternalIp { get; set; }
 
-        /// <summary>Internal IP address of a GKE cluster master.</summary>
+        /// <summary>Internal IP address of a GKE cluster control plane.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("internalIp")]
         public virtual string InternalIp { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// For display only. Details of a Google Service sending packets to a VPC network. Although the source IP might be
+    /// a publicly routable address, some Google Services use special routes within Google production infrastructure to
+    /// reach Compute Engine Instances. https://cloud.google.com/vpc/docs/routes#special_return_paths
+    /// </summary>
+    public class GoogleServiceInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Recognized type of a Google Service.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("googleServiceType")]
+        public virtual string GoogleServiceType { get; set; }
+
+        /// <summary>Source IP address.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceIp")]
+        public virtual string SourceIp { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2022,6 +2789,10 @@ namespace Google.Apis.NetworkManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("networkUri")]
         public virtual string NetworkUri { get; set; }
 
+        /// <summary>URI of the PSC network attachment the NIC is attached to (if relevant).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pscNetworkAttachmentUri")]
+        public virtual string PscNetworkAttachmentUri { get; set; }
+
         /// <summary>Service account authorized for the instance.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("serviceAccount")]
         public virtual string ServiceAccount { get; set; }
@@ -2029,6 +2800,35 @@ namespace Google.Apis.NetworkManagement.v1.Data
         /// <summary>URI of a Compute Engine instance.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("uri")]
         public virtual string Uri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Describes measured latency distribution.</summary>
+    public class LatencyDistribution : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Representative latency percentiles.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("latencyPercentiles")]
+        public virtual System.Collections.Generic.IList<LatencyPercentile> LatencyPercentiles { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Latency percentile rank and value.</summary>
+    public class LatencyPercentile : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// percent-th percentile of latency observed, in microseconds. Fraction of percent/100 of samples have latency
+        /// lower or equal to the value of this field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("latencyMicros")]
+        public virtual System.Nullable<long> LatencyMicros { get; set; }
+
+        /// <summary>Percentage of samples this data point applies to.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("percent")]
+        public virtual System.Nullable<int> Percent { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2083,6 +2883,25 @@ namespace Google.Apis.NetworkManagement.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Response for the `ListVpcFlowLogsConfigs` method.</summary>
+    public class ListVpcFlowLogsConfigsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Page token to fetch the next set of configurations.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>Locations that could not be reached (when querying all locations with `-`).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("unreachable")]
+        public virtual System.Collections.Generic.IList<string> Unreachable { get; set; }
+
+        /// <summary>List of VPC Flow Log configurations.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("vpcFlowLogsConfigs")]
+        public virtual System.Collections.Generic.IList<VpcFlowLogsConfig> VpcFlowLogsConfigs { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>For display only. Metadata associated with a specific load balancer backend.</summary>
     public class LoadBalancerBackend : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2110,6 +2929,63 @@ namespace Google.Apis.NetworkManagement.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>For display only. Metadata associated with the load balancer backend.</summary>
+    public class LoadBalancerBackendInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>URI of the backend bucket this backend targets (if applicable).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("backendBucketUri")]
+        public virtual string BackendBucketUri { get; set; }
+
+        /// <summary>URI of the backend service this backend belongs to (if applicable).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("backendServiceUri")]
+        public virtual string BackendServiceUri { get; set; }
+
+        /// <summary>
+        /// Output only. Health check firewalls configuration state for the backend. This is a result of the static
+        /// firewall analysis (verifying that health check traffic from required IP ranges to the backend is allowed or
+        /// not). The backend might still be unhealthy even if these firewalls are configured. Please refer to the
+        /// documentation for more information: https://cloud.google.com/load-balancing/docs/firewall-rules
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("healthCheckFirewallsConfigState")]
+        public virtual string HealthCheckFirewallsConfigState { get; set; }
+
+        /// <summary>URI of the health check attached to this backend (if applicable).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("healthCheckUri")]
+        public virtual string HealthCheckUri { get; set; }
+
+        /// <summary>URI of the instance group this backend belongs to (if applicable).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("instanceGroupUri")]
+        public virtual string InstanceGroupUri { get; set; }
+
+        /// <summary>
+        /// URI of the backend instance (if applicable). Populated for instance group backends, and zonal NEG backends.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("instanceUri")]
+        public virtual string InstanceUri { get; set; }
+
+        /// <summary>
+        /// Display name of the backend. For example, it might be an instance name for the instance group backends, or
+        /// an IP address and port for zonal network endpoint group backends.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>URI of the network endpoint group this backend belongs to (if applicable).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("networkEndpointGroupUri")]
+        public virtual string NetworkEndpointGroupUri { get; set; }
+
+        /// <summary>PSC Google API target this PSC NEG backend targets (if applicable).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pscGoogleApiTarget")]
+        public virtual string PscGoogleApiTarget { get; set; }
+
+        /// <summary>URI of the PSC service attachment this PSC NEG backend targets (if applicable).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pscServiceAttachmentUri")]
+        public virtual string PscServiceAttachmentUri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>For display only. Metadata associated with a load balancer.</summary>
     public class LoadBalancerInfo : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2125,7 +3001,10 @@ namespace Google.Apis.NetworkManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("backends")]
         public virtual System.Collections.Generic.IList<LoadBalancerBackend> Backends { get; set; }
 
-        /// <summary>URI of the health check for the load balancer.</summary>
+        /// <summary>
+        /// URI of the health check for the load balancer. Deprecated and no longer populated as different load balancer
+        /// backends might have different health checks.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("healthCheckUri")]
         public virtual string HealthCheckUri { get; set; }
 
@@ -2137,7 +3016,7 @@ namespace Google.Apis.NetworkManagement.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A resource that represents Google Cloud Platform location.</summary>
+    /// <summary>A resource that represents a Google Cloud location.</summary>
     public class Location : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The friendly name for this location, typically a nearby city name. For example, "Tokyo".</summary>
@@ -2169,16 +3048,83 @@ namespace Google.Apis.NetworkManagement.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>For display only. Metadata associated with a Compute Engine network.</summary>
+    /// <summary>For display only. Metadata associated with NAT.</summary>
+    public class NatInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The name of Cloud NAT Gateway. Only valid when type is CLOUD_NAT.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("natGatewayName")]
+        public virtual string NatGatewayName { get; set; }
+
+        /// <summary>URI of the network where NAT translation takes place.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("networkUri")]
+        public virtual string NetworkUri { get; set; }
+
+        /// <summary>Destination IP address after NAT translation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("newDestinationIp")]
+        public virtual string NewDestinationIp { get; set; }
+
+        /// <summary>Destination port after NAT translation. Only valid when protocol is TCP or UDP.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("newDestinationPort")]
+        public virtual System.Nullable<int> NewDestinationPort { get; set; }
+
+        /// <summary>Source IP address after NAT translation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("newSourceIp")]
+        public virtual string NewSourceIp { get; set; }
+
+        /// <summary>Source port after NAT translation. Only valid when protocol is TCP or UDP.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("newSourcePort")]
+        public virtual System.Nullable<int> NewSourcePort { get; set; }
+
+        /// <summary>Destination IP address before NAT translation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("oldDestinationIp")]
+        public virtual string OldDestinationIp { get; set; }
+
+        /// <summary>Destination port before NAT translation. Only valid when protocol is TCP or UDP.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("oldDestinationPort")]
+        public virtual System.Nullable<int> OldDestinationPort { get; set; }
+
+        /// <summary>Source IP address before NAT translation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("oldSourceIp")]
+        public virtual string OldSourceIp { get; set; }
+
+        /// <summary>Source port before NAT translation. Only valid when protocol is TCP or UDP.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("oldSourcePort")]
+        public virtual System.Nullable<int> OldSourcePort { get; set; }
+
+        /// <summary>IP protocol in string format, for example: "TCP", "UDP", "ICMP".</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("protocol")]
+        public virtual string Protocol { get; set; }
+
+        /// <summary>Uri of the Cloud Router. Only valid when type is CLOUD_NAT.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("routerUri")]
+        public virtual string RouterUri { get; set; }
+
+        /// <summary>Type of NAT.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>For display only. Metadata associated with a Compute Engine network. Next ID: 7</summary>
     public class NetworkInfo : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>Name of a Compute Engine network.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
 
-        /// <summary>The IP range that matches the test.</summary>
+        /// <summary>The IP range of the subnet matching the source IP address of the test.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("matchedIpRange")]
         public virtual string MatchedIpRange { get; set; }
+
+        /// <summary>URI of the subnet matching the source IP address of the test.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("matchedSubnetUri")]
+        public virtual string MatchedSubnetUri { get; set; }
+
+        /// <summary>The region of the subnet matching the source IP address of the test.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("region")]
+        public virtual string Region { get; set; }
 
         /// <summary>URI of a Compute Engine network.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("uri")]
@@ -2218,8 +3164,8 @@ namespace Google.Apis.NetworkManagement.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -2242,13 +3188,79 @@ namespace Google.Apis.NetworkManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("cancelRequested")]
         public virtual System.Nullable<bool> CancelRequested { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The time the operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
 
         /// <summary>The time the operation finished running.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Human-readable status of the operation, if any.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("statusDetail")]
@@ -2277,18 +3289,26 @@ namespace Google.Apis.NetworkManagement.v1.Data
     /// expression that allows access to a resource only if the expression evaluates to `true`. A condition can add
     /// constraints based on attributes of the request, the resource, or both. To learn which resources support
     /// conditions in their IAM policies, see the [IAM
-    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:** { "bindings":
-    /// [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
+    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:**
+    /// ```
+    /// {
+    /// "bindings": [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
     /// "group:admins@example.com", "domain:google.com", "serviceAccount:my-project-id@appspot.gserviceaccount.com" ] },
     /// { "role": "roles/resourcemanager.organizationViewer", "members": [ "user:eve@example.com" ], "condition": {
     /// "title": "expirable access", "description": "Does not grant access after Sep 2020", "expression": "request.time
-    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 } **YAML example:**
+    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 }
+    /// ```
+    /// **YAML
+    /// example:**
+    /// ```
     /// bindings: - members: - user:mike@example.com - group:admins@example.com - domain:google.com -
     /// serviceAccount:my-project-id@appspot.gserviceaccount.com role: roles/resourcemanager.organizationAdmin -
     /// members: - user:eve@example.com role: roles/resourcemanager.organizationViewer condition: title: expirable
     /// access description: Does not grant access after Sep 2020 expression: request.time &amp;lt;
-    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3 For a description of IAM and its features,
-    /// see the [IAM documentation](https://cloud.google.com/iam/docs/).
+    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3
+    /// ```
+    /// For a description of IAM and its
+    /// features, see the [IAM documentation](https://cloud.google.com/iam/docs/).
     /// </summary>
     public class Policy : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2337,6 +3357,142 @@ namespace Google.Apis.NetworkManagement.v1.Data
         public virtual System.Nullable<int> Version { get; set; }
     }
 
+    /// <summary>Results of active probing from the last run of the test.</summary>
+    public class ProbingDetails : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The reason probing was aborted.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("abortCause")]
+        public virtual string AbortCause { get; set; }
+
+        /// <summary>
+        /// The EdgeLocation from which a packet destined for/originating from the internet will egress/ingress the
+        /// Google network. This will only be populated for a connectivity test which has an internet destination/source
+        /// address. The absence of this field *must not* be used as an indication that the destination/source is part
+        /// of the Google network.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("destinationEgressLocation")]
+        public virtual EdgeLocation DestinationEgressLocation { get; set; }
+
+        /// <summary>
+        /// The source and destination endpoints derived from the test input and used for active probing.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endpointInfo")]
+        public virtual EndpointInfo EndpointInfo { get; set; }
+
+        /// <summary>Details about an internal failure or the cancellation of active probing.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("error")]
+        public virtual Status Error { get; set; }
+
+        /// <summary>
+        /// Latency as measured by active probing in one direction: from the source to the destination endpoint.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("probingLatency")]
+        public virtual LatencyDistribution ProbingLatency { get; set; }
+
+        /// <summary>The overall result of active probing.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("result")]
+        public virtual string Result { get; set; }
+
+        /// <summary>Number of probes sent.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sentProbeCount")]
+        public virtual System.Nullable<int> SentProbeCount { get; set; }
+
+        /// <summary>Number of probes that reached the destination.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("successfulProbeCount")]
+        public virtual System.Nullable<int> SuccessfulProbeCount { get; set; }
+
+        private string _verifyTimeRaw;
+
+        private object _verifyTime;
+
+        /// <summary>The time that reachability was assessed through active probing.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("verifyTime")]
+        public virtual string VerifyTimeRaw
+        {
+            get => _verifyTimeRaw;
+            set
+            {
+                _verifyTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _verifyTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="VerifyTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use VerifyTimeDateTimeOffset instead.")]
+        public virtual object VerifyTime
+        {
+            get => _verifyTime;
+            set
+            {
+                _verifyTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _verifyTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="VerifyTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? VerifyTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(VerifyTimeRaw);
+            set => VerifyTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>For display only. Metadata associated with ProxyConnection.</summary>
+    public class ProxyConnectionInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>URI of the network where connection is proxied.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("networkUri")]
+        public virtual string NetworkUri { get; set; }
+
+        /// <summary>Destination IP address of a new connection.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("newDestinationIp")]
+        public virtual string NewDestinationIp { get; set; }
+
+        /// <summary>Destination port of a new connection. Only valid when protocol is TCP or UDP.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("newDestinationPort")]
+        public virtual System.Nullable<int> NewDestinationPort { get; set; }
+
+        /// <summary>Source IP address of a new connection.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("newSourceIp")]
+        public virtual string NewSourceIp { get; set; }
+
+        /// <summary>Source port of a new connection. Only valid when protocol is TCP or UDP.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("newSourcePort")]
+        public virtual System.Nullable<int> NewSourcePort { get; set; }
+
+        /// <summary>Destination IP address of an original connection</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("oldDestinationIp")]
+        public virtual string OldDestinationIp { get; set; }
+
+        /// <summary>Destination port of an original connection. Only valid when protocol is TCP or UDP.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("oldDestinationPort")]
+        public virtual System.Nullable<int> OldDestinationPort { get; set; }
+
+        /// <summary>Source IP address of an original connection.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("oldSourceIp")]
+        public virtual string OldSourceIp { get; set; }
+
+        /// <summary>Source port of an original connection. Only valid when protocol is TCP or UDP.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("oldSourcePort")]
+        public virtual System.Nullable<int> OldSourcePort { get; set; }
+
+        /// <summary>IP protocol in string format, for example: "TCP", "UDP", "ICMP".</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("protocol")]
+        public virtual string Protocol { get; set; }
+
+        /// <summary>Uri of proxy subnet.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("subnetUri")]
+        public virtual string SubnetUri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Results of the configuration analysis from the last run of the test.</summary>
     public class ReachabilityDetails : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2355,9 +3511,108 @@ namespace Google.Apis.NetworkManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("traces")]
         public virtual System.Collections.Generic.IList<Trace> Traces { get; set; }
 
+        private string _verifyTimeRaw;
+
+        private object _verifyTime;
+
         /// <summary>The time of the configuration analysis.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("verifyTime")]
-        public virtual object VerifyTime { get; set; }
+        public virtual string VerifyTimeRaw
+        {
+            get => _verifyTimeRaw;
+            set
+            {
+                _verifyTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _verifyTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="VerifyTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use VerifyTimeDateTimeOffset instead.")]
+        public virtual object VerifyTime
+        {
+            get => _verifyTime;
+            set
+            {
+                _verifyTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _verifyTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="VerifyTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? VerifyTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(VerifyTimeRaw);
+            set => VerifyTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>For display only. Metadata associated with a Redis Cluster.</summary>
+    public class RedisClusterInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Discovery endpoint IP address of a Redis Cluster.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("discoveryEndpointIpAddress")]
+        public virtual string DiscoveryEndpointIpAddress { get; set; }
+
+        /// <summary>Name of a Redis Cluster.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>Name of the region in which the Redis Cluster is defined. For example, "us-central1".</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual string Location { get; set; }
+
+        /// <summary>
+        /// URI of a Redis Cluster network in format "projects/{project_id}/global/networks/{network_id}".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("networkUri")]
+        public virtual string NetworkUri { get; set; }
+
+        /// <summary>Secondary endpoint IP address of a Redis Cluster.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("secondaryEndpointIpAddress")]
+        public virtual string SecondaryEndpointIpAddress { get; set; }
+
+        /// <summary>
+        /// URI of a Redis Cluster in format "projects/{project_id}/locations/{location}/clusters/{cluster_id}"
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>For display only. Metadata associated with a Cloud Redis Instance.</summary>
+    public class RedisInstanceInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Name of a Cloud Redis Instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>URI of a Cloud Redis Instance network.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("networkUri")]
+        public virtual string NetworkUri { get; set; }
+
+        /// <summary>Primary endpoint IP address of a Cloud Redis Instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("primaryEndpointIp")]
+        public virtual string PrimaryEndpointIp { get; set; }
+
+        /// <summary>Read endpoint IP address of a Cloud Redis Instance (if applicable).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("readEndpointIp")]
+        public virtual string ReadEndpointIp { get; set; }
+
+        /// <summary>Region in which the Cloud Redis Instance is defined.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("region")]
+        public virtual string Region { get; set; }
+
+        /// <summary>URI of a Cloud Redis Instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2373,11 +3628,29 @@ namespace Google.Apis.NetworkManagement.v1.Data
     /// <summary>For display only. Metadata associated with a Compute Engine route.</summary>
     public class RouteInfo : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// For ADVERTISED routes, the URI of their next hop, i.e. the URI of the hybrid endpoint (VPN tunnel,
+        /// Interconnect attachment, NCC router appliance) the advertised prefix is advertised through, or URI of the
+        /// source peered network. Deprecated in favor of the next_hop_uri field, not used in new tests.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("advertisedRouteNextHopUri")]
+        public virtual string AdvertisedRouteNextHopUri { get; set; }
+
+        /// <summary>
+        /// For ADVERTISED dynamic routes, the URI of the Cloud Router that advertised the corresponding IP prefix.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("advertisedRouteSourceRouterUri")]
+        public virtual string AdvertisedRouteSourceRouterUri { get; set; }
+
         /// <summary>Destination IP range of the route.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("destIpRange")]
         public virtual string DestIpRange { get; set; }
 
-        /// <summary>Name of a Compute Engine route.</summary>
+        /// <summary>Destination port ranges of the route. POLICY_BASED routes only.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("destPortRanges")]
+        public virtual System.Collections.Generic.IList<string> DestPortRanges { get; set; }
+
+        /// <summary>Name of a route.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
 
@@ -2385,32 +3658,113 @@ namespace Google.Apis.NetworkManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("instanceTags")]
         public virtual System.Collections.Generic.IList<string> InstanceTags { get; set; }
 
-        /// <summary>URI of a Compute Engine network.</summary>
+        /// <summary>
+        /// For PEERING_SUBNET and PEERING_DYNAMIC routes that are advertised by NCC Hub, the URI of the corresponding
+        /// route in NCC Hub's routing table.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nccHubRouteUri")]
+        public virtual string NccHubRouteUri { get; set; }
+
+        /// <summary>
+        /// URI of the NCC Hub the route is advertised by. PEERING_SUBNET and PEERING_DYNAMIC routes that are advertised
+        /// by NCC Hub only.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nccHubUri")]
+        public virtual string NccHubUri { get; set; }
+
+        /// <summary>
+        /// URI of the destination NCC Spoke. PEERING_SUBNET and PEERING_DYNAMIC routes that are advertised by NCC Hub
+        /// only.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nccSpokeUri")]
+        public virtual string NccSpokeUri { get; set; }
+
+        /// <summary>URI of a VPC network where route is located.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("networkUri")]
         public virtual string NetworkUri { get; set; }
 
-        /// <summary>Next hop of the route.</summary>
+        /// <summary>
+        /// String type of the next hop of the route (for example, "VPN tunnel"). Deprecated in favor of the
+        /// next_hop_type and next_hop_uri fields, not used in new tests.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextHop")]
         public virtual string NextHop { get; set; }
+
+        /// <summary>URI of a VPC network where the next hop resource is located.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextHopNetworkUri")]
+        public virtual string NextHopNetworkUri { get; set; }
 
         /// <summary>Type of next hop.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextHopType")]
         public virtual string NextHopType { get; set; }
 
+        /// <summary>URI of the next hop resource.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextHopUri")]
+        public virtual string NextHopUri { get; set; }
+
+        /// <summary>
+        /// For PEERING_SUBNET, PEERING_STATIC and PEERING_DYNAMIC routes, the name of the originating
+        /// SUBNET/STATIC/DYNAMIC route.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("originatingRouteDisplayName")]
+        public virtual string OriginatingRouteDisplayName { get; set; }
+
+        /// <summary>
+        /// For PEERING_SUBNET and PEERING_STATIC routes, the URI of the originating SUBNET/STATIC route.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("originatingRouteUri")]
+        public virtual string OriginatingRouteUri { get; set; }
+
         /// <summary>Priority of the route.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("priority")]
         public virtual System.Nullable<int> Priority { get; set; }
+
+        /// <summary>Protocols of the route. POLICY_BASED routes only.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("protocols")]
+        public virtual System.Collections.Generic.IList<string> Protocols { get; set; }
+
+        /// <summary>
+        /// Region of the route. DYNAMIC, PEERING_DYNAMIC, POLICY_BASED and ADVERTISED routes only. If set for
+        /// POLICY_BASED route, this is a region of VLAN attachments for Cloud Interconnect the route applies to.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("region")]
+        public virtual string Region { get; set; }
+
+        /// <summary>
+        /// Indicates where route is applicable. Deprecated, routes with NCC_HUB scope are not included in the trace in
+        /// new tests.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("routeScope")]
+        public virtual string RouteScope { get; set; }
 
         /// <summary>Type of route.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("routeType")]
         public virtual string RouteType { get; set; }
 
+        /// <summary>Source IP address range of the route. POLICY_BASED routes only.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("srcIpRange")]
+        public virtual string SrcIpRange { get; set; }
+
+        /// <summary>Source port ranges of the route. POLICY_BASED routes only.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("srcPortRanges")]
+        public virtual System.Collections.Generic.IList<string> SrcPortRanges { get; set; }
+
         /// <summary>
-        /// URI of a Compute Engine route. Dynamic route from cloud router does not have a URI. Advertised route from
-        /// Google Cloud VPC to on-premises network also does not have a URI.
+        /// URI of a route. SUBNET, STATIC, PEERING_SUBNET (only for peering network) and POLICY_BASED routes only.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("uri")]
         public virtual string Uri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>For display only. Metadata associated with the serverless network endpoint group backend.</summary>
+    public class ServerlessNegInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>URI of the serverless network endpoint group.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("negUri")]
+        public virtual string NegUri { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2421,7 +3775,7 @@ namespace Google.Apis.NetworkManagement.v1.Data
     {
         /// <summary>
         /// REQUIRED: The complete policy to be applied to the `resource`. The size of the policy is limited to a few
-        /// 10s of KB. An empty policy is a valid policy but certain Cloud Platform services (such as Projects) might
+        /// 10s of KB. An empty policy is a valid policy but certain Google Cloud services (such as Projects) might
         /// reject them.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("policy")]
@@ -2477,9 +3831,21 @@ namespace Google.Apis.NetworkManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("abort")]
         public virtual AbortInfo Abort { get; set; }
 
+        /// <summary>Display information of an App Engine service version.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("appEngineVersion")]
+        public virtual AppEngineVersionInfo AppEngineVersion { get; set; }
+
         /// <summary>This is a step that leads to the final state Drop.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("causesDrop")]
         public virtual System.Nullable<bool> CausesDrop { get; set; }
+
+        /// <summary>Display information of a Cloud Function.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cloudFunction")]
+        public virtual CloudFunctionInfo CloudFunction { get; set; }
+
+        /// <summary>Display information of a Cloud Run revision.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cloudRunRevision")]
+        public virtual CloudRunRevisionInfo CloudRunRevision { get; set; }
 
         /// <summary>Display information of a Cloud SQL instance.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cloudSqlInstance")]
@@ -2521,13 +3887,28 @@ namespace Google.Apis.NetworkManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("gkeMaster")]
         public virtual GKEMasterInfo GkeMaster { get; set; }
 
+        /// <summary>Display information of a Google service</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("googleService")]
+        public virtual GoogleServiceInfo GoogleService { get; set; }
+
         /// <summary>Display information of a Compute Engine instance.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("instance")]
         public virtual InstanceInfo Instance { get; set; }
 
-        /// <summary>Display information of the load balancers.</summary>
+        /// <summary>
+        /// Display information of the load balancers. Deprecated in favor of the `load_balancer_backend_info` field,
+        /// not used in new tests.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("loadBalancer")]
         public virtual LoadBalancerInfo LoadBalancer { get; set; }
+
+        /// <summary>Display information of a specific load balancer backend.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("loadBalancerBackendInfo")]
+        public virtual LoadBalancerBackendInfo LoadBalancerBackendInfo { get; set; }
+
+        /// <summary>Display information of a NAT.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nat")]
+        public virtual NatInfo Nat { get; set; }
 
         /// <summary>Display information of a Google Cloud network.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("network")]
@@ -2537,13 +3918,39 @@ namespace Google.Apis.NetworkManagement.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
         public virtual string ProjectId { get; set; }
 
+        /// <summary>Display information of a ProxyConnection.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("proxyConnection")]
+        public virtual ProxyConnectionInfo ProxyConnection { get; set; }
+
+        /// <summary>Display information of a Redis Cluster.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("redisCluster")]
+        public virtual RedisClusterInfo RedisCluster { get; set; }
+
+        /// <summary>Display information of a Redis Instance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("redisInstance")]
+        public virtual RedisInstanceInfo RedisInstance { get; set; }
+
         /// <summary>Display information of a Compute Engine route.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("route")]
         public virtual RouteInfo Route { get; set; }
 
+        /// <summary>
+        /// Display information of a Serverless network endpoint group backend. Used only for return traces.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serverlessNeg")]
+        public virtual ServerlessNegInfo ServerlessNeg { get; set; }
+
         /// <summary>Each step is in one of the pre-defined states.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
+
+        /// <summary>Display information of a Storage Bucket. Used only for return traces.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("storageBucket")]
+        public virtual StorageBucketInfo StorageBucket { get; set; }
+
+        /// <summary>Display information of a VPC connector.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("vpcConnector")]
+        public virtual VpcConnectorInfo VpcConnector { get; set; }
 
         /// <summary>Display information of a Compute Engine VPN gateway.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("vpnGateway")]
@@ -2557,11 +3964,22 @@ namespace Google.Apis.NetworkManagement.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>For display only. Metadata associated with Storage Bucket.</summary>
+    public class StorageBucketInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Cloud Storage Bucket name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("bucket")]
+        public virtual string Bucket { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Request message for `TestIamPermissions` method.</summary>
     public class TestIamPermissionsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as '*' or 'storage.*')
+        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as `*` or `storage.*`)
         /// are not allowed. For more information see [IAM
         /// Overview](https://cloud.google.com/iam/docs/overview#permissions).
         /// </summary>
@@ -2586,8 +4004,10 @@ namespace Google.Apis.NetworkManagement.v1.Data
     /// <summary>
     /// Trace represents one simulated packet forwarding path. * Each trace contains multiple ordered steps. * Each step
     /// is in a particular state with associated configuration. * State is categorized as final or non-final states. *
-    /// Each final state has a reason associated. * Each trace must end with a final state (the last step). ```
-    /// |---------------------Trace----------------------| Step1(State) Step2(State) --- StepN(State(final)) ```
+    /// Each final state has a reason associated. * Each trace must end with a final state (the last step).
+    /// ```
+    /// |---------------------Trace----------------------| Step1(State) Step2(State) --- StepN(State(final))
+    /// ```
     /// </summary>
     public class Trace : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2600,12 +4020,194 @@ namespace Google.Apis.NetworkManagement.v1.Data
         public virtual EndpointInfo EndpointInfo { get; set; }
 
         /// <summary>
+        /// ID of trace. For forward traces, this ID is unique for each trace. For return traces, it matches ID of
+        /// associated forward trace. A single forward trace can be associated with none, one or more than one return
+        /// trace.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("forwardTraceId")]
+        public virtual System.Nullable<int> ForwardTraceId { get; set; }
+
+        /// <summary>
         /// A trace of a test contains multiple steps from the initial state to the final state (delivered, dropped,
         /// forwarded, or aborted). The steps are ordered by the processing sequence within the simulated network state
         /// machine. It is critical to preserve the order of the steps and avoid reordering or sorting them.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("steps")]
         public virtual System.Collections.Generic.IList<Step> Steps { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>For display only. Metadata associated with a VPC connector.</summary>
+    public class VpcConnectorInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Name of a VPC connector.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>Location in which the VPC connector is deployed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual string Location { get; set; }
+
+        /// <summary>URI of a VPC connector.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A configuration to generate VPC Flow Logs.</summary>
+    public class VpcFlowLogsConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. The aggregation interval for the logs. Default value is INTERVAL_5_SEC.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("aggregationInterval")]
+        public virtual string AggregationInterval { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. The time the config was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Optional. The user-supplied description of the VPC Flow Logs configuration. Maximum of 512 characters.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>Optional. Export filter used to define which VPC Flow Logs should be logged.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("filterExpr")]
+        public virtual string FilterExpr { get; set; }
+
+        /// <summary>
+        /// Optional. The value of the field must be in (0, 1]. The sampling rate of VPC Flow Logs where 1.0 means all
+        /// collected logs are reported. Setting the sampling rate to 0.0 is not allowed. If you want to disable VPC
+        /// Flow Logs, use the state field instead. Default value is 1.0.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("flowSampling")]
+        public virtual System.Nullable<float> FlowSampling { get; set; }
+
+        /// <summary>
+        /// Traffic will be logged from the Interconnect Attachment. Format:
+        /// projects/{project_id}/regions/{region}/interconnectAttachments/{name}
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("interconnectAttachment")]
+        public virtual string InterconnectAttachment { get; set; }
+
+        /// <summary>Optional. Resource labels to represent user-provided metadata.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labels")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Labels { get; set; }
+
+        /// <summary>
+        /// Optional. Configures whether all, none or a subset of metadata fields should be added to the reported VPC
+        /// flow logs. Default value is INCLUDE_ALL_METADATA.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("metadata")]
+        public virtual string Metadata { get; set; }
+
+        /// <summary>
+        /// Optional. Custom metadata fields to include in the reported VPC flow logs. Can only be specified if
+        /// "metadata" was set to CUSTOM_METADATA.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("metadataFields")]
+        public virtual System.Collections.Generic.IList<string> MetadataFields { get; set; }
+
+        /// <summary>
+        /// Identifier. Unique name of the configuration using the form:
+        /// `projects/{project_id}/locations/global/vpcFlowLogsConfigs/{vpc_flow_logs_config_id}`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Optional. The state of the VPC Flow Log configuration. Default value is ENABLED. When creating a new
+        /// configuration, it must be enabled.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>
+        /// Output only. A diagnostic bit - describes the state of the configured target resource for diagnostic
+        /// purposes.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targetResourceState")]
+        public virtual string TargetResourceState { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. The time the config was updated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Traffic will be logged from the VPN Tunnel. Format: projects/{project_id}/regions/{region}/vpnTunnels/{name}
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("vpnTunnel")]
+        public virtual string VpnTunnel { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

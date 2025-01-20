@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.CloudRuntimeConfig.v1
         public CloudRuntimeConfigService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Operations = new OperationsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://runtimeconfig.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://runtimeconfig.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.CloudRuntimeConfig.v1
         public override string Name => "runtimeconfig";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://runtimeconfig.googleapis.com/";
-        #else
-            "https://runtimeconfig.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://runtimeconfig.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Runtime Configuration API.</summary>
         public class Scope
@@ -293,13 +288,13 @@ namespace Google.Apis.CloudRuntimeConfig.v1
         /// `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check whether
         /// the cancellation succeeded or whether the operation completed despite cancellation. On successful
         /// cancellation, the operation is not deleted; instead, it becomes an operation with an Operation.error value
-        /// with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+        /// with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="name">The name of the operation resource to be cancelled.</param>
         public virtual CancelRequest Cancel(Google.Apis.CloudRuntimeConfig.v1.Data.CancelOperationRequest body, string name)
         {
-            return new CancelRequest(service, body, name);
+            return new CancelRequest(this.service, body, name);
         }
 
         /// <summary>
@@ -308,7 +303,7 @@ namespace Google.Apis.CloudRuntimeConfig.v1
         /// `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other methods to check whether
         /// the cancellation succeeded or whether the operation completed despite cancellation. On successful
         /// cancellation, the operation is not deleted; instead, it becomes an operation with an Operation.error value
-        /// with a google.rpc.Status.code of 1, corresponding to `Code.CANCELLED`.
+        /// with a google.rpc.Status.code of `1`, corresponding to `Code.CANCELLED`.
         /// </summary>
         public class CancelRequest : CloudRuntimeConfigBaseServiceRequest<Google.Apis.CloudRuntimeConfig.v1.Data.Empty>
         {
@@ -362,7 +357,7 @@ namespace Google.Apis.CloudRuntimeConfig.v1
         /// <param name="name">The name of the operation resource to be deleted.</param>
         public virtual DeleteRequest Delete(string name)
         {
-            return new DeleteRequest(service, name);
+            return new DeleteRequest(this.service, name);
         }
 
         /// <summary>
@@ -409,25 +404,17 @@ namespace Google.Apis.CloudRuntimeConfig.v1
 
         /// <summary>
         /// Lists operations that match the specified filter in the request. If the server doesn't support this method,
-        /// it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the binding to use
-        /// different resource name schemes, such as `users/*/operations`. To override the binding, API services can add
-        /// a binding such as `"/v1/{name=users/*}/operations"` to their service configuration. For backwards
-        /// compatibility, the default name includes the operations collection id, however overriding users must ensure
-        /// the name binding is the parent resource, without the operations collection id.
+        /// it returns `UNIMPLEMENTED`.
         /// </summary>
         /// <param name="name">The name of the operation's parent resource.</param>
         public virtual ListRequest List(string name)
         {
-            return new ListRequest(service, name);
+            return new ListRequest(this.service, name);
         }
 
         /// <summary>
         /// Lists operations that match the specified filter in the request. If the server doesn't support this method,
-        /// it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the binding to use
-        /// different resource name schemes, such as `users/*/operations`. To override the binding, API services can add
-        /// a binding such as `"/v1/{name=users/*}/operations"` to their service configuration. For backwards
-        /// compatibility, the default name includes the operations collection id, however overriding users must ensure
-        /// the name binding is the parent resource, without the operations collection id.
+        /// it returns `UNIMPLEMENTED`.
         /// </summary>
         public class ListRequest : CloudRuntimeConfigBaseServiceRequest<Google.Apis.CloudRuntimeConfig.v1.Data.ListOperationsResponse>
         {
@@ -515,8 +502,7 @@ namespace Google.Apis.CloudRuntimeConfig.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -569,8 +555,8 @@ namespace Google.Apis.CloudRuntimeConfig.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.

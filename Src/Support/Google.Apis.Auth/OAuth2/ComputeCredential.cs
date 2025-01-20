@@ -14,14 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+using Google.Apis.Auth.OAuth2.Requests;
 using Google.Apis.Auth.OAuth2.Responses;
 using Google.Apis.Http;
 using Google.Apis.Util;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -37,15 +41,16 @@ namespace Google.Apis.Auth.OAuth2
     /// https://cloud.google.com/compute/docs/authentication.
     /// </para>
     /// </summary>
-    public class ComputeCredential : ServiceCredential, IOidcTokenProvider, IGoogleCredential
+    public class ComputeCredential : ServiceCredential, IOidcTokenProvider, IGoogleCredential, IBlobSigner
     {
         /// <summary>The metadata server url. This can be overridden (for the purposes of Compute environment detection and
         /// auth token retrieval) using the GCE_METADATA_HOST environment variable.</summary>
         public const string MetadataServerUrl = GoogleAuthConsts.DefaultMetadataServerUrl;
 
         /// <summary>Caches result from first call to <c>IsRunningOnComputeEngine</c> </summary>
-        private readonly static Lazy<Task<bool>> isRunningOnComputeEngineCached = new Lazy<Task<bool>>(
-            () => IsRunningOnComputeEngineNoCache());
+        private readonly static Lazy<Task<bool>> isRunningOnComputeEngineCache = new Lazy<Task<bool>>(IsRunningOnComputeEngineUncachedAsync);
+
+        private readonly static Lazy<Task<string>> computeEngineUniverseDomainCache = new Lazy<Task<string>>(GetComputeEngineUniverseDomainUncachedAsync);
 
         /// <summary>
         /// Originally 1000ms was used without a retry. This proved inadequate; even 2000ms without
@@ -57,24 +62,45 @@ namespace Google.Apis.Auth.OAuth2
         private const int MetadataServerPingAttempts = 3;
 
         /// <summary>The Metadata flavor header name.</summary>
-        private const string MetadataFlavor = "Metadata-Flavor";
+        internal const string MetadataFlavor = "Metadata-Flavor";
 
         /// <summary>The Metadata header response indicating Google.</summary>
-        private const string GoogleMetadataHeader = "Google";
+        internal const string GoogleMetadataHeader = "Google";
+
+        /// <summary>
+        /// Caches the task that fetches the default service account email from the metadata server.
+        /// The default service account email can be cached because changing the service
+        /// account associated to a Compute instance requires a machine shutdown.
+        /// </summary>
+        private readonly Lazy<Task<string>> _defaultServiceAccountEmailCache;
+
+        /// <summary>
+        /// HttpClient used to call the IAM sign blob endpoint, authenticated as this credential.
+        /// </summary>
+        /// <remarks>Lazy to build one HtppClient only if it is needed.</remarks>
+        private readonly Lazy<ConfigurableHttpClient> _signBlobHttpClient;
 
         /// <summary>
         /// Gets the OIDC Token URL.
         /// </summary>
         public string OidcTokenUrl { get; }
 
-        /// <inheritdoc/>
-        bool IGoogleCredential.HasExplicitScopes => false;
+        /// <summary>
+        /// The explicitly set universe domain.
+        /// May be null, in which case the universe domain will be fetched from the metadata server.
+        /// </summary>
+        internal string ExplicitUniverseDomain { get; }
 
         /// <inheritdoc/>
-        bool IGoogleCredential.SupportsExplicitScopes => false;
+        bool IGoogleCredential.HasExplicitScopes => HasExplicitScopes;
+
+        /// <inheritdoc/>
+        bool IGoogleCredential.SupportsExplicitScopes => true;
+
+        internal string EffectiveTokenServerUrl { get; }
 
         /// <summary>
-        /// An initializer class for the Compute credential. It uses <see cref="GoogleAuthConsts.ComputeTokenUrl"/>
+        /// An initializer class for the Compute credential. It uses <see cref="GoogleAuthConsts.EffectiveComputeTokenUrl"/>
         /// as the token server URL (optionally overriding the host using the GCE_METADATA_HOST environment variable).
         /// </summary>
         new public class Initializer : ServiceCredential.Initializer
@@ -83,6 +109,12 @@ namespace Google.Apis.Auth.OAuth2
             /// Gets the OIDC Token URL.
             /// </summary>
             public string OidcTokenUrl { get; }
+
+            /// <summary>
+            /// The universe domain this credential belongs to.
+            /// May be null, in which case the GCE universe domain will be used.
+            /// </summary>
+            internal string UniverseDomain { get; set; }
 
             /// <summary>Constructs a new initializer using the default compute token URL
             /// and the default OIDC token URL.</summary>
@@ -100,21 +132,61 @@ namespace Google.Apis.Auth.OAuth2
                 : base(tokenUrl) => OidcTokenUrl = oidcTokenUrl;
 
             internal Initializer(ComputeCredential other)
-                : base(other) => OidcTokenUrl = other.OidcTokenUrl;
+                : base(other)
+            {
+                OidcTokenUrl = other.OidcTokenUrl;
+                UniverseDomain = other.ExplicitUniverseDomain;
+            }
         }
 
         /// <summary>Constructs a new Compute credential instance.</summary>
         public ComputeCredential() : this(new Initializer()) { }
 
         /// <summary>Constructs a new Compute credential instance.</summary>
-        public ComputeCredential(Initializer initializer) : base(initializer) => OidcTokenUrl = initializer.OidcTokenUrl;
+        public ComputeCredential(Initializer initializer) : base(initializer)
+        {
+            OidcTokenUrl = initializer.OidcTokenUrl;
+            ExplicitUniverseDomain = initializer.UniverseDomain;
+
+            if (HasExplicitScopes)
+            {
+                var uriBuilder = new UriBuilder(TokenServerUrl);
+                string scopesQuery = $"scopes={string.Join(",", Scopes)}";
+
+                // As per https://docs.microsoft.com/en-us/dotnet/api/system.uribuilder.query?view=net-6.0#examples
+                if (uriBuilder.Query is null || uriBuilder.Query.Length <= 1)
+                {
+                    uriBuilder.Query = scopesQuery;
+                }
+                else
+                {
+                    uriBuilder.Query = $"{uriBuilder.Query.Substring(1)}&{scopesQuery}";
+                }
+                EffectiveTokenServerUrl = uriBuilder.Uri.AbsoluteUri;
+            }
+            else
+            {
+                EffectiveTokenServerUrl = TokenServerUrl;
+            }
+            _defaultServiceAccountEmailCache = new Lazy<Task<string>>(FetchDefaultServiceAccountEmailAsync, LazyThreadSafetyMode.ExecutionAndPublication);
+            _signBlobHttpClient = new Lazy<ConfigurableHttpClient>(BuildSignBlobHttpClient, LazyThreadSafetyMode.ExecutionAndPublication);
+        }
+
+        /// <inheritdoc/>
+        async Task<string> IGoogleCredential.GetUniverseDomainAsync(CancellationToken cancellationToken) =>
+            ExplicitUniverseDomain ?? await computeEngineUniverseDomainCache.Value.WithCancellationToken(cancellationToken).ConfigureAwait(false);
+
+        /// <inheritdoc/>
+        string IGoogleCredential.GetUniverseDomain() =>
+            ExplicitUniverseDomain ?? Task.Run(() => computeEngineUniverseDomainCache.Value).Result;
 
         /// <inheritdoc/>
         IGoogleCredential IGoogleCredential.WithQuotaProject(string quotaProject) =>
             new ComputeCredential(new Initializer(this) { QuotaProject = quotaProject });
 
         /// <inheritdoc/>
-        IGoogleCredential IGoogleCredential.MaybeWithScopes(IEnumerable<string> scopes) => this;
+        IGoogleCredential IGoogleCredential.MaybeWithScopes(IEnumerable<string> scopes) =>
+            new ComputeCredential(new Initializer(this) { Scopes = scopes });
 
         /// <inheritdoc/>
         IGoogleCredential IGoogleCredential.WithUserForDomainWideDelegation(string user) =>
@@ -124,13 +196,37 @@ namespace Google.Apis.Auth.OAuth2
         IGoogleCredential IGoogleCredential.WithHttpClientFactory(IHttpClientFactory httpClientFactory) =>
             new ComputeCredential(new Initializer(this) { HttpClientFactory = httpClientFactory });
 
+        /// <inheritdoc/>
+        IGoogleCredential IGoogleCredential.WithUniverseDomain(string universeDomain) =>
+            new ComputeCredential(new Initializer(this) { UniverseDomain = universeDomain });
+
+        /// <summary>
+        /// Returns a task whose result, when completed, is the default service account email associated to
+        /// this Compute credential.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// This value is cached, because for changing the default service account associated to a
+        /// Compute VM, the machine needs to be turned off. This means that the operation is only
+        /// asynchronous when calling for the first time.
+        /// </para>
+        /// <para>
+        /// Note that if, when fetching this value, an exception is thrown, the exception is cached and
+        /// will be rethrown by the task returned by any future call to this method.
+        /// You can create a new <see cref="ComputeCredential"/> instance if that happens so fetching
+        /// the service account default email is re-attempted.
+        /// </para>
+        /// </remarks>
+        public Task<string> GetDefaultServiceAccountEmailAsync(CancellationToken cancellationToken = default) =>
+            Task.Run(() => _defaultServiceAccountEmailCache.Value, cancellationToken);
+
         #region ServiceCredential overrides
 
         /// <inheritdoc/>
         public override async Task<bool> RequestAccessTokenAsync(CancellationToken taskCancellationToken)
         {
             // Create and send the HTTP request to compute server token URL.
-            var httpRequest = new HttpRequestMessage(HttpMethod.Get, TokenServerUrl);
+            var httpRequest = new HttpRequestMessage(HttpMethod.Get, EffectiveTokenServerUrl);
             httpRequest.Headers.Add(MetadataFlavor, GoogleMetadataHeader);
             var response = await HttpClient.SendAsync(httpRequest, taskCancellationToken).ConfigureAwait(false);
             Token = await TokenResponse.FromHttpResponseAsync(response, Clock, Logger).ConfigureAwait(false);
@@ -173,16 +269,71 @@ namespace Google.Apis.Auth.OAuth2
         }
 
         /// <summary>
+        /// Signs the provided blob using the private key associated with the service account
+        /// this ComputeCredential represents.
+        /// </summary>
+        /// <param name="blob">The blob to sign.</param>
+        /// <param name="cancellationToken">Cancellation token to cancel the operation.</param>
+        /// <returns>The base64 encoded signature.</returns>
+        /// <exception cref="HttpRequestException">When the signing request fails.</exception>
+        /// <exception cref="JsonException">When the signing response is not valid JSON.</exception>
+        /// <remarks>
+        /// The private key associated with the Compute service account is not known locally
+        /// by a ComputeCredential. Signing happens by executing a request to the IAM Credentials API
+        /// which increases latency and counts towards IAM Credentials API quotas. Aditionally, the first
+        /// time a ComputeCredential is used to sign data, a request to the metadata server is made to
+        /// to obtain the email of the default Compute service account.
+        /// </remarks>
+        public async Task<string> SignBlobAsync(byte[] blob, CancellationToken cancellationToken = default)
+        {
+            var request = new IamSignBlobRequest { Payload = blob };
+            var serviceAccountEmail = await GetDefaultServiceAccountEmailAsync(cancellationToken).ConfigureAwait(false);
+            var universeDomain = await (this as IGoogleCredential).GetUniverseDomainAsync(cancellationToken).ConfigureAwait(false);
+            var signBlobUrl = string.Format(GoogleAuthConsts.IamSignEndpointFormatString, universeDomain, serviceAccountEmail);
+
+            var response = await request.PostJsonAsync<IamSignBlobResponse>(_signBlobHttpClient.Value, signBlobUrl, cancellationToken)
+                .ConfigureAwait(false);
+
+            return response.SignedBlob;
+        }
+
+        private async Task<string> FetchDefaultServiceAccountEmailAsync()
+        {
+            var httpRequest = new HttpRequestMessage(HttpMethod.Get, GoogleAuthConsts.EffectiveComputeDefaultServiceAccountEmailUrl);
+            httpRequest.Headers.Add(MetadataFlavor, GoogleMetadataHeader);
+
+            var response = await HttpClient.SendAsync(httpRequest).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        }
+
+        private ConfigurableHttpClient BuildSignBlobHttpClient()
+        {
+            var httpClientArgs = BuildCreateHttpClientArgsWithNoRetries();
+            AddIamSignBlobRetryConfiguration(httpClientArgs);
+            // We scope the credential because, although normal ComputeCredentials are scoped on origin,
+            // GKE Workload Identity credentials accept scopes.
+            // We know that the HttpClient is only used for IAM requests, so we scope it only for IAM.
+            var scopedCredential = ((IGoogleCredential)this).MaybeWithScopes(new string[] { GoogleAuthConsts.IamScope });
+            httpClientArgs.Initializers.Add(scopedCredential);
+            return HttpClientFactory.CreateHttpClient(httpClientArgs);
+        }
+
+        /// <summary>
         /// Detects if application is running on Google Compute Engine. This is achieved by attempting to contact
         /// GCE metadata server, that is only available on GCE. The check is only performed the first time you
         /// call this method, subsequent invocations used cached result of the first call.
         /// </summary>
         public static Task<bool> IsRunningOnComputeEngine()
         {
-            return isRunningOnComputeEngineCached.Value;
+            return isRunningOnComputeEngineCache.Value;
         }
 
-        private static async Task<bool> IsRunningOnComputeEngineNoCache()
+        private static async Task<bool> IsRunningOnComputeEngineUncachedAsync() =>
+            await IsMetadataServerAvailableAsync().ConfigureAwait(false)
+            || await IsGoogleBiosAsync().ConfigureAwait(false);
+
+        private static async Task<bool> IsMetadataServerAvailableAsync()
         {
             Logger.Info("Checking connectivity to ComputeEngine metadata server.");
 
@@ -211,16 +362,176 @@ namespace Google.Apis.Auth.OAuth2
                     }
                     catch (Exception e) when (e is HttpRequestException || e is WebException || e is OperationCanceledException)
                     {
-                        // No-op; we'll retry.
+                        // We'll retry, but let's log the exception.
                         // We may eventually want to handle the different exception types in different ways,
                         // e.g. returning false rather than retrying for some exception types. However,
                         // for now it's safe just to retry.
+                        Logger.Debug(
+                            "An exception ocurred while attempting to reach Google's metadata service on attempt {0}. " +
+                            "A total of {1} attempts will be made. " +
+                            "The exception was: {2}.",
+                            i + 1, MetadataServerPingAttempts, e);
                     }
                 }
             }
             // Only log after all attempts have failed.
-            Logger.Debug("Could not reach the Google Compute Engine metadata service. That is expected if this application is not running on GCE.");
+            Logger.Debug("Could not reach the Google Compute Engine metadata service. " +
+                "That is expected if this application is not running on GCE " +
+                "or on some cases where the metadata service is not available during application startup.");
             return false;
+        }
+
+        private static async Task<bool> IsGoogleBiosAsync()
+        {
+            Logger.Info("Checking BIOS values to determine GCE residency.");
+            try
+            {
+                if (IsLinux())
+                {
+                    return await IsLinuxGoogleBiosAsync().ConfigureAwait(false);
+                }
+                else if (IsWindows())
+                {
+                    return IsWindowsGoogleBios();
+                }
+                else
+                {
+                    Logger.Info("GCE residency detection through BIOS checking is only supported on Windows and Linux platforms.");
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Debug($"Could not read BIOS: {ex}");
+                return false;
+            }
+
+            // Some of these will be simpler once we have acted on
+            // https://github.com/googleapis/google-api-dotnet-client/issues/2561.
+
+            bool IsWindows()
+            {
+#if NET462
+                // RuntimeInformation.IsOsPlatform is not available for .NET 4.6.2.
+                // We are probably on Windows, unless we are using Mono which means we might be
+                // elsewhere. But we don't have a reliable way to determine that, so let's
+                // return false, always.
+                // Note that this check can go away after we update to 4.7.1 or higher.
+                return false;
+#else
+                return RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
+#endif
+            }
+
+            bool IsLinux()
+            {
+#if NET462
+                // RuntimeInformation.IsOsPlatform is not available for .NET 4.6.2.
+                // There's a chance we are on Linux if we are using Mono.
+                // But we don't have a reliable way to determine that, so let's
+                // return false, always.
+                // Note that this check can go away after we update to 4.7.1 or higher.
+                return false;
+#else
+                return RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+#endif
+            }
+
+            bool IsWindowsGoogleBios()
+            {
+                Logger.Info("Checking BIOS values on Windows.");
+                System.Management.ManagementClass biosClass = new ("Win32_BIOS");
+                using var instances = biosClass.GetInstances();
+
+                bool isGoogle = false;
+                foreach(var instance in instances)
+                {
+                    // We should only find one instance for Win32_BIOS class.
+                    using (instance)
+                    {
+                        try
+                        {
+                            isGoogle = isGoogle || instance["Manufacturer"]?.ToString() == "Google";
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Debug($"Error checking Win32_BIOS management object: {ex}.");
+                        }
+                    }
+                }
+                if (!isGoogle)
+                {
+                    Logger.Debug("No Win32_BIOS management object found.");
+                }
+                return isGoogle;
+            }
+
+            async Task<bool> IsLinuxGoogleBiosAsync()
+            {
+                Logger.Info("Checking BIOS values on Linux.");
+
+                string fileName = "/sys/class/dmi/id/product_name";
+                if (!File.Exists(fileName))
+                {
+                    Logger.Debug($"Couldn't read file {fileName} containing BIOS mapped values.");
+                    return false;
+                }
+
+                using var reader = File.OpenText(fileName);
+                string productName = await reader.ReadLineAsync().ConfigureAwait(false);
+                productName = productName?.Trim();
+                return productName == "Google" || productName == "Google Compute Engine";
+            }
+        }
+
+        private async static Task<string> GetComputeEngineUniverseDomainUncachedAsync()
+        {
+            Logger.Info("Attempting to fetch the universe domain from the metadata server.");
+
+            // Using the built-in HttpClient, as we want bare bones functionality - we'll control retries.
+            // Use the same one across all attempts, which may contribute to speedier retries.
+            using (var httpClient = new HttpClient())
+            {
+                int attempts = 0;
+                // We use the same timeouts as we do for token fetching.
+                foreach (var timeout in TokenRefreshManager.RefreshTimeouts)
+                {
+                    attempts++;
+                    var cts = new CancellationTokenSource(timeout);
+                    HttpResponseMessage response = null;
+                    try
+                    {
+                        var httpRequest = new HttpRequestMessage(HttpMethod.Get, GoogleAuthConsts.EffectiveComputeUniverDomainUrl);
+                        httpRequest.Headers.Add(MetadataFlavor, GoogleMetadataHeader);
+
+                        response = await httpClient.SendAsync(httpRequest, cts.Token).ConfigureAwait(false);
+                        response.EnsureSuccessStatusCode();
+
+                        return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+                    }
+                    catch (Exception) when (response?.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        Logger.Info($"The metadata server replied {HttpStatusCode.NotFound} when attempting to fetch the universe domain. " +
+                            $"Assuming default univer domain.");
+                        return GoogleAuthConsts.DefaultUniverseDomain;
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // We'll retry, but let's log the timeout.
+                        Logger.Debug(
+                            $"Fetching the universe domain from the metadata server timed out on attempt number {attempts} " +
+                            $"out of a total of {TokenRefreshManager.RefreshTimeouts.Length} attempts.");
+
+                        // If we've exhausted all our retries, throw.
+                        if (attempts == TokenRefreshManager.RefreshTimeouts.Length)
+                        {
+                            throw;
+                        }
+                    }
+                }
+            }
+            // We should have never reached here.
+            throw new InvalidOperationException("There's a bug in code. We should never reach this point.");
         }
     }
 }

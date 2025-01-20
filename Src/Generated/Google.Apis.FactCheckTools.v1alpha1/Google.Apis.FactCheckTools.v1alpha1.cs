@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ namespace Google.Apis.FactCheckTools.v1alpha1
         {
             Claims = new ClaimsResource(this);
             Pages = new PagesResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://factchecktools.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://factchecktools.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -45,36 +47,29 @@ namespace Google.Apis.FactCheckTools.v1alpha1
         public override string Name => "factchecktools";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://factchecktools.googleapis.com/";
-        #else
-            "https://factchecktools.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://factchecktools.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Fact Check Tools API.</summary>
         public class Scope
         {
-            /// <summary>See your primary Google Account email address</summary>
-            public static string UserinfoEmail = "https://www.googleapis.com/auth/userinfo.email";
+            /// <summary>Read, create, update, and delete your ClaimReview data.</summary>
+            public static string Factchecktools = "https://www.googleapis.com/auth/factchecktools";
         }
 
         /// <summary>Available OAuth 2.0 scope constants for use with the Fact Check Tools API.</summary>
         public static class ScopeConstants
         {
-            /// <summary>See your primary Google Account email address</summary>
-            public const string UserinfoEmail = "https://www.googleapis.com/auth/userinfo.email";
+            /// <summary>Read, create, update, and delete your ClaimReview data.</summary>
+            public const string Factchecktools = "https://www.googleapis.com/auth/factchecktools";
         }
 
         /// <summary>Gets the Claims resource.</summary>
@@ -279,10 +274,120 @@ namespace Google.Apis.FactCheckTools.v1alpha1
             this.service = service;
         }
 
+        /// <summary>Search through fact-checked claims using an image as the query.</summary>
+        public virtual ImageSearchRequest ImageSearch()
+        {
+            return new ImageSearchRequest(this.service);
+        }
+
+        /// <summary>Search through fact-checked claims using an image as the query.</summary>
+        public class ImageSearchRequest : FactCheckToolsBaseServiceRequest<Google.Apis.FactCheckTools.v1alpha1.Data.GoogleFactcheckingFactchecktoolsV1alpha1FactCheckedClaimImageSearchResponse>
+        {
+            /// <summary>Constructs a new ImageSearch request.</summary>
+            public ImageSearchRequest(Google.Apis.Services.IClientService service) : base(service)
+            {
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. The URI of the source image. This must be a publicly-accessible image HTTP/HTTPS URL. When
+            /// fetching images from HTTP/HTTPS URLs, Google cannot guarantee that the request will be completed. Your
+            /// request may fail if the specified host denies the request (e.g. due to request throttling or DOS
+            /// prevention), or if Google throttles requests to the site for abuse prevention. You should not depend on
+            /// externally-hosted images for production applications.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("imageUri", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string ImageUri { get; set; }
+
+            /// <summary>
+            /// Optional. The BCP-47 language code, such as "en-US" or "sr-Latn". Can be used to restrict results by
+            /// language, though we do not currently consider the region.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("languageCode", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string LanguageCode { get; set; }
+
+            /// <summary>
+            /// Optional. An integer that specifies the current offset (that is, starting result location) in search
+            /// results. This field is only considered if `page_token` is unset. For example, 0 means to return results
+            /// starting from the first matching result, and 10 means to return from the 11th result.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("offset", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<int> Offset { get; set; }
+
+            /// <summary>
+            /// Optional. The pagination size. We will return up to that many results. Defaults to 10 if not set.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<int> PageSize { get; set; }
+
+            /// <summary>
+            /// Optional. The pagination token. You may provide the `next_page_token` returned from a previous List
+            /// request, if any, in order to get the next page. All other fields must have the same values as in the
+            /// previous request.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string PageToken { get; set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "imageSearch";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1alpha1/claims:imageSearch";
+
+            /// <summary>Initializes ImageSearch parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("imageUri", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "imageUri",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("languageCode", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "languageCode",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("offset", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "offset",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "pageSize",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "pageToken",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
         /// <summary>Search through fact-checked claims.</summary>
         public virtual SearchRequest Search()
         {
-            return new SearchRequest(service);
+            return new SearchRequest(this.service);
         }
 
         /// <summary>Search through fact-checked claims.</summary>
@@ -429,7 +534,7 @@ namespace Google.Apis.FactCheckTools.v1alpha1
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.FactCheckTools.v1alpha1.Data.GoogleFactcheckingFactchecktoolsV1alpha1ClaimReviewMarkupPage body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>Create `ClaimReview` markup on a page.</summary>
@@ -468,7 +573,7 @@ namespace Google.Apis.FactCheckTools.v1alpha1
         /// <param name="name">The name of the resource to delete, in the form of `pages/{page_id}`.</param>
         public virtual DeleteRequest Delete(string name)
         {
-            return new DeleteRequest(service, name);
+            return new DeleteRequest(this.service, name);
         }
 
         /// <summary>Delete all `ClaimReview` markup on a page.</summary>
@@ -513,7 +618,7 @@ namespace Google.Apis.FactCheckTools.v1alpha1
         /// <param name="name">The name of the resource to get, in the form of `pages/{page_id}`.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>Get all `ClaimReview` markup on a page.</summary>
@@ -557,7 +662,7 @@ namespace Google.Apis.FactCheckTools.v1alpha1
         /// <summary>List the `ClaimReview` markup pages for a specific URL or for an organization.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>List the `ClaimReview` markup pages for a specific URL or for an organization.</summary>
@@ -676,7 +781,7 @@ namespace Google.Apis.FactCheckTools.v1alpha1
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.FactCheckTools.v1alpha1.Data.GoogleFactcheckingFactchecktoolsV1alpha1ClaimReviewMarkupPage body, string name)
         {
-            return new UpdateRequest(service, body, name);
+            return new UpdateRequest(this.service, body, name);
         }
 
         /// <summary>
@@ -737,9 +842,42 @@ namespace Google.Apis.FactCheckTools.v1alpha1.Data
     /// <summary>Information about the claim.</summary>
     public class GoogleFactcheckingFactchecktoolsV1alpha1Claim : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _claimDateRaw;
+
+        private object _claimDate;
+
         /// <summary>The date that the claim was made.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("claimDate")]
-        public virtual object ClaimDate { get; set; }
+        public virtual string ClaimDateRaw
+        {
+            get => _claimDateRaw;
+            set
+            {
+                _claimDate = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _claimDateRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ClaimDateRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ClaimDateDateTimeOffset instead.")]
+        public virtual object ClaimDate
+        {
+            get => _claimDate;
+            set
+            {
+                _claimDateRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _claimDate = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ClaimDateRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ClaimDateDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ClaimDateRaw);
+            set => ClaimDateRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>One or more reviews of this claim (namely, a fact-checking article).</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("claimReview")]
@@ -837,9 +975,42 @@ namespace Google.Apis.FactCheckTools.v1alpha1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("publisher")]
         public virtual GoogleFactcheckingFactchecktoolsV1alpha1Publisher Publisher { get; set; }
 
+        private string _reviewDateRaw;
+
+        private object _reviewDate;
+
         /// <summary>The date the claim was reviewed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("reviewDate")]
-        public virtual object ReviewDate { get; set; }
+        public virtual string ReviewDateRaw
+        {
+            get => _reviewDateRaw;
+            set
+            {
+                _reviewDate = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _reviewDateRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ReviewDateRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ReviewDateDateTimeOffset instead.")]
+        public virtual object ReviewDate
+        {
+            get => _reviewDate;
+            set
+            {
+                _reviewDateRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _reviewDate = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ReviewDateRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ReviewDateDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ReviewDateRaw);
+            set => ReviewDateRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Textual rating. For instance, "Mostly false".</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("textualRating")]
@@ -979,6 +1150,35 @@ namespace Google.Apis.FactCheckTools.v1alpha1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Response from searching fact-checked claims by image.</summary>
+    public class GoogleFactcheckingFactchecktoolsV1alpha1FactCheckedClaimImageSearchResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The next pagination token in the Search response. It should be used as the `page_token` for the following
+        /// request. An empty value means no more results.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The list of claims and all of their associated information.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("results")]
+        public virtual System.Collections.Generic.IList<GoogleFactcheckingFactchecktoolsV1alpha1FactCheckedClaimImageSearchResponseResult> Results { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A claim and its associated information.</summary>
+    public class GoogleFactcheckingFactchecktoolsV1alpha1FactCheckedClaimImageSearchResponseResult : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A claim which matched the query.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("claim")]
+        public virtual GoogleFactcheckingFactchecktoolsV1alpha1Claim Claim { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Response from searching fact-checked claims.</summary>
     public class GoogleFactcheckingFactchecktoolsV1alpha1FactCheckedClaimSearchResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1036,8 +1236,7 @@ namespace Google.Apis.FactCheckTools.v1alpha1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class GoogleProtobufEmpty : Google.Apis.Requests.IDirectResponseSchema
     {

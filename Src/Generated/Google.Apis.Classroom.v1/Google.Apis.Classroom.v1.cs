@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@ namespace Google.Apis.Classroom.v1
             Invitations = new InvitationsResource(this);
             Registrations = new RegistrationsResource(this);
             UserProfiles = new UserProfilesResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://classroom.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://classroom.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -47,27 +49,28 @@ namespace Google.Apis.Classroom.v1
         public override string Name => "classroom";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://classroom.googleapis.com/";
-        #else
-            "https://classroom.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://classroom.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Google Classroom API.</summary>
         public class Scope
         {
+            /// <summary>See and update its own attachments to posts in Google Classroom</summary>
+            public static string ClassroomAddonsStudent = "https://www.googleapis.com/auth/classroom.addons.student";
+
+            /// <summary>
+            /// See, create, and update its own attachments to posts in classes you teach in Google Classroom
+            /// </summary>
+            public static string ClassroomAddonsTeacher = "https://www.googleapis.com/auth/classroom.addons.teacher";
+
             /// <summary>View and manage announcements in Google Classroom</summary>
             public static string ClassroomAnnouncements = "https://www.googleapis.com/auth/classroom.announcements";
 
@@ -145,6 +148,14 @@ namespace Google.Apis.Classroom.v1
         /// <summary>Available OAuth 2.0 scope constants for use with the Google Classroom API.</summary>
         public static class ScopeConstants
         {
+            /// <summary>See and update its own attachments to posts in Google Classroom</summary>
+            public const string ClassroomAddonsStudent = "https://www.googleapis.com/auth/classroom.addons.student";
+
+            /// <summary>
+            /// See, create, and update its own attachments to posts in classes you teach in Google Classroom
+            /// </summary>
+            public const string ClassroomAddonsTeacher = "https://www.googleapis.com/auth/classroom.addons.teacher";
+
             /// <summary>View and manage announcements in Google Classroom</summary>
             public const string ClassroomAnnouncements = "https://www.googleapis.com/auth/classroom.announcements";
 
@@ -429,6 +440,7 @@ namespace Google.Apis.Classroom.v1
             Announcements = new AnnouncementsResource(service);
             CourseWork = new CourseWorkResource(service);
             CourseWorkMaterials = new CourseWorkMaterialsResource(service);
+            Posts = new PostsResource(service);
             Students = new StudentsResource(service);
             Teachers = new TeachersResource(service);
             Topics = new TopicsResource(service);
@@ -465,7 +477,7 @@ namespace Google.Apis.Classroom.v1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Classroom.v1.Data.CourseAlias body, string courseId)
             {
-                return new CreateRequest(service, body, courseId);
+                return new CreateRequest(this.service, body, courseId);
             }
 
             /// <summary>
@@ -536,7 +548,7 @@ namespace Google.Apis.Classroom.v1
             /// <param name="alias">Alias to delete. This may not be the Classroom-assigned identifier.</param>
             public virtual DeleteRequest Delete(string courseId, string alias)
             {
-                return new DeleteRequest(service, courseId, alias);
+                return new DeleteRequest(this.service, courseId, alias);
             }
 
             /// <summary>
@@ -610,7 +622,7 @@ namespace Google.Apis.Classroom.v1
             /// </param>
             public virtual ListRequest List(string courseId)
             {
-                return new ListRequest(service, courseId);
+                return new ListRequest(this.service, courseId);
             }
 
             /// <summary>
@@ -705,6 +717,589 @@ namespace Google.Apis.Classroom.v1
             public AnnouncementsResource(Google.Apis.Services.IClientService service)
             {
                 this.service = service;
+                AddOnAttachments = new AddOnAttachmentsResource(service);
+            }
+
+            /// <summary>Gets the AddOnAttachments resource.</summary>
+            public virtual AddOnAttachmentsResource AddOnAttachments { get; }
+
+            /// <summary>The "addOnAttachments" collection of methods.</summary>
+            public class AddOnAttachmentsResource
+            {
+                private const string Resource = "addOnAttachments";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public AddOnAttachmentsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>
+                /// Creates an add-on attachment under a post. Requires the add-on to have permission to create new
+                /// attachments on the post. This method returns the following error codes: * `PERMISSION_DENIED` for
+                /// access errors. * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the
+                /// identified resources does not exist.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="itemId">
+                /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which to create the
+                /// attachment. This field is required, but is not marked as such while we are migrating from post_id.
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.Classroom.v1.Data.AddOnAttachment body, string courseId, string itemId)
+                {
+                    return new CreateRequest(this.service, body, courseId, itemId);
+                }
+
+                /// <summary>
+                /// Creates an add-on attachment under a post. Requires the add-on to have permission to create new
+                /// attachments on the post. This method returns the following error codes: * `PERMISSION_DENIED` for
+                /// access errors. * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the
+                /// identified resources does not exist.
+                /// </summary>
+                public class CreateRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.AddOnAttachment>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Classroom.v1.Data.AddOnAttachment body, string courseId, string itemId) : base(service)
+                    {
+                        CourseId = courseId;
+                        ItemId = itemId;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>
+                    /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which to create
+                    /// the attachment. This field is required, but is not marked as such while we are migrating from
+                    /// post_id.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string ItemId { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Token that authorizes the request. The token is passed as a query parameter when the
+                    /// user is redirected from Classroom to the add-on's URL. This authorization token is required for
+                    /// in-Classroom attachment creation but optional for partner-first attachment creation. Returns an
+                    /// error if not provided for partner-first attachment creation and the developer projects that
+                    /// created the attachment and its parent stream item do not match.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("addOnToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string AddOnToken { get; set; }
+
+                    /// <summary>Optional. Deprecated, use `item_id` instead.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PostId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Classroom.v1.Data.AddOnAttachment Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/announcements/{itemId}/addOnAttachments";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "itemId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("addOnToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "addOnToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "postId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Deletes an add-on attachment. Requires the add-on to have been the original creator of the
+                /// attachment. This method returns the following error codes: * `PERMISSION_DENIED` for access errors.
+                /// * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the identified resources
+                /// does not exist.
+                /// </summary>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="itemId">
+                /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the attachment
+                /// is attached. This field is required, but is not marked as such while we are migrating from post_id.
+                /// </param>
+                /// <param name="attachmentId">Required. Identifier of the attachment.</param>
+                public virtual DeleteRequest Delete(string courseId, string itemId, string attachmentId)
+                {
+                    return new DeleteRequest(this.service, courseId, itemId, attachmentId);
+                }
+
+                /// <summary>
+                /// Deletes an add-on attachment. Requires the add-on to have been the original creator of the
+                /// attachment. This method returns the following error codes: * `PERMISSION_DENIED` for access errors.
+                /// * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the identified resources
+                /// does not exist.
+                /// </summary>
+                public class DeleteRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.Empty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string courseId, string itemId, string attachmentId) : base(service)
+                    {
+                        CourseId = courseId;
+                        ItemId = itemId;
+                        AttachmentId = attachmentId;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>
+                    /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the
+                    /// attachment is attached. This field is required, but is not marked as such while we are migrating
+                    /// from post_id.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string ItemId { get; private set; }
+
+                    /// <summary>Required. Identifier of the attachment.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("attachmentId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string AttachmentId { get; private set; }
+
+                    /// <summary>Optional. Deprecated, use `item_id` instead.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PostId { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/announcements/{itemId}/addOnAttachments/{attachmentId}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "itemId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("attachmentId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "attachmentId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "postId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Returns an add-on attachment. Requires the add-on requesting the attachment to be the original
+                /// creator of the attachment. This method returns the following error codes: * `PERMISSION_DENIED` for
+                /// access errors. * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the
+                /// identified resources does not exist.
+                /// </summary>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="itemId">
+                /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the attachment
+                /// is attached. This field is required, but is not marked as such while we are migrating from post_id.
+                /// </param>
+                /// <param name="attachmentId">Required. Identifier of the attachment.</param>
+                public virtual GetRequest Get(string courseId, string itemId, string attachmentId)
+                {
+                    return new GetRequest(this.service, courseId, itemId, attachmentId);
+                }
+
+                /// <summary>
+                /// Returns an add-on attachment. Requires the add-on requesting the attachment to be the original
+                /// creator of the attachment. This method returns the following error codes: * `PERMISSION_DENIED` for
+                /// access errors. * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the
+                /// identified resources does not exist.
+                /// </summary>
+                public class GetRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.AddOnAttachment>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string courseId, string itemId, string attachmentId) : base(service)
+                    {
+                        CourseId = courseId;
+                        ItemId = itemId;
+                        AttachmentId = attachmentId;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>
+                    /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the
+                    /// attachment is attached. This field is required, but is not marked as such while we are migrating
+                    /// from post_id.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string ItemId { get; private set; }
+
+                    /// <summary>Required. Identifier of the attachment.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("attachmentId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string AttachmentId { get; private set; }
+
+                    /// <summary>Optional. Deprecated, use `item_id` instead.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PostId { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/announcements/{itemId}/addOnAttachments/{attachmentId}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "itemId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("attachmentId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "attachmentId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "postId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Returns all attachments created by an add-on under the post. Requires the add-on to have active
+                /// attachments on the post or have permission to create new attachments on the post. This method
+                /// returns the following error codes: * `PERMISSION_DENIED` for access errors. * `INVALID_ARGUMENT` if
+                /// the request is malformed. * `NOT_FOUND` if one of the identified resources does not exist.
+                /// </summary>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="itemId">
+                /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` whose attachments should be
+                /// enumerated. This field is required, but is not marked as such while we are migrating from post_id.
+                /// </param>
+                public virtual ListRequest List(string courseId, string itemId)
+                {
+                    return new ListRequest(this.service, courseId, itemId);
+                }
+
+                /// <summary>
+                /// Returns all attachments created by an add-on under the post. Requires the add-on to have active
+                /// attachments on the post or have permission to create new attachments on the post. This method
+                /// returns the following error codes: * `PERMISSION_DENIED` for access errors. * `INVALID_ARGUMENT` if
+                /// the request is malformed. * `NOT_FOUND` if one of the identified resources does not exist.
+                /// </summary>
+                public class ListRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.ListAddOnAttachmentsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string courseId, string itemId) : base(service)
+                    {
+                        CourseId = courseId;
+                        ItemId = itemId;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>
+                    /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` whose attachments should
+                    /// be enumerated. This field is required, but is not marked as such while we are migrating from
+                    /// post_id.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string ItemId { get; private set; }
+
+                    /// <summary>
+                    /// The maximum number of attachments to return. The service may return fewer than this value. If
+                    /// unspecified, at most 20 attachments will be returned. The maximum value is 20; values above 20
+                    /// will be coerced to 20.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// A page token, received from a previous `ListAddOnAttachments` call. Provide this to retrieve the
+                    /// subsequent page. When paginating, all other parameters provided to `ListAddOnAttachments` must
+                    /// match the call that provided the page token.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>
+                    /// Optional. Identifier of the post under the course whose attachments to enumerate. Deprecated,
+                    /// use `item_id` instead.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PostId { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/announcements/{itemId}/addOnAttachments";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "itemId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "postId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Updates an add-on attachment. Requires the add-on to have been the original creator of the
+                /// attachment. This method returns the following error codes: * `PERMISSION_DENIED` for access errors.
+                /// * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the identified resources
+                /// does not exist.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="itemId">Identifier of the post under which the attachment is attached.</param>
+                /// <param name="attachmentId">Required. Identifier of the attachment.</param>
+                public virtual PatchRequest Patch(Google.Apis.Classroom.v1.Data.AddOnAttachment body, string courseId, string itemId, string attachmentId)
+                {
+                    return new PatchRequest(this.service, body, courseId, itemId, attachmentId);
+                }
+
+                /// <summary>
+                /// Updates an add-on attachment. Requires the add-on to have been the original creator of the
+                /// attachment. This method returns the following error codes: * `PERMISSION_DENIED` for access errors.
+                /// * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the identified resources
+                /// does not exist.
+                /// </summary>
+                public class PatchRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.AddOnAttachment>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.Classroom.v1.Data.AddOnAttachment body, string courseId, string itemId, string attachmentId) : base(service)
+                    {
+                        CourseId = courseId;
+                        ItemId = itemId;
+                        AttachmentId = attachmentId;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>Identifier of the post under which the attachment is attached.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string ItemId { get; private set; }
+
+                    /// <summary>Required. Identifier of the attachment.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("attachmentId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string AttachmentId { get; private set; }
+
+                    /// <summary>Required. Identifier of the post under which the attachment is attached.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PostId { get; set; }
+
+                    /// <summary>
+                    /// Required. Mask that identifies which fields on the attachment to update. The update fails if
+                    /// invalid fields are specified. If a field supports empty values, it can be cleared by specifying
+                    /// it in the update mask and not in the `AddOnAttachment` object. If a field that does not support
+                    /// empty values is included in the update mask and not set in the `AddOnAttachment` object, an
+                    /// `INVALID_ARGUMENT` error is returned. The following fields may be specified by teachers: *
+                    /// `title` * `teacher_view_uri` * `student_view_uri` * `student_work_review_uri` * `due_date` *
+                    /// `due_time` * `max_points`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Classroom.v1.Data.AddOnAttachment Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/announcements/{itemId}/addOnAttachments/{attachmentId}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "itemId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("attachmentId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "attachmentId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "postId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
             }
 
             /// <summary>
@@ -720,7 +1315,7 @@ namespace Google.Apis.Classroom.v1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Classroom.v1.Data.Announcement body, string courseId)
             {
-                return new CreateRequest(service, body, courseId);
+                return new CreateRequest(this.service, body, courseId);
             }
 
             /// <summary>
@@ -793,7 +1388,7 @@ namespace Google.Apis.Classroom.v1
             /// </param>
             public virtual DeleteRequest Delete(string courseId, string id)
             {
-                return new DeleteRequest(service, courseId, id);
+                return new DeleteRequest(this.service, courseId, id);
             }
 
             /// <summary>
@@ -871,7 +1466,7 @@ namespace Google.Apis.Classroom.v1
             /// <param name="id">Identifier of the announcement.</param>
             public virtual GetRequest Get(string courseId, string id)
             {
-                return new GetRequest(service, courseId, id);
+                return new GetRequest(this.service, courseId, id);
             }
 
             /// <summary>
@@ -934,6 +1529,130 @@ namespace Google.Apis.Classroom.v1
             }
 
             /// <summary>
+            /// Gets metadata for Classroom add-ons in the context of a specific post. To maintain the integrity of its
+            /// own data and permissions model, an add-on should call this to validate query parameters and the
+            /// requesting user's role whenever the add-on is opened in an
+            /// [iframe](https://developers.google.com/classroom/add-ons/get-started/iframes/iframes-overview). This
+            /// method returns the following error codes: * `PERMISSION_DENIED` for access errors. * `INVALID_ARGUMENT`
+            /// if the request is malformed. * `NOT_FOUND` if one of the identified resources does not exist.
+            /// </summary>
+            /// <param name="courseId">Required. Identifier of the course.</param>
+            /// <param name="itemId">
+            /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the attachment is
+            /// attached. This field is required, but is not marked as such while we are migrating from post_id.
+            /// </param>
+            public virtual GetAddOnContextRequest GetAddOnContext(string courseId, string itemId)
+            {
+                return new GetAddOnContextRequest(this.service, courseId, itemId);
+            }
+
+            /// <summary>
+            /// Gets metadata for Classroom add-ons in the context of a specific post. To maintain the integrity of its
+            /// own data and permissions model, an add-on should call this to validate query parameters and the
+            /// requesting user's role whenever the add-on is opened in an
+            /// [iframe](https://developers.google.com/classroom/add-ons/get-started/iframes/iframes-overview). This
+            /// method returns the following error codes: * `PERMISSION_DENIED` for access errors. * `INVALID_ARGUMENT`
+            /// if the request is malformed. * `NOT_FOUND` if one of the identified resources does not exist.
+            /// </summary>
+            public class GetAddOnContextRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.AddOnContext>
+            {
+                /// <summary>Constructs a new GetAddOnContext request.</summary>
+                public GetAddOnContextRequest(Google.Apis.Services.IClientService service, string courseId, string itemId) : base(service)
+                {
+                    CourseId = courseId;
+                    ItemId = itemId;
+                    InitParameters();
+                }
+
+                /// <summary>Required. Identifier of the course.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string CourseId { get; private set; }
+
+                /// <summary>
+                /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the attachment
+                /// is attached. This field is required, but is not marked as such while we are migrating from post_id.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string ItemId { get; private set; }
+
+                /// <summary>
+                /// Optional. Token that authorizes the request. The token is passed as a query parameter when the user
+                /// is redirected from Classroom to the add-on's URL. The authorization token is required when neither
+                /// of the following is true: * The add-on has attachments on the post. * The developer project issuing
+                /// the request is the same project that created the post.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("addOnToken", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string AddOnToken { get; set; }
+
+                /// <summary>
+                /// Optional. The identifier of the attachment. This field is required for all requests except when the
+                /// user is in the [Attachment Discovery
+                /// iframe](https://developers.google.com/classroom/add-ons/get-started/iframes/attachment-discovery-iframe).
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("attachmentId", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string AttachmentId { get; set; }
+
+                /// <summary>Optional. Deprecated, use `item_id` instead.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string PostId { get; set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "getAddOnContext";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/courses/{courseId}/announcements/{itemId}/addOnContext";
+
+                /// <summary>Initializes GetAddOnContext parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "courseId",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "itemId",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("addOnToken", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "addOnToken",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("attachmentId", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "attachmentId",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "postId",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+
+            /// <summary>
             /// Returns a list of announcements that the requester is permitted to view. Course students may only view
             /// `PUBLISHED` announcements. Course teachers and domain administrators may view all announcements. This
             /// method returns the following error codes: * `PERMISSION_DENIED` if the requesting user is not permitted
@@ -945,7 +1664,7 @@ namespace Google.Apis.Classroom.v1
             /// </param>
             public virtual ListRequest List(string courseId)
             {
-                return new ListRequest(service, courseId);
+                return new ListRequest(this.service, courseId);
             }
 
             /// <summary>
@@ -1116,7 +1835,7 @@ namespace Google.Apis.Classroom.v1
             /// <param name="id">Identifier of the announcement.</param>
             public virtual ModifyAssigneesRequest ModifyAssignees(Google.Apis.Classroom.v1.Data.ModifyAnnouncementAssigneesRequest body, string courseId, string id)
             {
-                return new ModifyAssigneesRequest(service, body, courseId, id);
+                return new ModifyAssigneesRequest(this.service, body, courseId, id);
             }
 
             /// <summary>
@@ -1200,7 +1919,7 @@ namespace Google.Apis.Classroom.v1
             /// <param name="id">Identifier of the announcement.</param>
             public virtual PatchRequest Patch(Google.Apis.Classroom.v1.Data.Announcement body, string courseId, string id)
             {
-                return new PatchRequest(service, body, courseId, id);
+                return new PatchRequest(this.service, body, courseId, id);
             }
 
             /// <summary>
@@ -1305,7 +2024,1391 @@ namespace Google.Apis.Classroom.v1
             public CourseWorkResource(Google.Apis.Services.IClientService service)
             {
                 this.service = service;
+                AddOnAttachments = new AddOnAttachmentsResource(service);
+                Rubrics = new RubricsResource(service);
                 StudentSubmissions = new StudentSubmissionsResource(service);
+            }
+
+            /// <summary>Gets the AddOnAttachments resource.</summary>
+            public virtual AddOnAttachmentsResource AddOnAttachments { get; }
+
+            /// <summary>The "addOnAttachments" collection of methods.</summary>
+            public class AddOnAttachmentsResource
+            {
+                private const string Resource = "addOnAttachments";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public AddOnAttachmentsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                    StudentSubmissions = new StudentSubmissionsResource(service);
+                }
+
+                /// <summary>Gets the StudentSubmissions resource.</summary>
+                public virtual StudentSubmissionsResource StudentSubmissions { get; }
+
+                /// <summary>The "studentSubmissions" collection of methods.</summary>
+                public class StudentSubmissionsResource
+                {
+                    private const string Resource = "studentSubmissions";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public StudentSubmissionsResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>
+                    /// Returns a student submission for an add-on attachment. This method returns the following error
+                    /// codes: * `PERMISSION_DENIED` for access errors. * `INVALID_ARGUMENT` if the request is
+                    /// malformed. * `NOT_FOUND` if one of the identified resources does not exist.
+                    /// </summary>
+                    /// <param name="courseId">Required. Identifier of the course.</param>
+                    /// <param name="itemId">
+                    /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the
+                    /// attachment is attached. This field is required, but is not marked as such while we are migrating
+                    /// from post_id.
+                    /// </param>
+                    /// <param name="attachmentId">Required. Identifier of the attachment.</param>
+                    /// <param name="submissionId">Required. Identifier of the student’s submission.</param>
+                    public virtual GetRequest Get(string courseId, string itemId, string attachmentId, string submissionId)
+                    {
+                        return new GetRequest(this.service, courseId, itemId, attachmentId, submissionId);
+                    }
+
+                    /// <summary>
+                    /// Returns a student submission for an add-on attachment. This method returns the following error
+                    /// codes: * `PERMISSION_DENIED` for access errors. * `INVALID_ARGUMENT` if the request is
+                    /// malformed. * `NOT_FOUND` if one of the identified resources does not exist.
+                    /// </summary>
+                    public class GetRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.AddOnAttachmentStudentSubmission>
+                    {
+                        /// <summary>Constructs a new Get request.</summary>
+                        public GetRequest(Google.Apis.Services.IClientService service, string courseId, string itemId, string attachmentId, string submissionId) : base(service)
+                        {
+                            CourseId = courseId;
+                            ItemId = itemId;
+                            AttachmentId = attachmentId;
+                            SubmissionId = submissionId;
+                            InitParameters();
+                        }
+
+                        /// <summary>Required. Identifier of the course.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string CourseId { get; private set; }
+
+                        /// <summary>
+                        /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the
+                        /// attachment is attached. This field is required, but is not marked as such while we are
+                        /// migrating from post_id.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string ItemId { get; private set; }
+
+                        /// <summary>Required. Identifier of the attachment.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("attachmentId", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string AttachmentId { get; private set; }
+
+                        /// <summary>Required. Identifier of the student’s submission.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("submissionId", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string SubmissionId { get; private set; }
+
+                        /// <summary>Optional. Deprecated, use `item_id` instead.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PostId { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "get";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/courses/{courseId}/courseWork/{itemId}/addOnAttachments/{attachmentId}/studentSubmissions/{submissionId}";
+
+                        /// <summary>Initializes Get parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "courseId",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "itemId",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("attachmentId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "attachmentId",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("submissionId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "submissionId",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "postId",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Updates data associated with an add-on attachment submission. Requires the add-on to have been
+                    /// the original creator of the attachment and the attachment to have a positive `max_points` value
+                    /// set. This method returns the following error codes: * `PERMISSION_DENIED` for access errors. *
+                    /// `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the identified resources
+                    /// does not exist.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="courseId">Required. Identifier of the course.</param>
+                    /// <param name="itemId">
+                    /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the
+                    /// attachment is attached. This field is required, but is not marked as such while we are migrating
+                    /// from post_id.
+                    /// </param>
+                    /// <param name="attachmentId">Required. Identifier of the attachment.</param>
+                    /// <param name="submissionId">Required. Identifier of the student's submission.</param>
+                    public virtual PatchRequest Patch(Google.Apis.Classroom.v1.Data.AddOnAttachmentStudentSubmission body, string courseId, string itemId, string attachmentId, string submissionId)
+                    {
+                        return new PatchRequest(this.service, body, courseId, itemId, attachmentId, submissionId);
+                    }
+
+                    /// <summary>
+                    /// Updates data associated with an add-on attachment submission. Requires the add-on to have been
+                    /// the original creator of the attachment and the attachment to have a positive `max_points` value
+                    /// set. This method returns the following error codes: * `PERMISSION_DENIED` for access errors. *
+                    /// `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the identified resources
+                    /// does not exist.
+                    /// </summary>
+                    public class PatchRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.AddOnAttachmentStudentSubmission>
+                    {
+                        /// <summary>Constructs a new Patch request.</summary>
+                        public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.Classroom.v1.Data.AddOnAttachmentStudentSubmission body, string courseId, string itemId, string attachmentId, string submissionId) : base(service)
+                        {
+                            CourseId = courseId;
+                            ItemId = itemId;
+                            AttachmentId = attachmentId;
+                            SubmissionId = submissionId;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>Required. Identifier of the course.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string CourseId { get; private set; }
+
+                        /// <summary>
+                        /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the
+                        /// attachment is attached. This field is required, but is not marked as such while we are
+                        /// migrating from post_id.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string ItemId { get; private set; }
+
+                        /// <summary>Required. Identifier of the attachment.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("attachmentId", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string AttachmentId { get; private set; }
+
+                        /// <summary>Required. Identifier of the student's submission.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("submissionId", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string SubmissionId { get; private set; }
+
+                        /// <summary>Optional. Deprecated, use `item_id` instead.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PostId { get; set; }
+
+                        /// <summary>
+                        /// Required. Mask that identifies which fields on the attachment to update. The update fails if
+                        /// invalid fields are specified. If a field supports empty values, it can be cleared by
+                        /// specifying it in the update mask and not in the `AddOnAttachmentStudentSubmission` object.
+                        /// The following fields may be specified by teachers: * `points_earned`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual object UpdateMask { get; set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Classroom.v1.Data.AddOnAttachmentStudentSubmission Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "patch";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "PATCH";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/courses/{courseId}/courseWork/{itemId}/addOnAttachments/{attachmentId}/studentSubmissions/{submissionId}";
+
+                        /// <summary>Initializes Patch parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "courseId",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "itemId",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("attachmentId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "attachmentId",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("submissionId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "submissionId",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "postId",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "updateMask",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+                }
+
+                /// <summary>
+                /// Creates an add-on attachment under a post. Requires the add-on to have permission to create new
+                /// attachments on the post. This method returns the following error codes: * `PERMISSION_DENIED` for
+                /// access errors. * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the
+                /// identified resources does not exist.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="itemId">
+                /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which to create the
+                /// attachment. This field is required, but is not marked as such while we are migrating from post_id.
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.Classroom.v1.Data.AddOnAttachment body, string courseId, string itemId)
+                {
+                    return new CreateRequest(this.service, body, courseId, itemId);
+                }
+
+                /// <summary>
+                /// Creates an add-on attachment under a post. Requires the add-on to have permission to create new
+                /// attachments on the post. This method returns the following error codes: * `PERMISSION_DENIED` for
+                /// access errors. * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the
+                /// identified resources does not exist.
+                /// </summary>
+                public class CreateRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.AddOnAttachment>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Classroom.v1.Data.AddOnAttachment body, string courseId, string itemId) : base(service)
+                    {
+                        CourseId = courseId;
+                        ItemId = itemId;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>
+                    /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which to create
+                    /// the attachment. This field is required, but is not marked as such while we are migrating from
+                    /// post_id.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string ItemId { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Token that authorizes the request. The token is passed as a query parameter when the
+                    /// user is redirected from Classroom to the add-on's URL. This authorization token is required for
+                    /// in-Classroom attachment creation but optional for partner-first attachment creation. Returns an
+                    /// error if not provided for partner-first attachment creation and the developer projects that
+                    /// created the attachment and its parent stream item do not match.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("addOnToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string AddOnToken { get; set; }
+
+                    /// <summary>Optional. Deprecated, use `item_id` instead.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PostId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Classroom.v1.Data.AddOnAttachment Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/courseWork/{itemId}/addOnAttachments";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "itemId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("addOnToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "addOnToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "postId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Deletes an add-on attachment. Requires the add-on to have been the original creator of the
+                /// attachment. This method returns the following error codes: * `PERMISSION_DENIED` for access errors.
+                /// * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the identified resources
+                /// does not exist.
+                /// </summary>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="itemId">
+                /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the attachment
+                /// is attached. This field is required, but is not marked as such while we are migrating from post_id.
+                /// </param>
+                /// <param name="attachmentId">Required. Identifier of the attachment.</param>
+                public virtual DeleteRequest Delete(string courseId, string itemId, string attachmentId)
+                {
+                    return new DeleteRequest(this.service, courseId, itemId, attachmentId);
+                }
+
+                /// <summary>
+                /// Deletes an add-on attachment. Requires the add-on to have been the original creator of the
+                /// attachment. This method returns the following error codes: * `PERMISSION_DENIED` for access errors.
+                /// * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the identified resources
+                /// does not exist.
+                /// </summary>
+                public class DeleteRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.Empty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string courseId, string itemId, string attachmentId) : base(service)
+                    {
+                        CourseId = courseId;
+                        ItemId = itemId;
+                        AttachmentId = attachmentId;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>
+                    /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the
+                    /// attachment is attached. This field is required, but is not marked as such while we are migrating
+                    /// from post_id.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string ItemId { get; private set; }
+
+                    /// <summary>Required. Identifier of the attachment.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("attachmentId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string AttachmentId { get; private set; }
+
+                    /// <summary>Optional. Deprecated, use `item_id` instead.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PostId { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/courseWork/{itemId}/addOnAttachments/{attachmentId}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "itemId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("attachmentId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "attachmentId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "postId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Returns an add-on attachment. Requires the add-on requesting the attachment to be the original
+                /// creator of the attachment. This method returns the following error codes: * `PERMISSION_DENIED` for
+                /// access errors. * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the
+                /// identified resources does not exist.
+                /// </summary>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="itemId">
+                /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the attachment
+                /// is attached. This field is required, but is not marked as such while we are migrating from post_id.
+                /// </param>
+                /// <param name="attachmentId">Required. Identifier of the attachment.</param>
+                public virtual GetRequest Get(string courseId, string itemId, string attachmentId)
+                {
+                    return new GetRequest(this.service, courseId, itemId, attachmentId);
+                }
+
+                /// <summary>
+                /// Returns an add-on attachment. Requires the add-on requesting the attachment to be the original
+                /// creator of the attachment. This method returns the following error codes: * `PERMISSION_DENIED` for
+                /// access errors. * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the
+                /// identified resources does not exist.
+                /// </summary>
+                public class GetRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.AddOnAttachment>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string courseId, string itemId, string attachmentId) : base(service)
+                    {
+                        CourseId = courseId;
+                        ItemId = itemId;
+                        AttachmentId = attachmentId;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>
+                    /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the
+                    /// attachment is attached. This field is required, but is not marked as such while we are migrating
+                    /// from post_id.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string ItemId { get; private set; }
+
+                    /// <summary>Required. Identifier of the attachment.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("attachmentId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string AttachmentId { get; private set; }
+
+                    /// <summary>Optional. Deprecated, use `item_id` instead.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PostId { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/courseWork/{itemId}/addOnAttachments/{attachmentId}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "itemId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("attachmentId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "attachmentId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "postId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Returns all attachments created by an add-on under the post. Requires the add-on to have active
+                /// attachments on the post or have permission to create new attachments on the post. This method
+                /// returns the following error codes: * `PERMISSION_DENIED` for access errors. * `INVALID_ARGUMENT` if
+                /// the request is malformed. * `NOT_FOUND` if one of the identified resources does not exist.
+                /// </summary>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="itemId">
+                /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` whose attachments should be
+                /// enumerated. This field is required, but is not marked as such while we are migrating from post_id.
+                /// </param>
+                public virtual ListRequest List(string courseId, string itemId)
+                {
+                    return new ListRequest(this.service, courseId, itemId);
+                }
+
+                /// <summary>
+                /// Returns all attachments created by an add-on under the post. Requires the add-on to have active
+                /// attachments on the post or have permission to create new attachments on the post. This method
+                /// returns the following error codes: * `PERMISSION_DENIED` for access errors. * `INVALID_ARGUMENT` if
+                /// the request is malformed. * `NOT_FOUND` if one of the identified resources does not exist.
+                /// </summary>
+                public class ListRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.ListAddOnAttachmentsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string courseId, string itemId) : base(service)
+                    {
+                        CourseId = courseId;
+                        ItemId = itemId;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>
+                    /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` whose attachments should
+                    /// be enumerated. This field is required, but is not marked as such while we are migrating from
+                    /// post_id.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string ItemId { get; private set; }
+
+                    /// <summary>
+                    /// The maximum number of attachments to return. The service may return fewer than this value. If
+                    /// unspecified, at most 20 attachments will be returned. The maximum value is 20; values above 20
+                    /// will be coerced to 20.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// A page token, received from a previous `ListAddOnAttachments` call. Provide this to retrieve the
+                    /// subsequent page. When paginating, all other parameters provided to `ListAddOnAttachments` must
+                    /// match the call that provided the page token.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>
+                    /// Optional. Identifier of the post under the course whose attachments to enumerate. Deprecated,
+                    /// use `item_id` instead.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PostId { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/courseWork/{itemId}/addOnAttachments";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "itemId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "postId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Updates an add-on attachment. Requires the add-on to have been the original creator of the
+                /// attachment. This method returns the following error codes: * `PERMISSION_DENIED` for access errors.
+                /// * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the identified resources
+                /// does not exist.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="itemId">Identifier of the post under which the attachment is attached.</param>
+                /// <param name="attachmentId">Required. Identifier of the attachment.</param>
+                public virtual PatchRequest Patch(Google.Apis.Classroom.v1.Data.AddOnAttachment body, string courseId, string itemId, string attachmentId)
+                {
+                    return new PatchRequest(this.service, body, courseId, itemId, attachmentId);
+                }
+
+                /// <summary>
+                /// Updates an add-on attachment. Requires the add-on to have been the original creator of the
+                /// attachment. This method returns the following error codes: * `PERMISSION_DENIED` for access errors.
+                /// * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the identified resources
+                /// does not exist.
+                /// </summary>
+                public class PatchRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.AddOnAttachment>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.Classroom.v1.Data.AddOnAttachment body, string courseId, string itemId, string attachmentId) : base(service)
+                    {
+                        CourseId = courseId;
+                        ItemId = itemId;
+                        AttachmentId = attachmentId;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>Identifier of the post under which the attachment is attached.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string ItemId { get; private set; }
+
+                    /// <summary>Required. Identifier of the attachment.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("attachmentId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string AttachmentId { get; private set; }
+
+                    /// <summary>Required. Identifier of the post under which the attachment is attached.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PostId { get; set; }
+
+                    /// <summary>
+                    /// Required. Mask that identifies which fields on the attachment to update. The update fails if
+                    /// invalid fields are specified. If a field supports empty values, it can be cleared by specifying
+                    /// it in the update mask and not in the `AddOnAttachment` object. If a field that does not support
+                    /// empty values is included in the update mask and not set in the `AddOnAttachment` object, an
+                    /// `INVALID_ARGUMENT` error is returned. The following fields may be specified by teachers: *
+                    /// `title` * `teacher_view_uri` * `student_view_uri` * `student_work_review_uri` * `due_date` *
+                    /// `due_time` * `max_points`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Classroom.v1.Data.AddOnAttachment Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/courseWork/{itemId}/addOnAttachments/{attachmentId}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "itemId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("attachmentId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "attachmentId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "postId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the Rubrics resource.</summary>
+            public virtual RubricsResource Rubrics { get; }
+
+            /// <summary>The "rubrics" collection of methods.</summary>
+            public class RubricsResource
+            {
+                private const string Resource = "rubrics";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public RubricsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>
+                /// Creates a rubric. The requesting user and course owner must have rubrics creation capabilities. For
+                /// details, see [licensing
+                /// requirements](https://developers.google.com/classroom/rubrics/limitations#license-requirements). For
+                /// further details, see [Rubrics structure and known limitations](/classroom/rubrics/limitations). This
+                /// request must be made by the Google Cloud console of the [OAuth client
+                /// ID](https://support.google.com/cloud/answer/6158849) used to create the parent course work item.
+                /// This method returns the following error codes: * `PERMISSION_DENIED` if the requesting user isn't
+                /// permitted to create rubrics for course work in the requested course. * `INTERNAL` if the request has
+                /// insufficient OAuth scopes. * `INVALID_ARGUMENT` if the request is malformed and for the following
+                /// request error: * `RubricCriteriaInvalidFormat` * `NOT_FOUND` if the requested course or course work
+                /// don't exist or the user doesn't have access to the course or course work. * `FAILED_PRECONDITION`
+                /// for the following request error: * `AttachmentNotVisible`
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="courseWorkId">Required. Identifier of the course work.</param>
+                public virtual CreateRequest Create(Google.Apis.Classroom.v1.Data.Rubric body, string courseId, string courseWorkId)
+                {
+                    return new CreateRequest(this.service, body, courseId, courseWorkId);
+                }
+
+                /// <summary>
+                /// Creates a rubric. The requesting user and course owner must have rubrics creation capabilities. For
+                /// details, see [licensing
+                /// requirements](https://developers.google.com/classroom/rubrics/limitations#license-requirements). For
+                /// further details, see [Rubrics structure and known limitations](/classroom/rubrics/limitations). This
+                /// request must be made by the Google Cloud console of the [OAuth client
+                /// ID](https://support.google.com/cloud/answer/6158849) used to create the parent course work item.
+                /// This method returns the following error codes: * `PERMISSION_DENIED` if the requesting user isn't
+                /// permitted to create rubrics for course work in the requested course. * `INTERNAL` if the request has
+                /// insufficient OAuth scopes. * `INVALID_ARGUMENT` if the request is malformed and for the following
+                /// request error: * `RubricCriteriaInvalidFormat` * `NOT_FOUND` if the requested course or course work
+                /// don't exist or the user doesn't have access to the course or course work. * `FAILED_PRECONDITION`
+                /// for the following request error: * `AttachmentNotVisible`
+                /// </summary>
+                public class CreateRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.Rubric>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Classroom.v1.Data.Rubric body, string courseId, string courseWorkId) : base(service)
+                    {
+                        CourseId = courseId;
+                        CourseWorkId = courseWorkId;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>Required. Identifier of the course work.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseWorkId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseWorkId { get; private set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Classroom.v1.Data.Rubric Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/courseWork/{courseWorkId}/rubrics";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("courseWorkId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseWorkId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Deletes a rubric. The requesting user and course owner must have rubrics creation capabilities. For
+                /// details, see [licensing
+                /// requirements](https://developers.google.com/classroom/rubrics/limitations#license-requirements).
+                /// This request must be made by the Google Cloud console of the [OAuth client
+                /// ID](https://support.google.com/cloud/answer/6158849) used to create the corresponding rubric. This
+                /// method returns the following error codes: * `PERMISSION_DENIED` if the requesting developer project
+                /// didn't create the corresponding rubric, or if the requesting user isn't permitted to delete the
+                /// requested rubric. * `NOT_FOUND` if no rubric exists with the requested ID or the user does not have
+                /// access to the course, course work, or rubric. * `INVALID_ARGUMENT` if grading has already started on
+                /// the rubric.
+                /// </summary>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="courseWorkId">Required. Identifier of the course work.</param>
+                /// <param name="id">Required. Identifier of the rubric.</param>
+                public virtual DeleteRequest Delete(string courseId, string courseWorkId, string id)
+                {
+                    return new DeleteRequest(this.service, courseId, courseWorkId, id);
+                }
+
+                /// <summary>
+                /// Deletes a rubric. The requesting user and course owner must have rubrics creation capabilities. For
+                /// details, see [licensing
+                /// requirements](https://developers.google.com/classroom/rubrics/limitations#license-requirements).
+                /// This request must be made by the Google Cloud console of the [OAuth client
+                /// ID](https://support.google.com/cloud/answer/6158849) used to create the corresponding rubric. This
+                /// method returns the following error codes: * `PERMISSION_DENIED` if the requesting developer project
+                /// didn't create the corresponding rubric, or if the requesting user isn't permitted to delete the
+                /// requested rubric. * `NOT_FOUND` if no rubric exists with the requested ID or the user does not have
+                /// access to the course, course work, or rubric. * `INVALID_ARGUMENT` if grading has already started on
+                /// the rubric.
+                /// </summary>
+                public class DeleteRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.Empty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string courseId, string courseWorkId, string id) : base(service)
+                    {
+                        CourseId = courseId;
+                        CourseWorkId = courseWorkId;
+                        Id = id;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>Required. Identifier of the course work.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseWorkId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseWorkId { get; private set; }
+
+                    /// <summary>Required. Identifier of the rubric.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("id", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Id { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/courseWork/{courseWorkId}/rubrics/{id}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("courseWorkId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseWorkId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("id", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "id",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Returns a rubric. This method returns the following error codes: * `PERMISSION_DENIED` for access
+                /// errors. * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if the requested course,
+                /// course work, or rubric doesn't exist or if the user doesn't have access to the corresponding course
+                /// work.
+                /// </summary>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="courseWorkId">Required. Identifier of the course work.</param>
+                /// <param name="id">Required. Identifier of the rubric.</param>
+                public virtual GetRequest Get(string courseId, string courseWorkId, string id)
+                {
+                    return new GetRequest(this.service, courseId, courseWorkId, id);
+                }
+
+                /// <summary>
+                /// Returns a rubric. This method returns the following error codes: * `PERMISSION_DENIED` for access
+                /// errors. * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if the requested course,
+                /// course work, or rubric doesn't exist or if the user doesn't have access to the corresponding course
+                /// work.
+                /// </summary>
+                public class GetRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.Rubric>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string courseId, string courseWorkId, string id) : base(service)
+                    {
+                        CourseId = courseId;
+                        CourseWorkId = courseWorkId;
+                        Id = id;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>Required. Identifier of the course work.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseWorkId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseWorkId { get; private set; }
+
+                    /// <summary>Required. Identifier of the rubric.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("id", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Id { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/courseWork/{courseWorkId}/rubrics/{id}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("courseWorkId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseWorkId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("id", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "id",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Returns a list of rubrics that the requester is permitted to view. This method returns the following
+                /// error codes: * `PERMISSION_DENIED` for access errors. * `INVALID_ARGUMENT` if the request is
+                /// malformed. * `NOT_FOUND` if the requested course or course work doesn't exist or if the user doesn't
+                /// have access to the corresponding course work.
+                /// </summary>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="courseWorkId">Required. Identifier of the course work.</param>
+                public virtual ListRequest List(string courseId, string courseWorkId)
+                {
+                    return new ListRequest(this.service, courseId, courseWorkId);
+                }
+
+                /// <summary>
+                /// Returns a list of rubrics that the requester is permitted to view. This method returns the following
+                /// error codes: * `PERMISSION_DENIED` for access errors. * `INVALID_ARGUMENT` if the request is
+                /// malformed. * `NOT_FOUND` if the requested course or course work doesn't exist or if the user doesn't
+                /// have access to the corresponding course work.
+                /// </summary>
+                public class ListRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.ListRubricsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string courseId, string courseWorkId) : base(service)
+                    {
+                        CourseId = courseId;
+                        CourseWorkId = courseWorkId;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>Required. Identifier of the course work.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseWorkId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseWorkId { get; private set; }
+
+                    /// <summary>
+                    /// The maximum number of rubrics to return. If unspecified, at most 1 rubric is returned. The
+                    /// maximum value is 1; values above 1 are coerced to 1.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// nextPageToken value returned from a previous list call, indicating that the subsequent page of
+                    /// results should be returned. The list request must be otherwise identical to the one that
+                    /// resulted in this token.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/courseWork/{courseWorkId}/rubrics";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("courseWorkId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseWorkId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Updates a rubric. See google.classroom.v1.Rubric for details of which fields can be updated. Rubric
+                /// update capabilities are [limited](/classroom/rubrics/limitations) once grading has started. The
+                /// requesting user and course owner must have rubrics creation capabilities. For details, see
+                /// [licensing
+                /// requirements](https://developers.google.com/classroom/rubrics/limitations#license-requirements).
+                /// This request must be made by the Google Cloud console of the [OAuth client
+                /// ID](https://support.google.com/cloud/answer/6158849) used to create the parent course work item.
+                /// This method returns the following error codes: * `PERMISSION_DENIED` if the requesting developer
+                /// project didn't create the corresponding course work, if the user isn't permitted to make the
+                /// requested modification to the rubric, or for access errors. This error code is also returned if
+                /// grading has already started on the rubric. * `INVALID_ARGUMENT` if the request is malformed and for
+                /// the following request error: * `RubricCriteriaInvalidFormat` * `NOT_FOUND` if the requested course,
+                /// course work, or rubric doesn't exist or if the user doesn't have access to the corresponding course
+                /// work. * `INTERNAL` if grading has already started on the rubric.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="courseWorkId">Required. Identifier of the course work.</param>
+                /// <param name="id">Optional. Identifier of the rubric.</param>
+                public virtual PatchRequest Patch(Google.Apis.Classroom.v1.Data.Rubric body, string courseId, string courseWorkId, string id)
+                {
+                    return new PatchRequest(this.service, body, courseId, courseWorkId, id);
+                }
+
+                /// <summary>
+                /// Updates a rubric. See google.classroom.v1.Rubric for details of which fields can be updated. Rubric
+                /// update capabilities are [limited](/classroom/rubrics/limitations) once grading has started. The
+                /// requesting user and course owner must have rubrics creation capabilities. For details, see
+                /// [licensing
+                /// requirements](https://developers.google.com/classroom/rubrics/limitations#license-requirements).
+                /// This request must be made by the Google Cloud console of the [OAuth client
+                /// ID](https://support.google.com/cloud/answer/6158849) used to create the parent course work item.
+                /// This method returns the following error codes: * `PERMISSION_DENIED` if the requesting developer
+                /// project didn't create the corresponding course work, if the user isn't permitted to make the
+                /// requested modification to the rubric, or for access errors. This error code is also returned if
+                /// grading has already started on the rubric. * `INVALID_ARGUMENT` if the request is malformed and for
+                /// the following request error: * `RubricCriteriaInvalidFormat` * `NOT_FOUND` if the requested course,
+                /// course work, or rubric doesn't exist or if the user doesn't have access to the corresponding course
+                /// work. * `INTERNAL` if grading has already started on the rubric.
+                /// </summary>
+                public class PatchRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.Rubric>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.Classroom.v1.Data.Rubric body, string courseId, string courseWorkId, string id) : base(service)
+                    {
+                        CourseId = courseId;
+                        CourseWorkId = courseWorkId;
+                        Id = id;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>Required. Identifier of the course work.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseWorkId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseWorkId { get; private set; }
+
+                    /// <summary>Optional. Identifier of the rubric.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("id", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Id { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Mask that identifies which fields on the rubric to update. This field is required to
+                    /// do an update. The update fails if invalid fields are specified. There are multiple options to
+                    /// define the criteria of a rubric: the `source_spreadsheet_id` and the `criteria` list. Only one
+                    /// of these can be used at a time to define a rubric. The rubric `criteria` list is fully replaced
+                    /// by the rubric criteria specified in the update request. For example, if a criterion or level is
+                    /// missing from the request, it is deleted. New criteria and levels are added and an ID is
+                    /// assigned. Existing criteria and levels retain the previously assigned ID if the ID is specified
+                    /// in the request. The following fields can be specified by teachers: * `criteria` *
+                    /// `source_spreadsheet_id`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Classroom.v1.Data.Rubric Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/courseWork/{courseWorkId}/rubrics/{id}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("courseWorkId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseWorkId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("id", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "id",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
             }
 
             /// <summary>Gets the StudentSubmissions resource.</summary>
@@ -1339,7 +3442,7 @@ namespace Google.Apis.Classroom.v1
                 /// <param name="id">Identifier of the student submission.</param>
                 public virtual GetRequest Get(string courseId, string courseWorkId, string id)
                 {
-                    return new GetRequest(service, courseId, courseWorkId, id);
+                    return new GetRequest(this.service, courseId, courseWorkId, id);
                 }
 
                 /// <summary>
@@ -1433,7 +3536,7 @@ namespace Google.Apis.Classroom.v1
                 /// </param>
                 public virtual ListRequest List(string courseId, string courseWorkId)
                 {
-                    return new ListRequest(service, courseId, courseWorkId);
+                    return new ListRequest(this.service, courseId, courseWorkId);
                 }
 
                 /// <summary>
@@ -1666,7 +3769,7 @@ namespace Google.Apis.Classroom.v1
                 /// <param name="id">Identifier of the student submission.</param>
                 public virtual ModifyAttachmentsRequest ModifyAttachments(Google.Apis.Classroom.v1.Data.ModifyAttachmentsRequest body, string courseId, string courseWorkId, string id)
                 {
-                    return new ModifyAttachmentsRequest(service, body, courseId, courseWorkId, id);
+                    return new ModifyAttachmentsRequest(this.service, body, courseId, courseWorkId, id);
                 }
 
                 /// <summary>
@@ -1771,7 +3874,7 @@ namespace Google.Apis.Classroom.v1
                 /// <param name="id">Identifier of the student submission.</param>
                 public virtual PatchRequest Patch(Google.Apis.Classroom.v1.Data.StudentSubmission body, string courseId, string courseWorkId, string id)
                 {
-                    return new PatchRequest(service, body, courseId, courseWorkId, id);
+                    return new PatchRequest(this.service, body, courseId, courseWorkId, id);
                 }
 
                 /// <summary>
@@ -1894,7 +3997,7 @@ namespace Google.Apis.Classroom.v1
                 /// <param name="id">Identifier of the student submission.</param>
                 public virtual ReclaimRequest Reclaim(Google.Apis.Classroom.v1.Data.ReclaimStudentSubmissionRequest body, string courseId, string courseWorkId, string id)
                 {
-                    return new ReclaimRequest(service, body, courseId, courseWorkId, id);
+                    return new ReclaimRequest(this.service, body, courseId, courseWorkId, id);
                 }
 
                 /// <summary>
@@ -2003,7 +4106,7 @@ namespace Google.Apis.Classroom.v1
                 /// <param name="id">Identifier of the student submission.</param>
                 public virtual ClassroomReturnRequest ClassroomReturn(Google.Apis.Classroom.v1.Data.ReturnStudentSubmissionRequest body, string courseId, string courseWorkId, string id)
                 {
-                    return new ClassroomReturnRequest(service, body, courseId, courseWorkId, id);
+                    return new ClassroomReturnRequest(this.service, body, courseId, courseWorkId, id);
                 }
 
                 /// <summary>
@@ -2111,7 +4214,7 @@ namespace Google.Apis.Classroom.v1
                 /// <param name="id">Identifier of the student submission.</param>
                 public virtual TurnInRequest TurnIn(Google.Apis.Classroom.v1.Data.TurnInStudentSubmissionRequest body, string courseId, string courseWorkId, string id)
                 {
-                    return new TurnInRequest(service, body, courseId, courseWorkId, id);
+                    return new TurnInRequest(this.service, body, courseId, courseWorkId, id);
                 }
 
                 /// <summary>
@@ -2216,7 +4319,7 @@ namespace Google.Apis.Classroom.v1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Classroom.v1.Data.CourseWork body, string courseId)
             {
-                return new CreateRequest(service, body, courseId);
+                return new CreateRequest(this.service, body, courseId);
             }
 
             /// <summary>
@@ -2293,7 +4396,7 @@ namespace Google.Apis.Classroom.v1
             /// </param>
             public virtual DeleteRequest Delete(string courseId, string id)
             {
-                return new DeleteRequest(service, courseId, id);
+                return new DeleteRequest(this.service, courseId, id);
             }
 
             /// <summary>
@@ -2371,7 +4474,7 @@ namespace Google.Apis.Classroom.v1
             /// <param name="id">Identifier of the course work.</param>
             public virtual GetRequest Get(string courseId, string id)
             {
-                return new GetRequest(service, courseId, id);
+                return new GetRequest(this.service, courseId, id);
             }
 
             /// <summary>
@@ -2434,6 +4537,130 @@ namespace Google.Apis.Classroom.v1
             }
 
             /// <summary>
+            /// Gets metadata for Classroom add-ons in the context of a specific post. To maintain the integrity of its
+            /// own data and permissions model, an add-on should call this to validate query parameters and the
+            /// requesting user's role whenever the add-on is opened in an
+            /// [iframe](https://developers.google.com/classroom/add-ons/get-started/iframes/iframes-overview). This
+            /// method returns the following error codes: * `PERMISSION_DENIED` for access errors. * `INVALID_ARGUMENT`
+            /// if the request is malformed. * `NOT_FOUND` if one of the identified resources does not exist.
+            /// </summary>
+            /// <param name="courseId">Required. Identifier of the course.</param>
+            /// <param name="itemId">
+            /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the attachment is
+            /// attached. This field is required, but is not marked as such while we are migrating from post_id.
+            /// </param>
+            public virtual GetAddOnContextRequest GetAddOnContext(string courseId, string itemId)
+            {
+                return new GetAddOnContextRequest(this.service, courseId, itemId);
+            }
+
+            /// <summary>
+            /// Gets metadata for Classroom add-ons in the context of a specific post. To maintain the integrity of its
+            /// own data and permissions model, an add-on should call this to validate query parameters and the
+            /// requesting user's role whenever the add-on is opened in an
+            /// [iframe](https://developers.google.com/classroom/add-ons/get-started/iframes/iframes-overview). This
+            /// method returns the following error codes: * `PERMISSION_DENIED` for access errors. * `INVALID_ARGUMENT`
+            /// if the request is malformed. * `NOT_FOUND` if one of the identified resources does not exist.
+            /// </summary>
+            public class GetAddOnContextRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.AddOnContext>
+            {
+                /// <summary>Constructs a new GetAddOnContext request.</summary>
+                public GetAddOnContextRequest(Google.Apis.Services.IClientService service, string courseId, string itemId) : base(service)
+                {
+                    CourseId = courseId;
+                    ItemId = itemId;
+                    InitParameters();
+                }
+
+                /// <summary>Required. Identifier of the course.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string CourseId { get; private set; }
+
+                /// <summary>
+                /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the attachment
+                /// is attached. This field is required, but is not marked as such while we are migrating from post_id.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string ItemId { get; private set; }
+
+                /// <summary>
+                /// Optional. Token that authorizes the request. The token is passed as a query parameter when the user
+                /// is redirected from Classroom to the add-on's URL. The authorization token is required when neither
+                /// of the following is true: * The add-on has attachments on the post. * The developer project issuing
+                /// the request is the same project that created the post.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("addOnToken", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string AddOnToken { get; set; }
+
+                /// <summary>
+                /// Optional. The identifier of the attachment. This field is required for all requests except when the
+                /// user is in the [Attachment Discovery
+                /// iframe](https://developers.google.com/classroom/add-ons/get-started/iframes/attachment-discovery-iframe).
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("attachmentId", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string AttachmentId { get; set; }
+
+                /// <summary>Optional. Deprecated, use `item_id` instead.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string PostId { get; set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "getAddOnContext";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/courses/{courseId}/courseWork/{itemId}/addOnContext";
+
+                /// <summary>Initializes GetAddOnContext parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "courseId",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "itemId",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("addOnToken", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "addOnToken",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("attachmentId", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "attachmentId",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "postId",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+
+            /// <summary>
             /// Returns a list of course work that the requester is permitted to view. Course students may only view
             /// `PUBLISHED` course work. Course teachers and domain administrators may view all course work. This method
             /// returns the following error codes: * `PERMISSION_DENIED` if the requesting user is not permitted to
@@ -2445,7 +4672,7 @@ namespace Google.Apis.Classroom.v1
             /// </param>
             public virtual ListRequest List(string courseId)
             {
-                return new ListRequest(service, courseId);
+                return new ListRequest(this.service, courseId);
             }
 
             /// <summary>
@@ -2616,7 +4843,7 @@ namespace Google.Apis.Classroom.v1
             /// <param name="id">Identifier of the coursework.</param>
             public virtual ModifyAssigneesRequest ModifyAssignees(Google.Apis.Classroom.v1.Data.ModifyCourseWorkAssigneesRequest body, string courseId, string id)
             {
-                return new ModifyAssigneesRequest(service, body, courseId, id);
+                return new ModifyAssigneesRequest(this.service, body, courseId, id);
             }
 
             /// <summary>
@@ -2694,8 +4921,7 @@ namespace Google.Apis.Classroom.v1
             /// the requesting developer project did not create the corresponding course work, if the user is not
             /// permitted to make the requested modification to the student submission, or for access errors. *
             /// `INVALID_ARGUMENT` if the request is malformed. * `FAILED_PRECONDITION` if the requested course work has
-            /// already been deleted. * `NOT_FOUND` if the requested course, course work, or student submission does not
-            /// exist.
+            /// already been deleted. * `NOT_FOUND` if the requested course or course work does not exist.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="courseId">
@@ -2704,7 +4930,7 @@ namespace Google.Apis.Classroom.v1
             /// <param name="id">Identifier of the course work.</param>
             public virtual PatchRequest Patch(Google.Apis.Classroom.v1.Data.CourseWork body, string courseId, string id)
             {
-                return new PatchRequest(service, body, courseId, id);
+                return new PatchRequest(this.service, body, courseId, id);
             }
 
             /// <summary>
@@ -2715,8 +4941,7 @@ namespace Google.Apis.Classroom.v1
             /// the requesting developer project did not create the corresponding course work, if the user is not
             /// permitted to make the requested modification to the student submission, or for access errors. *
             /// `INVALID_ARGUMENT` if the request is malformed. * `FAILED_PRECONDITION` if the requested course work has
-            /// already been deleted. * `NOT_FOUND` if the requested course, course work, or student submission does not
-            /// exist.
+            /// already been deleted. * `NOT_FOUND` if the requested course or course work does not exist.
             /// </summary>
             public class PatchRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.CourseWork>
             {
@@ -2743,11 +4968,12 @@ namespace Google.Apis.Classroom.v1
                 /// <summary>
                 /// Mask that identifies which fields on the course work to update. This field is required to do an
                 /// update. The update fails if invalid fields are specified. If a field supports empty values, it can
-                /// be cleared by specifying it in the update mask and not in the CourseWork object. If a field that
-                /// does not support empty values is included in the update mask and not set in the CourseWork object,
+                /// be cleared by specifying it in the update mask and not in the `CourseWork` object. If a field that
+                /// does not support empty values is included in the update mask and not set in the `CourseWork` object,
                 /// an `INVALID_ARGUMENT` error is returned. The following fields may be specified by teachers: *
                 /// `title` * `description` * `state` * `due_date` * `due_time` * `max_points` * `scheduled_time` *
-                /// `submission_modification_mode` * `topic_id`
+                /// `submission_modification_mode` * `topic_id` * `grading_period_id` Available in
+                /// [V1_20240401_PREVIEW](https://developers.google.com/classroom/reference/preview) and later.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual object UpdateMask { get; set; }
@@ -2797,6 +5023,134 @@ namespace Google.Apis.Classroom.v1
                     });
                 }
             }
+
+            /// <summary>
+            /// Updates a rubric. See google.classroom.v1.Rubric for details of which fields can be updated. Rubric
+            /// update capabilities are [limited](/classroom/rubrics/limitations) once grading has started. The
+            /// requesting user and course owner must have rubrics creation capabilities. For details, see [licensing
+            /// requirements](https://developers.google.com/classroom/rubrics/limitations#license-requirements). This
+            /// request must be made by the Google Cloud console of the [OAuth client
+            /// ID](https://support.google.com/cloud/answer/6158849) used to create the parent course work item. This
+            /// method returns the following error codes: * `PERMISSION_DENIED` if the requesting developer project
+            /// didn't create the corresponding course work, if the user isn't permitted to make the requested
+            /// modification to the rubric, or for access errors. This error code is also returned if grading has
+            /// already started on the rubric. * `INVALID_ARGUMENT` if the request is malformed and for the following
+            /// request error: * `RubricCriteriaInvalidFormat` * `NOT_FOUND` if the requested course, course work, or
+            /// rubric doesn't exist or if the user doesn't have access to the corresponding course work. * `INTERNAL`
+            /// if grading has already started on the rubric.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="courseId">Required. Identifier of the course.</param>
+            /// <param name="courseWorkId">Required. Identifier of the course work.</param>
+            public virtual UpdateRubricRequest UpdateRubric(Google.Apis.Classroom.v1.Data.Rubric body, string courseId, string courseWorkId)
+            {
+                return new UpdateRubricRequest(this.service, body, courseId, courseWorkId);
+            }
+
+            /// <summary>
+            /// Updates a rubric. See google.classroom.v1.Rubric for details of which fields can be updated. Rubric
+            /// update capabilities are [limited](/classroom/rubrics/limitations) once grading has started. The
+            /// requesting user and course owner must have rubrics creation capabilities. For details, see [licensing
+            /// requirements](https://developers.google.com/classroom/rubrics/limitations#license-requirements). This
+            /// request must be made by the Google Cloud console of the [OAuth client
+            /// ID](https://support.google.com/cloud/answer/6158849) used to create the parent course work item. This
+            /// method returns the following error codes: * `PERMISSION_DENIED` if the requesting developer project
+            /// didn't create the corresponding course work, if the user isn't permitted to make the requested
+            /// modification to the rubric, or for access errors. This error code is also returned if grading has
+            /// already started on the rubric. * `INVALID_ARGUMENT` if the request is malformed and for the following
+            /// request error: * `RubricCriteriaInvalidFormat` * `NOT_FOUND` if the requested course, course work, or
+            /// rubric doesn't exist or if the user doesn't have access to the corresponding course work. * `INTERNAL`
+            /// if grading has already started on the rubric.
+            /// </summary>
+            public class UpdateRubricRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.Rubric>
+            {
+                /// <summary>Constructs a new UpdateRubric request.</summary>
+                public UpdateRubricRequest(Google.Apis.Services.IClientService service, Google.Apis.Classroom.v1.Data.Rubric body, string courseId, string courseWorkId) : base(service)
+                {
+                    CourseId = courseId;
+                    CourseWorkId = courseWorkId;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>Required. Identifier of the course.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string CourseId { get; private set; }
+
+                /// <summary>Required. Identifier of the course work.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("courseWorkId", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string CourseWorkId { get; private set; }
+
+                /// <summary>Optional. Identifier of the rubric.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("id", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string Id { get; set; }
+
+                /// <summary>
+                /// Optional. Mask that identifies which fields on the rubric to update. This field is required to do an
+                /// update. The update fails if invalid fields are specified. There are multiple options to define the
+                /// criteria of a rubric: the `source_spreadsheet_id` and the `criteria` list. Only one of these can be
+                /// used at a time to define a rubric. The rubric `criteria` list is fully replaced by the rubric
+                /// criteria specified in the update request. For example, if a criterion or level is missing from the
+                /// request, it is deleted. New criteria and levels are added and an ID is assigned. Existing criteria
+                /// and levels retain the previously assigned ID if the ID is specified in the request. The following
+                /// fields can be specified by teachers: * `criteria` * `source_spreadsheet_id`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual object UpdateMask { get; set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.Classroom.v1.Data.Rubric Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "updateRubric";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "PATCH";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/courses/{courseId}/courseWork/{courseWorkId}/rubric";
+
+                /// <summary>Initializes UpdateRubric parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "courseId",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("courseWorkId", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "courseWorkId",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("id", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "id",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "updateMask",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
         }
 
         /// <summary>Gets the CourseWorkMaterials resource.</summary>
@@ -2814,6 +5168,589 @@ namespace Google.Apis.Classroom.v1
             public CourseWorkMaterialsResource(Google.Apis.Services.IClientService service)
             {
                 this.service = service;
+                AddOnAttachments = new AddOnAttachmentsResource(service);
+            }
+
+            /// <summary>Gets the AddOnAttachments resource.</summary>
+            public virtual AddOnAttachmentsResource AddOnAttachments { get; }
+
+            /// <summary>The "addOnAttachments" collection of methods.</summary>
+            public class AddOnAttachmentsResource
+            {
+                private const string Resource = "addOnAttachments";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public AddOnAttachmentsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>
+                /// Creates an add-on attachment under a post. Requires the add-on to have permission to create new
+                /// attachments on the post. This method returns the following error codes: * `PERMISSION_DENIED` for
+                /// access errors. * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the
+                /// identified resources does not exist.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="itemId">
+                /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which to create the
+                /// attachment. This field is required, but is not marked as such while we are migrating from post_id.
+                /// </param>
+                public virtual CreateRequest Create(Google.Apis.Classroom.v1.Data.AddOnAttachment body, string courseId, string itemId)
+                {
+                    return new CreateRequest(this.service, body, courseId, itemId);
+                }
+
+                /// <summary>
+                /// Creates an add-on attachment under a post. Requires the add-on to have permission to create new
+                /// attachments on the post. This method returns the following error codes: * `PERMISSION_DENIED` for
+                /// access errors. * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the
+                /// identified resources does not exist.
+                /// </summary>
+                public class CreateRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.AddOnAttachment>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Classroom.v1.Data.AddOnAttachment body, string courseId, string itemId) : base(service)
+                    {
+                        CourseId = courseId;
+                        ItemId = itemId;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>
+                    /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which to create
+                    /// the attachment. This field is required, but is not marked as such while we are migrating from
+                    /// post_id.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string ItemId { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Token that authorizes the request. The token is passed as a query parameter when the
+                    /// user is redirected from Classroom to the add-on's URL. This authorization token is required for
+                    /// in-Classroom attachment creation but optional for partner-first attachment creation. Returns an
+                    /// error if not provided for partner-first attachment creation and the developer projects that
+                    /// created the attachment and its parent stream item do not match.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("addOnToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string AddOnToken { get; set; }
+
+                    /// <summary>Optional. Deprecated, use `item_id` instead.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PostId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Classroom.v1.Data.AddOnAttachment Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/courseWorkMaterials/{itemId}/addOnAttachments";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "itemId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("addOnToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "addOnToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "postId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Deletes an add-on attachment. Requires the add-on to have been the original creator of the
+                /// attachment. This method returns the following error codes: * `PERMISSION_DENIED` for access errors.
+                /// * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the identified resources
+                /// does not exist.
+                /// </summary>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="itemId">
+                /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the attachment
+                /// is attached. This field is required, but is not marked as such while we are migrating from post_id.
+                /// </param>
+                /// <param name="attachmentId">Required. Identifier of the attachment.</param>
+                public virtual DeleteRequest Delete(string courseId, string itemId, string attachmentId)
+                {
+                    return new DeleteRequest(this.service, courseId, itemId, attachmentId);
+                }
+
+                /// <summary>
+                /// Deletes an add-on attachment. Requires the add-on to have been the original creator of the
+                /// attachment. This method returns the following error codes: * `PERMISSION_DENIED` for access errors.
+                /// * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the identified resources
+                /// does not exist.
+                /// </summary>
+                public class DeleteRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.Empty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string courseId, string itemId, string attachmentId) : base(service)
+                    {
+                        CourseId = courseId;
+                        ItemId = itemId;
+                        AttachmentId = attachmentId;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>
+                    /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the
+                    /// attachment is attached. This field is required, but is not marked as such while we are migrating
+                    /// from post_id.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string ItemId { get; private set; }
+
+                    /// <summary>Required. Identifier of the attachment.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("attachmentId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string AttachmentId { get; private set; }
+
+                    /// <summary>Optional. Deprecated, use `item_id` instead.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PostId { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/courseWorkMaterials/{itemId}/addOnAttachments/{attachmentId}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "itemId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("attachmentId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "attachmentId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "postId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Returns an add-on attachment. Requires the add-on requesting the attachment to be the original
+                /// creator of the attachment. This method returns the following error codes: * `PERMISSION_DENIED` for
+                /// access errors. * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the
+                /// identified resources does not exist.
+                /// </summary>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="itemId">
+                /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the attachment
+                /// is attached. This field is required, but is not marked as such while we are migrating from post_id.
+                /// </param>
+                /// <param name="attachmentId">Required. Identifier of the attachment.</param>
+                public virtual GetRequest Get(string courseId, string itemId, string attachmentId)
+                {
+                    return new GetRequest(this.service, courseId, itemId, attachmentId);
+                }
+
+                /// <summary>
+                /// Returns an add-on attachment. Requires the add-on requesting the attachment to be the original
+                /// creator of the attachment. This method returns the following error codes: * `PERMISSION_DENIED` for
+                /// access errors. * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the
+                /// identified resources does not exist.
+                /// </summary>
+                public class GetRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.AddOnAttachment>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string courseId, string itemId, string attachmentId) : base(service)
+                    {
+                        CourseId = courseId;
+                        ItemId = itemId;
+                        AttachmentId = attachmentId;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>
+                    /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the
+                    /// attachment is attached. This field is required, but is not marked as such while we are migrating
+                    /// from post_id.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string ItemId { get; private set; }
+
+                    /// <summary>Required. Identifier of the attachment.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("attachmentId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string AttachmentId { get; private set; }
+
+                    /// <summary>Optional. Deprecated, use `item_id` instead.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PostId { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/courseWorkMaterials/{itemId}/addOnAttachments/{attachmentId}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "itemId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("attachmentId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "attachmentId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "postId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Returns all attachments created by an add-on under the post. Requires the add-on to have active
+                /// attachments on the post or have permission to create new attachments on the post. This method
+                /// returns the following error codes: * `PERMISSION_DENIED` for access errors. * `INVALID_ARGUMENT` if
+                /// the request is malformed. * `NOT_FOUND` if one of the identified resources does not exist.
+                /// </summary>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="itemId">
+                /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` whose attachments should be
+                /// enumerated. This field is required, but is not marked as such while we are migrating from post_id.
+                /// </param>
+                public virtual ListRequest List(string courseId, string itemId)
+                {
+                    return new ListRequest(this.service, courseId, itemId);
+                }
+
+                /// <summary>
+                /// Returns all attachments created by an add-on under the post. Requires the add-on to have active
+                /// attachments on the post or have permission to create new attachments on the post. This method
+                /// returns the following error codes: * `PERMISSION_DENIED` for access errors. * `INVALID_ARGUMENT` if
+                /// the request is malformed. * `NOT_FOUND` if one of the identified resources does not exist.
+                /// </summary>
+                public class ListRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.ListAddOnAttachmentsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string courseId, string itemId) : base(service)
+                    {
+                        CourseId = courseId;
+                        ItemId = itemId;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>
+                    /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` whose attachments should
+                    /// be enumerated. This field is required, but is not marked as such while we are migrating from
+                    /// post_id.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string ItemId { get; private set; }
+
+                    /// <summary>
+                    /// The maximum number of attachments to return. The service may return fewer than this value. If
+                    /// unspecified, at most 20 attachments will be returned. The maximum value is 20; values above 20
+                    /// will be coerced to 20.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// A page token, received from a previous `ListAddOnAttachments` call. Provide this to retrieve the
+                    /// subsequent page. When paginating, all other parameters provided to `ListAddOnAttachments` must
+                    /// match the call that provided the page token.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>
+                    /// Optional. Identifier of the post under the course whose attachments to enumerate. Deprecated,
+                    /// use `item_id` instead.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PostId { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/courseWorkMaterials/{itemId}/addOnAttachments";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "itemId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "postId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Updates an add-on attachment. Requires the add-on to have been the original creator of the
+                /// attachment. This method returns the following error codes: * `PERMISSION_DENIED` for access errors.
+                /// * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the identified resources
+                /// does not exist.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="itemId">Identifier of the post under which the attachment is attached.</param>
+                /// <param name="attachmentId">Required. Identifier of the attachment.</param>
+                public virtual PatchRequest Patch(Google.Apis.Classroom.v1.Data.AddOnAttachment body, string courseId, string itemId, string attachmentId)
+                {
+                    return new PatchRequest(this.service, body, courseId, itemId, attachmentId);
+                }
+
+                /// <summary>
+                /// Updates an add-on attachment. Requires the add-on to have been the original creator of the
+                /// attachment. This method returns the following error codes: * `PERMISSION_DENIED` for access errors.
+                /// * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the identified resources
+                /// does not exist.
+                /// </summary>
+                public class PatchRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.AddOnAttachment>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.Classroom.v1.Data.AddOnAttachment body, string courseId, string itemId, string attachmentId) : base(service)
+                    {
+                        CourseId = courseId;
+                        ItemId = itemId;
+                        AttachmentId = attachmentId;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>Identifier of the post under which the attachment is attached.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string ItemId { get; private set; }
+
+                    /// <summary>Required. Identifier of the attachment.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("attachmentId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string AttachmentId { get; private set; }
+
+                    /// <summary>Required. Identifier of the post under which the attachment is attached.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PostId { get; set; }
+
+                    /// <summary>
+                    /// Required. Mask that identifies which fields on the attachment to update. The update fails if
+                    /// invalid fields are specified. If a field supports empty values, it can be cleared by specifying
+                    /// it in the update mask and not in the `AddOnAttachment` object. If a field that does not support
+                    /// empty values is included in the update mask and not set in the `AddOnAttachment` object, an
+                    /// `INVALID_ARGUMENT` error is returned. The following fields may be specified by teachers: *
+                    /// `title` * `teacher_view_uri` * `student_view_uri` * `student_work_review_uri` * `due_date` *
+                    /// `due_time` * `max_points`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Classroom.v1.Data.AddOnAttachment Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/courseWorkMaterials/{itemId}/addOnAttachments/{attachmentId}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "itemId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("attachmentId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "attachmentId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "postId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
             }
 
             /// <summary>
@@ -2829,7 +5766,7 @@ namespace Google.Apis.Classroom.v1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Classroom.v1.Data.CourseWorkMaterial body, string courseId)
             {
-                return new CreateRequest(service, body, courseId);
+                return new CreateRequest(this.service, body, courseId);
             }
 
             /// <summary>
@@ -2902,7 +5839,7 @@ namespace Google.Apis.Classroom.v1
             /// </param>
             public virtual DeleteRequest Delete(string courseId, string id)
             {
-                return new DeleteRequest(service, courseId, id);
+                return new DeleteRequest(this.service, courseId, id);
             }
 
             /// <summary>
@@ -2981,7 +5918,7 @@ namespace Google.Apis.Classroom.v1
             /// <param name="id">Identifier of the course work material.</param>
             public virtual GetRequest Get(string courseId, string id)
             {
-                return new GetRequest(service, courseId, id);
+                return new GetRequest(this.service, courseId, id);
             }
 
             /// <summary>
@@ -3044,6 +5981,130 @@ namespace Google.Apis.Classroom.v1
             }
 
             /// <summary>
+            /// Gets metadata for Classroom add-ons in the context of a specific post. To maintain the integrity of its
+            /// own data and permissions model, an add-on should call this to validate query parameters and the
+            /// requesting user's role whenever the add-on is opened in an
+            /// [iframe](https://developers.google.com/classroom/add-ons/get-started/iframes/iframes-overview). This
+            /// method returns the following error codes: * `PERMISSION_DENIED` for access errors. * `INVALID_ARGUMENT`
+            /// if the request is malformed. * `NOT_FOUND` if one of the identified resources does not exist.
+            /// </summary>
+            /// <param name="courseId">Required. Identifier of the course.</param>
+            /// <param name="itemId">
+            /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the attachment is
+            /// attached. This field is required, but is not marked as such while we are migrating from post_id.
+            /// </param>
+            public virtual GetAddOnContextRequest GetAddOnContext(string courseId, string itemId)
+            {
+                return new GetAddOnContextRequest(this.service, courseId, itemId);
+            }
+
+            /// <summary>
+            /// Gets metadata for Classroom add-ons in the context of a specific post. To maintain the integrity of its
+            /// own data and permissions model, an add-on should call this to validate query parameters and the
+            /// requesting user's role whenever the add-on is opened in an
+            /// [iframe](https://developers.google.com/classroom/add-ons/get-started/iframes/iframes-overview). This
+            /// method returns the following error codes: * `PERMISSION_DENIED` for access errors. * `INVALID_ARGUMENT`
+            /// if the request is malformed. * `NOT_FOUND` if one of the identified resources does not exist.
+            /// </summary>
+            public class GetAddOnContextRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.AddOnContext>
+            {
+                /// <summary>Constructs a new GetAddOnContext request.</summary>
+                public GetAddOnContextRequest(Google.Apis.Services.IClientService service, string courseId, string itemId) : base(service)
+                {
+                    CourseId = courseId;
+                    ItemId = itemId;
+                    InitParameters();
+                }
+
+                /// <summary>Required. Identifier of the course.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string CourseId { get; private set; }
+
+                /// <summary>
+                /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the attachment
+                /// is attached. This field is required, but is not marked as such while we are migrating from post_id.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string ItemId { get; private set; }
+
+                /// <summary>
+                /// Optional. Token that authorizes the request. The token is passed as a query parameter when the user
+                /// is redirected from Classroom to the add-on's URL. The authorization token is required when neither
+                /// of the following is true: * The add-on has attachments on the post. * The developer project issuing
+                /// the request is the same project that created the post.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("addOnToken", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string AddOnToken { get; set; }
+
+                /// <summary>
+                /// Optional. The identifier of the attachment. This field is required for all requests except when the
+                /// user is in the [Attachment Discovery
+                /// iframe](https://developers.google.com/classroom/add-ons/get-started/iframes/attachment-discovery-iframe).
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("attachmentId", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string AttachmentId { get; set; }
+
+                /// <summary>Optional. Deprecated, use `item_id` instead.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string PostId { get; set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "getAddOnContext";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/courses/{courseId}/courseWorkMaterials/{itemId}/addOnContext";
+
+                /// <summary>Initializes GetAddOnContext parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "courseId",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "itemId",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("addOnToken", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "addOnToken",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("attachmentId", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "attachmentId",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "postId",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+
+            /// <summary>
             /// Returns a list of course work material that the requester is permitted to view. Course students may only
             /// view `PUBLISHED` course work material. Course teachers and domain administrators may view all course
             /// work material. This method returns the following error codes: * `PERMISSION_DENIED` if the requesting
@@ -3055,7 +6116,7 @@ namespace Google.Apis.Classroom.v1
             /// </param>
             public virtual ListRequest List(string courseId)
             {
-                return new ListRequest(service, courseId);
+                return new ListRequest(this.service, courseId);
             }
 
             /// <summary>
@@ -3120,7 +6181,7 @@ namespace Google.Apis.Classroom.v1
                     PUBLISHED = 1,
 
                     /// <summary>
-                    /// Status for an course work material that is not yet published. Course work material in this state
+                    /// Status for a course work material that is not yet published. Course work material in this state
                     /// is visible only to course teachers and domain administrators.
                     /// </summary>
                     [Google.Apis.Util.StringValueAttribute("DRAFT")]
@@ -3258,7 +6319,7 @@ namespace Google.Apis.Classroom.v1
             /// <param name="id">Identifier of the course work material.</param>
             public virtual PatchRequest Patch(Google.Apis.Classroom.v1.Data.CourseWorkMaterial body, string courseId, string id)
             {
-                return new PatchRequest(service, body, courseId, id);
+                return new PatchRequest(this.service, body, courseId, id);
             }
 
             /// <summary>
@@ -3347,6 +6408,991 @@ namespace Google.Apis.Classroom.v1
             }
         }
 
+        /// <summary>Gets the Posts resource.</summary>
+        public virtual PostsResource Posts { get; }
+
+        /// <summary>The "posts" collection of methods.</summary>
+        public class PostsResource
+        {
+            private const string Resource = "posts";
+
+            /// <summary>The service which this resource belongs to.</summary>
+            private readonly Google.Apis.Services.IClientService service;
+
+            /// <summary>Constructs a new resource.</summary>
+            public PostsResource(Google.Apis.Services.IClientService service)
+            {
+                this.service = service;
+                AddOnAttachments = new AddOnAttachmentsResource(service);
+            }
+
+            /// <summary>Gets the AddOnAttachments resource.</summary>
+            public virtual AddOnAttachmentsResource AddOnAttachments { get; }
+
+            /// <summary>The "addOnAttachments" collection of methods.</summary>
+            public class AddOnAttachmentsResource
+            {
+                private const string Resource = "addOnAttachments";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public AddOnAttachmentsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                    StudentSubmissions = new StudentSubmissionsResource(service);
+                }
+
+                /// <summary>Gets the StudentSubmissions resource.</summary>
+                public virtual StudentSubmissionsResource StudentSubmissions { get; }
+
+                /// <summary>The "studentSubmissions" collection of methods.</summary>
+                public class StudentSubmissionsResource
+                {
+                    private const string Resource = "studentSubmissions";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public StudentSubmissionsResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>
+                    /// Returns a student submission for an add-on attachment. This method returns the following error
+                    /// codes: * `PERMISSION_DENIED` for access errors. * `INVALID_ARGUMENT` if the request is
+                    /// malformed. * `NOT_FOUND` if one of the identified resources does not exist.
+                    /// </summary>
+                    /// <param name="courseId">Required. Identifier of the course.</param>
+                    /// <param name="postId">Optional. Deprecated, use `item_id` instead.</param>
+                    /// <param name="attachmentId">Required. Identifier of the attachment.</param>
+                    /// <param name="submissionId">Required. Identifier of the student’s submission.</param>
+                    public virtual GetRequest Get(string courseId, string postId, string attachmentId, string submissionId)
+                    {
+                        return new GetRequest(this.service, courseId, postId, attachmentId, submissionId);
+                    }
+
+                    /// <summary>
+                    /// Returns a student submission for an add-on attachment. This method returns the following error
+                    /// codes: * `PERMISSION_DENIED` for access errors. * `INVALID_ARGUMENT` if the request is
+                    /// malformed. * `NOT_FOUND` if one of the identified resources does not exist.
+                    /// </summary>
+                    public class GetRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.AddOnAttachmentStudentSubmission>
+                    {
+                        /// <summary>Constructs a new Get request.</summary>
+                        public GetRequest(Google.Apis.Services.IClientService service, string courseId, string postId, string attachmentId, string submissionId) : base(service)
+                        {
+                            CourseId = courseId;
+                            PostId = postId;
+                            AttachmentId = attachmentId;
+                            SubmissionId = submissionId;
+                            InitParameters();
+                        }
+
+                        /// <summary>Required. Identifier of the course.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string CourseId { get; private set; }
+
+                        /// <summary>Optional. Deprecated, use `item_id` instead.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string PostId { get; private set; }
+
+                        /// <summary>Required. Identifier of the attachment.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("attachmentId", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string AttachmentId { get; private set; }
+
+                        /// <summary>Required. Identifier of the student’s submission.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("submissionId", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string SubmissionId { get; private set; }
+
+                        /// <summary>
+                        /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the
+                        /// attachment is attached. This field is required, but is not marked as such while we are
+                        /// migrating from post_id.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string ItemId { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "get";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/courses/{courseId}/posts/{postId}/addOnAttachments/{attachmentId}/studentSubmissions/{submissionId}";
+
+                        /// <summary>Initializes Get parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "courseId",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "postId",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("attachmentId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "attachmentId",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("submissionId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "submissionId",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "itemId",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+
+                    /// <summary>
+                    /// Updates data associated with an add-on attachment submission. Requires the add-on to have been
+                    /// the original creator of the attachment and the attachment to have a positive `max_points` value
+                    /// set. This method returns the following error codes: * `PERMISSION_DENIED` for access errors. *
+                    /// `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the identified resources
+                    /// does not exist.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="courseId">Required. Identifier of the course.</param>
+                    /// <param name="postId">Optional. Deprecated, use `item_id` instead.</param>
+                    /// <param name="attachmentId">Required. Identifier of the attachment.</param>
+                    /// <param name="submissionId">Required. Identifier of the student's submission.</param>
+                    public virtual PatchRequest Patch(Google.Apis.Classroom.v1.Data.AddOnAttachmentStudentSubmission body, string courseId, string postId, string attachmentId, string submissionId)
+                    {
+                        return new PatchRequest(this.service, body, courseId, postId, attachmentId, submissionId);
+                    }
+
+                    /// <summary>
+                    /// Updates data associated with an add-on attachment submission. Requires the add-on to have been
+                    /// the original creator of the attachment and the attachment to have a positive `max_points` value
+                    /// set. This method returns the following error codes: * `PERMISSION_DENIED` for access errors. *
+                    /// `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the identified resources
+                    /// does not exist.
+                    /// </summary>
+                    public class PatchRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.AddOnAttachmentStudentSubmission>
+                    {
+                        /// <summary>Constructs a new Patch request.</summary>
+                        public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.Classroom.v1.Data.AddOnAttachmentStudentSubmission body, string courseId, string postId, string attachmentId, string submissionId) : base(service)
+                        {
+                            CourseId = courseId;
+                            PostId = postId;
+                            AttachmentId = attachmentId;
+                            SubmissionId = submissionId;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>Required. Identifier of the course.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string CourseId { get; private set; }
+
+                        /// <summary>Optional. Deprecated, use `item_id` instead.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string PostId { get; private set; }
+
+                        /// <summary>Required. Identifier of the attachment.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("attachmentId", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string AttachmentId { get; private set; }
+
+                        /// <summary>Required. Identifier of the student's submission.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("submissionId", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string SubmissionId { get; private set; }
+
+                        /// <summary>
+                        /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the
+                        /// attachment is attached. This field is required, but is not marked as such while we are
+                        /// migrating from post_id.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string ItemId { get; set; }
+
+                        /// <summary>
+                        /// Required. Mask that identifies which fields on the attachment to update. The update fails if
+                        /// invalid fields are specified. If a field supports empty values, it can be cleared by
+                        /// specifying it in the update mask and not in the `AddOnAttachmentStudentSubmission` object.
+                        /// The following fields may be specified by teachers: * `points_earned`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual object UpdateMask { get; set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Classroom.v1.Data.AddOnAttachmentStudentSubmission Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "patch";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "PATCH";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/courses/{courseId}/posts/{postId}/addOnAttachments/{attachmentId}/studentSubmissions/{submissionId}";
+
+                        /// <summary>Initializes Patch parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "courseId",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "postId",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("attachmentId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "attachmentId",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("submissionId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "submissionId",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "itemId",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "updateMask",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+                }
+
+                /// <summary>
+                /// Creates an add-on attachment under a post. Requires the add-on to have permission to create new
+                /// attachments on the post. This method returns the following error codes: * `PERMISSION_DENIED` for
+                /// access errors. * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the
+                /// identified resources does not exist.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="postId">Optional. Deprecated, use `item_id` instead.</param>
+                public virtual CreateRequest Create(Google.Apis.Classroom.v1.Data.AddOnAttachment body, string courseId, string postId)
+                {
+                    return new CreateRequest(this.service, body, courseId, postId);
+                }
+
+                /// <summary>
+                /// Creates an add-on attachment under a post. Requires the add-on to have permission to create new
+                /// attachments on the post. This method returns the following error codes: * `PERMISSION_DENIED` for
+                /// access errors. * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the
+                /// identified resources does not exist.
+                /// </summary>
+                public class CreateRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.AddOnAttachment>
+                {
+                    /// <summary>Constructs a new Create request.</summary>
+                    public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Classroom.v1.Data.AddOnAttachment body, string courseId, string postId) : base(service)
+                    {
+                        CourseId = courseId;
+                        PostId = postId;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>Optional. Deprecated, use `item_id` instead.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string PostId { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Token that authorizes the request. The token is passed as a query parameter when the
+                    /// user is redirected from Classroom to the add-on's URL. This authorization token is required for
+                    /// in-Classroom attachment creation but optional for partner-first attachment creation. Returns an
+                    /// error if not provided for partner-first attachment creation and the developer projects that
+                    /// created the attachment and its parent stream item do not match.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("addOnToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string AddOnToken { get; set; }
+
+                    /// <summary>
+                    /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which to create
+                    /// the attachment. This field is required, but is not marked as such while we are migrating from
+                    /// post_id.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string ItemId { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Classroom.v1.Data.AddOnAttachment Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "create";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "POST";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/posts/{postId}/addOnAttachments";
+
+                    /// <summary>Initializes Create parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "postId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("addOnToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "addOnToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "itemId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Deletes an add-on attachment. Requires the add-on to have been the original creator of the
+                /// attachment. This method returns the following error codes: * `PERMISSION_DENIED` for access errors.
+                /// * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the identified resources
+                /// does not exist.
+                /// </summary>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="postId">Optional. Deprecated, use `item_id` instead.</param>
+                /// <param name="attachmentId">Required. Identifier of the attachment.</param>
+                public virtual DeleteRequest Delete(string courseId, string postId, string attachmentId)
+                {
+                    return new DeleteRequest(this.service, courseId, postId, attachmentId);
+                }
+
+                /// <summary>
+                /// Deletes an add-on attachment. Requires the add-on to have been the original creator of the
+                /// attachment. This method returns the following error codes: * `PERMISSION_DENIED` for access errors.
+                /// * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the identified resources
+                /// does not exist.
+                /// </summary>
+                public class DeleteRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.Empty>
+                {
+                    /// <summary>Constructs a new Delete request.</summary>
+                    public DeleteRequest(Google.Apis.Services.IClientService service, string courseId, string postId, string attachmentId) : base(service)
+                    {
+                        CourseId = courseId;
+                        PostId = postId;
+                        AttachmentId = attachmentId;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>Optional. Deprecated, use `item_id` instead.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string PostId { get; private set; }
+
+                    /// <summary>Required. Identifier of the attachment.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("attachmentId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string AttachmentId { get; private set; }
+
+                    /// <summary>
+                    /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the
+                    /// attachment is attached. This field is required, but is not marked as such while we are migrating
+                    /// from post_id.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string ItemId { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "delete";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "DELETE";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/posts/{postId}/addOnAttachments/{attachmentId}";
+
+                    /// <summary>Initializes Delete parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "postId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("attachmentId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "attachmentId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "itemId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Returns an add-on attachment. Requires the add-on requesting the attachment to be the original
+                /// creator of the attachment. This method returns the following error codes: * `PERMISSION_DENIED` for
+                /// access errors. * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the
+                /// identified resources does not exist.
+                /// </summary>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="postId">Optional. Deprecated, use `item_id` instead.</param>
+                /// <param name="attachmentId">Required. Identifier of the attachment.</param>
+                public virtual GetRequest Get(string courseId, string postId, string attachmentId)
+                {
+                    return new GetRequest(this.service, courseId, postId, attachmentId);
+                }
+
+                /// <summary>
+                /// Returns an add-on attachment. Requires the add-on requesting the attachment to be the original
+                /// creator of the attachment. This method returns the following error codes: * `PERMISSION_DENIED` for
+                /// access errors. * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the
+                /// identified resources does not exist.
+                /// </summary>
+                public class GetRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.AddOnAttachment>
+                {
+                    /// <summary>Constructs a new Get request.</summary>
+                    public GetRequest(Google.Apis.Services.IClientService service, string courseId, string postId, string attachmentId) : base(service)
+                    {
+                        CourseId = courseId;
+                        PostId = postId;
+                        AttachmentId = attachmentId;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>Optional. Deprecated, use `item_id` instead.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string PostId { get; private set; }
+
+                    /// <summary>Required. Identifier of the attachment.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("attachmentId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string AttachmentId { get; private set; }
+
+                    /// <summary>
+                    /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the
+                    /// attachment is attached. This field is required, but is not marked as such while we are migrating
+                    /// from post_id.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string ItemId { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "get";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/posts/{postId}/addOnAttachments/{attachmentId}";
+
+                    /// <summary>Initializes Get parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "postId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("attachmentId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "attachmentId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "itemId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Returns all attachments created by an add-on under the post. Requires the add-on to have active
+                /// attachments on the post or have permission to create new attachments on the post. This method
+                /// returns the following error codes: * `PERMISSION_DENIED` for access errors. * `INVALID_ARGUMENT` if
+                /// the request is malformed. * `NOT_FOUND` if one of the identified resources does not exist.
+                /// </summary>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="postId">
+                /// Optional. Identifier of the post under the course whose attachments to enumerate. Deprecated, use
+                /// `item_id` instead.
+                /// </param>
+                public virtual ListRequest List(string courseId, string postId)
+                {
+                    return new ListRequest(this.service, courseId, postId);
+                }
+
+                /// <summary>
+                /// Returns all attachments created by an add-on under the post. Requires the add-on to have active
+                /// attachments on the post or have permission to create new attachments on the post. This method
+                /// returns the following error codes: * `PERMISSION_DENIED` for access errors. * `INVALID_ARGUMENT` if
+                /// the request is malformed. * `NOT_FOUND` if one of the identified resources does not exist.
+                /// </summary>
+                public class ListRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.ListAddOnAttachmentsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string courseId, string postId) : base(service)
+                    {
+                        CourseId = courseId;
+                        PostId = postId;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>
+                    /// Optional. Identifier of the post under the course whose attachments to enumerate. Deprecated,
+                    /// use `item_id` instead.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string PostId { get; private set; }
+
+                    /// <summary>
+                    /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` whose attachments should
+                    /// be enumerated. This field is required, but is not marked as such while we are migrating from
+                    /// post_id.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string ItemId { get; set; }
+
+                    /// <summary>
+                    /// The maximum number of attachments to return. The service may return fewer than this value. If
+                    /// unspecified, at most 20 attachments will be returned. The maximum value is 20; values above 20
+                    /// will be coerced to 20.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// A page token, received from a previous `ListAddOnAttachments` call. Provide this to retrieve the
+                    /// subsequent page. When paginating, all other parameters provided to `ListAddOnAttachments` must
+                    /// match the call that provided the page token.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/posts/{postId}/addOnAttachments";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "postId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "itemId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Updates an add-on attachment. Requires the add-on to have been the original creator of the
+                /// attachment. This method returns the following error codes: * `PERMISSION_DENIED` for access errors.
+                /// * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the identified resources
+                /// does not exist.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="courseId">Required. Identifier of the course.</param>
+                /// <param name="postId">
+                /// Required. Identifier of the post under which the attachment is attached.
+                /// </param>
+                /// <param name="attachmentId">Required. Identifier of the attachment.</param>
+                public virtual PatchRequest Patch(Google.Apis.Classroom.v1.Data.AddOnAttachment body, string courseId, string postId, string attachmentId)
+                {
+                    return new PatchRequest(this.service, body, courseId, postId, attachmentId);
+                }
+
+                /// <summary>
+                /// Updates an add-on attachment. Requires the add-on to have been the original creator of the
+                /// attachment. This method returns the following error codes: * `PERMISSION_DENIED` for access errors.
+                /// * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if one of the identified resources
+                /// does not exist.
+                /// </summary>
+                public class PatchRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.AddOnAttachment>
+                {
+                    /// <summary>Constructs a new Patch request.</summary>
+                    public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.Classroom.v1.Data.AddOnAttachment body, string courseId, string postId, string attachmentId) : base(service)
+                    {
+                        CourseId = courseId;
+                        PostId = postId;
+                        AttachmentId = attachmentId;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>Required. Identifier of the course.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string CourseId { get; private set; }
+
+                    /// <summary>Required. Identifier of the post under which the attachment is attached.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string PostId { get; private set; }
+
+                    /// <summary>Required. Identifier of the attachment.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("attachmentId", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string AttachmentId { get; private set; }
+
+                    /// <summary>Identifier of the post under which the attachment is attached.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string ItemId { get; set; }
+
+                    /// <summary>
+                    /// Required. Mask that identifies which fields on the attachment to update. The update fails if
+                    /// invalid fields are specified. If a field supports empty values, it can be cleared by specifying
+                    /// it in the update mask and not in the `AddOnAttachment` object. If a field that does not support
+                    /// empty values is included in the update mask and not set in the `AddOnAttachment` object, an
+                    /// `INVALID_ARGUMENT` error is returned. The following fields may be specified by teachers: *
+                    /// `title` * `teacher_view_uri` * `student_view_uri` * `student_work_review_uri` * `due_date` *
+                    /// `due_time` * `max_points`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Classroom.v1.Data.AddOnAttachment Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "patch";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/courses/{courseId}/posts/{postId}/addOnAttachments/{attachmentId}";
+
+                    /// <summary>Initializes Patch parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "courseId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "postId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("attachmentId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "attachmentId",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "itemId",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Gets metadata for Classroom add-ons in the context of a specific post. To maintain the integrity of its
+            /// own data and permissions model, an add-on should call this to validate query parameters and the
+            /// requesting user's role whenever the add-on is opened in an
+            /// [iframe](https://developers.google.com/classroom/add-ons/get-started/iframes/iframes-overview). This
+            /// method returns the following error codes: * `PERMISSION_DENIED` for access errors. * `INVALID_ARGUMENT`
+            /// if the request is malformed. * `NOT_FOUND` if one of the identified resources does not exist.
+            /// </summary>
+            /// <param name="courseId">Required. Identifier of the course.</param>
+            /// <param name="postId">Optional. Deprecated, use `item_id` instead.</param>
+            public virtual GetAddOnContextRequest GetAddOnContext(string courseId, string postId)
+            {
+                return new GetAddOnContextRequest(this.service, courseId, postId);
+            }
+
+            /// <summary>
+            /// Gets metadata for Classroom add-ons in the context of a specific post. To maintain the integrity of its
+            /// own data and permissions model, an add-on should call this to validate query parameters and the
+            /// requesting user's role whenever the add-on is opened in an
+            /// [iframe](https://developers.google.com/classroom/add-ons/get-started/iframes/iframes-overview). This
+            /// method returns the following error codes: * `PERMISSION_DENIED` for access errors. * `INVALID_ARGUMENT`
+            /// if the request is malformed. * `NOT_FOUND` if one of the identified resources does not exist.
+            /// </summary>
+            public class GetAddOnContextRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.AddOnContext>
+            {
+                /// <summary>Constructs a new GetAddOnContext request.</summary>
+                public GetAddOnContextRequest(Google.Apis.Services.IClientService service, string courseId, string postId) : base(service)
+                {
+                    CourseId = courseId;
+                    PostId = postId;
+                    InitParameters();
+                }
+
+                /// <summary>Required. Identifier of the course.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("courseId", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string CourseId { get; private set; }
+
+                /// <summary>Optional. Deprecated, use `item_id` instead.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("postId", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string PostId { get; private set; }
+
+                /// <summary>
+                /// Optional. Token that authorizes the request. The token is passed as a query parameter when the user
+                /// is redirected from Classroom to the add-on's URL. The authorization token is required when neither
+                /// of the following is true: * The add-on has attachments on the post. * The developer project issuing
+                /// the request is the same project that created the post.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("addOnToken", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string AddOnToken { get; set; }
+
+                /// <summary>
+                /// Optional. The identifier of the attachment. This field is required for all requests except when the
+                /// user is in the [Attachment Discovery
+                /// iframe](https://developers.google.com/classroom/add-ons/get-started/iframes/attachment-discovery-iframe).
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("attachmentId", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string AttachmentId { get; set; }
+
+                /// <summary>
+                /// Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the attachment
+                /// is attached. This field is required, but is not marked as such while we are migrating from post_id.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("itemId", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string ItemId { get; set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "getAddOnContext";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/courses/{courseId}/posts/{postId}/addOnContext";
+
+                /// <summary>Initializes GetAddOnContext parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("courseId", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "courseId",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("postId", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "postId",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("addOnToken", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "addOnToken",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("attachmentId", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "attachmentId",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("itemId", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "itemId",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+        }
+
         /// <summary>Gets the Students resource.</summary>
         public virtual StudentsResource Students { get; }
 
@@ -3365,11 +7411,14 @@ namespace Google.Apis.Classroom.v1
             }
 
             /// <summary>
-            /// Adds a user as a student of a course. This method returns the following error codes: *
-            /// `PERMISSION_DENIED` if the requesting user is not permitted to create students in this course or for
-            /// access errors. * `NOT_FOUND` if the requested course ID does not exist. * `FAILED_PRECONDITION` if the
-            /// requested user's account is disabled, for the following request errors: * CourseMemberLimitReached *
-            /// CourseNotModifiable * UserGroupsMembershipLimitReached * `ALREADY_EXISTS` if the user is already a
+            /// Adds a user as a student of a course. Domain administrators are permitted to [directly
+            /// add](https://developers.google.com/classroom/guides/manage-users) users within their domain as students
+            /// to courses within their domain. Students are permitted to add themselves to a course using an enrollment
+            /// code. This method returns the following error codes: * `PERMISSION_DENIED` if the requesting user is not
+            /// permitted to create students in this course or for access errors. * `NOT_FOUND` if the requested course
+            /// ID does not exist. * `FAILED_PRECONDITION` if the requested user's account is disabled, for the
+            /// following request errors: * CourseMemberLimitReached * CourseNotModifiable *
+            /// UserGroupsMembershipLimitReached * InactiveCourseOwner * `ALREADY_EXISTS` if the user is already a
             /// student or teacher in the course.
             /// </summary>
             /// <param name="body">The body of the request.</param>
@@ -3379,15 +7428,18 @@ namespace Google.Apis.Classroom.v1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Classroom.v1.Data.Student body, string courseId)
             {
-                return new CreateRequest(service, body, courseId);
+                return new CreateRequest(this.service, body, courseId);
             }
 
             /// <summary>
-            /// Adds a user as a student of a course. This method returns the following error codes: *
-            /// `PERMISSION_DENIED` if the requesting user is not permitted to create students in this course or for
-            /// access errors. * `NOT_FOUND` if the requested course ID does not exist. * `FAILED_PRECONDITION` if the
-            /// requested user's account is disabled, for the following request errors: * CourseMemberLimitReached *
-            /// CourseNotModifiable * UserGroupsMembershipLimitReached * `ALREADY_EXISTS` if the user is already a
+            /// Adds a user as a student of a course. Domain administrators are permitted to [directly
+            /// add](https://developers.google.com/classroom/guides/manage-users) users within their domain as students
+            /// to courses within their domain. Students are permitted to add themselves to a course using an enrollment
+            /// code. This method returns the following error codes: * `PERMISSION_DENIED` if the requesting user is not
+            /// permitted to create students in this course or for access errors. * `NOT_FOUND` if the requested course
+            /// ID does not exist. * `FAILED_PRECONDITION` if the requested user's account is disabled, for the
+            /// following request errors: * CourseMemberLimitReached * CourseNotModifiable *
+            /// UserGroupsMembershipLimitReached * InactiveCourseOwner * `ALREADY_EXISTS` if the user is already a
             /// student or teacher in the course.
             /// </summary>
             public class CreateRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.Student>
@@ -3468,7 +7520,7 @@ namespace Google.Apis.Classroom.v1
             /// </param>
             public virtual DeleteRequest Delete(string courseId, string userId)
             {
-                return new DeleteRequest(service, courseId, userId);
+                return new DeleteRequest(this.service, courseId, userId);
             }
 
             /// <summary>
@@ -3548,7 +7600,7 @@ namespace Google.Apis.Classroom.v1
             /// </param>
             public virtual GetRequest Get(string courseId, string userId)
             {
-                return new GetRequest(service, courseId, userId);
+                return new GetRequest(this.service, courseId, userId);
             }
 
             /// <summary>
@@ -3623,7 +7675,7 @@ namespace Google.Apis.Classroom.v1
             /// </param>
             public virtual ListRequest List(string courseId)
             {
-                return new ListRequest(service, courseId);
+                return new ListRequest(this.service, courseId);
             }
 
             /// <summary>
@@ -3721,12 +7773,15 @@ namespace Google.Apis.Classroom.v1
             }
 
             /// <summary>
-            /// Creates a teacher of a course. This method returns the following error codes: * `PERMISSION_DENIED` if
-            /// the requesting user is not permitted to create teachers in this course or for access errors. *
-            /// `NOT_FOUND` if the requested course ID does not exist. * `FAILED_PRECONDITION` if the requested user's
-            /// account is disabled, for the following request errors: * CourseMemberLimitReached * CourseNotModifiable
-            /// * CourseTeacherLimitReached * UserGroupsMembershipLimitReached * `ALREADY_EXISTS` if the user is already
-            /// a teacher or student in the course.
+            /// Creates a teacher of a course. Domain administrators are permitted to [directly
+            /// add](https://developers.google.com/classroom/guides/manage-users) users within their domain as teachers
+            /// to courses within their domain. Non-admin users should send an Invitation instead. This method returns
+            /// the following error codes: * `PERMISSION_DENIED` if the requesting user is not permitted to create
+            /// teachers in this course or for access errors. * `NOT_FOUND` if the requested course ID does not exist. *
+            /// `FAILED_PRECONDITION` if the requested user's account is disabled, for the following request errors: *
+            /// CourseMemberLimitReached * CourseNotModifiable * CourseTeacherLimitReached *
+            /// UserGroupsMembershipLimitReached * InactiveCourseOwner * `ALREADY_EXISTS` if the user is already a
+            /// teacher or student in the course.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="courseId">
@@ -3734,16 +7789,19 @@ namespace Google.Apis.Classroom.v1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Classroom.v1.Data.Teacher body, string courseId)
             {
-                return new CreateRequest(service, body, courseId);
+                return new CreateRequest(this.service, body, courseId);
             }
 
             /// <summary>
-            /// Creates a teacher of a course. This method returns the following error codes: * `PERMISSION_DENIED` if
-            /// the requesting user is not permitted to create teachers in this course or for access errors. *
-            /// `NOT_FOUND` if the requested course ID does not exist. * `FAILED_PRECONDITION` if the requested user's
-            /// account is disabled, for the following request errors: * CourseMemberLimitReached * CourseNotModifiable
-            /// * CourseTeacherLimitReached * UserGroupsMembershipLimitReached * `ALREADY_EXISTS` if the user is already
-            /// a teacher or student in the course.
+            /// Creates a teacher of a course. Domain administrators are permitted to [directly
+            /// add](https://developers.google.com/classroom/guides/manage-users) users within their domain as teachers
+            /// to courses within their domain. Non-admin users should send an Invitation instead. This method returns
+            /// the following error codes: * `PERMISSION_DENIED` if the requesting user is not permitted to create
+            /// teachers in this course or for access errors. * `NOT_FOUND` if the requested course ID does not exist. *
+            /// `FAILED_PRECONDITION` if the requested user's account is disabled, for the following request errors: *
+            /// CourseMemberLimitReached * CourseNotModifiable * CourseTeacherLimitReached *
+            /// UserGroupsMembershipLimitReached * InactiveCourseOwner * `ALREADY_EXISTS` if the user is already a
+            /// teacher or student in the course.
             /// </summary>
             public class CreateRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.Teacher>
             {
@@ -3810,7 +7868,7 @@ namespace Google.Apis.Classroom.v1
             /// </param>
             public virtual DeleteRequest Delete(string courseId, string userId)
             {
-                return new DeleteRequest(service, courseId, userId);
+                return new DeleteRequest(this.service, courseId, userId);
             }
 
             /// <summary>
@@ -3893,7 +7951,7 @@ namespace Google.Apis.Classroom.v1
             /// </param>
             public virtual GetRequest Get(string courseId, string userId)
             {
-                return new GetRequest(service, courseId, userId);
+                return new GetRequest(this.service, courseId, userId);
             }
 
             /// <summary>
@@ -3968,7 +8026,7 @@ namespace Google.Apis.Classroom.v1
             /// </param>
             public virtual ListRequest List(string courseId)
             {
-                return new ListRequest(service, courseId);
+                return new ListRequest(this.service, courseId);
             }
 
             /// <summary>
@@ -4068,8 +8126,8 @@ namespace Google.Apis.Classroom.v1
             /// <summary>
             /// Creates a topic. This method returns the following error codes: * `PERMISSION_DENIED` if the requesting
             /// user is not permitted to access the requested course, create a topic in the requested course, or for
-            /// access errors. * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if the requested course
-            /// does not exist.
+            /// access errors. * `INVALID_ARGUMENT` if the request is malformed. * `ALREADY_EXISTS` if there exists a
+            /// topic in the course with the same name. * `NOT_FOUND` if the requested course does not exist.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="courseId">
@@ -4077,14 +8135,14 @@ namespace Google.Apis.Classroom.v1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.Classroom.v1.Data.Topic body, string courseId)
             {
-                return new CreateRequest(service, body, courseId);
+                return new CreateRequest(this.service, body, courseId);
             }
 
             /// <summary>
             /// Creates a topic. This method returns the following error codes: * `PERMISSION_DENIED` if the requesting
             /// user is not permitted to access the requested course, create a topic in the requested course, or for
-            /// access errors. * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if the requested course
-            /// does not exist.
+            /// access errors. * `INVALID_ARGUMENT` if the request is malformed. * `ALREADY_EXISTS` if there exists a
+            /// topic in the course with the same name. * `NOT_FOUND` if the requested course does not exist.
             /// </summary>
             public class CreateRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.Topic>
             {
@@ -4145,7 +8203,7 @@ namespace Google.Apis.Classroom.v1
             /// <param name="id">Identifier of the topic to delete.</param>
             public virtual DeleteRequest Delete(string courseId, string id)
             {
-                return new DeleteRequest(service, courseId, id);
+                return new DeleteRequest(this.service, courseId, id);
             }
 
             /// <summary>
@@ -4217,7 +8275,7 @@ namespace Google.Apis.Classroom.v1
             /// <param name="id">Identifier of the topic.</param>
             public virtual GetRequest Get(string courseId, string id)
             {
-                return new GetRequest(service, courseId, id);
+                return new GetRequest(this.service, courseId, id);
             }
 
             /// <summary>
@@ -4287,7 +8345,7 @@ namespace Google.Apis.Classroom.v1
             /// </param>
             public virtual ListRequest List(string courseId)
             {
-                return new ListRequest(service, courseId);
+                return new ListRequest(this.service, courseId);
             }
 
             /// <summary>
@@ -4370,8 +8428,8 @@ namespace Google.Apis.Classroom.v1
             /// <summary>
             /// Updates one or more fields of a topic. This method returns the following error codes: *
             /// `PERMISSION_DENIED` if the requesting developer project did not create the corresponding topic or for
-            /// access errors. * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if the requested course
-            /// or topic does not exist
+            /// access errors. * `INVALID_ARGUMENT` if the request is malformed. * `FAILED_PRECONDITION` if there exists
+            /// a topic in the course with the same name. * `NOT_FOUND` if the requested course or topic does not exist
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="courseId">
@@ -4380,14 +8438,14 @@ namespace Google.Apis.Classroom.v1
             /// <param name="id">Identifier of the topic.</param>
             public virtual PatchRequest Patch(Google.Apis.Classroom.v1.Data.Topic body, string courseId, string id)
             {
-                return new PatchRequest(service, body, courseId, id);
+                return new PatchRequest(this.service, body, courseId, id);
             }
 
             /// <summary>
             /// Updates one or more fields of a topic. This method returns the following error codes: *
             /// `PERMISSION_DENIED` if the requesting developer project did not create the corresponding topic or for
-            /// access errors. * `INVALID_ARGUMENT` if the request is malformed. * `NOT_FOUND` if the requested course
-            /// or topic does not exist
+            /// access errors. * `INVALID_ARGUMENT` if the request is malformed. * `FAILED_PRECONDITION` if there exists
+            /// a topic in the course with the same name. * `NOT_FOUND` if the requested course or topic does not exist
             /// </summary>
             public class PatchRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.Topic>
             {
@@ -4470,23 +8528,27 @@ namespace Google.Apis.Classroom.v1
 
         /// <summary>
         /// Creates a course. The user specified in `ownerId` is the owner of the created course and added as a teacher.
-        /// This method returns the following error codes: * `PERMISSION_DENIED` if the requesting user is not permitted
-        /// to create courses or for access errors. * `NOT_FOUND` if the primary teacher is not a valid user. *
-        /// `FAILED_PRECONDITION` if the course owner's account is disabled or for the following request errors: *
+        /// A non-admin requesting user can only create a course with themselves as the owner. Domain admins can create
+        /// courses owned by any user within their domain. This method returns the following error codes: *
+        /// `PERMISSION_DENIED` if the requesting user is not permitted to create courses or for access errors. *
+        /// `NOT_FOUND` if the primary teacher is not a valid user. * `FAILED_PRECONDITION` if the course owner's
+        /// account is disabled or for the following request errors: * UserCannotOwnCourse *
         /// UserGroupsMembershipLimitReached * `ALREADY_EXISTS` if an alias was specified in the `id` and already
         /// exists.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.Classroom.v1.Data.Course body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>
         /// Creates a course. The user specified in `ownerId` is the owner of the created course and added as a teacher.
-        /// This method returns the following error codes: * `PERMISSION_DENIED` if the requesting user is not permitted
-        /// to create courses or for access errors. * `NOT_FOUND` if the primary teacher is not a valid user. *
-        /// `FAILED_PRECONDITION` if the course owner's account is disabled or for the following request errors: *
+        /// A non-admin requesting user can only create a course with themselves as the owner. Domain admins can create
+        /// courses owned by any user within their domain. This method returns the following error codes: *
+        /// `PERMISSION_DENIED` if the requesting user is not permitted to create courses or for access errors. *
+        /// `NOT_FOUND` if the primary teacher is not a valid user. * `FAILED_PRECONDITION` if the course owner's
+        /// account is disabled or for the following request errors: * UserCannotOwnCourse *
         /// UserGroupsMembershipLimitReached * `ALREADY_EXISTS` if an alias was specified in the `id` and already
         /// exists.
         /// </summary>
@@ -4532,7 +8594,7 @@ namespace Google.Apis.Classroom.v1
         /// </param>
         public virtual DeleteRequest Delete(string id)
         {
-            return new DeleteRequest(service, id);
+            return new DeleteRequest(this.service, id);
         }
 
         /// <summary>
@@ -4591,7 +8653,7 @@ namespace Google.Apis.Classroom.v1
         /// </param>
         public virtual GetRequest Get(string id)
         {
-            return new GetRequest(service, id);
+            return new GetRequest(this.service, id);
         }
 
         /// <summary>
@@ -4647,7 +8709,7 @@ namespace Google.Apis.Classroom.v1
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
@@ -4823,7 +8885,7 @@ namespace Google.Apis.Classroom.v1
         /// if the requesting user is not permitted to modify the requested course or for access errors. * `NOT_FOUND`
         /// if no course exists with the requested ID. * `INVALID_ARGUMENT` if invalid fields are specified in the
         /// update mask or if no update mask is supplied. * `FAILED_PRECONDITION` for the following request errors: *
-        /// CourseNotModifiable
+        /// CourseNotModifiable * InactiveCourseOwner * IneligibleOwner
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="id">
@@ -4832,7 +8894,7 @@ namespace Google.Apis.Classroom.v1
         /// </param>
         public virtual PatchRequest Patch(Google.Apis.Classroom.v1.Data.Course body, string id)
         {
-            return new PatchRequest(service, body, id);
+            return new PatchRequest(this.service, body, id);
         }
 
         /// <summary>
@@ -4840,7 +8902,7 @@ namespace Google.Apis.Classroom.v1
         /// if the requesting user is not permitted to modify the requested course or for access errors. * `NOT_FOUND`
         /// if no course exists with the requested ID. * `INVALID_ARGUMENT` if invalid fields are specified in the
         /// update mask or if no update mask is supplied. * `FAILED_PRECONDITION` for the following request errors: *
-        /// CourseNotModifiable
+        /// CourseNotModifiable * InactiveCourseOwner * IneligibleOwner
         /// </summary>
         public class PatchRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.Course>
         {
@@ -4920,7 +8982,7 @@ namespace Google.Apis.Classroom.v1
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.Classroom.v1.Data.Course body, string id)
         {
-            return new UpdateRequest(service, body, id);
+            return new UpdateRequest(this.service, body, id);
         }
 
         /// <summary>
@@ -5001,7 +9063,7 @@ namespace Google.Apis.Classroom.v1
         /// <param name="id">Identifier of the invitation to accept.</param>
         public virtual AcceptRequest Accept(string id)
         {
-            return new AcceptRequest(service, id);
+            return new AcceptRequest(this.service, id);
         }
 
         /// <summary>
@@ -5053,23 +9115,25 @@ namespace Google.Apis.Classroom.v1
         /// Creates an invitation. Only one invitation for a user and course may exist at a time. Delete and re-create
         /// an invitation to make changes. This method returns the following error codes: * `PERMISSION_DENIED` if the
         /// requesting user is not permitted to create invitations for this course or for access errors. * `NOT_FOUND`
-        /// if the course or the user does not exist. * `FAILED_PRECONDITION` if the requested user's account is
-        /// disabled or if the user already has this role or a role with greater permissions. * `ALREADY_EXISTS` if an
-        /// invitation for the specified user and course already exists.
+        /// if the course or the user does not exist. * `FAILED_PRECONDITION`: * if the requested user's account is
+        /// disabled. * if the user already has this role or a role with greater permissions. * for the following
+        /// request errors: * IneligibleOwner * `ALREADY_EXISTS` if an invitation for the specified user and course
+        /// already exists.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.Classroom.v1.Data.Invitation body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>
         /// Creates an invitation. Only one invitation for a user and course may exist at a time. Delete and re-create
         /// an invitation to make changes. This method returns the following error codes: * `PERMISSION_DENIED` if the
         /// requesting user is not permitted to create invitations for this course or for access errors. * `NOT_FOUND`
-        /// if the course or the user does not exist. * `FAILED_PRECONDITION` if the requested user's account is
-        /// disabled or if the user already has this role or a role with greater permissions. * `ALREADY_EXISTS` if an
-        /// invitation for the specified user and course already exists.
+        /// if the course or the user does not exist. * `FAILED_PRECONDITION`: * if the requested user's account is
+        /// disabled. * if the user already has this role or a role with greater permissions. * for the following
+        /// request errors: * IneligibleOwner * `ALREADY_EXISTS` if an invitation for the specified user and course
+        /// already exists.
         /// </summary>
         public class CreateRequest : ClassroomBaseServiceRequest<Google.Apis.Classroom.v1.Data.Invitation>
         {
@@ -5110,7 +9174,7 @@ namespace Google.Apis.Classroom.v1
         /// <param name="id">Identifier of the invitation to delete.</param>
         public virtual DeleteRequest Delete(string id)
         {
-            return new DeleteRequest(service, id);
+            return new DeleteRequest(this.service, id);
         }
 
         /// <summary>
@@ -5163,7 +9227,7 @@ namespace Google.Apis.Classroom.v1
         /// <param name="id">Identifier of the invitation to return.</param>
         public virtual GetRequest Get(string id)
         {
-            return new GetRequest(service, id);
+            return new GetRequest(this.service, id);
         }
 
         /// <summary>
@@ -5215,7 +9279,7 @@ namespace Google.Apis.Classroom.v1
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
@@ -5340,7 +9404,7 @@ namespace Google.Apis.Classroom.v1
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.Classroom.v1.Data.Registration body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>
@@ -5397,7 +9461,7 @@ namespace Google.Apis.Classroom.v1
         /// <param name="registrationId">The `registration_id` of the `Registration` to be deleted.</param>
         public virtual DeleteRequest Delete(string registrationId)
         {
-            return new DeleteRequest(service, registrationId);
+            return new DeleteRequest(this.service, registrationId);
         }
 
         /// <summary>
@@ -5496,7 +9560,7 @@ namespace Google.Apis.Classroom.v1
             /// <param name="studentId">ID of the student (in standard format)</param>
             public virtual CreateRequest Create(Google.Apis.Classroom.v1.Data.GuardianInvitation body, string studentId)
             {
-                return new CreateRequest(service, body, studentId);
+                return new CreateRequest(this.service, body, studentId);
             }
 
             /// <summary>
@@ -5574,7 +9638,7 @@ namespace Google.Apis.Classroom.v1
             /// <param name="invitationId">The `id` field of the `GuardianInvitation` being requested.</param>
             public virtual GetRequest Get(string studentId, string invitationId)
             {
-                return new GetRequest(service, studentId, invitationId);
+                return new GetRequest(this.service, studentId, invitationId);
             }
 
             /// <summary>
@@ -5655,7 +9719,7 @@ namespace Google.Apis.Classroom.v1
             /// </param>
             public virtual ListRequest List(string studentId)
             {
-                return new ListRequest(service, studentId);
+                return new ListRequest(this.service, studentId);
             }
 
             /// <summary>
@@ -5826,7 +9890,7 @@ namespace Google.Apis.Classroom.v1
             /// <param name="invitationId">The `id` field of the `GuardianInvitation` to be modified.</param>
             public virtual PatchRequest Patch(Google.Apis.Classroom.v1.Data.GuardianInvitation body, string studentId, string invitationId)
             {
-                return new PatchRequest(service, body, studentId, invitationId);
+                return new PatchRequest(this.service, body, studentId, invitationId);
             }
 
             /// <summary>
@@ -5950,7 +10014,7 @@ namespace Google.Apis.Classroom.v1
             /// <param name="guardianId">The `id` field from a `Guardian`.</param>
             public virtual DeleteRequest Delete(string studentId, string guardianId)
             {
-                return new DeleteRequest(service, studentId, guardianId);
+                return new DeleteRequest(this.service, studentId, guardianId);
             }
 
             /// <summary>
@@ -6034,7 +10098,7 @@ namespace Google.Apis.Classroom.v1
             /// <param name="guardianId">The `id` field from a `Guardian`.</param>
             public virtual GetRequest Get(string studentId, string guardianId)
             {
-                return new GetRequest(service, studentId, guardianId);
+                return new GetRequest(this.service, studentId, guardianId);
             }
 
             /// <summary>
@@ -6121,7 +10185,7 @@ namespace Google.Apis.Classroom.v1
             /// </param>
             public virtual ListRequest List(string studentId)
             {
-                return new ListRequest(service, studentId);
+                return new ListRequest(this.service, studentId);
             }
 
             /// <summary>
@@ -6237,7 +10301,7 @@ namespace Google.Apis.Classroom.v1
         /// </param>
         public virtual GetRequest Get(string userId)
         {
-            return new GetRequest(service, userId);
+            return new GetRequest(this.service, userId);
         }
 
         /// <summary>
@@ -6289,6 +10353,144 @@ namespace Google.Apis.Classroom.v1
 }
 namespace Google.Apis.Classroom.v1.Data
 {
+    /// <summary>An add-on attachment on a post.</summary>
+    public class AddOnAttachment : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. Identifiers of attachments that were previous copies of this attachment. If the attachment was
+        /// previously copied by virtue of its parent post being copied, this enumerates the identifiers of attachments
+        /// that were its previous copies in ascending chronological order of copy.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("copyHistory")]
+        public virtual System.Collections.Generic.IList<CopyHistory> CopyHistory { get; set; }
+
+        /// <summary>Immutable. Identifier of the course.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("courseId")]
+        public virtual string CourseId { get; set; }
+
+        /// <summary>
+        /// Date, in UTC, that work on this attachment is due. This must be specified if `due_time` is specified.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dueDate")]
+        public virtual Date DueDate { get; set; }
+
+        /// <summary>
+        /// Time of day, in UTC, that work on this attachment is due. This must be specified if `due_date` is specified.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dueTime")]
+        public virtual TimeOfDay DueTime { get; set; }
+
+        /// <summary>Immutable. Classroom-assigned identifier for this attachment, unique per post.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>
+        /// Immutable. Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the
+        /// attachment is attached. Unique per course.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("itemId")]
+        public virtual string ItemId { get; set; }
+
+        /// <summary>
+        /// Maximum grade for this attachment. Can only be set if `studentWorkReviewUri` is set. Set to a non-zero value
+        /// to indicate that the attachment supports grade passback. If set, this must be a non-negative integer value.
+        /// When set to zero, the attachment will not support grade passback.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("maxPoints")]
+        public virtual System.Nullable<double> MaxPoints { get; set; }
+
+        /// <summary>Immutable. Deprecated, use `item_id` instead.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("postId")]
+        public virtual string PostId { get; set; }
+
+        /// <summary>
+        /// Required. URI to show the student view of the attachment. The URI will be opened in an iframe with the
+        /// `courseId`, `itemId`, `itemType`, and `attachmentId` query parameters set.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("studentViewUri")]
+        public virtual EmbedUri StudentViewUri { get; set; }
+
+        /// <summary>
+        /// URI for the teacher to see student work on the attachment, if applicable. The URI will be opened in an
+        /// iframe with the `courseId`, `itemId`, `itemType`, `attachmentId`, and `submissionId` query parameters set.
+        /// This is the same `submissionId` returned in the
+        /// [`AddOnContext.studentContext`](//devsite.google.com/classroom/reference/rest/v1/AddOnContext#StudentContext)
+        /// field when a student views the attachment. If the URI is omitted or removed, `max_points` will also be
+        /// discarded.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("studentWorkReviewUri")]
+        public virtual EmbedUri StudentWorkReviewUri { get; set; }
+
+        /// <summary>
+        /// Required. URI to show the teacher view of the attachment. The URI will be opened in an iframe with the
+        /// `courseId`, `itemId`, `itemType`, and `attachmentId` query parameters set.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("teacherViewUri")]
+        public virtual EmbedUri TeacherViewUri { get; set; }
+
+        /// <summary>Required. Title of this attachment. The title must be between 1 and 1000 characters.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("title")]
+        public virtual string Title { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Payload for grade update requests.</summary>
+    public class AddOnAttachmentStudentSubmission : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Student grade on this attachment. If unset, no grade was set.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pointsEarned")]
+        public virtual System.Nullable<double> PointsEarned { get; set; }
+
+        /// <summary>Submission state of add-on attachment's parent post (i.e. assignment).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("postSubmissionState")]
+        public virtual string PostSubmissionState { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Attachment-relevant metadata for Classroom add-ons in the context of a specific post.</summary>
+    public class AddOnContext : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Immutable. Identifier of the course.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("courseId")]
+        public virtual string CourseId { get; set; }
+
+        /// <summary>
+        /// Immutable. Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the
+        /// attachment is attached.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("itemId")]
+        public virtual string ItemId { get; set; }
+
+        /// <summary>Immutable. Deprecated, use `item_id` instead.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("postId")]
+        public virtual string PostId { get; set; }
+
+        /// <summary>
+        /// Add-on context corresponding to the requesting user's role as a student. Its presence implies that the
+        /// requesting user is a student in the course.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("studentContext")]
+        public virtual StudentContext StudentContext { get; set; }
+
+        /// <summary>Optional. Whether the post allows the teacher to see student work and passback grades.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("supportsStudentWork")]
+        public virtual System.Nullable<bool> SupportsStudentWork { get; set; }
+
+        /// <summary>
+        /// Add-on context corresponding to the requesting user's role as a teacher. Its presence implies that the
+        /// requesting user is a teacher in the course.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("teacherContext")]
+        public virtual TeacherContext TeacherContext { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Announcement created by a teacher for students of the course</summary>
     public class Announcement : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -6307,9 +10509,42 @@ namespace Google.Apis.Classroom.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("courseId")]
         public virtual string CourseId { get; set; }
 
+        private string _creationTimeRaw;
+
+        private object _creationTime;
+
         /// <summary>Timestamp when this announcement was created. Read-only.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creationTime")]
-        public virtual object CreationTime { get; set; }
+        public virtual string CreationTimeRaw
+        {
+            get => _creationTimeRaw;
+            set
+            {
+                _creationTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _creationTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreationTimeDateTimeOffset instead.")]
+        public virtual object CreationTime
+        {
+            get => _creationTime;
+            set
+            {
+                _creationTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _creationTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreationTimeRaw);
+            set => CreationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Identifier for the user that created the announcement. Read-only.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creatorUserId")]
@@ -6331,9 +10566,42 @@ namespace Google.Apis.Classroom.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("materials")]
         public virtual System.Collections.Generic.IList<Material> Materials { get; set; }
 
+        private string _scheduledTimeRaw;
+
+        private object _scheduledTime;
+
         /// <summary>Optional timestamp when this announcement is scheduled to be published.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("scheduledTime")]
-        public virtual object ScheduledTime { get; set; }
+        public virtual string ScheduledTimeRaw
+        {
+            get => _scheduledTimeRaw;
+            set
+            {
+                _scheduledTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _scheduledTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ScheduledTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ScheduledTimeDateTimeOffset instead.")]
+        public virtual object ScheduledTime
+        {
+            get => _scheduledTime;
+            set
+            {
+                _scheduledTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _scheduledTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ScheduledTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ScheduledTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ScheduledTimeRaw);
+            set => ScheduledTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Status of this announcement. If unspecified, the default state is `DRAFT`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
@@ -6346,9 +10614,42 @@ namespace Google.Apis.Classroom.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("text")]
         public virtual string Text { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Timestamp of the most recent change to this announcement. Read-only.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6427,6 +10728,32 @@ namespace Google.Apis.Classroom.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Identifier of a previous copy of a given attachment.</summary>
+    public class CopyHistory : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Immutable. Identifier of the attachment.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("attachmentId")]
+        public virtual string AttachmentId { get; set; }
+
+        /// <summary>Immutable. Identifier of the course.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("courseId")]
+        public virtual string CourseId { get; set; }
+
+        /// <summary>
+        /// Immutable. Identifier of the `Announcement`, `CourseWork`, or `CourseWorkMaterial` under which the
+        /// attachment is attached.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("itemId")]
+        public virtual string ItemId { get; set; }
+
+        /// <summary>Immutable. Deprecated, use `item_id` instead.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("postId")]
+        public virtual string PostId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>A Course in Classroom.</summary>
     public class Course : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -6436,7 +10763,10 @@ namespace Google.Apis.Classroom.v1.Data
 
         /// <summary>
         /// The Calendar ID for a calendar that all course members can see, to which Classroom adds events for course
-        /// work and announcements in the course. Read-only.
+        /// work and announcements in the course. The Calendar for a course is created asynchronously when the course is
+        /// set to `CourseState.ACTIVE` for the first time (at creation time or when it is updated to `ACTIVE` through
+        /// the UI or the API). The Calendar ID will not be populated until the creation process is completed.
+        /// Read-only.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("calendarId")]
         public virtual string CalendarId { get; set; }
@@ -6456,11 +10786,44 @@ namespace Google.Apis.Classroom.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("courseState")]
         public virtual string CourseState { get; set; }
 
+        private string _creationTimeRaw;
+
+        private object _creationTime;
+
         /// <summary>
         /// Creation time of the course. Specifying this field in a course update mask results in an error. Read-only.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creationTime")]
-        public virtual object CreationTime { get; set; }
+        public virtual string CreationTimeRaw
+        {
+            get => _creationTimeRaw;
+            set
+            {
+                _creationTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _creationTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreationTimeDateTimeOffset instead.")]
+        public virtual object CreationTime
+        {
+            get => _creationTime;
+            set
+            {
+                _creationTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _creationTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreationTimeRaw);
+            set => CreationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Optional description. For example, "We'll be learning about the structure of living creatures from a
@@ -6483,6 +10846,13 @@ namespace Google.Apis.Classroom.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("enrollmentCode")]
         public virtual string EnrollmentCode { get; set; }
+
+        /// <summary>
+        /// The gradebook settings that specify how a student's overall grade for the course will be calculated and who
+        /// it will be displayed to. Read-only
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gradebookSettings")]
+        public virtual GradebookSettings GradebookSettings { get; set; }
 
         /// <summary>Whether or not guardian notifications are enabled for this course. Read-only.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("guardiansEnabled")]
@@ -6542,12 +10912,45 @@ namespace Google.Apis.Classroom.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("teacherGroupEmail")]
         public virtual string TeacherGroupEmail { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>
         /// Time of the most recent update to this course. Specifying this field in a course update mask results in an
         /// error. Read-only.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6658,9 +11061,42 @@ namespace Google.Apis.Classroom.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("courseId")]
         public virtual string CourseId { get; set; }
 
+        private string _creationTimeRaw;
+
+        private object _creationTime;
+
         /// <summary>Timestamp when this course work was created. Read-only.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creationTime")]
-        public virtual object CreationTime { get; set; }
+        public virtual string CreationTimeRaw
+        {
+            get => _creationTimeRaw;
+            set
+            {
+                _creationTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _creationTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreationTimeDateTimeOffset instead.")]
+        public virtual object CreationTime
+        {
+            get => _creationTime;
+            set
+            {
+                _creationTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _creationTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreationTimeRaw);
+            set => CreationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Identifier for the user that created the coursework. Read-only.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creatorUserId")]
@@ -6686,6 +11122,13 @@ namespace Google.Apis.Classroom.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dueTime")]
         public virtual TimeOfDay DueTime { get; set; }
+
+        /// <summary>
+        /// The category that this coursework's grade contributes to. Present only when a category has been chosen for
+        /// the coursework. May be used in calculating the overall grade. Read-only.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gradeCategory")]
+        public virtual GradeCategory GradeCategory { get; set; }
 
         /// <summary>Classroom-assigned identifier of this course work, unique per course. Read-only.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("id")]
@@ -6718,9 +11161,42 @@ namespace Google.Apis.Classroom.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("multipleChoiceQuestion")]
         public virtual MultipleChoiceQuestion MultipleChoiceQuestion { get; set; }
 
+        private string _scheduledTimeRaw;
+
+        private object _scheduledTime;
+
         /// <summary>Optional timestamp when this course work is scheduled to be published.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("scheduledTime")]
-        public virtual object ScheduledTime { get; set; }
+        public virtual string ScheduledTimeRaw
+        {
+            get => _scheduledTimeRaw;
+            set
+            {
+                _scheduledTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _scheduledTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ScheduledTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ScheduledTimeDateTimeOffset instead.")]
+        public virtual object ScheduledTime
+        {
+            get => _scheduledTime;
+            set
+            {
+                _scheduledTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _scheduledTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ScheduledTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ScheduledTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ScheduledTimeRaw);
+            set => ScheduledTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Status of this course work. If unspecified, the default state is `DRAFT`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
@@ -6746,9 +11222,42 @@ namespace Google.Apis.Classroom.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("topicId")]
         public virtual string TopicId { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Timestamp of the most recent change to this course work. Read-only.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Type of this course work. The type is set when the course work is created and cannot be changed.
@@ -6791,9 +11300,42 @@ namespace Google.Apis.Classroom.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("courseId")]
         public virtual string CourseId { get; set; }
 
+        private string _creationTimeRaw;
+
+        private object _creationTime;
+
         /// <summary>Timestamp when this course work material was created. Read-only.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creationTime")]
-        public virtual object CreationTime { get; set; }
+        public virtual string CreationTimeRaw
+        {
+            get => _creationTimeRaw;
+            set
+            {
+                _creationTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _creationTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreationTimeDateTimeOffset instead.")]
+        public virtual object CreationTime
+        {
+            get => _creationTime;
+            set
+            {
+                _creationTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _creationTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreationTimeRaw);
+            set => CreationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Identifier for the user that created the course work material. Read-only.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creatorUserId")]
@@ -6822,9 +11364,42 @@ namespace Google.Apis.Classroom.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("materials")]
         public virtual System.Collections.Generic.IList<Material> Materials { get; set; }
 
+        private string _scheduledTimeRaw;
+
+        private object _scheduledTime;
+
         /// <summary>Optional timestamp when this course work material is scheduled to be published.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("scheduledTime")]
-        public virtual object ScheduledTime { get; set; }
+        public virtual string ScheduledTimeRaw
+        {
+            get => _scheduledTimeRaw;
+            set
+            {
+                _scheduledTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _scheduledTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ScheduledTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ScheduledTimeDateTimeOffset instead.")]
+        public virtual object ScheduledTime
+        {
+            get => _scheduledTime;
+            set
+            {
+                _scheduledTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _scheduledTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ScheduledTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ScheduledTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ScheduledTimeRaw);
+            set => ScheduledTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Status of this course work material. If unspecified, the default state is `DRAFT`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
@@ -6844,9 +11419,65 @@ namespace Google.Apis.Classroom.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("topicId")]
         public virtual string TopicId { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Timestamp of the most recent change to this course work material. Read-only.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A rubric criterion. Each criterion is a dimension on which performance is rated.</summary>
+    public class Criterion : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The description of the criterion.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>The criterion ID. On creation, an ID is assigned.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>The list of levels within this criterion.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("levels")]
+        public virtual System.Collections.Generic.IList<Level> Levels { get; set; }
+
+        /// <summary>The title of the criterion.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("title")]
+        public virtual string Title { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6855,10 +11486,10 @@ namespace Google.Apis.Classroom.v1.Data
     /// <summary>
     /// Represents a whole or partial calendar date, such as a birthday. The time of day and time zone are either
     /// specified elsewhere or are insignificant. The date is relative to the Gregorian Calendar. This can represent one
-    /// of the following: * A full date, with non-zero year, month, and day values * A month and day value, with a zero
-    /// year, such as an anniversary * A year on its own, with zero month and day values * A year and month value, with
-    /// a zero day, such as a credit card expiration date Related types are google.type.TimeOfDay and
-    /// `google.protobuf.Timestamp`.
+    /// of the following: * A full date, with non-zero year, month, and day values. * A month and day, with a zero year
+    /// (for example, an anniversary). * A year on its own, with a zero month and a zero day. * A year and month, with a
+    /// zero day (for example, a credit card expiration date). Related types: * google.type.TimeOfDay *
+    /// google.type.DateTime * google.protobuf.Timestamp
     /// </summary>
     public class Date : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -6923,11 +11554,24 @@ namespace Google.Apis.Classroom.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>URI to be iframed after being populated with query parameters.</summary>
+    public class EmbedUri : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. URI to be iframed after being populated with query parameters. This must be a valid UTF-8 string
+        /// containing between 1 and 1800 characters.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uri")]
+        public virtual string Uri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -6971,7 +11615,7 @@ namespace Google.Apis.Classroom.v1.Data
         public virtual string FormUrl { get; set; }
 
         /// <summary>
-        /// URL of the form responses document. Only set if respsonses have been recorded and only when the requesting
+        /// URL of the form responses document. Only set if responses have been recorded and only when the requesting
         /// user is an editor of the form. Read-only.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("responseUrl")]
@@ -7000,6 +11644,39 @@ namespace Google.Apis.Classroom.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Details for a grade category in a course. Coursework may have zero or one grade category, and the category may
+    /// be used in computing the overall grade. See the [help center
+    /// article](https://support.google.com/edu/classroom/answer/9184995) for details.
+    /// </summary>
+    public class GradeCategory : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Default value of denominator. Only applicable when grade calculation type is TOTAL_POINTS.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("defaultGradeDenominator")]
+        public virtual System.Nullable<int> DefaultGradeDenominator { get; set; }
+
+        /// <summary>ID of the grade category.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>Name of the grade category.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// The weight of the category average as part of overall average. A weight of 12.34% is represented as 123400
+        /// (100% is 1,000,000). The last two digits should always be zero since we use two decimal precision. Only
+        /// applicable when grade calculation type is WEIGHTED_CATEGORIES.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("weight")]
+        public virtual System.Nullable<int> Weight { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The history of each grade on this submission.</summary>
     public class GradeHistory : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -7011,9 +11688,44 @@ namespace Google.Apis.Classroom.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("gradeChangeType")]
         public virtual string GradeChangeType { get; set; }
 
+        private string _gradeTimestampRaw;
+
+        private object _gradeTimestamp;
+
         /// <summary>When the grade of the submission was changed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("gradeTimestamp")]
-        public virtual object GradeTimestamp { get; set; }
+        public virtual string GradeTimestampRaw
+        {
+            get => _gradeTimestampRaw;
+            set
+            {
+                _gradeTimestamp = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _gradeTimestampRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="GradeTimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use GradeTimestampDateTimeOffset instead.")]
+        public virtual object GradeTimestamp
+        {
+            get => _gradeTimestamp;
+            set
+            {
+                _gradeTimestampRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _gradeTimestamp = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="GradeTimestampRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? GradeTimestampDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(GradeTimestampRaw);
+            set => GradeTimestampRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The denominator of the grade at this time in the submission grade history.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("maxPoints")]
@@ -7022,6 +11734,28 @@ namespace Google.Apis.Classroom.v1.Data
         /// <summary>The numerator of the grade at this time in the submission grade history.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("pointsEarned")]
         public virtual System.Nullable<double> PointsEarned { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The gradebook settings for a course. See the [help center
+    /// article](https://support.google.com/edu/classroom/answer/9184995) for details.
+    /// </summary>
+    public class GradebookSettings : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Indicates how the overall grade is calculated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("calculationType")]
+        public virtual string CalculationType { get; set; }
+
+        /// <summary>Indicates who can see the overall grade..</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displaySetting")]
+        public virtual string DisplaySetting { get; set; }
+
+        /// <summary>Grade categories that are available for coursework in the course.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gradeCategories")]
+        public virtual System.Collections.Generic.IList<GradeCategory> GradeCategories { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -7059,9 +11793,42 @@ namespace Google.Apis.Classroom.v1.Data
     /// <summary>An invitation to become the guardian of a specified user, sent to a specified email address.</summary>
     public class GuardianInvitation : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _creationTimeRaw;
+
+        private object _creationTime;
+
         /// <summary>The time that this invitation was created. Read-only.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creationTime")]
-        public virtual object CreationTime { get; set; }
+        public virtual string CreationTimeRaw
+        {
+            get => _creationTimeRaw;
+            set
+            {
+                _creationTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _creationTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreationTimeDateTimeOffset instead.")]
+        public virtual object CreationTime
+        {
+            get => _creationTime;
+            set
+            {
+                _creationTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _creationTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreationTimeRaw);
+            set => CreationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Unique identifier for this invitation. Read-only.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("invitationId")]
@@ -7126,6 +11893,32 @@ namespace Google.Apis.Classroom.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>A level of the criterion.</summary>
+    public class Level : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The description of the level.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>The level ID. On creation, an ID is assigned.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>
+        /// Optional points associated with this level. If set, all levels within the rubric must specify points and the
+        /// value must be distinct across all levels within a single criterion. 0 is distinct from no points.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("points")]
+        public virtual System.Nullable<double> Points { get; set; }
+
+        /// <summary>The title of the level. If the level has no points set, title must be set.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("title")]
+        public virtual string Title { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>URL item.</summary>
     public class Link : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -7142,6 +11935,24 @@ namespace Google.Apis.Classroom.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("url")]
         public virtual string Url { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response when listing add-on attachments.</summary>
+    public class ListAddOnAttachmentsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Attachments under the given post.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("addOnAttachments")]
+        public virtual System.Collections.Generic.IList<AddOnAttachment> AddOnAttachments { get; set; }
+
+        /// <summary>
+        /// A token, which can be sent as `pageToken` to retrieve the next page. If this field is omitted, there are no
+        /// subsequent pages.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -7278,6 +12089,23 @@ namespace Google.Apis.Classroom.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response when listing rubrics.</summary>
+    public class ListRubricsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Token identifying the next page of results to return. If empty, no further results are available.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>Rubrics that match the request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rubrics")]
+        public virtual System.Collections.Generic.IList<Rubric> Rubrics { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -7510,11 +12338,44 @@ namespace Google.Apis.Classroom.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("cloudPubsubTopic")]
         public virtual CloudPubsubTopic CloudPubsubTopic { get; set; }
 
+        private string _expiryTimeRaw;
+
+        private object _expiryTime;
+
         /// <summary>
         /// The time until which the `Registration` is effective. This is a read-only field assigned by the server.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expiryTime")]
-        public virtual object ExpiryTime { get; set; }
+        public virtual string ExpiryTimeRaw
+        {
+            get => _expiryTimeRaw;
+            set
+            {
+                _expiryTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expiryTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpiryTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpiryTimeDateTimeOffset instead.")]
+        public virtual object ExpiryTime
+        {
+            get => _expiryTime;
+            set
+            {
+                _expiryTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expiryTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpiryTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpiryTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpiryTimeRaw);
+            set => ExpiryTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Specification for the class of notifications that Classroom should deliver to the destination.
@@ -7533,6 +12394,143 @@ namespace Google.Apis.Classroom.v1.Data
     /// <summary>Request to return a student submission.</summary>
     public class ReturnStudentSubmissionRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The rubric of the course work. A rubric is a scoring guide used to evaluate student work and give feedback. For
+    /// further details, see [Rubrics structure and known limitations](/classroom/rubrics/limitations).
+    /// </summary>
+    public class Rubric : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Identifier of the course. Read-only.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("courseId")]
+        public virtual string CourseId { get; set; }
+
+        /// <summary>Identifier for the course work this corresponds to. Read-only.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("courseWorkId")]
+        public virtual string CourseWorkId { get; set; }
+
+        private string _creationTimeRaw;
+
+        private object _creationTime;
+
+        /// <summary>Output only. Timestamp when this rubric was created. Read-only.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("creationTime")]
+        public virtual string CreationTimeRaw
+        {
+            get => _creationTimeRaw;
+            set
+            {
+                _creationTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _creationTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreationTimeDateTimeOffset instead.")]
+        public virtual object CreationTime
+        {
+            get => _creationTime;
+            set
+            {
+                _creationTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _creationTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreationTimeRaw);
+            set => CreationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>List of criteria. Each criterion is a dimension on which performance is rated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("criteria")]
+        public virtual System.Collections.Generic.IList<Criterion> Criteria { get; set; }
+
+        /// <summary>
+        /// Classroom-assigned identifier for the rubric. This is unique among rubrics for the relevant course work.
+        /// Read-only.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>
+        /// Input only. Immutable. Google Sheets ID of the spreadsheet. This spreadsheet must contain formatted rubric
+        /// settings. See [Create or reuse a rubric for an
+        /// assignment](https://support.google.com/edu/classroom/answer/9335069). Use of this field requires the
+        /// `https://www.googleapis.com/auth/spreadsheets.readonly` or `https://www.googleapis.com/auth/spreadsheets`
+        /// scope.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sourceSpreadsheetId")]
+        public virtual string SourceSpreadsheetId { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Output only. Timestamp of the most recent change to this rubric. Read-only.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A rubric grade set for the student submission. There is at most one entry per rubric criterion.
+    /// </summary>
+    public class RubricGrade : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Optional. Criterion ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("criterionId")]
+        public virtual string CriterionId { get; set; }
+
+        /// <summary>Optional. Optional level ID of the selected level. If empty, no level was selected.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("levelId")]
+        public virtual string LevelId { get; set; }
+
+        /// <summary>
+        /// Optional. Optional points assigned for this criterion, typically based on the level. Levels might or might
+        /// not have points. If unset, no points were set for this criterion.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("points")]
+        public virtual System.Nullable<double> Points { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -7574,9 +12572,44 @@ namespace Google.Apis.Classroom.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        private string _stateTimestampRaw;
+
+        private object _stateTimestamp;
+
         /// <summary>When the submission entered this state.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("stateTimestamp")]
-        public virtual object StateTimestamp { get; set; }
+        public virtual string StateTimestampRaw
+        {
+            get => _stateTimestampRaw;
+            set
+            {
+                _stateTimestamp = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _stateTimestampRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StateTimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StateTimestampDateTimeOffset instead.")]
+        public virtual object StateTimestamp
+        {
+            get => _stateTimestamp;
+            set
+            {
+                _stateTimestampRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _stateTimestamp = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="StateTimestampRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StateTimestampDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StateTimestampRaw);
+            set => StateTimestampRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -7612,9 +12645,23 @@ namespace Google.Apis.Classroom.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Role-specific context if the requesting user is a student.</summary>
+    public class StudentContext : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Requesting user's submission id to be used for grade passback and to identify the student when showing
+        /// student work to the teacher. This is set exactly when `supportsStudentWork` is `true`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("submissionId")]
+        public virtual string SubmissionId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
-    /// Student submission for course work. StudentSubmission items are generated when a CourseWork item is created.
-    /// StudentSubmissions that have never been accessed (i.e. with `state` = NEW) may not have a creation time or
+    /// Student submission for course work. `StudentSubmission` items are generated when a `CourseWork` item is created.
+    /// Student submissions that have never been accessed (i.e. with `state` = NEW) may not have a creation time or
     /// update time.
     /// </summary>
     public class StudentSubmission : Google.Apis.Requests.IDirectResponseSchema
@@ -7629,6 +12676,14 @@ namespace Google.Apis.Classroom.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("assignedGrade")]
         public virtual System.Nullable<double> AssignedGrade { get; set; }
+
+        /// <summary>
+        /// Assigned rubric grades based on the rubric's Criteria. This map is empty if there is no rubric attached to
+        /// this course work or if a rubric is attached, but no grades have been set on any Criteria. Entries are only
+        /// populated for grades that have been set. Key: The rubric's criterion ID. Read-only.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("assignedRubricGrades")]
+        public virtual System.Collections.Generic.IDictionary<string, RubricGrade> AssignedRubricGrades { get; set; }
 
         /// <summary>
         /// Submission content when course_work_type is ASSIGNMENT. Students can modify this content using
@@ -7656,11 +12711,44 @@ namespace Google.Apis.Classroom.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("courseWorkType")]
         public virtual string CourseWorkType { get; set; }
 
+        private string _creationTimeRaw;
+
+        private object _creationTime;
+
         /// <summary>
         /// Creation time of this submission. This may be unset if the student has not accessed this item. Read-only.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creationTime")]
-        public virtual object CreationTime { get; set; }
+        public virtual string CreationTimeRaw
+        {
+            get => _creationTimeRaw;
+            set
+            {
+                _creationTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _creationTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreationTimeDateTimeOffset instead.")]
+        public virtual object CreationTime
+        {
+            get => _creationTime;
+            set
+            {
+                _creationTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _creationTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreationTimeRaw);
+            set => CreationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Optional pending grade. If unset, no grade was set. This value must be non-negative. Decimal (that is,
@@ -7669,6 +12757,14 @@ namespace Google.Apis.Classroom.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("draftGrade")]
         public virtual System.Nullable<double> DraftGrade { get; set; }
+
+        /// <summary>
+        /// Pending rubric grades based on the rubric's criteria. This map is empty if there is no rubric attached to
+        /// this course work or if a rubric is attached, but no grades have been set on any criteria. Entries are only
+        /// populated for grades that have been set. Key: The rubric's criterion ID. Read-only.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("draftRubricGrades")]
+        public virtual System.Collections.Generic.IDictionary<string, RubricGrade> DraftRubricGrades { get; set; }
 
         /// <summary>
         /// Classroom-assigned Identifier for the student submission. This is unique among submissions for the relevant
@@ -7697,11 +12793,44 @@ namespace Google.Apis.Classroom.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("submissionHistory")]
         public virtual System.Collections.Generic.IList<SubmissionHistory> SubmissionHistory { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>
         /// Last update time of this submission. This may be unset if the student has not accessed this item. Read-only.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Identifier for the student that owns this submission. Read-only.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("userId")]
@@ -7749,6 +12878,13 @@ namespace Google.Apis.Classroom.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Role-specific context if the requesting user is a teacher.</summary>
+    public class TeacherContext : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// Represents a time of day. The date and time zone are either not significant or are specified elsewhere. An API
     /// may choose to allow leap seconds. Related types are google.type.Date and `google.protobuf.Timestamp`.
@@ -7756,23 +12892,26 @@ namespace Google.Apis.Classroom.v1.Data
     public class TimeOfDay : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for
-        /// scenarios like business closing time.
+        /// Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or
+        /// equal to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("hours")]
         public virtual System.Nullable<int> Hours { get; set; }
 
-        /// <summary>Minutes of hour of day. Must be from 0 to 59.</summary>
+        /// <summary>Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minutes")]
         public virtual System.Nullable<int> Minutes { get; set; }
 
-        /// <summary>Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.</summary>
+        /// <summary>
+        /// Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to
+        /// 999,999,999.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nanos")]
         public virtual System.Nullable<int> Nanos { get; set; }
 
         /// <summary>
-        /// Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows
-        /// leap-seconds.
+        /// Seconds of a minute. Must be greater than or equal to 0 and typically must be less than or equal to 59. An
+        /// API may allow the value 60 if it allows leap-seconds.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("seconds")]
         public virtual System.Nullable<int> Seconds { get; set; }
@@ -7800,9 +12939,42 @@ namespace Google.Apis.Classroom.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("topicId")]
         public virtual string TopicId { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>The time the topic was last updated by the system. Read-only.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -7818,7 +12990,10 @@ namespace Google.Apis.Classroom.v1.Data
     /// <summary>Global information for a user.</summary>
     public class UserProfile : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Email address of the user. Read-only.</summary>
+        /// <summary>
+        /// Email address of the user. Must request `https://www.googleapis.com/auth/classroom.profile.emails` scope for
+        /// this field to be populated in a response body. Read-only.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("emailAddress")]
         public virtual string EmailAddress { get; set; }
 
@@ -7834,14 +13009,17 @@ namespace Google.Apis.Classroom.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("permissions")]
         public virtual System.Collections.Generic.IList<GlobalPermission> Permissions { get; set; }
 
-        /// <summary>URL of user's profile photo. Read-only.</summary>
+        /// <summary>
+        /// URL of user's profile photo. Must request `https://www.googleapis.com/auth/classroom.profile.photos` scope
+        /// for this field to be populated in a response body. Read-only.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("photoUrl")]
         public virtual string PhotoUrl { get; set; }
 
         /// <summary>
-        /// Represents whether a G Suite for Education user's domain administrator has explicitly verified them as being
-        /// a teacher. If the user is not a member of a G Suite for Education domain, than this field is always false.
-        /// Read-only
+        /// Represents whether a Google Workspace for Education user's domain administrator has explicitly verified them
+        /// as being a teacher. This field is always false if the user is not a member of a Google Workspace for
+        /// Education domain. Read-only
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("verifiedTeacher")]
         public virtual System.Nullable<bool> VerifiedTeacher { get; set; }

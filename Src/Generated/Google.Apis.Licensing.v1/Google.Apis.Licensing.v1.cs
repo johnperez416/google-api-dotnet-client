@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.Licensing.v1
         public LicensingService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             LicenseAssignments = new LicenseAssignmentsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://licensing.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://licensing.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.Licensing.v1
         public override string Name => "licensing";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://licensing.googleapis.com/";
-        #else
-            "https://licensing.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://licensing.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Enterprise License Manager API.</summary>
         public class Scope
@@ -292,7 +287,7 @@ namespace Google.Apis.Licensing.v1
         /// </param>
         public virtual DeleteRequest Delete(string productId, string skuId, string userId)
         {
-            return new DeleteRequest(service, productId, skuId, userId);
+            return new DeleteRequest(this.service, productId, skuId, userId);
         }
 
         /// <summary>Revoke a license.</summary>
@@ -387,7 +382,7 @@ namespace Google.Apis.Licensing.v1
         /// </param>
         public virtual GetRequest Get(string productId, string skuId, string userId)
         {
-            return new GetRequest(service, productId, skuId, userId);
+            return new GetRequest(this.service, productId, skuId, userId);
         }
 
         /// <summary>Get a specific user's license by product SKU.</summary>
@@ -477,7 +472,7 @@ namespace Google.Apis.Licensing.v1
         /// </param>
         public virtual InsertRequest Insert(Google.Apis.Licensing.v1.Data.LicenseAssignmentInsert body, string productId, string skuId)
         {
-            return new InsertRequest(service, body, productId, skuId);
+            return new InsertRequest(this.service, body, productId, skuId);
         }
 
         /// <summary>Assign a license.</summary>
@@ -550,12 +545,12 @@ namespace Google.Apis.Licensing.v1
         /// and SKUs.
         /// </param>
         /// <param name="customerId">
-        /// Customer's `customerId`. A previous version of this API accepted the primary domain name as a value for this
-        /// field. If the customer is suspended, the server returns an error.
+        /// The customer's unique ID as defined in the Admin console, such as `C00000000`. If the customer is suspended,
+        /// the server returns an error.
         /// </param>
         public virtual ListForProductRequest ListForProduct(string productId, string customerId)
         {
-            return new ListForProductRequest(service, productId, customerId);
+            return new ListForProductRequest(this.service, productId, customerId);
         }
 
         /// <summary>List all users assigned licenses for a specific product SKU.</summary>
@@ -577,8 +572,8 @@ namespace Google.Apis.Licensing.v1
             public virtual string ProductId { get; private set; }
 
             /// <summary>
-            /// Customer's `customerId`. A previous version of this API accepted the primary domain name as a value for
-            /// this field. If the customer is suspended, the server returns an error.
+            /// The customer's unique ID as defined in the Admin console, such as `C00000000`. If the customer is
+            /// suspended, the server returns an error.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("customerId", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string CustomerId { get; private set; }
@@ -656,12 +651,12 @@ namespace Google.Apis.Licensing.v1
         /// Products and SKUs.
         /// </param>
         /// <param name="customerId">
-        /// Customer's `customerId`. A previous version of this API accepted the primary domain name as a value for this
-        /// field. If the customer is suspended, the server returns an error.
+        /// The customer's unique ID as defined in the Admin console, such as `C00000000`. If the customer is suspended,
+        /// the server returns an error.
         /// </param>
         public virtual ListForProductAndSkuRequest ListForProductAndSku(string productId, string skuId, string customerId)
         {
-            return new ListForProductAndSkuRequest(service, productId, skuId, customerId);
+            return new ListForProductAndSkuRequest(this.service, productId, skuId, customerId);
         }
 
         /// <summary>List all users assigned licenses for a specific product SKU.</summary>
@@ -691,8 +686,8 @@ namespace Google.Apis.Licensing.v1
             public virtual string SkuId { get; private set; }
 
             /// <summary>
-            /// Customer's `customerId`. A previous version of this API accepted the primary domain name as a value for
-            /// this field. If the customer is suspended, the server returns an error.
+            /// The customer's unique ID as defined in the Admin console, such as `C00000000`. If the customer is
+            /// suspended, the server returns an error.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("customerId", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string CustomerId { get; private set; }
@@ -789,7 +784,7 @@ namespace Google.Apis.Licensing.v1
         /// </param>
         public virtual PatchRequest Patch(Google.Apis.Licensing.v1.Data.LicenseAssignment body, string productId, string skuId, string userId)
         {
-            return new PatchRequest(service, body, productId, skuId, userId);
+            return new PatchRequest(this.service, body, productId, skuId, userId);
         }
 
         /// <summary>
@@ -895,7 +890,7 @@ namespace Google.Apis.Licensing.v1
         /// </param>
         public virtual UpdateRequest Update(Google.Apis.Licensing.v1.Data.LicenseAssignment body, string productId, string skuId, string userId)
         {
-            return new UpdateRequest(service, body, productId, skuId, userId);
+            return new UpdateRequest(this.service, body, productId, skuId, userId);
         }
 
         /// <summary>Reassign a user's product SKU with a different SKU in the same product.</summary>
@@ -986,8 +981,7 @@ namespace Google.Apis.Licensing.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {

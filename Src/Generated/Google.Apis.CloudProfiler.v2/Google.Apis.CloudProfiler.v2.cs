@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.CloudProfiler.v2
         public CloudProfilerService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://cloudprofiler.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://cloudprofiler.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,25 +46,18 @@ namespace Google.Apis.CloudProfiler.v2
         public override string Name => "cloudprofiler";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://cloudprofiler.googleapis.com/";
-        #else
-            "https://cloudprofiler.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://cloudprofiler.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
-        /// <summary>Available OAuth 2.0 scopes for use with the Stackdriver Profiler API.</summary>
+        /// <summary>Available OAuth 2.0 scopes for use with the Cloud Profiler API.</summary>
         public class Scope
         {
             /// <summary>
@@ -80,7 +75,7 @@ namespace Google.Apis.CloudProfiler.v2
             public static string MonitoringWrite = "https://www.googleapis.com/auth/monitoring.write";
         }
 
-        /// <summary>Available OAuth 2.0 scope constants for use with the Stackdriver Profiler API.</summary>
+        /// <summary>Available OAuth 2.0 scope constants for use with the Cloud Profiler API.</summary>
         public static class ScopeConstants
         {
             /// <summary>
@@ -316,29 +311,35 @@ namespace Google.Apis.CloudProfiler.v2
             }
 
             /// <summary>
-            /// CreateProfile creates a new profile resource in the online mode. The server ensures that the new
-            /// profiles are created at a constant rate per deployment, so the creation request may hang for some time
-            /// until the next profile session is available. The request may fail with ABORTED error if the creation is
-            /// not available within ~1m, the response will indicate the duration of the backoff the client should take
-            /// before attempting creating a profile again. The backoff duration is returned in google.rpc.RetryInfo
-            /// extension on the response status. To a gRPC client, the extension will be return as a binary-serialized
-            /// proto in the trailing metadata item named "google.rpc.retryinfo-bin".
+            /// CreateProfile creates a new profile resource in the online mode. _Direct use of this API is discouraged,
+            /// please use a [supported profiler
+            /// agent](https://cloud.google.com/profiler/docs/about-profiler#profiling_agent) instead for profile
+            /// collection._ The server ensures that the new profiles are created at a constant rate per deployment, so
+            /// the creation request may hang for some time until the next profile session is available. The request may
+            /// fail with ABORTED error if the creation is not available within ~1m, the response will indicate the
+            /// duration of the backoff the client should take before attempting creating a profile again. The backoff
+            /// duration is returned in google.rpc.RetryInfo extension on the response status. To a gRPC client, the
+            /// extension will be return as a binary-serialized proto in the trailing metadata item named
+            /// "google.rpc.retryinfo-bin".
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">Parent project to create the profile in.</param>
             public virtual CreateRequest Create(Google.Apis.CloudProfiler.v2.Data.CreateProfileRequest body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
-            /// CreateProfile creates a new profile resource in the online mode. The server ensures that the new
-            /// profiles are created at a constant rate per deployment, so the creation request may hang for some time
-            /// until the next profile session is available. The request may fail with ABORTED error if the creation is
-            /// not available within ~1m, the response will indicate the duration of the backoff the client should take
-            /// before attempting creating a profile again. The backoff duration is returned in google.rpc.RetryInfo
-            /// extension on the response status. To a gRPC client, the extension will be return as a binary-serialized
-            /// proto in the trailing metadata item named "google.rpc.retryinfo-bin".
+            /// CreateProfile creates a new profile resource in the online mode. _Direct use of this API is discouraged,
+            /// please use a [supported profiler
+            /// agent](https://cloud.google.com/profiler/docs/about-profiler#profiling_agent) instead for profile
+            /// collection._ The server ensures that the new profiles are created at a constant rate per deployment, so
+            /// the creation request may hang for some time until the next profile session is available. The request may
+            /// fail with ABORTED error if the creation is not available within ~1m, the response will indicate the
+            /// duration of the backoff the client should take before attempting creating a profile again. The backoff
+            /// duration is returned in google.rpc.RetryInfo extension on the response status. To a gRPC client, the
+            /// extension will be return as a binary-serialized proto in the trailing metadata item named
+            /// "google.rpc.retryinfo-bin".
             /// </summary>
             public class CreateRequest : CloudProfilerBaseServiceRequest<Google.Apis.CloudProfiler.v2.Data.Profile>
             {
@@ -386,18 +387,24 @@ namespace Google.Apis.CloudProfiler.v2
 
             /// <summary>
             /// CreateOfflineProfile creates a new profile resource in the offline mode. The client provides the profile
-            /// to create along with the profile bytes, the server records it.
+            /// to create along with the profile bytes, the server records it. _Direct use of this API is discouraged,
+            /// please use a [supported profiler
+            /// agent](https://cloud.google.com/profiler/docs/about-profiler#profiling_agent) instead for profile
+            /// collection._
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">Parent project to create the profile in.</param>
             public virtual CreateOfflineRequest CreateOffline(Google.Apis.CloudProfiler.v2.Data.Profile body, string parent)
             {
-                return new CreateOfflineRequest(service, body, parent);
+                return new CreateOfflineRequest(this.service, body, parent);
             }
 
             /// <summary>
             /// CreateOfflineProfile creates a new profile resource in the offline mode. The client provides the profile
-            /// to create along with the profile bytes, the server records it.
+            /// to create along with the profile bytes, the server records it. _Direct use of this API is discouraged,
+            /// please use a [supported profiler
+            /// agent](https://cloud.google.com/profiler/docs/about-profiler#profiling_agent) instead for profile
+            /// collection._
             /// </summary>
             public class CreateOfflineRequest : CloudProfilerBaseServiceRequest<Google.Apis.CloudProfiler.v2.Data.Profile>
             {
@@ -444,21 +451,109 @@ namespace Google.Apis.CloudProfiler.v2
             }
 
             /// <summary>
-            /// UpdateProfile updates the profile bytes and labels on the profile resource created in the online mode.
-            /// Updating the bytes for profiles created in the offline mode is currently not supported: the profile
-            /// content must be provided at the time of the profile creation.
+            /// Lists profiles which have been collected so far and for which the caller has permission to view.
             /// </summary>
-            /// <param name="body">The body of the request.</param>
-            /// <param name="name">Output only. Opaque, server-assigned, unique ID for this profile.</param>
-            public virtual PatchRequest Patch(Google.Apis.CloudProfiler.v2.Data.Profile body, string name)
+            /// <param name="parent">
+            /// Required. The parent, which owns this collection of profiles. Format: projects/{user_project_id}
+            /// </param>
+            public virtual ListRequest List(string parent)
             {
-                return new PatchRequest(service, body, name);
+                return new ListRequest(this.service, parent);
+            }
+
+            /// <summary>
+            /// Lists profiles which have been collected so far and for which the caller has permission to view.
+            /// </summary>
+            public class ListRequest : CloudProfilerBaseServiceRequest<Google.Apis.CloudProfiler.v2.Data.ListProfilesResponse>
+            {
+                /// <summary>Constructs a new List request.</summary>
+                public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                {
+                    Parent = parent;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The parent, which owns this collection of profiles. Format: projects/{user_project_id}
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>
+                /// Optional. The maximum number of items to return. Default page_size is 1000. Max limit is 1000.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<int> PageSize { get; set; }
+
+                /// <summary>
+                /// Optional. The token to continue pagination and get profiles from a particular page. When paginating,
+                /// all other parameters provided to `ListProfiles` must match the call that provided the page token.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string PageToken { get; set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "list";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v2/{+parent}/profiles";
+
+                /// <summary>Initializes List parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+$",
+                    });
+                    RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageSize",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageToken",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
             }
 
             /// <summary>
             /// UpdateProfile updates the profile bytes and labels on the profile resource created in the online mode.
             /// Updating the bytes for profiles created in the offline mode is currently not supported: the profile
-            /// content must be provided at the time of the profile creation.
+            /// content must be provided at the time of the profile creation. _Direct use of this API is discouraged,
+            /// please use a [supported profiler
+            /// agent](https://cloud.google.com/profiler/docs/about-profiler#profiling_agent) instead for profile
+            /// collection._
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">Output only. Opaque, server-assigned, unique ID for this profile.</param>
+            public virtual PatchRequest Patch(Google.Apis.CloudProfiler.v2.Data.Profile body, string name)
+            {
+                return new PatchRequest(this.service, body, name);
+            }
+
+            /// <summary>
+            /// UpdateProfile updates the profile bytes and labels on the profile resource created in the online mode.
+            /// Updating the bytes for profiles created in the offline mode is currently not supported: the profile
+            /// content must be provided at the time of the profile creation. _Direct use of this API is discouraged,
+            /// please use a [supported profiler
+            /// agent](https://cloud.google.com/profiler/docs/about-profiler#profiling_agent) instead for profile
+            /// collection._
             /// </summary>
             public class PatchRequest : CloudProfilerBaseServiceRequest<Google.Apis.CloudProfiler.v2.Data.Profile>
             {
@@ -531,11 +626,11 @@ namespace Google.Apis.CloudProfiler.v2.Data
     /// </summary>
     public class CreateProfileRequest : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Required. Deployment details.</summary>
+        /// <summary>Deployment details.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deployment")]
         public virtual Deployment Deployment { get; set; }
 
-        /// <summary>Required. One or more profile types that the agent is capable of providing.</summary>
+        /// <summary>One or more profile types that the agent is capable of providing.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("profileType")]
         public virtual System.Collections.Generic.IList<string> ProfileType { get; set; }
 
@@ -565,10 +660,38 @@ namespace Google.Apis.CloudProfiler.v2.Data
         /// <summary>
         /// Target is the service name used to group related deployments: * Service name for App Engine Flex / Standard.
         /// * Cluster and container name for GKE. * User-specified string for direct Compute Engine profiling (e.g.
-        /// Java). * Job name for Dataflow. Validation regex: `^[a-z]([-a-z0-9_.]{0,253}[a-z0-9])?$`.
+        /// Java). * Job name for Dataflow. Validation regex: `^[a-z0-9]([-a-z0-9_.]{0,253}[a-z0-9])?$`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("target")]
         public virtual string Target { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// ListProfileResponse contains the list of collected profiles for deployments in projects which the user has
+    /// permissions to view.
+    /// </summary>
+    public class ListProfilesResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Token to receive the next page of results. This field maybe empty if there are no more profiles to fetch.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>List of profiles fetched.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("profiles")]
+        public virtual System.Collections.Generic.IList<Profile> Profiles { get; set; }
+
+        /// <summary>
+        /// Number of profiles that were skipped in the current page since they were not able to be fetched
+        /// successfully. This should typically be zero. A non-zero value may indicate a transient failure, in which
+        /// case if the number is too high for your use case, the call may be retried.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("skippedProfiles")]
+        public virtual System.Nullable<int> SkippedProfiles { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -614,6 +737,46 @@ namespace Google.Apis.CloudProfiler.v2.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("profileType")]
         public virtual string ProfileType { get; set; }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
+        /// <summary>
+        /// Output only. Start time for the profile. This output is only present in response from the ListProfiles
+        /// method.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

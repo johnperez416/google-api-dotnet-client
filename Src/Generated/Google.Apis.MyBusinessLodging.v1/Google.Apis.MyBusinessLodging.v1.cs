@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.MyBusinessLodging.v1
         public MyBusinessLodgingService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Locations = new LocationsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://mybusinesslodging.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://mybusinesslodging.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.MyBusinessLodging.v1
         public override string Name => "mybusinesslodging";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://mybusinesslodging.googleapis.com/";
-        #else
-            "https://mybusinesslodging.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://mybusinesslodging.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Gets the Locations resource.</summary>
         public virtual LocationsResource Locations { get; }
@@ -281,12 +276,11 @@ namespace Google.Apis.MyBusinessLodging.v1
 
             /// <summary>Returns the Google updated Lodging of a specific location.</summary>
             /// <param name="name">
-            /// Required. Google identifier for this location in the form:
-            /// `accounts/{account_id}/locations/{location_id}/lodging`
+            /// Required. Google identifier for this location in the form: `locations/{location_id}/lodging`
             /// </param>
             public virtual GetGoogleUpdatedRequest GetGoogleUpdated(string name)
             {
-                return new GetGoogleUpdatedRequest(service, name);
+                return new GetGoogleUpdatedRequest(this.service, name);
             }
 
             /// <summary>Returns the Google updated Lodging of a specific location.</summary>
@@ -300,8 +294,7 @@ namespace Google.Apis.MyBusinessLodging.v1
                 }
 
                 /// <summary>
-                /// Required. Google identifier for this location in the form:
-                /// `accounts/{account_id}/locations/{location_id}/lodging`
+                /// Required. Google identifier for this location in the form: `locations/{location_id}/lodging`
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Name { get; private set; }
@@ -352,7 +345,7 @@ namespace Google.Apis.MyBusinessLodging.v1
         /// </param>
         public virtual GetLodgingRequest GetLodging(string name)
         {
-            return new GetLodgingRequest(service, name);
+            return new GetLodgingRequest(this.service, name);
         }
 
         /// <summary>Returns the Lodging of a specific location.</summary>
@@ -417,7 +410,7 @@ namespace Google.Apis.MyBusinessLodging.v1
         /// </param>
         public virtual UpdateLodgingRequest UpdateLodging(Google.Apis.MyBusinessLodging.v1.Data.Lodging body, string name)
         {
-            return new UpdateLodgingRequest(service, body, name);
+            return new UpdateLodgingRequest(this.service, body, name);
         }
 
         /// <summary>Updates the Lodging of a specific location.</summary>
@@ -830,7 +823,10 @@ namespace Google.Apis.MyBusinessLodging.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>An eco certificate awarded to the hotel.</summary>
+    /// <summary>
+    /// An eco certificate awarded to the hotel. Deprecated: this message is no longer populated. All certification data
+    /// is now provided by BeCause.
+    /// </summary>
     public class EcoCertification : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>Whether the eco certificate was awarded or not.</summary>
@@ -919,7 +915,9 @@ namespace Google.Apis.MyBusinessLodging.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("energySavingThermostatsException")]
         public virtual string EnergySavingThermostatsException { get; set; }
 
-        /// <summary>Output only. Green building design. True if BREEAM-* or LEED-* certified.</summary>
+        /// <summary>
+        /// Output only. Green building design. True if the property has been awarded a relevant certification.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("greenBuildingDesign")]
         public virtual System.Nullable<bool> GreenBuildingDesign { get; set; }
 
@@ -1041,6 +1039,17 @@ namespace Google.Apis.MyBusinessLodging.v1.Data
         /// <summary>Kids club exception.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("kidsClubException")]
         public virtual string KidsClubException { get; set; }
+
+        /// <summary>
+        /// Kids friendly. The hotel has one or more special features for families with children, such as reduced rates,
+        /// child-sized beds, kids' club, babysitting service, or suitable place to play on premises.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kidsFriendly")]
+        public virtual System.Nullable<bool> KidsFriendly { get; set; }
+
+        /// <summary>Kids friendly exception.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kidsFriendlyException")]
+        public virtual string KidsFriendlyException { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2321,12 +2330,45 @@ namespace Google.Apis.MyBusinessLodging.v1.Data
     /// <summary>Metadata for the Lodging.</summary>
     public class LodgingMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>
         /// Required. The latest time at which the Lodging data is asserted to be true in the real world. This is not
         /// necessarily the time at which the request is made.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3131,7 +3173,10 @@ namespace Google.Apis.MyBusinessLodging.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("energyEfficiency")]
         public virtual EnergyEfficiency EnergyEfficiency { get; set; }
 
-        /// <summary>Sustainability certifications the hotel has been awarded.</summary>
+        /// <summary>
+        /// Sustainability certifications the hotel has been awarded. Deprecated: this field is no longer populated. All
+        /// certification data is now provided by BeCause.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sustainabilityCertifications")]
         public virtual SustainabilityCertifications SustainabilityCertifications { get; set; }
 
@@ -3151,7 +3196,10 @@ namespace Google.Apis.MyBusinessLodging.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Sustainability certifications the hotel has been awarded.</summary>
+    /// <summary>
+    /// Sustainability certifications the hotel has been awarded. Deprecated: this message is no longer populated. All
+    /// certification data is now provided by BeCause.
+    /// </summary>
     public class SustainabilityCertifications : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>BREEAM certification.</summary>
@@ -3266,7 +3314,7 @@ namespace Google.Apis.MyBusinessLodging.v1.Data
 
         /// <summary>
         /// Vegetarian meals. The property provides vegetarian menu options for guests. Vegetarian food does not contain
-        /// animal products.
+        /// meat, poultry, fish, or seafood.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("vegetarianMeals")]
         public virtual System.Nullable<bool> VegetarianMeals { get; set; }
@@ -3286,23 +3334,26 @@ namespace Google.Apis.MyBusinessLodging.v1.Data
     public class TimeOfDay : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for
-        /// scenarios like business closing time.
+        /// Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or
+        /// equal to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("hours")]
         public virtual System.Nullable<int> Hours { get; set; }
 
-        /// <summary>Minutes of hour of day. Must be from 0 to 59.</summary>
+        /// <summary>Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minutes")]
         public virtual System.Nullable<int> Minutes { get; set; }
 
-        /// <summary>Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.</summary>
+        /// <summary>
+        /// Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to
+        /// 999,999,999.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nanos")]
         public virtual System.Nullable<int> Nanos { get; set; }
 
         /// <summary>
-        /// Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows
-        /// leap-seconds.
+        /// Seconds of a minute. Must be greater than or equal to 0 and typically must be less than or equal to 59. An
+        /// API may allow the value 60 if it allows leap-seconds.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("seconds")]
         public virtual System.Nullable<int> Seconds { get; set; }

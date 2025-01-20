@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ namespace Google.Apis.PubsubLite.v1
             Admin = new AdminResource(this);
             Cursor = new CursorResource(this);
             TopicStats = new TopicStatsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://pubsublite.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://pubsublite.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -46,23 +48,16 @@ namespace Google.Apis.PubsubLite.v1
         public override string Name => "pubsublite";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://pubsublite.googleapis.com/";
-        #else
-            "https://pubsublite.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://pubsublite.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Pub/Sub Lite API.</summary>
         public class Scope
@@ -352,14 +347,14 @@ namespace Google.Apis.PubsubLite.v1
                     /// it returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other
                     /// methods to check whether the cancellation succeeded or whether the operation completed despite
                     /// cancellation. On successful cancellation, the operation is not deleted; instead, it becomes an
-                    /// operation with an Operation.error value with a google.rpc.Status.code of 1, corresponding to
+                    /// operation with an Operation.error value with a google.rpc.Status.code of `1`, corresponding to
                     /// `Code.CANCELLED`.
                     /// </summary>
                     /// <param name="body">The body of the request.</param>
                     /// <param name="name">The name of the operation resource to be cancelled.</param>
                     public virtual CancelRequest Cancel(Google.Apis.PubsubLite.v1.Data.CancelOperationRequest body, string name)
                     {
-                        return new CancelRequest(service, body, name);
+                        return new CancelRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -368,7 +363,7 @@ namespace Google.Apis.PubsubLite.v1
                     /// it returns `google.rpc.Code.UNIMPLEMENTED`. Clients can use Operations.GetOperation or other
                     /// methods to check whether the cancellation succeeded or whether the operation completed despite
                     /// cancellation. On successful cancellation, the operation is not deleted; instead, it becomes an
-                    /// operation with an Operation.error value with a google.rpc.Status.code of 1, corresponding to
+                    /// operation with an Operation.error value with a google.rpc.Status.code of `1`, corresponding to
                     /// `Code.CANCELLED`.
                     /// </summary>
                     public class CancelRequest : PubsubLiteBaseServiceRequest<Google.Apis.PubsubLite.v1.Data.Empty>
@@ -423,7 +418,7 @@ namespace Google.Apis.PubsubLite.v1
                     /// <param name="name">The name of the operation resource to be deleted.</param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -475,7 +470,7 @@ namespace Google.Apis.PubsubLite.v1
                     /// <param name="name">The name of the operation resource.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -521,27 +516,17 @@ namespace Google.Apis.PubsubLite.v1
 
                     /// <summary>
                     /// Lists operations that match the specified filter in the request. If the server doesn't support
-                    /// this method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to
-                    /// override the binding to use different resource name schemes, such as `users/*/operations`. To
-                    /// override the binding, API services can add a binding such as `"/v1/{name=users/*}/operations"`
-                    /// to their service configuration. For backwards compatibility, the default name includes the
-                    /// operations collection id, however overriding users must ensure the name binding is the parent
-                    /// resource, without the operations collection id.
+                    /// this method, it returns `UNIMPLEMENTED`.
                     /// </summary>
                     /// <param name="name">The name of the operation's parent resource.</param>
                     public virtual ListRequest List(string name)
                     {
-                        return new ListRequest(service, name);
+                        return new ListRequest(this.service, name);
                     }
 
                     /// <summary>
                     /// Lists operations that match the specified filter in the request. If the server doesn't support
-                    /// this method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to
-                    /// override the binding to use different resource name schemes, such as `users/*/operations`. To
-                    /// override the binding, API services can add a binding such as `"/v1/{name=users/*}/operations"`
-                    /// to their service configuration. For backwards compatibility, the default name includes the
-                    /// operations collection id, however overriding users must ensure the name binding is the parent
-                    /// resource, without the operations collection id.
+                    /// this method, it returns `UNIMPLEMENTED`.
                     /// </summary>
                     public class ListRequest : PubsubLiteBaseServiceRequest<Google.Apis.PubsubLite.v1.Data.ListOperationsResponse>
                     {
@@ -659,7 +644,7 @@ namespace Google.Apis.PubsubLite.v1
                         /// </param>
                         public virtual ListRequest List(string name)
                         {
-                            return new ListRequest(service, name);
+                            return new ListRequest(this.service, name);
                         }
 
                         /// <summary>Lists the topics attached to the specified reservation.</summary>
@@ -743,7 +728,7 @@ namespace Google.Apis.PubsubLite.v1
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.PubsubLite.v1.Data.Reservation body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>Creates a new reservation.</summary>
@@ -816,7 +801,7 @@ namespace Google.Apis.PubsubLite.v1
                     /// </param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>Deletes the specified reservation.</summary>
@@ -867,7 +852,7 @@ namespace Google.Apis.PubsubLite.v1
                     /// </param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Returns the reservation configuration.</summary>
@@ -918,7 +903,7 @@ namespace Google.Apis.PubsubLite.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Returns the list of reservations for the given project.</summary>
@@ -1001,7 +986,7 @@ namespace Google.Apis.PubsubLite.v1
                     /// </param>
                     public virtual PatchRequest Patch(Google.Apis.PubsubLite.v1.Data.Reservation body, string name)
                     {
-                        return new PatchRequest(service, body, name);
+                        return new PatchRequest(this.service, body, name);
                     }
 
                     /// <summary>Updates properties of the specified reservation.</summary>
@@ -1090,7 +1075,7 @@ namespace Google.Apis.PubsubLite.v1
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.PubsubLite.v1.Data.Subscription body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>Creates a new subscription.</summary>
@@ -1176,7 +1161,7 @@ namespace Google.Apis.PubsubLite.v1
                     /// <param name="name">Required. The name of the subscription to delete.</param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>Deletes the specified subscription.</summary>
@@ -1221,7 +1206,7 @@ namespace Google.Apis.PubsubLite.v1
                     /// <param name="name">Required. The name of the subscription whose configuration to return.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Returns the subscription configuration.</summary>
@@ -1269,7 +1254,7 @@ namespace Google.Apis.PubsubLite.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Returns the list of subscriptions for the given project.</summary>
@@ -1352,7 +1337,7 @@ namespace Google.Apis.PubsubLite.v1
                     /// </param>
                     public virtual PatchRequest Patch(Google.Apis.PubsubLite.v1.Data.Subscription body, string name)
                     {
-                        return new PatchRequest(service, body, name);
+                        return new PatchRequest(this.service, body, name);
                     }
 
                     /// <summary>Updates properties of the specified subscription.</summary>
@@ -1433,7 +1418,7 @@ namespace Google.Apis.PubsubLite.v1
                     /// <param name="name">Required. The name of the subscription to seek.</param>
                     public virtual SeekRequest Seek(Google.Apis.PubsubLite.v1.Data.SeekSubscriptionRequest body, string name)
                     {
-                        return new SeekRequest(service, body, name);
+                        return new SeekRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -1534,7 +1519,7 @@ namespace Google.Apis.PubsubLite.v1
                         /// <param name="name">Required. The name of the topic whose subscriptions to list.</param>
                         public virtual ListRequest List(string name)
                         {
-                            return new ListRequest(service, name);
+                            return new ListRequest(this.service, name);
                         }
 
                         /// <summary>Lists the subscriptions attached to the specified topic.</summary>
@@ -1615,7 +1600,7 @@ namespace Google.Apis.PubsubLite.v1
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.PubsubLite.v1.Data.Topic body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>Creates a new topic.</summary>
@@ -1685,7 +1670,7 @@ namespace Google.Apis.PubsubLite.v1
                     /// <param name="name">Required. The name of the topic to delete.</param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>Deletes the specified topic.</summary>
@@ -1730,7 +1715,7 @@ namespace Google.Apis.PubsubLite.v1
                     /// <param name="name">Required. The name of the topic whose configuration to return.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Returns the topic configuration.</summary>
@@ -1775,7 +1760,7 @@ namespace Google.Apis.PubsubLite.v1
                     /// <param name="name">Required. The topic whose partition information to return.</param>
                     public virtual GetPartitionsRequest GetPartitions(string name)
                     {
-                        return new GetPartitionsRequest(service, name);
+                        return new GetPartitionsRequest(this.service, name);
                     }
 
                     /// <summary>Returns the partition information for the requested topic.</summary>
@@ -1823,7 +1808,7 @@ namespace Google.Apis.PubsubLite.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Returns the list of topics for the given project.</summary>
@@ -1906,7 +1891,7 @@ namespace Google.Apis.PubsubLite.v1
                     /// </param>
                     public virtual PatchRequest Patch(Google.Apis.PubsubLite.v1.Data.Topic body, string name)
                     {
-                        return new PatchRequest(service, body, name);
+                        return new PatchRequest(this.service, body, name);
                     }
 
                     /// <summary>Updates properties of the specified topic.</summary>
@@ -2066,7 +2051,7 @@ namespace Google.Apis.PubsubLite.v1
                         /// </param>
                         public virtual ListRequest List(string parent)
                         {
-                            return new ListRequest(service, parent);
+                            return new ListRequest(this.service, parent);
                         }
 
                         /// <summary>Returns all committed cursor information for a subscription.</summary>
@@ -2147,7 +2132,7 @@ namespace Google.Apis.PubsubLite.v1
                     /// <param name="subscription">The subscription for which to update the cursor.</param>
                     public virtual CommitCursorRequest CommitCursor(Google.Apis.PubsubLite.v1.Data.CommitCursorRequest body, string subscription)
                     {
-                        return new CommitCursorRequest(service, body, subscription);
+                        return new CommitCursorRequest(this.service, body, subscription);
                     }
 
                     /// <summary>Updates the committed cursor.</summary>
@@ -2277,7 +2262,7 @@ namespace Google.Apis.PubsubLite.v1
                     /// <param name="topic">Required. The topic for which we should compute the head cursor.</param>
                     public virtual ComputeHeadCursorRequest ComputeHeadCursor(Google.Apis.PubsubLite.v1.Data.ComputeHeadCursorRequest body, string topic)
                     {
-                        return new ComputeHeadCursorRequest(service, body, topic);
+                        return new ComputeHeadCursorRequest(this.service, body, topic);
                     }
 
                     /// <summary>
@@ -2335,7 +2320,7 @@ namespace Google.Apis.PubsubLite.v1
                     /// <param name="topic">Required. The topic for which we should compute message stats.</param>
                     public virtual ComputeMessageStatsRequest ComputeMessageStats(Google.Apis.PubsubLite.v1.Data.ComputeMessageStatsRequest body, string topic)
                     {
-                        return new ComputeMessageStatsRequest(service, body, topic);
+                        return new ComputeMessageStatsRequest(this.service, body, topic);
                     }
 
                     /// <summary>Compute statistics about a range of messages in a given topic and partition.</summary>
@@ -2390,7 +2375,7 @@ namespace Google.Apis.PubsubLite.v1
                     /// <param name="topic">Required. The topic for which we should compute the cursor.</param>
                     public virtual ComputeTimeCursorRequest ComputeTimeCursor(Google.Apis.PubsubLite.v1.Data.ComputeTimeCursorRequest body, string topic)
                     {
-                        return new ComputeTimeCursorRequest(service, body, topic);
+                        return new ComputeTimeCursorRequest(this.service, body, topic);
                     }
 
                     /// <summary>
@@ -2548,19 +2533,89 @@ namespace Google.Apis.PubsubLite.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("messageCount")]
         public virtual System.Nullable<long> MessageCount { get; set; }
 
+        private string _minimumEventTimeRaw;
+
+        private object _minimumEventTime;
+
         /// <summary>
         /// The minimum event timestamp across these messages. For the purposes of this computation, if a message does
         /// not have an event time, we use the publish time. The timestamp will be unset if there are no messages.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minimumEventTime")]
-        public virtual object MinimumEventTime { get; set; }
+        public virtual string MinimumEventTimeRaw
+        {
+            get => _minimumEventTimeRaw;
+            set
+            {
+                _minimumEventTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _minimumEventTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="MinimumEventTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use MinimumEventTimeDateTimeOffset instead.")]
+        public virtual object MinimumEventTime
+        {
+            get => _minimumEventTime;
+            set
+            {
+                _minimumEventTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _minimumEventTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="MinimumEventTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? MinimumEventTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(MinimumEventTimeRaw);
+            set => MinimumEventTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _minimumPublishTimeRaw;
+
+        private object _minimumPublishTime;
 
         /// <summary>
         /// The minimum publish timestamp across these messages. Note that publish timestamps within a partition are not
         /// guaranteed to be non-decreasing. The timestamp will be unset if there are no messages.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minimumPublishTime")]
-        public virtual object MinimumPublishTime { get; set; }
+        public virtual string MinimumPublishTimeRaw
+        {
+            get => _minimumPublishTimeRaw;
+            set
+            {
+                _minimumPublishTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _minimumPublishTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="MinimumPublishTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use MinimumPublishTimeDateTimeOffset instead.")]
+        public virtual object MinimumPublishTime
+        {
+            get => _minimumPublishTime;
+            set
+            {
+                _minimumPublishTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _minimumPublishTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="MinimumPublishTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? MinimumPublishTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(MinimumPublishTimeRaw);
+            set => MinimumPublishTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2622,11 +2677,51 @@ namespace Google.Apis.PubsubLite.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Configuration for a Pub/Sub Lite subscription that writes messages to a destination. User subscriber clients
+    /// must not connect to this subscription.
+    /// </summary>
+    public class ExportConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. The current state of the export, which may be different to the desired state due to errors.
+        /// This field is output only.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("currentState")]
+        public virtual string CurrentState { get; set; }
+
+        /// <summary>
+        /// Optional. The name of an optional Pub/Sub Lite topic to publish messages that can not be exported to the
+        /// destination. For example, the message can not be published to the Pub/Sub service because it does not
+        /// satisfy the constraints documented at https://cloud.google.com/pubsub/docs/publisher. Structured like:
+        /// projects/{project_number}/locations/{location}/topics/{topic_id}. Must be within the same project and
+        /// location as the subscription. The topic may be changed or removed.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deadLetterTopic")]
+        public virtual string DeadLetterTopic { get; set; }
+
+        /// <summary>
+        /// The desired state of this export. Setting this to values other than `ACTIVE` and `PAUSED` will result in an
+        /// error.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("desiredState")]
+        public virtual string DesiredState { get; set; }
+
+        /// <summary>
+        /// Messages are automatically written from the Pub/Sub Lite topic associated with this subscription to a
+        /// Pub/Sub topic.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("pubsubConfig")]
+        public virtual PubSubConfig PubsubConfig { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -2790,8 +2885,8 @@ namespace Google.Apis.PubsubLite.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -2806,13 +2901,79 @@ namespace Google.Apis.PubsubLite.v1.Data
     /// <summary>Metadata for long running operations.</summary>
     public class OperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The time the operation was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
 
         /// <summary>The time the operation finished running. Not set if the operation has not completed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Resource path for the target of the operation. For example, targets of seeks are subscription resources,
@@ -2867,6 +3028,20 @@ namespace Google.Apis.PubsubLite.v1.Data
         /// <summary>The partition this is for.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("partition")]
         public virtual System.Nullable<long> Partition { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Configuration for exporting to a Pub/Sub topic.</summary>
+    public class PubSubConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The name of the Pub/Sub topic. Structured like: projects/{project_number}/topics/{topic_id}. The topic may
+        /// be changed.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("topic")]
+        public virtual string Topic { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2992,6 +3167,13 @@ namespace Google.Apis.PubsubLite.v1.Data
         public virtual DeliveryConfig DeliveryConfig { get; set; }
 
         /// <summary>
+        /// If present, messages are automatically written from the Pub/Sub Lite topic associated with this subscription
+        /// to a destination.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("exportConfig")]
+        public virtual ExportConfig ExportConfig { get; set; }
+
+        /// <summary>
         /// The name of the subscription. Structured like:
         /// projects/{project_number}/locations/{location}/subscriptions/{subscription_id}
         /// </summary>
@@ -3014,6 +3196,10 @@ namespace Google.Apis.PubsubLite.v1.Data
     /// </summary>
     public class TimeTarget : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _eventTimeRaw;
+
+        private object _eventTime;
+
         /// <summary>
         /// Request the cursor of the first message with event time greater than or equal to `event_time`. If messages
         /// are missing an event time, the publish time is used as a fallback. As event times are user supplied,
@@ -3021,14 +3207,76 @@ namespace Google.Apis.PubsubLite.v1.Data
         /// necessary.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("eventTime")]
-        public virtual object EventTime { get; set; }
+        public virtual string EventTimeRaw
+        {
+            get => _eventTimeRaw;
+            set
+            {
+                _eventTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _eventTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EventTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EventTimeDateTimeOffset instead.")]
+        public virtual object EventTime
+        {
+            get => _eventTime;
+            set
+            {
+                _eventTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _eventTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EventTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EventTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EventTimeRaw);
+            set => EventTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _publishTimeRaw;
+
+        private object _publishTime;
 
         /// <summary>
         /// Request the cursor of the first message with publish time greater than or equal to `publish_time`. All
         /// messages thereafter are guaranteed to have publish times &amp;gt;= `publish_time`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("publishTime")]
-        public virtual object PublishTime { get; set; }
+        public virtual string PublishTimeRaw
+        {
+            get => _publishTimeRaw;
+            set
+            {
+                _publishTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _publishTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="PublishTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PublishTimeDateTimeOffset instead.")]
+        public virtual object PublishTime
+        {
+            get => _publishTime;
+            set
+            {
+                _publishTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _publishTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="PublishTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? PublishTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(PublishTimeRaw);
+            set => PublishTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

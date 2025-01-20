@@ -80,7 +80,7 @@ namespace Google.Apis.Tests.Apis.Services
 
         /// <summary>This tests deserialization with data wrapping.</summary>
         [Fact]
-        public void TestDeserialization_WithDataWrapping()
+        public async Task TestDeserialization_WithDataWrapping()
         {
             const string Response =
                 @"{ ""data"" : 
@@ -98,13 +98,13 @@ namespace Google.Apis.Tests.Apis.Services
             // Check that the response is decoded correctly.
             var stream = new MemoryStream(Encoding.UTF8.GetBytes(Response));
             var response = new HttpResponseMessage { Content = new StreamContent(stream) };
-            CheckDeserializationResult(client.DeserializeResponse<MockJsonSchema>(response).Result);
+            CheckDeserializationResult(await client.DeserializeResponse<MockJsonSchema>(response));
         }
 
 
         /// <summary>This tests Deserialization without data wrapping.</summary>
         [Fact]
-        public void TestDeserialization_WithoutDataWrapping()
+        public async Task TestDeserialization_WithoutDataWrapping()
         {
             const string Response = @"{""kind"":""urlshortener#url"",""longUrl"":""http://google.com/""}";
 
@@ -117,8 +117,7 @@ namespace Google.Apis.Tests.Apis.Services
             // Check that the response is decoded correctly
             var stream = new MemoryStream(Encoding.UTF8.GetBytes(Response));
             var response = new HttpResponseMessage { Content = new StreamContent(stream) };
-            CheckDeserializationResult(
-                client.DeserializeResponse<MockJsonSchema>(response).Result);
+            CheckDeserializationResult(await client.DeserializeResponse<MockJsonSchema>(response));
         }
 
         /// <summary>Tests serialization with data wrapping.</summary>
@@ -161,7 +160,7 @@ namespace Google.Apis.Tests.Apis.Services
         /// Confirms that the serializer won't do anything if a string is the requested response type.
         /// </summary>
         [Fact]
-        public void TestDeserializationString()
+        public async Task TestDeserializationString()
         {
             const string Response = @"{""kind"":""urlshortener#url"",""longUrl"":""http://google.com/""}";
 
@@ -170,13 +169,13 @@ namespace Google.Apis.Tests.Apis.Services
             // Check that the response is decoded correctly
             var stream = new MemoryStream(Encoding.UTF8.GetBytes(Response));
             var response = new HttpResponseMessage { Content = new StreamContent(stream) };
-            string result = client.DeserializeResponse<string>(response).Result;
+            string result = await client.DeserializeResponse<string>(response);
             Assert.Equal(Response, result);
         }
 
         /// <summary>Tests deserialization for server error response.</summary>
         [Theory, CombinatorialData]
-        public void TestErrorDeserialization(
+        public async Task TestErrorDeserialization(
           [CombinatorialValues(Features.LegacyDataResponse, null)] Features? features)
         {
             const string ErrorResponse =
@@ -203,10 +202,10 @@ namespace Google.Apis.Tests.Apis.Services
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(ErrorResponse)))
             {
                 var response = new HttpResponseMessage { Content = new StreamContent(stream) };
-                RequestError error = client.DeserializeError(response).Result;
+                RequestError error = await client.DeserializeError(response);
                 Assert.Equal(400, error.Code);
                 Assert.Equal("Required", error.Message);
-                Assert.Equal(1, error.Errors.Count);
+                Assert.Single(error.Errors);
                 Assert.NotNull(error.ErrorResponseContent);
                 Assert.Equal(ErrorResponse, error.ErrorResponseContent);
             }
@@ -224,40 +223,37 @@ namespace Google.Apis.Tests.Apis.Services
             Assert.Equal(expectedServiceUri, service.BaseUri);
         }
 
-        /// <summary>
-        /// A mock authentication message handler which returns an unauthorized response in the first call, and a 
-        /// successful response in the second.
-        /// </summary>
-        class MockAuthenticationMessageHandler : CountableMessageHandler
+        [Theory]
+        [InlineData(null, null, null, null)]
+        [InlineData(null, "custom.domain", null, null)]
+        [InlineData(null, "custom.domain", "https://service.googleapis.com", "https://service.custom.domain")]
+        [InlineData(null, "custom.domain", "https://service.another.domain", "https://service.another.domain")]
+        [InlineData("https://service.explicit.domain", "custom.domain", "https://service.googleapis.com", "https://service.explicit.domain")]
+        [InlineData("https://service.explicit.domain", "custom.domain", "https://service.another.domain", "https://service.explicit.domain")]
+        public void UniverseDomain_GetEffectiveUri(string explicitUri, string universeDomain, string defaultUri, string expectedUri)
         {
-            internal static string FirstToken = "invalid";
-            internal static string SecondToken = "valid";
+            var service = new MockClientService(new BaseClientService.Initializer
+            { 
+                // We don't need to initialize BaseUri here as we are testing the GetEffectiveUri method directly.
+                UniverseDomain = universeDomain
+            });
 
-            protected override Task<HttpResponseMessage> SendAsyncCore(HttpRequestMessage request,
-                CancellationToken cancellationToken)
+            var effectiveUri = service.GetEffectiveUri(explicitUri, defaultUri);
+            Assert.Equal(expectedUri, effectiveUri);
+        }
+
+        [Theory]
+        [InlineData(null, "googleapis.com")]
+        [InlineData("googleapis.com", "googleapis.com")]
+        [InlineData("custom.domain", "custom.domain")]
+        public void UniverseDomain_PropagatesToMessageHandler(string explicitUniverseDomain, string expectedUnirseDomain)
+        {
+            var service = new MockClientService(new BaseClientService.Initializer
             {
-                TaskCompletionSource<HttpResponseMessage> tcs = new TaskCompletionSource<HttpResponseMessage>();
-                switch (Calls)
-                {
-                    case 1:
-                        Assert.Single(request.Headers.GetValues("Authorization"));
-                        Assert.Equal(FirstToken, request.Headers.GetValues("Authorization").First());
-                        tcs.SetResult(new HttpResponseMessage
-                            {
-                                StatusCode = System.Net.HttpStatusCode.Unauthorized
-                            });
-                        break;
-                    case 2:
-                        Assert.Single(request.Headers.GetValues("Authorization"));
-                        Assert.Equal(SecondToken, request.Headers.GetValues("Authorization").First());
-                        tcs.SetResult(new HttpResponseMessage());
-                        break;
-                    default:
-                        throw new Exception("There should be only two calls");
-                }
+                UniverseDomain = explicitUniverseDomain
+            });
 
-                return tcs.Task;
-            }
+            Assert.Equal(service.HttpClient.MessageHandler.UniverseDomain, expectedUnirseDomain);
         }
 
         /// <summary>
@@ -276,12 +272,12 @@ namespace Google.Apis.Tests.Apis.Services
             // but we rely on the obsolete property as an implementation detail here.
             #pragma warning disable 618
             // Back-off handler for unsuccessful response (503) is added by default.
-            Assert.Equal(1, service.HttpClient.MessageHandler.UnsuccessfulResponseHandlers.Count);
-            Assert.IsAssignableFrom<BackOffHandler>(service.HttpClient.MessageHandler.UnsuccessfulResponseHandlers.FirstOrDefault());
+            var backoffHandler = Assert.Single(service.HttpClient.MessageHandler.UnsuccessfulResponseHandlers);
+            Assert.IsAssignableFrom<BackOffHandler>(backoffHandler);
 
-            // An execute interceptors is expected (for handling GET requests with URLs that are too long)
-            Assert.Equal(1, service.HttpClient.MessageHandler.ExecuteInterceptors.Count);
-            Assert.IsType<MaxUrlLengthInterceptor>(service.HttpClient.MessageHandler.ExecuteInterceptors.FirstOrDefault());
+            // An execute interceptor is expected (for handling GET requests with URLs that are too long)
+            var interceptor = Assert.Single(service.HttpClient.MessageHandler.ExecuteInterceptors);
+            Assert.IsType<MaxUrlLengthInterceptor>(interceptor);
             #pragma warning restore 618
         }
 
@@ -374,6 +370,19 @@ namespace Google.Apis.Tests.Apis.Services
             {
                 ApplicationName = "App=Name"
             }));
+        }
+
+        [Fact]
+        public void HttpClientTimeout()
+        {
+            var timeout = TimeSpan.FromHours(10);
+            var service = new MockClientService(new BaseClientService.Initializer
+            {
+                HttpClientTimeout = timeout
+            });
+
+            Assert.Equal(timeout, service.HttpClientTimeout);
+            Assert.Equal(timeout, service.HttpClient.Timeout);
         }
 
         [Fact]

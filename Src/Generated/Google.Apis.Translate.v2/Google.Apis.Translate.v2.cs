@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ namespace Google.Apis.Translate.v2
             Detections = new DetectionsResource(this);
             Languages = new LanguagesResource(this);
             Translations = new TranslationsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://translation.googleapis.com/language/translate/");
+            BatchUri = GetEffectiveUri(null, "https://translation.googleapis.com/batch/translate");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -46,23 +48,16 @@ namespace Google.Apis.Translate.v2
         public override string Name => "translate";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://translation.googleapis.com/language/translate/";
-        #else
-            "https://translation.googleapis.com/language/translate/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "language/translate/";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://translation.googleapis.com/batch/translate";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch/translate";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Google Cloud Translation API.</summary>
         public class Scope
@@ -317,7 +312,7 @@ namespace Google.Apis.Translate.v2
         /// <param name="body">The body of the request.</param>
         public virtual DetectRequest Detect(Google.Apis.Translate.v2.Data.DetectLanguageRequest body)
         {
-            return new DetectRequest(service, body);
+            return new DetectRequest(this.service, body);
         }
 
         /// <summary>Detects the language of text within a request.</summary>
@@ -359,7 +354,7 @@ namespace Google.Apis.Translate.v2
         /// </param>
         public virtual ListRequest List(Google.Apis.Util.Repeatable<string> q)
         {
-            return new ListRequest(service, q);
+            return new ListRequest(this.service, q);
         }
 
         /// <summary>Detects the language of text within a request.</summary>
@@ -421,7 +416,7 @@ namespace Google.Apis.Translate.v2
         /// <summary>Returns a list of supported languages for translation.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>Returns a list of supported languages for translation.</summary>
@@ -499,7 +494,7 @@ namespace Google.Apis.Translate.v2
         /// </param>
         public virtual ListRequest List(Google.Apis.Util.Repeatable<string> q, string target)
         {
-            return new ListRequest(service, q, target);
+            return new ListRequest(this.service, q, target);
         }
 
         /// <summary>Translates input text, returning translated text.</summary>
@@ -635,7 +630,7 @@ namespace Google.Apis.Translate.v2
         /// <param name="body">The body of the request.</param>
         public virtual TranslateRequest Translate(Google.Apis.Translate.v2.Data.TranslateTextRequest body)
         {
-            return new TranslateRequest(service, body);
+            return new TranslateRequest(this.service, body);
         }
 
         /// <summary>Translates input text, returning translated text.</summary>

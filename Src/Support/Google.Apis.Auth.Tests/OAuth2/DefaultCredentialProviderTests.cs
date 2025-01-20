@@ -18,45 +18,35 @@ using Google.Apis.Auth.OAuth2;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using System.Reflection;
 using System.Threading.Tasks;
 using Xunit;
 
 namespace Google.Apis.Auth.Tests.OAuth2
 {
-    /// <summary>A mock for the <see cref="Google.Apis.Auth.OAuth2.DefaultCredentialProvider"/>.</summary>
+    /// <summary>A mock for the <see cref="DefaultCredentialProvider"/>.</summary>
     class MockDefaultCredentialProvider : DefaultCredentialProvider
     {
-        Dictionary<string, string> envVars = new Dictionary<string, string>();
-        Dictionary<string, string> fileContents = new Dictionary<string, string>();
+        private static readonly Assembly CurrentAssembly = typeof(MockDefaultCredentialProvider).Assembly;
 
-        protected override string GetEnvironmentVariable(string variableName)
-        {
-            if (!envVars.ContainsKey(variableName))
-                return null;
+        private readonly Dictionary<string, string> envVars = new Dictionary<string, string>();
+        // Used to map the well known credential location to a file name of the dummy credential to return.
+        private readonly Dictionary<string, string> pathToFileName = new Dictionary<string, string>();
 
-            return envVars[variableName];
-        }
+        protected override string GetEnvironmentVariable(string variableName) => 
+            envVars.TryGetValue(variableName, out string value) ? value : null;
 
-        public void SetEnvironmentVariable(string variableName, string value)
-        {
-            envVars[variableName] = value;
-        }
+        public void SetEnvironmentVariable(string variableName, string value) => envVars[variableName] = value;
 
         protected override Stream GetStream(string filePath)
         {
-            if (!fileContents.ContainsKey(filePath))
-            {
-                throw new System.IO.FileNotFoundException();
-            }
+            var resourceName = pathToFileName.TryGetValue(filePath, out var mappedFileName) ? mappedFileName : filePath;
+            resourceName = $"Google.Apis.Auth.Tests.OAuth2.FakeCredentialFiles.{resourceName}";
 
-            return new MemoryStream(Encoding.UTF8.GetBytes(fileContents[filePath]));
+            return CurrentAssembly.GetManifestResourceStream(resourceName) ?? throw new FileNotFoundException();
         }
 
-        public void SetFileContents(string filePath, string contents)
-        {
-            fileContents[filePath] = contents;
-        }
+        public void MapPathToFileName(string path, string fileName) => pathToFileName[path] = fileName;
     }
 
     /// <summary>Tests for <see cref="Google.Apis.Auth.OAuth2.DefaultCredentialProvider"/>.</summary>
@@ -68,90 +58,89 @@ namespace Google.Apis.Auth.Tests.OAuth2
         private const string AppDataValue = "AppDataEnvVarValue";
         private const string HomeValue = "HomeEnvVarValue";
         private const string CredentialEnvironmentVariable = "GOOGLE_APPLICATION_CREDENTIALS";
-        private const string DummyUserCredentialFileContents = @"{
-""client_id"": ""CLIENT_ID"",
-""client_secret"": ""CLIENT_SECRET"",
-""refresh_token"": ""REFRESH_TOKEN"",
-""type"": ""authorized_user""}";
-        private const string DummyServiceAccountCredentialFileContents = @"{
-""private_key_id"": ""PRIVATE_KEY_ID"",
-""private_key"": ""-----BEGIN PRIVATE KEY-----
-MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAJJM6HT4s6btOsfe
-2x4zrzrwSUtmtR37XTTi0sPARTDF8uzmXy8UnE5RcVJzEH5T2Ssz/ylX4Sl/CI4L
-no1l8j9GiHJb49LSRjWe4Yx936q0Xj9H0R1HTxvjUPqwAsTwy2fKBTog+q1frqc9
-o8s2r6LYivUGDVbhuUzCaMJsf+x3AgMBAAECgYEAi0FTXsu/zRswAUGaViQiHjrL
-uU65BSHXNVjV/2fLNEKnGWGqpli68z1IXY+S2nwbUak7rnGsq9/0F6jtsW+hZbLk
-KXUOuuExpeC5Kd6ngWX/f2jqmhlUabiQijU9cVk7pMq8EHkRtvlosnMTUAEzempu
-QUPwn1PZHhmJkBvZ4lECQQDCErrxl+e3BwUDcS0yVEEmCNSG6xdXs2878b8rzbe7
-3Mmi6SuuOLi3PU92J+j+f/MOdtYrk13mEDdYmd5dhrt5AkEAwPvDEsDT/W4y4h5n
-gv1awGBA5aLFE1JNWM/Gwn4D1cGpEDHKFREaBtxMDCASpHJuw8r7zUywpKhmBZcf
-GS37bwJANdSAKfbafLfjuhqwUJ9yGpykZm/a36aTmerp/bpn1iHdg+RtCzwMcDb/
-TWSwibbvsflgWmHbz657y4WSWhq+8QJAWrpCNN/ZCk2zuGDo80lfUBAwkoVat8G6
-wWU1oZyS+vzIGef+hLb8kHsjeZPej9eIwZ39kcBbT54oELrCkRjwGwJAQ8V2A7lT
-ZUp8AsbVqF6rbLiiUfJMo2btGclQu4DEVyS+ymFA65tXDLUuR9EDqJYdqHNZJ5B8
-4Z5p2prkjWTLcA\u003d\u003d
------END PRIVATE KEY-----"",
-""client_email"": ""CLIENT_EMAIL"",
-""client_id"": ""CLIENT_ID"",
-""type"": ""service_account""}";
-        private const string BrokenPkcs8KeyServiceAccountCredentialFileContents = @"{
-""private_key_id"": ""PRIVATE_KEY_ID"",
-""private_key"": ""-----BEGIN PRIVATE KEY-----
-MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAJJM6HT4s6btOsfe
------END PRIVATE KEY-----"",
-""client_email"": ""CLIENT_EMAIL"",
-""client_id"": ""CLIENT_ID"",
-""type"": ""service_account""}";
+
+        private const string InvalidCredentialFileName = "invalid_credential.json";
+        private const string UserCredentialFileName = "user_credential.json";
+        private const string UserCredentialCustomUniverseDomainFileName = "user_credential_custom_universe_domain.json";
+        internal const string ServiceAccountCredentialMinimalFileName = "service_account_credential_minimal.json";
+        private const string ServiceAccountCredentialFullFileName = "service_account_credential_full.json";
+        private const string BrokenServiceAccountCredentialFileName = "broken_service_account_credential.json";
+        private const string NoCredentialSourceExternalAccountCredentialFileName = "no_credential_source_external_account_credential.json";
+        private const string UrlSourcedExternalAccountCredentialFileName = "url_sourced_external_account_credential.json";
+        private const string FileSourcedExternalAccountCredentialFileName = "file_sourced_external_account_credential.json";
+        private const string AwsExternalAccountCredentialFileName = "aws_external_account_credential.json";
+        private const string UrlSourcedImpersonatedExternalAccountCredentialFileName = "url_sourced_impersonated_external_account_credential.json";
+        private const string FileSourcedImpersonatedExternalAccountCredentialFileName = "file_sourced_impersonated_external_account_credential.json";
+        private const string AwsImpersonatedExternalAccountCredentialFileName = "aws_impersonated_external_account_credential.json";
+        private const string UrlSourcedWorkforceExternalAccountCredentialFileName = "url_sourced_workforce_external_account_credential.json";
+        private const string FileSourcedWorkforceExternalAccountCredentialFileName = "file_sourced_workforce_external_account_credential.json";
+        private const string AwsWorkforceExternalAccountCredentialFileName = "aws_workforce_external_account_credential.json";
+        private const string UrlSourcedExternalAccountCredentialUniverseDomainFileName = "url_sourced_external_account_credential_universe_domain.json";
+        private const string FileSourcedExternalAccountCredentialUniverseDomainFileName = "file_sourced_external_account_credential_universe_domain.json";
+        private const string AwsExternalAccountCredentialUniverseDomainFileName = "aws_external_account_credential_universe_domain.json";
+        private const string ImpersonatedServiceAccountCredentialFileName = "impersonated_service_account_credential.json";
+        private const string ImpersonatedServiceAccountCredentialUniverseDomainFileName = "impersonated_service_account_credential_universe_domain.json";
+        private const string ImpersonatedServiceAccountCredentialUniverseDomainDifferentFileName = "impersonated_service_account_credential_universe_domain_different.json";
+        private const string RecursiveImpersonatedServiceAccountCredentialName = "recursive_impersonated_service_account_credential.json";
 
         public DefaultCredentialProviderTests()
         {
             credentialProvider = new MockDefaultCredentialProvider();
         }
 
-        private MockDefaultCredentialProvider credentialProvider;
+        private readonly MockDefaultCredentialProvider credentialProvider;
 
         #region UserCredential
 
         [Fact]
+        public async Task GetDefaultCredential_UserCredential_CustomUniverseDomain_Fails()
+        {
+            credentialProvider.SetEnvironmentVariable(CredentialEnvironmentVariable, UserCredentialCustomUniverseDomainFileName);
+
+            await Assert.ThrowsAsync<InvalidOperationException>(credentialProvider.GetDefaultCredentialAsync);
+        }
+
+        [Fact]
         public async Task GetDefaultCredential_UserCredential_FromEnvironmentVariable()
         {
-            // Setup fake environment variables and credential file contents.
-            var credentialFilepath = "TempFilePath.json";
-            credentialProvider.SetEnvironmentVariable(CredentialEnvironmentVariable, credentialFilepath);
-            credentialProvider.SetFileContents(credentialFilepath, DummyUserCredentialFileContents);
+            credentialProvider.SetEnvironmentVariable(CredentialEnvironmentVariable, UserCredentialFileName);
 
             var credential = await credentialProvider.GetDefaultCredentialAsync();
 
             Assert.IsType<UserCredential>(credential.UnderlyingCredential);
             Assert.False(credential.IsCreateScopedRequired);
-            Assert.Same(credential, credential.CreateScoped(new [] { "SomeScope" }));
+            Assert.Same(credential, credential.CreateScoped(new[] { "SomeScope" }));
+            Assert.Equal(GoogleAuthConsts.DefaultUniverseDomain, credential.GetUniverseDomain());
+            Assert.Equal(GoogleAuthConsts.DefaultUniverseDomain, await credential.GetUniverseDomainAsync(default));
         }
 
         [Fact]
         public async Task GetDefaultCredential_UserCredential_FromWellKnownFileLocation()
         {
-            // Setup fake environment variables and credential file contents.
             credentialProvider.SetEnvironmentVariable("APPDATA", AppDataValue);
-            credentialProvider.SetFileContents(WellKnownCredentialFilePath, DummyUserCredentialFileContents);
+            credentialProvider.MapPathToFileName(WellKnownCredentialFilePath, UserCredentialFileName);
 
             var credential = await credentialProvider.GetDefaultCredentialAsync();
-            
+
             Assert.IsType<UserCredential>(credential.UnderlyingCredential);
             Assert.False(credential.IsCreateScopedRequired);
-            Assert.Same(credential, credential.CreateScoped(new [] { "SomeScope" }));
+            Assert.Same(credential, credential.CreateScoped(new[] { "SomeScope" }));
+            Assert.Equal(GoogleAuthConsts.DefaultUniverseDomain, credential.GetUniverseDomain());
+            Assert.Equal(GoogleAuthConsts.DefaultUniverseDomain, await credential.GetUniverseDomainAsync(default));
         }
 
         [Fact]
         public async Task GetDefaultCredential_UserCredential_FromWellKnownFileLocationUnix()
         {
-            // Setup fake environment variables and credential file contents.
             credentialProvider.SetEnvironmentVariable("HOME", HomeValue);
-            credentialProvider.SetFileContents(WellKnownCredentialFilePathUnix, DummyUserCredentialFileContents);
+            credentialProvider.MapPathToFileName(WellKnownCredentialFilePathUnix, UserCredentialFileName);
 
             var credential = await credentialProvider.GetDefaultCredentialAsync();
 
             Assert.IsType<UserCredential>(credential.UnderlyingCredential);
             Assert.False(credential.IsCreateScopedRequired);
+            Assert.Equal(GoogleAuthConsts.DefaultUniverseDomain, credential.GetUniverseDomain());
+            Assert.Equal(GoogleAuthConsts.DefaultUniverseDomain, await credential.GetUniverseDomainAsync(default));
         }
 
         #endregion
@@ -161,10 +150,7 @@ MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAJJM6HT4s6btOsfe
         [Fact]
         public async Task GetDefaultCredential_ServiceAccountCredential_FromEnvironmentVariable()
         {
-            // Setup fake environment variables and credential file contents.
-            var credentialFilepath = "TempFilePath.json";
-            credentialProvider.SetEnvironmentVariable(CredentialEnvironmentVariable, credentialFilepath);
-            credentialProvider.SetFileContents(credentialFilepath, DummyServiceAccountCredentialFileContents);
+            credentialProvider.SetEnvironmentVariable(CredentialEnvironmentVariable, ServiceAccountCredentialMinimalFileName);
 
             var credential = await credentialProvider.GetDefaultCredentialAsync();
 
@@ -176,10 +162,7 @@ MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAJJM6HT4s6btOsfe
         [Fact]
         public async Task GetDefaultCredential_ServiceAccountCredential_CreateScoped()
         {
-            // Setup fake environment variables and credential file contents.
-            var credentialFilepath = "TempFilePath.json";
-            credentialProvider.SetEnvironmentVariable(CredentialEnvironmentVariable, credentialFilepath);
-            credentialProvider.SetFileContents(credentialFilepath, DummyServiceAccountCredentialFileContents);
+            credentialProvider.SetEnvironmentVariable(CredentialEnvironmentVariable, ServiceAccountCredentialMinimalFileName);
 
             var credential = await credentialProvider.GetDefaultCredentialAsync();
 
@@ -193,89 +176,238 @@ MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBAJJM6HT4s6btOsfe
             Assert.Equal(new[] { "scope1", "scope2" }, ((ServiceAccountCredential)scopedCredential.UnderlyingCredential).Scopes);
         }
 
+        [Fact]
+        public async Task GetDefaultCredential_ServiceAccountCredential_Minimal()
+        {
+            credentialProvider.SetEnvironmentVariable(CredentialEnvironmentVariable, ServiceAccountCredentialMinimalFileName);
+
+            var credential = await credentialProvider.GetDefaultCredentialAsync();
+
+            var sa = Assert.IsType<ServiceAccountCredential>(credential.UnderlyingCredential);
+            Assert.NotNull(sa.Key);
+            Assert.Equal("PRIVATE_KEY_ID", sa.KeyId);
+            Assert.Equal("CLIENT_EMAIL", sa.Id);
+            Assert.Equal(GoogleAuthConsts.OidcTokenUrl, sa.TokenServerUrl);
+            Assert.Null(sa.ProjectId);
+            Assert.Null(sa.QuotaProject);
+            Assert.Equal(GoogleAuthConsts.DefaultUniverseDomain, credential.GetUniverseDomain());
+            Assert.Equal(GoogleAuthConsts.DefaultUniverseDomain, await credential.GetUniverseDomainAsync(default));
+        }
+
+        [Fact]
+        public async Task GetDefaultCredential_ServiceAccountCredential_Full()
+        {
+            credentialProvider.SetEnvironmentVariable(CredentialEnvironmentVariable, ServiceAccountCredentialFullFileName);
+
+            var credential = await credentialProvider.GetDefaultCredentialAsync();
+
+            var sa = Assert.IsType<ServiceAccountCredential>(credential.UnderlyingCredential);
+            Assert.NotNull(sa.Key);
+            Assert.Equal("PRIVATE_KEY_ID", sa.KeyId);
+            Assert.Equal("CLIENT_EMAIL", sa.Id);
+            Assert.Equal("TOKEN_URI", sa.TokenServerUrl);
+            Assert.Equal("PROJECT_ID", sa.ProjectId);
+            Assert.Equal("QUOTA_PROJECT_ID", sa.QuotaProject);
+            Assert.Equal("fake.universe.domain.com", credential.GetUniverseDomain());
+            Assert.Equal("fake.universe.domain.com", await credential.GetUniverseDomainAsync(default));
+        }
+
+        #endregion
+
+        #region ExternalAccountCredential
+
+        [Fact]
+        public async Task GetDefaultCredential_ExternalAccountCredential_NoCredentialSource()
+        {
+            credentialProvider.SetEnvironmentVariable(CredentialEnvironmentVariable, NoCredentialSourceExternalAccountCredentialFileName);
+
+            await Assert.ThrowsAsync<InvalidOperationException>(credentialProvider.GetDefaultCredentialAsync);
+        }
+
+        public static TheoryData<string, Type> ExternalAccountCredentialTestData => new TheoryData<string, Type>
+        {
+            { UrlSourcedExternalAccountCredentialFileName, typeof(UrlSourcedExternalAccountCredential) },
+            { FileSourcedExternalAccountCredentialFileName, typeof (FileSourcedExternalAccountCredential) },
+            { AwsExternalAccountCredentialFileName, typeof(AwsExternalAccountCredential) },
+        };
+
+        [Theory]
+        [MemberData(nameof(ExternalAccountCredentialTestData))]
+        public async Task GetDefaultCredential_ExternalAccountCredential(string credentialFileName, Type expectedCredentialType)
+        {
+            credentialProvider.SetEnvironmentVariable(CredentialEnvironmentVariable, credentialFileName);
+
+            var credential = await credentialProvider.GetDefaultCredentialAsync();
+
+            Assert.IsType(expectedCredentialType, credential.UnderlyingCredential);
+            Assert.Equal(GoogleAuthConsts.DefaultUniverseDomain, credential.GetUniverseDomain());
+            Assert.Equal(GoogleAuthConsts.DefaultUniverseDomain, await credential.GetUniverseDomainAsync(default));
+
+        }
+
+        public static TheoryData<string, Type> ExternalImpersonatedAccountCredentialTestData => new TheoryData<string, Type>
+        {
+            { UrlSourcedImpersonatedExternalAccountCredentialFileName, typeof(UrlSourcedExternalAccountCredential) },
+            { FileSourcedImpersonatedExternalAccountCredentialFileName, typeof (FileSourcedExternalAccountCredential) },
+            { AwsImpersonatedExternalAccountCredentialFileName, typeof (AwsExternalAccountCredential) },
+        };
+
+        [Theory]
+        [MemberData(nameof(ExternalImpersonatedAccountCredentialTestData))]
+        public async Task GetDefaultCredential_ExternalAccountCredential_Impersonated(string credentialFileName, Type expectedCredentialType)
+        {
+            credentialProvider.SetEnvironmentVariable(CredentialEnvironmentVariable, credentialFileName);
+
+            var credential = await credentialProvider.GetDefaultCredentialAsync();
+
+            Assert.IsType(expectedCredentialType, credential.UnderlyingCredential);
+
+            var impersonatedExternalCredential = (ExternalAccountCredential)credential.UnderlyingCredential;
+            Assert.IsType<ImpersonatedCredential>(impersonatedExternalCredential.ImplicitlyImpersonated.Value);
+            Assert.Equal(GoogleAuthConsts.DefaultUniverseDomain, credential.GetUniverseDomain());
+            Assert.Equal(GoogleAuthConsts.DefaultUniverseDomain, await credential.GetUniverseDomainAsync(default));
+        }
+
+        public static TheoryData<string, Type> ExternalWorkforceAccountCredentialTestData => new TheoryData<string, Type>
+        {
+            { UrlSourcedWorkforceExternalAccountCredentialFileName, typeof(UrlSourcedExternalAccountCredential) },
+            { FileSourcedWorkforceExternalAccountCredentialFileName, typeof (FileSourcedExternalAccountCredential) },
+            { AwsWorkforceExternalAccountCredentialFileName, typeof(AwsExternalAccountCredential) } ,
+        };
+
+        [Theory]
+        [MemberData(nameof(ExternalWorkforceAccountCredentialTestData))]
+        public async Task GetDefaultCredential_ExternalAccountCredential_WorkforceIdentity(string credentialFileName, Type expectedCredentialType)
+        {
+            credentialProvider.SetEnvironmentVariable(CredentialEnvironmentVariable, credentialFileName);
+
+            var credential = await credentialProvider.GetDefaultCredentialAsync();
+
+            Assert.IsType(expectedCredentialType, credential.UnderlyingCredential);
+
+            var workforceCredential = (ExternalAccountCredential)credential.UnderlyingCredential;
+            Assert.Equal("user_project", workforceCredential.WorkforcePoolUserProject);
+            Assert.Equal(GoogleAuthConsts.DefaultUniverseDomain, credential.GetUniverseDomain());
+            Assert.Equal(GoogleAuthConsts.DefaultUniverseDomain, await credential.GetUniverseDomainAsync(default));
+        }
+
+        public static TheoryData<string, Type> ExternalAccountCredentialUniverseDomainTestData => new TheoryData<string, Type>
+        {
+            { UrlSourcedExternalAccountCredentialUniverseDomainFileName, typeof(UrlSourcedExternalAccountCredential) },
+            { FileSourcedExternalAccountCredentialUniverseDomainFileName, typeof (FileSourcedExternalAccountCredential) },
+            { AwsExternalAccountCredentialUniverseDomainFileName, typeof(AwsExternalAccountCredential) } ,
+        };
+
+        [Theory]
+        [MemberData(nameof(ExternalAccountCredentialUniverseDomainTestData))]
+        public async Task GetDefaultCredential_ExternalAccountCredential_UniverseDomain(string credentialFileName, Type expectedCredentialType)
+        {
+            credentialProvider.SetEnvironmentVariable(CredentialEnvironmentVariable, credentialFileName);
+
+            var credential = await credentialProvider.GetDefaultCredentialAsync();
+
+            Assert.IsType(expectedCredentialType, credential.UnderlyingCredential);
+
+            var workforceCredential = (ExternalAccountCredential)credential.UnderlyingCredential;
+            Assert.Equal("fake.universe.domain.com", credential.GetUniverseDomain());
+            Assert.Equal("fake.universe.domain.com", await credential.GetUniverseDomainAsync(default));
+        }
+
+        #endregion
+
+        #region ImpersonatedCredential
+
+        [Fact]
+        public async Task GetDefaultCredential_ImpersonatedCredential_FromEnvironmentVariable()
+        {
+            credentialProvider.SetEnvironmentVariable(CredentialEnvironmentVariable, ImpersonatedServiceAccountCredentialFileName);
+
+            var credential = await credentialProvider.GetDefaultCredentialAsync();
+
+            var impersonatedCredential = Assert.IsType<ImpersonatedCredential>(credential.UnderlyingCredential);
+            Assert.Equal("service-account-email", impersonatedCredential.TargetPrincipal);
+            Assert.False(await impersonatedCredential.HasCustomTokenUrlCache.Value);
+            Assert.Collection(impersonatedCredential.DelegateAccounts,
+                account => Assert.Equal("delegate-email-1", account),
+                account => Assert.Equal("delegate-email-2", account));
+            Assert.Equal(GoogleAuthConsts.DefaultUniverseDomain, credential.GetUniverseDomain());
+            Assert.Equal(GoogleAuthConsts.DefaultUniverseDomain, await credential.GetUniverseDomainAsync(default));
+
+            var userCredential = Assert.IsType<UserCredential>(impersonatedCredential.SourceCredential.UnderlyingCredential);
+            Assert.Equal("REFRESH_TOKEN", userCredential.Token.RefreshToken);
+        }
+
+        [Fact]
+        public async Task GetDefaultCredential_ImpersonatedCredential_UniverseDomain()
+        {
+            credentialProvider.SetEnvironmentVariable(CredentialEnvironmentVariable, ImpersonatedServiceAccountCredentialUniverseDomainFileName);
+
+            var credential = await credentialProvider.GetDefaultCredentialAsync();
+
+            var impersonatedCredential = Assert.IsType<ImpersonatedCredential>(credential.UnderlyingCredential);
+            Assert.Equal("service-account-email", impersonatedCredential.TargetPrincipal);
+            Assert.True(await impersonatedCredential.HasCustomTokenUrlCache.Value);
+            Assert.Collection(impersonatedCredential.DelegateAccounts,
+                account => Assert.Equal("delegate-email-1", account),
+                account => Assert.Equal("delegate-email-2", account));
+
+            Assert.Equal("fake.universe.domain.com", credential.GetUniverseDomain());
+            Assert.Equal("fake.universe.domain.com", await credential.GetUniverseDomainAsync(default));
+        }
+
+        [Fact]
+        public async Task GetDefaultCredential_ImpersonatedCredential_UniverseDomain_Different()
+        {
+            credentialProvider.SetEnvironmentVariable(CredentialEnvironmentVariable, ImpersonatedServiceAccountCredentialUniverseDomainDifferentFileName);
+
+            var credential = await credentialProvider.GetDefaultCredentialAsync();
+
+            var impersonatedCredential = Assert.IsType<ImpersonatedCredential>(credential.UnderlyingCredential);
+            Assert.Equal("service-account-email", impersonatedCredential.TargetPrincipal);
+            Assert.True(await impersonatedCredential.HasCustomTokenUrlCache.Value);
+            Assert.Collection(impersonatedCredential.DelegateAccounts,
+                account => Assert.Equal("delegate-email-1", account),
+                account => Assert.Equal("delegate-email-2", account));
+
+            Assert.Equal("target.fake.universe.domain.com", credential.GetUniverseDomain());
+            Assert.Equal("target.fake.universe.domain.com", await credential.GetUniverseDomainAsync(default));
+
+            var sourceGCredential = Assert.IsType<GoogleCredential>(impersonatedCredential.SourceCredential);
+            var sourceSACredential = Assert.IsType<ServiceAccountCredential>(sourceGCredential.UnderlyingCredential);
+            Assert.Equal("target.fake.universe.domain.com", sourceSACredential.UniverseDomain);
+        }
+
+        [Fact]
+        public async Task GetDefaultCredential_RecursiveImpersonatedCredential_FromEnvironmentVariable()
+        {
+            credentialProvider.SetEnvironmentVariable(CredentialEnvironmentVariable, RecursiveImpersonatedServiceAccountCredentialName);
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() => credentialProvider.GetDefaultCredentialAsync());
+        }
+
         #endregion
 
         #region Invalid Cases
-
-        /// <summary> No credential files or environment variable specified - like a fresh developer's machine.</summary>
-        [Fact]
-        public async Task GetDefaultCredential_NoCredentialFiles()
-        {
-            try
-            {
-                var credential = await credentialProvider.GetDefaultCredentialAsync();
-                // When running on GCE expect to get a ComputeCredential
-                if (!(credential.UnderlyingCredential is ComputeCredential))
-                {
-                    // If not running on GCE getting to this point is a fail
-                    Assert.True(false, "Unexpected compute credential");
-                }
-            }
-            catch (InvalidOperationException e)
-            {
-                Assert.Contains("The Application Default Credentials are not available", e.Message);
-            }
-        }
 
         /// <summary>Environment variable points to a non existant credential file.</summary>
         [Fact]
         public async Task GetDefaultCredential_MissingCredentialFile()
         {
-            // Setup fake environment variable.
-            credentialProvider.SetEnvironmentVariable(CredentialEnvironmentVariable, WellKnownCredentialFilePath);
-            
-            try
-            {
-                var credential = await credentialProvider.GetDefaultCredentialAsync();
-                Assert.True(false, "Exception expected");
-            }
-            catch (InvalidOperationException e)
-            {
-                Assert.Contains("Please check the value of the Environment Variable GOOGLE_APPLICATION_CREDENTIALS", e.Message);
-            }
+            credentialProvider.SetEnvironmentVariable(CredentialEnvironmentVariable, @"non/existent/path/credential.json");
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(credentialProvider.GetDefaultCredentialAsync);
+            Assert.Contains("Please check the value of the Environment Variable GOOGLE_APPLICATION_CREDENTIALS", exception.Message);
         }
 
         /// <summary>Credential file has invalid content format.</summary>
-        [Fact]
-        public async Task GetDefaultCredential_InvalidCredentialFile()
+        [Theory]
+        [InlineData(InvalidCredentialFileName)]
+        [InlineData(BrokenServiceAccountCredentialFileName)]
+        public async Task GetDefaultCredential_InvalidCredentialFile(string brokenCredentialFileName)
         {
-            // Setup fake environment variables and credential file contents.
-            var credentialFilepath = "TempFilePath.json";
-            credentialProvider.SetEnvironmentVariable(CredentialEnvironmentVariable, credentialFilepath);
-            credentialProvider.SetFileContents(credentialFilepath, "Invalid Credentials File Contents");
-
-            try
-            {
-                var credential = await credentialProvider.GetDefaultCredentialAsync();
-                Assert.True(false, "Exception expected");
-            }
-            catch (InvalidOperationException e)
-            {
-                Assert.Contains("Error reading credential file from location", e.Message);
-            }
+            credentialProvider.SetEnvironmentVariable(CredentialEnvironmentVariable, brokenCredentialFileName);
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(credentialProvider.GetDefaultCredentialAsync);
+            Assert.Contains("Error reading credential file from location", exception.Message);
         }
-
-        /// <summary>Credential file contains invalid PKCS8 key.</summary>
-        [Fact]
-        public async Task GetDefaultCredential_BrokenPkcs8Key()
-        {
-            // Setup fake environment variables and credential file contents.
-            var credentialFilepath = "TempFilePath.json";
-            credentialProvider.SetEnvironmentVariable(CredentialEnvironmentVariable, credentialFilepath);
-            credentialProvider.SetFileContents(credentialFilepath, BrokenPkcs8KeyServiceAccountCredentialFileContents);
-
-            try
-            {
-                var credential = await credentialProvider.GetDefaultCredentialAsync();
-                Assert.True(false, "Exception expected");
-            }
-            catch (InvalidOperationException e)
-            {
-                Assert.Contains("Error reading credential file from location", e.Message);
-            }
-        }
-
-        // TODO(jtattermusch): test compute engine credential.
 
         #endregion
     }

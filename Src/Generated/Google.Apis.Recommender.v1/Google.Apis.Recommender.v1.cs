@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,6 +38,8 @@ namespace Google.Apis.Recommender.v1
             Folders = new FoldersResource(this);
             Organizations = new OrganizationsResource(this);
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://recommender.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://recommender.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -47,23 +49,16 @@ namespace Google.Apis.Recommender.v1
         public override string Name => "recommender";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://recommender.googleapis.com/";
-        #else
-            "https://recommender.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://recommender.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Recommender API.</summary>
         public class Scope
@@ -355,7 +350,7 @@ namespace Google.Apis.Recommender.v1
                     /// <param name="name">Required. Name of the insight.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -415,7 +410,7 @@ namespace Google.Apis.Recommender.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>
@@ -447,11 +442,13 @@ namespace Google.Apis.Recommender.v1
 
                         /// <summary>
                         /// Optional. Filter expression to restrict the insights returned. Supported filter fields: *
-                        /// `stateInfo.state` * `insightSubtype` * `severity` Examples: * `stateInfo.state = ACTIVE OR
-                        /// stateInfo.state = DISMISSED` * `insightSubtype = PERMISSIONS_USAGE` * `severity = CRITICAL
-                        /// OR severity = HIGH` * `stateInfo.state = ACTIVE AND (severity = CRITICAL OR severity =
-                        /// HIGH)` (These expressions are based on the filter language described at
-                        /// https://google.aip.dev/160)
+                        /// `stateInfo.state` * `insightSubtype` * `severity` * `targetResources` Examples: *
+                        /// `stateInfo.state = ACTIVE OR stateInfo.state = DISMISSED` * `insightSubtype =
+                        /// PERMISSIONS_USAGE` * `severity = CRITICAL OR severity = HIGH` * `targetResources :
+                        /// //compute.googleapis.com/projects/1234/zones/us-central1-a/instances/instance-1` *
+                        /// `stateInfo.state = ACTIVE AND (severity = CRITICAL OR severity = HIGH)` The max allowed
+                        /// filter length is 500 characters. (These expressions are based on the filter language
+                        /// described at https://google.aip.dev/160)
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                         public virtual string Filter { get; set; }
@@ -529,7 +526,7 @@ namespace Google.Apis.Recommender.v1
                     /// <param name="name">Required. Name of the insight.</param>
                     public virtual MarkAcceptedRequest MarkAccepted(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkInsightAcceptedRequest body, string name)
                     {
-                        return new MarkAcceptedRequest(service, body, name);
+                        return new MarkAcceptedRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -582,6 +579,156 @@ namespace Google.Apis.Recommender.v1
                         }
                     }
                 }
+
+                /// <summary>
+                /// Gets the requested InsightTypeConfig. There is only one instance of the config for each InsightType.
+                /// </summary>
+                /// <param name="name">
+                /// Required. Name of the InsightTypeConfig to get. Acceptable formats: *
+                /// `projects/[PROJECT_NUMBER]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config` *
+                /// `projects/[PROJECT_ID]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config` *
+                /// `organizations/[ORGANIZATION_ID]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config` *
+                /// `billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config`
+                /// </param>
+                public virtual GetConfigRequest GetConfig(string name)
+                {
+                    return new GetConfigRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Gets the requested InsightTypeConfig. There is only one instance of the config for each InsightType.
+                /// </summary>
+                public class GetConfigRequest : RecommenderBaseServiceRequest<Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1InsightTypeConfig>
+                {
+                    /// <summary>Constructs a new GetConfig request.</summary>
+                    public GetConfigRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Name of the InsightTypeConfig to get. Acceptable formats: *
+                    /// `projects/[PROJECT_NUMBER]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config` *
+                    /// `projects/[PROJECT_ID]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config` *
+                    /// `organizations/[ORGANIZATION_ID]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config` *
+                    /// `billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "getConfig";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes GetConfig parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^billingAccounts/[^/]+/locations/[^/]+/insightTypes/[^/]+/config$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Updates an InsightTypeConfig change. This will create a new revision of the config.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Identifier. Name of insight type config. Eg,
+                /// projects/[PROJECT_NUMBER]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config
+                /// </param>
+                public virtual UpdateConfigRequest UpdateConfig(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1InsightTypeConfig body, string name)
+                {
+                    return new UpdateConfigRequest(this.service, body, name);
+                }
+
+                /// <summary>
+                /// Updates an InsightTypeConfig change. This will create a new revision of the config.
+                /// </summary>
+                public class UpdateConfigRequest : RecommenderBaseServiceRequest<Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1InsightTypeConfig>
+                {
+                    /// <summary>Constructs a new UpdateConfig request.</summary>
+                    public UpdateConfigRequest(Google.Apis.Services.IClientService service, Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1InsightTypeConfig body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Identifier. Name of insight type config. Eg,
+                    /// projects/[PROJECT_NUMBER]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>The list of fields to be updated.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>
+                    /// If true, validate the request and preview the change, but do not actually update it.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("validateOnly", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<bool> ValidateOnly { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1InsightTypeConfig Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "updateConfig";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes UpdateConfig parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^billingAccounts/[^/]+/locations/[^/]+/insightTypes/[^/]+/config$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("validateOnly", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "validateOnly",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
             }
 
             /// <summary>Gets the Recommenders resource.</summary>
@@ -626,7 +773,7 @@ namespace Google.Apis.Recommender.v1
                     /// <param name="name">Required. Name of the recommendation.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -686,7 +833,7 @@ namespace Google.Apis.Recommender.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>
@@ -718,10 +865,13 @@ namespace Google.Apis.Recommender.v1
 
                         /// <summary>
                         /// Filter expression to restrict the recommendations returned. Supported filter fields: *
-                        /// `state_info.state` * `recommenderSubtype` * `priority` Examples: * `stateInfo.state = ACTIVE
-                        /// OR stateInfo.state = DISMISSED` * `recommenderSubtype = REMOVE_ROLE OR recommenderSubtype =
-                        /// REPLACE_ROLE` * `priority = P1 OR priority = P2` * `stateInfo.state = ACTIVE AND (priority =
-                        /// P1 OR priority = P2)` (These expressions are based on the filter language described at
+                        /// `state_info.state` * `recommenderSubtype` * `priority` * `targetResources` Examples: *
+                        /// `stateInfo.state = ACTIVE OR stateInfo.state = DISMISSED` * `recommenderSubtype =
+                        /// REMOVE_ROLE OR recommenderSubtype = REPLACE_ROLE` * `priority = P1 OR priority = P2` *
+                        /// `targetResources :
+                        /// //compute.googleapis.com/projects/1234/zones/us-central1-a/instances/instance-1` *
+                        /// `stateInfo.state = ACTIVE AND (priority = P1 OR priority = P2)` The max allowed filter
+                        /// length is 500 characters. (These expressions are based on the filter language described at
                         /// https://google.aip.dev/160)
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
@@ -802,7 +952,7 @@ namespace Google.Apis.Recommender.v1
                     /// <param name="name">Required. Name of the recommendation.</param>
                     public virtual MarkClaimedRequest MarkClaimed(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkRecommendationClaimedRequest body, string name)
                     {
-                        return new MarkClaimedRequest(service, body, name);
+                        return new MarkClaimedRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -858,6 +1008,69 @@ namespace Google.Apis.Recommender.v1
                     }
 
                     /// <summary>
+                    /// Mark the Recommendation State as Dismissed. Users can use this method to indicate to the
+                    /// Recommender API that an ACTIVE recommendation has to be marked back as DISMISSED.
+                    /// MarkRecommendationDismissed can be applied to recommendations in ACTIVE state. Requires the
+                    /// recommender.*.update IAM permission for the specified recommender.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="name">Required. Name of the recommendation.</param>
+                    public virtual MarkDismissedRequest MarkDismissed(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkRecommendationDismissedRequest body, string name)
+                    {
+                        return new MarkDismissedRequest(this.service, body, name);
+                    }
+
+                    /// <summary>
+                    /// Mark the Recommendation State as Dismissed. Users can use this method to indicate to the
+                    /// Recommender API that an ACTIVE recommendation has to be marked back as DISMISSED.
+                    /// MarkRecommendationDismissed can be applied to recommendations in ACTIVE state. Requires the
+                    /// recommender.*.update IAM permission for the specified recommender.
+                    /// </summary>
+                    public class MarkDismissedRequest : RecommenderBaseServiceRequest<Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1Recommendation>
+                    {
+                        /// <summary>Constructs a new MarkDismissed request.</summary>
+                        public MarkDismissedRequest(Google.Apis.Services.IClientService service, Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkRecommendationDismissedRequest body, string name) : base(service)
+                        {
+                            Name = name;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>Required. Name of the recommendation.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkRecommendationDismissedRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "markDismissed";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}:markDismissed";
+
+                        /// <summary>Initializes MarkDismissed parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^billingAccounts/[^/]+/locations/[^/]+/recommenders/[^/]+/recommendations/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>
                     /// Marks the Recommendation State as Failed. Users can use this method to indicate to the
                     /// Recommender API that they have applied the recommendation themselves, and the operation failed.
                     /// This stops the recommendation content from being updated. Associated insights are frozen and
@@ -869,7 +1082,7 @@ namespace Google.Apis.Recommender.v1
                     /// <param name="name">Required. Name of the recommendation.</param>
                     public virtual MarkFailedRequest MarkFailed(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkRecommendationFailedRequest body, string name)
                     {
-                        return new MarkFailedRequest(service, body, name);
+                        return new MarkFailedRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -936,7 +1149,7 @@ namespace Google.Apis.Recommender.v1
                     /// <param name="name">Required. Name of the recommendation.</param>
                     public virtual MarkSucceededRequest MarkSucceeded(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkRecommendationSucceededRequest body, string name)
                     {
-                        return new MarkSucceededRequest(service, body, name);
+                        return new MarkSucceededRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -989,6 +1202,154 @@ namespace Google.Apis.Recommender.v1
                                 Pattern = @"^billingAccounts/[^/]+/locations/[^/]+/recommenders/[^/]+/recommendations/[^/]+$",
                             });
                         }
+                    }
+                }
+
+                /// <summary>
+                /// Gets the requested Recommender Config. There is only one instance of the config for each
+                /// Recommender.
+                /// </summary>
+                /// <param name="name">
+                /// Required. Name of the Recommendation Config to get. Acceptable formats: *
+                /// `projects/[PROJECT_NUMBER]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config` *
+                /// `projects/[PROJECT_ID]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config` *
+                /// `organizations/[ORGANIZATION_ID]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config` *
+                /// `billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config`
+                /// </param>
+                public virtual GetConfigRequest GetConfig(string name)
+                {
+                    return new GetConfigRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Gets the requested Recommender Config. There is only one instance of the config for each
+                /// Recommender.
+                /// </summary>
+                public class GetConfigRequest : RecommenderBaseServiceRequest<Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1RecommenderConfig>
+                {
+                    /// <summary>Constructs a new GetConfig request.</summary>
+                    public GetConfigRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Name of the Recommendation Config to get. Acceptable formats: *
+                    /// `projects/[PROJECT_NUMBER]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config` *
+                    /// `projects/[PROJECT_ID]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config` *
+                    /// `organizations/[ORGANIZATION_ID]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config` *
+                    /// `billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "getConfig";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes GetConfig parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^billingAccounts/[^/]+/locations/[^/]+/recommenders/[^/]+/config$",
+                        });
+                    }
+                }
+
+                /// <summary>Updates a Recommender Config. This will create a new revision of the config.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Identifier. Name of recommender config. Eg,
+                /// projects/[PROJECT_NUMBER]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config
+                /// </param>
+                public virtual UpdateConfigRequest UpdateConfig(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1RecommenderConfig body, string name)
+                {
+                    return new UpdateConfigRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates a Recommender Config. This will create a new revision of the config.</summary>
+                public class UpdateConfigRequest : RecommenderBaseServiceRequest<Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1RecommenderConfig>
+                {
+                    /// <summary>Constructs a new UpdateConfig request.</summary>
+                    public UpdateConfigRequest(Google.Apis.Services.IClientService service, Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1RecommenderConfig body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Identifier. Name of recommender config. Eg,
+                    /// projects/[PROJECT_NUMBER]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>The list of fields to be updated.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>
+                    /// If true, validate the request and preview the change, but do not actually update it.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("validateOnly", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<bool> ValidateOnly { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1RecommenderConfig Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "updateConfig";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes UpdateConfig parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^billingAccounts/[^/]+/locations/[^/]+/recommenders/[^/]+/config$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("validateOnly", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "validateOnly",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
                     }
                 }
             }
@@ -1071,7 +1432,7 @@ namespace Google.Apis.Recommender.v1
                     /// <param name="name">Required. Name of the insight.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -1131,7 +1492,7 @@ namespace Google.Apis.Recommender.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>
@@ -1163,11 +1524,13 @@ namespace Google.Apis.Recommender.v1
 
                         /// <summary>
                         /// Optional. Filter expression to restrict the insights returned. Supported filter fields: *
-                        /// `stateInfo.state` * `insightSubtype` * `severity` Examples: * `stateInfo.state = ACTIVE OR
-                        /// stateInfo.state = DISMISSED` * `insightSubtype = PERMISSIONS_USAGE` * `severity = CRITICAL
-                        /// OR severity = HIGH` * `stateInfo.state = ACTIVE AND (severity = CRITICAL OR severity =
-                        /// HIGH)` (These expressions are based on the filter language described at
-                        /// https://google.aip.dev/160)
+                        /// `stateInfo.state` * `insightSubtype` * `severity` * `targetResources` Examples: *
+                        /// `stateInfo.state = ACTIVE OR stateInfo.state = DISMISSED` * `insightSubtype =
+                        /// PERMISSIONS_USAGE` * `severity = CRITICAL OR severity = HIGH` * `targetResources :
+                        /// //compute.googleapis.com/projects/1234/zones/us-central1-a/instances/instance-1` *
+                        /// `stateInfo.state = ACTIVE AND (severity = CRITICAL OR severity = HIGH)` The max allowed
+                        /// filter length is 500 characters. (These expressions are based on the filter language
+                        /// described at https://google.aip.dev/160)
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                         public virtual string Filter { get; set; }
@@ -1245,7 +1608,7 @@ namespace Google.Apis.Recommender.v1
                     /// <param name="name">Required. Name of the insight.</param>
                     public virtual MarkAcceptedRequest MarkAccepted(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkInsightAcceptedRequest body, string name)
                     {
-                        return new MarkAcceptedRequest(service, body, name);
+                        return new MarkAcceptedRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -1342,7 +1705,7 @@ namespace Google.Apis.Recommender.v1
                     /// <param name="name">Required. Name of the recommendation.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -1402,7 +1765,7 @@ namespace Google.Apis.Recommender.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>
@@ -1434,10 +1797,13 @@ namespace Google.Apis.Recommender.v1
 
                         /// <summary>
                         /// Filter expression to restrict the recommendations returned. Supported filter fields: *
-                        /// `state_info.state` * `recommenderSubtype` * `priority` Examples: * `stateInfo.state = ACTIVE
-                        /// OR stateInfo.state = DISMISSED` * `recommenderSubtype = REMOVE_ROLE OR recommenderSubtype =
-                        /// REPLACE_ROLE` * `priority = P1 OR priority = P2` * `stateInfo.state = ACTIVE AND (priority =
-                        /// P1 OR priority = P2)` (These expressions are based on the filter language described at
+                        /// `state_info.state` * `recommenderSubtype` * `priority` * `targetResources` Examples: *
+                        /// `stateInfo.state = ACTIVE OR stateInfo.state = DISMISSED` * `recommenderSubtype =
+                        /// REMOVE_ROLE OR recommenderSubtype = REPLACE_ROLE` * `priority = P1 OR priority = P2` *
+                        /// `targetResources :
+                        /// //compute.googleapis.com/projects/1234/zones/us-central1-a/instances/instance-1` *
+                        /// `stateInfo.state = ACTIVE AND (priority = P1 OR priority = P2)` The max allowed filter
+                        /// length is 500 characters. (These expressions are based on the filter language described at
                         /// https://google.aip.dev/160)
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
@@ -1518,7 +1884,7 @@ namespace Google.Apis.Recommender.v1
                     /// <param name="name">Required. Name of the recommendation.</param>
                     public virtual MarkClaimedRequest MarkClaimed(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkRecommendationClaimedRequest body, string name)
                     {
-                        return new MarkClaimedRequest(service, body, name);
+                        return new MarkClaimedRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -1574,6 +1940,69 @@ namespace Google.Apis.Recommender.v1
                     }
 
                     /// <summary>
+                    /// Mark the Recommendation State as Dismissed. Users can use this method to indicate to the
+                    /// Recommender API that an ACTIVE recommendation has to be marked back as DISMISSED.
+                    /// MarkRecommendationDismissed can be applied to recommendations in ACTIVE state. Requires the
+                    /// recommender.*.update IAM permission for the specified recommender.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="name">Required. Name of the recommendation.</param>
+                    public virtual MarkDismissedRequest MarkDismissed(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkRecommendationDismissedRequest body, string name)
+                    {
+                        return new MarkDismissedRequest(this.service, body, name);
+                    }
+
+                    /// <summary>
+                    /// Mark the Recommendation State as Dismissed. Users can use this method to indicate to the
+                    /// Recommender API that an ACTIVE recommendation has to be marked back as DISMISSED.
+                    /// MarkRecommendationDismissed can be applied to recommendations in ACTIVE state. Requires the
+                    /// recommender.*.update IAM permission for the specified recommender.
+                    /// </summary>
+                    public class MarkDismissedRequest : RecommenderBaseServiceRequest<Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1Recommendation>
+                    {
+                        /// <summary>Constructs a new MarkDismissed request.</summary>
+                        public MarkDismissedRequest(Google.Apis.Services.IClientService service, Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkRecommendationDismissedRequest body, string name) : base(service)
+                        {
+                            Name = name;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>Required. Name of the recommendation.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkRecommendationDismissedRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "markDismissed";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}:markDismissed";
+
+                        /// <summary>Initializes MarkDismissed parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^folders/[^/]+/locations/[^/]+/recommenders/[^/]+/recommendations/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>
                     /// Marks the Recommendation State as Failed. Users can use this method to indicate to the
                     /// Recommender API that they have applied the recommendation themselves, and the operation failed.
                     /// This stops the recommendation content from being updated. Associated insights are frozen and
@@ -1585,7 +2014,7 @@ namespace Google.Apis.Recommender.v1
                     /// <param name="name">Required. Name of the recommendation.</param>
                     public virtual MarkFailedRequest MarkFailed(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkRecommendationFailedRequest body, string name)
                     {
-                        return new MarkFailedRequest(service, body, name);
+                        return new MarkFailedRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -1652,7 +2081,7 @@ namespace Google.Apis.Recommender.v1
                     /// <param name="name">Required. Name of the recommendation.</param>
                     public virtual MarkSucceededRequest MarkSucceeded(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkRecommendationSucceededRequest body, string name)
                     {
-                        return new MarkSucceededRequest(service, body, name);
+                        return new MarkSucceededRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -1787,7 +2216,7 @@ namespace Google.Apis.Recommender.v1
                     /// <param name="name">Required. Name of the insight.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -1847,7 +2276,7 @@ namespace Google.Apis.Recommender.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>
@@ -1879,11 +2308,13 @@ namespace Google.Apis.Recommender.v1
 
                         /// <summary>
                         /// Optional. Filter expression to restrict the insights returned. Supported filter fields: *
-                        /// `stateInfo.state` * `insightSubtype` * `severity` Examples: * `stateInfo.state = ACTIVE OR
-                        /// stateInfo.state = DISMISSED` * `insightSubtype = PERMISSIONS_USAGE` * `severity = CRITICAL
-                        /// OR severity = HIGH` * `stateInfo.state = ACTIVE AND (severity = CRITICAL OR severity =
-                        /// HIGH)` (These expressions are based on the filter language described at
-                        /// https://google.aip.dev/160)
+                        /// `stateInfo.state` * `insightSubtype` * `severity` * `targetResources` Examples: *
+                        /// `stateInfo.state = ACTIVE OR stateInfo.state = DISMISSED` * `insightSubtype =
+                        /// PERMISSIONS_USAGE` * `severity = CRITICAL OR severity = HIGH` * `targetResources :
+                        /// //compute.googleapis.com/projects/1234/zones/us-central1-a/instances/instance-1` *
+                        /// `stateInfo.state = ACTIVE AND (severity = CRITICAL OR severity = HIGH)` The max allowed
+                        /// filter length is 500 characters. (These expressions are based on the filter language
+                        /// described at https://google.aip.dev/160)
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                         public virtual string Filter { get; set; }
@@ -1961,7 +2392,7 @@ namespace Google.Apis.Recommender.v1
                     /// <param name="name">Required. Name of the insight.</param>
                     public virtual MarkAcceptedRequest MarkAccepted(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkInsightAcceptedRequest body, string name)
                     {
-                        return new MarkAcceptedRequest(service, body, name);
+                        return new MarkAcceptedRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -2014,6 +2445,156 @@ namespace Google.Apis.Recommender.v1
                         }
                     }
                 }
+
+                /// <summary>
+                /// Gets the requested InsightTypeConfig. There is only one instance of the config for each InsightType.
+                /// </summary>
+                /// <param name="name">
+                /// Required. Name of the InsightTypeConfig to get. Acceptable formats: *
+                /// `projects/[PROJECT_NUMBER]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config` *
+                /// `projects/[PROJECT_ID]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config` *
+                /// `organizations/[ORGANIZATION_ID]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config` *
+                /// `billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config`
+                /// </param>
+                public virtual GetConfigRequest GetConfig(string name)
+                {
+                    return new GetConfigRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Gets the requested InsightTypeConfig. There is only one instance of the config for each InsightType.
+                /// </summary>
+                public class GetConfigRequest : RecommenderBaseServiceRequest<Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1InsightTypeConfig>
+                {
+                    /// <summary>Constructs a new GetConfig request.</summary>
+                    public GetConfigRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Name of the InsightTypeConfig to get. Acceptable formats: *
+                    /// `projects/[PROJECT_NUMBER]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config` *
+                    /// `projects/[PROJECT_ID]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config` *
+                    /// `organizations/[ORGANIZATION_ID]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config` *
+                    /// `billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "getConfig";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes GetConfig parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/insightTypes/[^/]+/config$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Updates an InsightTypeConfig change. This will create a new revision of the config.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Identifier. Name of insight type config. Eg,
+                /// projects/[PROJECT_NUMBER]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config
+                /// </param>
+                public virtual UpdateConfigRequest UpdateConfig(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1InsightTypeConfig body, string name)
+                {
+                    return new UpdateConfigRequest(this.service, body, name);
+                }
+
+                /// <summary>
+                /// Updates an InsightTypeConfig change. This will create a new revision of the config.
+                /// </summary>
+                public class UpdateConfigRequest : RecommenderBaseServiceRequest<Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1InsightTypeConfig>
+                {
+                    /// <summary>Constructs a new UpdateConfig request.</summary>
+                    public UpdateConfigRequest(Google.Apis.Services.IClientService service, Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1InsightTypeConfig body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Identifier. Name of insight type config. Eg,
+                    /// projects/[PROJECT_NUMBER]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>The list of fields to be updated.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>
+                    /// If true, validate the request and preview the change, but do not actually update it.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("validateOnly", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<bool> ValidateOnly { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1InsightTypeConfig Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "updateConfig";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes UpdateConfig parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/insightTypes/[^/]+/config$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("validateOnly", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "validateOnly",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
             }
 
             /// <summary>Gets the Recommenders resource.</summary>
@@ -2058,7 +2639,7 @@ namespace Google.Apis.Recommender.v1
                     /// <param name="name">Required. Name of the recommendation.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -2118,7 +2699,7 @@ namespace Google.Apis.Recommender.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>
@@ -2150,10 +2731,13 @@ namespace Google.Apis.Recommender.v1
 
                         /// <summary>
                         /// Filter expression to restrict the recommendations returned. Supported filter fields: *
-                        /// `state_info.state` * `recommenderSubtype` * `priority` Examples: * `stateInfo.state = ACTIVE
-                        /// OR stateInfo.state = DISMISSED` * `recommenderSubtype = REMOVE_ROLE OR recommenderSubtype =
-                        /// REPLACE_ROLE` * `priority = P1 OR priority = P2` * `stateInfo.state = ACTIVE AND (priority =
-                        /// P1 OR priority = P2)` (These expressions are based on the filter language described at
+                        /// `state_info.state` * `recommenderSubtype` * `priority` * `targetResources` Examples: *
+                        /// `stateInfo.state = ACTIVE OR stateInfo.state = DISMISSED` * `recommenderSubtype =
+                        /// REMOVE_ROLE OR recommenderSubtype = REPLACE_ROLE` * `priority = P1 OR priority = P2` *
+                        /// `targetResources :
+                        /// //compute.googleapis.com/projects/1234/zones/us-central1-a/instances/instance-1` *
+                        /// `stateInfo.state = ACTIVE AND (priority = P1 OR priority = P2)` The max allowed filter
+                        /// length is 500 characters. (These expressions are based on the filter language described at
                         /// https://google.aip.dev/160)
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
@@ -2234,7 +2818,7 @@ namespace Google.Apis.Recommender.v1
                     /// <param name="name">Required. Name of the recommendation.</param>
                     public virtual MarkClaimedRequest MarkClaimed(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkRecommendationClaimedRequest body, string name)
                     {
-                        return new MarkClaimedRequest(service, body, name);
+                        return new MarkClaimedRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -2290,6 +2874,69 @@ namespace Google.Apis.Recommender.v1
                     }
 
                     /// <summary>
+                    /// Mark the Recommendation State as Dismissed. Users can use this method to indicate to the
+                    /// Recommender API that an ACTIVE recommendation has to be marked back as DISMISSED.
+                    /// MarkRecommendationDismissed can be applied to recommendations in ACTIVE state. Requires the
+                    /// recommender.*.update IAM permission for the specified recommender.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="name">Required. Name of the recommendation.</param>
+                    public virtual MarkDismissedRequest MarkDismissed(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkRecommendationDismissedRequest body, string name)
+                    {
+                        return new MarkDismissedRequest(this.service, body, name);
+                    }
+
+                    /// <summary>
+                    /// Mark the Recommendation State as Dismissed. Users can use this method to indicate to the
+                    /// Recommender API that an ACTIVE recommendation has to be marked back as DISMISSED.
+                    /// MarkRecommendationDismissed can be applied to recommendations in ACTIVE state. Requires the
+                    /// recommender.*.update IAM permission for the specified recommender.
+                    /// </summary>
+                    public class MarkDismissedRequest : RecommenderBaseServiceRequest<Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1Recommendation>
+                    {
+                        /// <summary>Constructs a new MarkDismissed request.</summary>
+                        public MarkDismissedRequest(Google.Apis.Services.IClientService service, Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkRecommendationDismissedRequest body, string name) : base(service)
+                        {
+                            Name = name;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>Required. Name of the recommendation.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkRecommendationDismissedRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "markDismissed";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}:markDismissed";
+
+                        /// <summary>Initializes MarkDismissed parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^organizations/[^/]+/locations/[^/]+/recommenders/[^/]+/recommendations/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>
                     /// Marks the Recommendation State as Failed. Users can use this method to indicate to the
                     /// Recommender API that they have applied the recommendation themselves, and the operation failed.
                     /// This stops the recommendation content from being updated. Associated insights are frozen and
@@ -2301,7 +2948,7 @@ namespace Google.Apis.Recommender.v1
                     /// <param name="name">Required. Name of the recommendation.</param>
                     public virtual MarkFailedRequest MarkFailed(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkRecommendationFailedRequest body, string name)
                     {
-                        return new MarkFailedRequest(service, body, name);
+                        return new MarkFailedRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -2368,7 +3015,7 @@ namespace Google.Apis.Recommender.v1
                     /// <param name="name">Required. Name of the recommendation.</param>
                     public virtual MarkSucceededRequest MarkSucceeded(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkRecommendationSucceededRequest body, string name)
                     {
-                        return new MarkSucceededRequest(service, body, name);
+                        return new MarkSucceededRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -2421,6 +3068,154 @@ namespace Google.Apis.Recommender.v1
                                 Pattern = @"^organizations/[^/]+/locations/[^/]+/recommenders/[^/]+/recommendations/[^/]+$",
                             });
                         }
+                    }
+                }
+
+                /// <summary>
+                /// Gets the requested Recommender Config. There is only one instance of the config for each
+                /// Recommender.
+                /// </summary>
+                /// <param name="name">
+                /// Required. Name of the Recommendation Config to get. Acceptable formats: *
+                /// `projects/[PROJECT_NUMBER]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config` *
+                /// `projects/[PROJECT_ID]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config` *
+                /// `organizations/[ORGANIZATION_ID]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config` *
+                /// `billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config`
+                /// </param>
+                public virtual GetConfigRequest GetConfig(string name)
+                {
+                    return new GetConfigRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Gets the requested Recommender Config. There is only one instance of the config for each
+                /// Recommender.
+                /// </summary>
+                public class GetConfigRequest : RecommenderBaseServiceRequest<Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1RecommenderConfig>
+                {
+                    /// <summary>Constructs a new GetConfig request.</summary>
+                    public GetConfigRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Name of the Recommendation Config to get. Acceptable formats: *
+                    /// `projects/[PROJECT_NUMBER]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config` *
+                    /// `projects/[PROJECT_ID]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config` *
+                    /// `organizations/[ORGANIZATION_ID]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config` *
+                    /// `billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "getConfig";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes GetConfig parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/recommenders/[^/]+/config$",
+                        });
+                    }
+                }
+
+                /// <summary>Updates a Recommender Config. This will create a new revision of the config.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Identifier. Name of recommender config. Eg,
+                /// projects/[PROJECT_NUMBER]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config
+                /// </param>
+                public virtual UpdateConfigRequest UpdateConfig(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1RecommenderConfig body, string name)
+                {
+                    return new UpdateConfigRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates a Recommender Config. This will create a new revision of the config.</summary>
+                public class UpdateConfigRequest : RecommenderBaseServiceRequest<Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1RecommenderConfig>
+                {
+                    /// <summary>Constructs a new UpdateConfig request.</summary>
+                    public UpdateConfigRequest(Google.Apis.Services.IClientService service, Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1RecommenderConfig body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Identifier. Name of recommender config. Eg,
+                    /// projects/[PROJECT_NUMBER]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>The list of fields to be updated.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>
+                    /// If true, validate the request and preview the change, but do not actually update it.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("validateOnly", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<bool> ValidateOnly { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1RecommenderConfig Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "updateConfig";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes UpdateConfig parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^organizations/[^/]+/locations/[^/]+/recommenders/[^/]+/config$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("validateOnly", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "validateOnly",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
                     }
                 }
             }
@@ -2503,7 +3298,7 @@ namespace Google.Apis.Recommender.v1
                     /// <param name="name">Required. Name of the insight.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -2563,7 +3358,7 @@ namespace Google.Apis.Recommender.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>
@@ -2595,11 +3390,13 @@ namespace Google.Apis.Recommender.v1
 
                         /// <summary>
                         /// Optional. Filter expression to restrict the insights returned. Supported filter fields: *
-                        /// `stateInfo.state` * `insightSubtype` * `severity` Examples: * `stateInfo.state = ACTIVE OR
-                        /// stateInfo.state = DISMISSED` * `insightSubtype = PERMISSIONS_USAGE` * `severity = CRITICAL
-                        /// OR severity = HIGH` * `stateInfo.state = ACTIVE AND (severity = CRITICAL OR severity =
-                        /// HIGH)` (These expressions are based on the filter language described at
-                        /// https://google.aip.dev/160)
+                        /// `stateInfo.state` * `insightSubtype` * `severity` * `targetResources` Examples: *
+                        /// `stateInfo.state = ACTIVE OR stateInfo.state = DISMISSED` * `insightSubtype =
+                        /// PERMISSIONS_USAGE` * `severity = CRITICAL OR severity = HIGH` * `targetResources :
+                        /// //compute.googleapis.com/projects/1234/zones/us-central1-a/instances/instance-1` *
+                        /// `stateInfo.state = ACTIVE AND (severity = CRITICAL OR severity = HIGH)` The max allowed
+                        /// filter length is 500 characters. (These expressions are based on the filter language
+                        /// described at https://google.aip.dev/160)
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
                         public virtual string Filter { get; set; }
@@ -2677,7 +3474,7 @@ namespace Google.Apis.Recommender.v1
                     /// <param name="name">Required. Name of the insight.</param>
                     public virtual MarkAcceptedRequest MarkAccepted(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkInsightAcceptedRequest body, string name)
                     {
-                        return new MarkAcceptedRequest(service, body, name);
+                        return new MarkAcceptedRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -2730,6 +3527,156 @@ namespace Google.Apis.Recommender.v1
                         }
                     }
                 }
+
+                /// <summary>
+                /// Gets the requested InsightTypeConfig. There is only one instance of the config for each InsightType.
+                /// </summary>
+                /// <param name="name">
+                /// Required. Name of the InsightTypeConfig to get. Acceptable formats: *
+                /// `projects/[PROJECT_NUMBER]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config` *
+                /// `projects/[PROJECT_ID]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config` *
+                /// `organizations/[ORGANIZATION_ID]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config` *
+                /// `billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config`
+                /// </param>
+                public virtual GetConfigRequest GetConfig(string name)
+                {
+                    return new GetConfigRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Gets the requested InsightTypeConfig. There is only one instance of the config for each InsightType.
+                /// </summary>
+                public class GetConfigRequest : RecommenderBaseServiceRequest<Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1InsightTypeConfig>
+                {
+                    /// <summary>Constructs a new GetConfig request.</summary>
+                    public GetConfigRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Name of the InsightTypeConfig to get. Acceptable formats: *
+                    /// `projects/[PROJECT_NUMBER]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config` *
+                    /// `projects/[PROJECT_ID]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config` *
+                    /// `organizations/[ORGANIZATION_ID]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config` *
+                    /// `billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "getConfig";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes GetConfig parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/insightTypes/[^/]+/config$",
+                        });
+                    }
+                }
+
+                /// <summary>
+                /// Updates an InsightTypeConfig change. This will create a new revision of the config.
+                /// </summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Identifier. Name of insight type config. Eg,
+                /// projects/[PROJECT_NUMBER]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config
+                /// </param>
+                public virtual UpdateConfigRequest UpdateConfig(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1InsightTypeConfig body, string name)
+                {
+                    return new UpdateConfigRequest(this.service, body, name);
+                }
+
+                /// <summary>
+                /// Updates an InsightTypeConfig change. This will create a new revision of the config.
+                /// </summary>
+                public class UpdateConfigRequest : RecommenderBaseServiceRequest<Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1InsightTypeConfig>
+                {
+                    /// <summary>Constructs a new UpdateConfig request.</summary>
+                    public UpdateConfigRequest(Google.Apis.Services.IClientService service, Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1InsightTypeConfig body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Identifier. Name of insight type config. Eg,
+                    /// projects/[PROJECT_NUMBER]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>The list of fields to be updated.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>
+                    /// If true, validate the request and preview the change, but do not actually update it.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("validateOnly", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<bool> ValidateOnly { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1InsightTypeConfig Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "updateConfig";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes UpdateConfig parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/insightTypes/[^/]+/config$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("validateOnly", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "validateOnly",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
             }
 
             /// <summary>Gets the Recommenders resource.</summary>
@@ -2774,7 +3721,7 @@ namespace Google.Apis.Recommender.v1
                     /// <param name="name">Required. Name of the recommendation.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -2834,7 +3781,7 @@ namespace Google.Apis.Recommender.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>
@@ -2866,10 +3813,13 @@ namespace Google.Apis.Recommender.v1
 
                         /// <summary>
                         /// Filter expression to restrict the recommendations returned. Supported filter fields: *
-                        /// `state_info.state` * `recommenderSubtype` * `priority` Examples: * `stateInfo.state = ACTIVE
-                        /// OR stateInfo.state = DISMISSED` * `recommenderSubtype = REMOVE_ROLE OR recommenderSubtype =
-                        /// REPLACE_ROLE` * `priority = P1 OR priority = P2` * `stateInfo.state = ACTIVE AND (priority =
-                        /// P1 OR priority = P2)` (These expressions are based on the filter language described at
+                        /// `state_info.state` * `recommenderSubtype` * `priority` * `targetResources` Examples: *
+                        /// `stateInfo.state = ACTIVE OR stateInfo.state = DISMISSED` * `recommenderSubtype =
+                        /// REMOVE_ROLE OR recommenderSubtype = REPLACE_ROLE` * `priority = P1 OR priority = P2` *
+                        /// `targetResources :
+                        /// //compute.googleapis.com/projects/1234/zones/us-central1-a/instances/instance-1` *
+                        /// `stateInfo.state = ACTIVE AND (priority = P1 OR priority = P2)` The max allowed filter
+                        /// length is 500 characters. (These expressions are based on the filter language described at
                         /// https://google.aip.dev/160)
                         /// </summary>
                         [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
@@ -2950,7 +3900,7 @@ namespace Google.Apis.Recommender.v1
                     /// <param name="name">Required. Name of the recommendation.</param>
                     public virtual MarkClaimedRequest MarkClaimed(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkRecommendationClaimedRequest body, string name)
                     {
-                        return new MarkClaimedRequest(service, body, name);
+                        return new MarkClaimedRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -3006,6 +3956,69 @@ namespace Google.Apis.Recommender.v1
                     }
 
                     /// <summary>
+                    /// Mark the Recommendation State as Dismissed. Users can use this method to indicate to the
+                    /// Recommender API that an ACTIVE recommendation has to be marked back as DISMISSED.
+                    /// MarkRecommendationDismissed can be applied to recommendations in ACTIVE state. Requires the
+                    /// recommender.*.update IAM permission for the specified recommender.
+                    /// </summary>
+                    /// <param name="body">The body of the request.</param>
+                    /// <param name="name">Required. Name of the recommendation.</param>
+                    public virtual MarkDismissedRequest MarkDismissed(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkRecommendationDismissedRequest body, string name)
+                    {
+                        return new MarkDismissedRequest(this.service, body, name);
+                    }
+
+                    /// <summary>
+                    /// Mark the Recommendation State as Dismissed. Users can use this method to indicate to the
+                    /// Recommender API that an ACTIVE recommendation has to be marked back as DISMISSED.
+                    /// MarkRecommendationDismissed can be applied to recommendations in ACTIVE state. Requires the
+                    /// recommender.*.update IAM permission for the specified recommender.
+                    /// </summary>
+                    public class MarkDismissedRequest : RecommenderBaseServiceRequest<Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1Recommendation>
+                    {
+                        /// <summary>Constructs a new MarkDismissed request.</summary>
+                        public MarkDismissedRequest(Google.Apis.Services.IClientService service, Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkRecommendationDismissedRequest body, string name) : base(service)
+                        {
+                            Name = name;
+                            Body = body;
+                            InitParameters();
+                        }
+
+                        /// <summary>Required. Name of the recommendation.</summary>
+                        [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string Name { get; private set; }
+
+                        /// <summary>Gets or sets the body of this request.</summary>
+                        Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkRecommendationDismissedRequest Body { get; set; }
+
+                        /// <summary>Returns the body of the request.</summary>
+                        protected override object GetBody() => Body;
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "markDismissed";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "POST";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v1/{+name}:markDismissed";
+
+                        /// <summary>Initializes MarkDismissed parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "name",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^projects/[^/]+/locations/[^/]+/recommenders/[^/]+/recommendations/[^/]+$",
+                            });
+                        }
+                    }
+
+                    /// <summary>
                     /// Marks the Recommendation State as Failed. Users can use this method to indicate to the
                     /// Recommender API that they have applied the recommendation themselves, and the operation failed.
                     /// This stops the recommendation content from being updated. Associated insights are frozen and
@@ -3017,7 +4030,7 @@ namespace Google.Apis.Recommender.v1
                     /// <param name="name">Required. Name of the recommendation.</param>
                     public virtual MarkFailedRequest MarkFailed(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkRecommendationFailedRequest body, string name)
                     {
-                        return new MarkFailedRequest(service, body, name);
+                        return new MarkFailedRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -3084,7 +4097,7 @@ namespace Google.Apis.Recommender.v1
                     /// <param name="name">Required. Name of the recommendation.</param>
                     public virtual MarkSucceededRequest MarkSucceeded(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1MarkRecommendationSucceededRequest body, string name)
                     {
-                        return new MarkSucceededRequest(service, body, name);
+                        return new MarkSucceededRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -3139,6 +4152,154 @@ namespace Google.Apis.Recommender.v1
                         }
                     }
                 }
+
+                /// <summary>
+                /// Gets the requested Recommender Config. There is only one instance of the config for each
+                /// Recommender.
+                /// </summary>
+                /// <param name="name">
+                /// Required. Name of the Recommendation Config to get. Acceptable formats: *
+                /// `projects/[PROJECT_NUMBER]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config` *
+                /// `projects/[PROJECT_ID]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config` *
+                /// `organizations/[ORGANIZATION_ID]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config` *
+                /// `billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config`
+                /// </param>
+                public virtual GetConfigRequest GetConfig(string name)
+                {
+                    return new GetConfigRequest(this.service, name);
+                }
+
+                /// <summary>
+                /// Gets the requested Recommender Config. There is only one instance of the config for each
+                /// Recommender.
+                /// </summary>
+                public class GetConfigRequest : RecommenderBaseServiceRequest<Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1RecommenderConfig>
+                {
+                    /// <summary>Constructs a new GetConfig request.</summary>
+                    public GetConfigRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                    {
+                        Name = name;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Required. Name of the Recommendation Config to get. Acceptable formats: *
+                    /// `projects/[PROJECT_NUMBER]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config` *
+                    /// `projects/[PROJECT_ID]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config` *
+                    /// `organizations/[ORGANIZATION_ID]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config` *
+                    /// `billingAccounts/[BILLING_ACCOUNT_ID]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "getConfig";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes GetConfig parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/recommenders/[^/]+/config$",
+                        });
+                    }
+                }
+
+                /// <summary>Updates a Recommender Config. This will create a new revision of the config.</summary>
+                /// <param name="body">The body of the request.</param>
+                /// <param name="name">
+                /// Identifier. Name of recommender config. Eg,
+                /// projects/[PROJECT_NUMBER]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config
+                /// </param>
+                public virtual UpdateConfigRequest UpdateConfig(Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1RecommenderConfig body, string name)
+                {
+                    return new UpdateConfigRequest(this.service, body, name);
+                }
+
+                /// <summary>Updates a Recommender Config. This will create a new revision of the config.</summary>
+                public class UpdateConfigRequest : RecommenderBaseServiceRequest<Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1RecommenderConfig>
+                {
+                    /// <summary>Constructs a new UpdateConfig request.</summary>
+                    public UpdateConfigRequest(Google.Apis.Services.IClientService service, Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1RecommenderConfig body, string name) : base(service)
+                    {
+                        Name = name;
+                        Body = body;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Identifier. Name of recommender config. Eg,
+                    /// projects/[PROJECT_NUMBER]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string Name { get; private set; }
+
+                    /// <summary>The list of fields to be updated.</summary>
+                    [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual object UpdateMask { get; set; }
+
+                    /// <summary>
+                    /// If true, validate the request and preview the change, but do not actually update it.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("validateOnly", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<bool> ValidateOnly { get; set; }
+
+                    /// <summary>Gets or sets the body of this request.</summary>
+                    Google.Apis.Recommender.v1.Data.GoogleCloudRecommenderV1RecommenderConfig Body { get; set; }
+
+                    /// <summary>Returns the body of the request.</summary>
+                    protected override object GetBody() => Body;
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "updateConfig";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "PATCH";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v1/{+name}";
+
+                    /// <summary>Initializes UpdateConfig parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "name",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^projects/[^/]+/locations/[^/]+/recommenders/[^/]+/config$",
+                        });
+                        RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "updateMask",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("validateOnly", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "validateOnly",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
             }
         }
     }
@@ -3150,10 +4311,15 @@ namespace Google.Apis.Recommender.v1.Data
     {
         /// <summary>
         /// An approximate projection on amount saved or amount incurred. Negative cost units indicate cost savings and
-        /// positive cost units indicate increase. See google.type.Money documentation for positive/negative units.
+        /// positive cost units indicate increase. See google.type.Money documentation for positive/negative units. A
+        /// user's permissions may affect whether the cost is computed using list prices or custom contract prices.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("cost")]
         public virtual GoogleTypeMoney Cost { get; set; }
+
+        /// <summary>The approximate cost savings in the billing account's local currency.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("costInLocalCurrency")]
+        public virtual GoogleTypeMoney CostInLocalCurrency { get; set; }
 
         /// <summary>Duration for which this cost applies.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("duration")]
@@ -3174,17 +4340,36 @@ namespace Google.Apis.Recommender.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("costProjection")]
         public virtual GoogleCloudRecommenderV1CostProjection CostProjection { get; set; }
 
+        /// <summary>
+        /// If populated, the impact contains multiple components. In this case, the top-level impact contains
+        /// aggregated values and each component contains per-service details.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("impactComponents")]
+        public virtual System.Collections.Generic.IList<GoogleCloudRecommenderV1Impact> ImpactComponents { get; set; }
+
+        /// <summary>Use with CategoryType.RELIABILITY</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("reliabilityProjection")]
+        public virtual GoogleCloudRecommenderV1ReliabilityProjection ReliabilityProjection { get; set; }
+
         /// <summary>Use with CategoryType.SECURITY</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("securityProjection")]
         public virtual GoogleCloudRecommenderV1SecurityProjection SecurityProjection { get; set; }
+
+        /// <summary>The service that this impact is associated with.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("service")]
+        public virtual string Service { get; set; }
+
+        /// <summary>Use with CategoryType.SUSTAINABILITY</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sustainabilityProjection")]
+        public virtual GoogleCloudRecommenderV1SustainabilityProjection SustainabilityProjection { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
 
     /// <summary>
-    /// An insight along with the information used to derive the insight. The insight may have associated recomendations
-    /// as well.
+    /// An insight along with the information used to derive the insight. The insight may have associated
+    /// recommendations as well.
     /// </summary>
     public class GoogleCloudRecommenderV1Insight : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3214,11 +4399,46 @@ namespace Google.Apis.Recommender.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("insightSubtype")]
         public virtual string InsightSubtype { get; set; }
 
+        private string _lastRefreshTimeRaw;
+
+        private object _lastRefreshTime;
+
         /// <summary>Timestamp of the latest data used to generate the insight.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastRefreshTime")]
-        public virtual object LastRefreshTime { get; set; }
+        public virtual string LastRefreshTimeRaw
+        {
+            get => _lastRefreshTimeRaw;
+            set
+            {
+                _lastRefreshTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastRefreshTimeRaw = value;
+            }
+        }
 
-        /// <summary>Name of the insight.</summary>
+        /// <summary><seealso cref="object"/> representation of <see cref="LastRefreshTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastRefreshTimeDateTimeOffset instead.")]
+        public virtual object LastRefreshTime
+        {
+            get => _lastRefreshTime;
+            set
+            {
+                _lastRefreshTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastRefreshTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastRefreshTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastRefreshTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastRefreshTimeRaw);
+            set => LastRefreshTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Identifier. Name of the insight.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
@@ -3266,6 +4486,102 @@ namespace Google.Apis.Recommender.v1.Data
         /// <summary>A map of metadata for the state, provided by user or automations systems.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("stateMetadata")]
         public virtual System.Collections.Generic.IDictionary<string, string> StateMetadata { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Configuration for an InsightType.</summary>
+    public class GoogleCloudRecommenderV1InsightTypeConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Allows clients to store small amounts of arbitrary data. Annotations must follow the Kubernetes syntax. The
+        /// total size of all keys and values combined is limited to 256k. Key can have 2 segments: prefix (optional)
+        /// and name (required), separated by a slash (/). Prefix must be a DNS subdomain. Name must be 63 characters or
+        /// less, begin and end with alphanumerics, with dashes (-), underscores (_), dots (.), and alphanumerics
+        /// between.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("annotations")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Annotations { get; set; }
+
+        /// <summary>A user-settable field to provide a human-readable name to be used in user interfaces.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>Fingerprint of the InsightTypeConfig. Provides optimistic locking when updating.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>
+        /// InsightTypeGenerationConfig which configures the generation of insights for this insight type.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("insightTypeGenerationConfig")]
+        public virtual GoogleCloudRecommenderV1InsightTypeGenerationConfig InsightTypeGenerationConfig { get; set; }
+
+        /// <summary>
+        /// Identifier. Name of insight type config. Eg,
+        /// projects/[PROJECT_NUMBER]/locations/[LOCATION]/insightTypes/[INSIGHT_TYPE_ID]/config
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Output only. Immutable. The revision ID of the config. A new revision is committed whenever the config is
+        /// changed in any way. The format is an 8-character hexadecimal string.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("revisionId")]
+        public virtual string RevisionId { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Last time when the config was updated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+    }
+
+    /// <summary>
+    /// A configuration to customize the generation of insights. Eg, customizing the lookback period considered when
+    /// generating a insight.
+    /// </summary>
+    public class GoogleCloudRecommenderV1InsightTypeGenerationConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Parameters for this InsightTypeGenerationConfig. These configs can be used by or are applied to all
+        /// subtypes.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("params")]
+        public virtual System.Collections.Generic.IDictionary<string, object> Params__ { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3336,6 +4652,14 @@ namespace Google.Apis.Recommender.v1.Data
         public virtual System.Collections.Generic.IDictionary<string, string> StateMetadata { get; set; }
     }
 
+    /// <summary>Request for the `MarkRecommendationDismissed` Method.</summary>
+    public class GoogleCloudRecommenderV1MarkRecommendationDismissedRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Fingerprint of the Recommendation. Provides optimistic locking.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Request for the `MarkRecommendationFailed` Method.</summary>
     public class GoogleCloudRecommenderV1MarkRecommendationFailedRequest : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3391,10 +4715,22 @@ namespace Google.Apis.Recommender.v1.Data
         /// <summary>
         /// Set of filters to apply if `path` refers to array elements or nested array elements in order to narrow down
         /// to a single unique element that is being tested/modified. This is intended to be an exact match per filter.
-        /// To perform advanced matching, use path_value_matchers. * Example: ``` { "/versions/*/name" : "it-123"
-        /// "/versions/*/targetSize/percent": 20 } ``` * Example: ``` { "/bindings/*/role": "roles/owner"
-        /// "/bindings/*/condition" : null } ``` * Example: ``` { "/bindings/*/role": "roles/owner"
-        /// "/bindings/*/members/*" : ["x@example.com", "y@example.com"] } ``` When both path_filters and
+        /// To perform advanced matching, use path_value_matchers. * Example:
+        /// ```
+        /// { "/versions/*/name" : "it-123"
+        /// "/versions/*/targetSize/percent": 20 }
+        /// ```
+        /// * Example:
+        /// ```
+        /// { "/bindings/*/role": "roles/owner"
+        /// "/bindings/*/condition" : null }
+        /// ```
+        /// * Example:
+        /// ```
+        /// { "/bindings/*/role": "roles/owner"
+        /// "/bindings/*/members/*" : ["x@example.com", "y@example.com"] }
+        /// ```
+        /// When both path_filters and
         /// path_value_matchers are set, an implicit AND must be performed.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("pathFilters")]
@@ -3498,13 +4834,48 @@ namespace Google.Apis.Recommender.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("etag")]
         public virtual string ETag { get; set; }
 
+        private string _lastRefreshTimeRaw;
+
+        private object _lastRefreshTime;
+
         /// <summary>
         /// Last time this recommendation was refreshed by the system that created it in the first place.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastRefreshTime")]
-        public virtual object LastRefreshTime { get; set; }
+        public virtual string LastRefreshTimeRaw
+        {
+            get => _lastRefreshTimeRaw;
+            set
+            {
+                _lastRefreshTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastRefreshTimeRaw = value;
+            }
+        }
 
-        /// <summary>Name of recommendation.</summary>
+        /// <summary><seealso cref="object"/> representation of <see cref="LastRefreshTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastRefreshTimeDateTimeOffset instead.")]
+        public virtual object LastRefreshTime
+        {
+            get => _lastRefreshTime;
+            set
+            {
+                _lastRefreshTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastRefreshTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastRefreshTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastRefreshTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastRefreshTimeRaw);
+            set => LastRefreshTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Identifier. Name of recommendation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
@@ -3531,6 +4902,10 @@ namespace Google.Apis.Recommender.v1.Data
         /// <summary>Information for state. Contains state and metadata.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("stateInfo")]
         public virtual GoogleCloudRecommenderV1RecommendationStateInfo StateInfo { get; set; }
+
+        /// <summary>Fully qualified resource names that this recommendation is targeting.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("targetResources")]
+        public virtual System.Collections.Generic.IList<string> TargetResources { get; set; }
 
         /// <summary>
         /// Corresponds to a mutually exclusive group ID within a recommender. A non-empty ID indicates that the
@@ -3588,12 +4963,141 @@ namespace Google.Apis.Recommender.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Configuration for a Recommender.</summary>
+    public class GoogleCloudRecommenderV1RecommenderConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Allows clients to store small amounts of arbitrary data. Annotations must follow the Kubernetes syntax. The
+        /// total size of all keys and values combined is limited to 256k. Key can have 2 segments: prefix (optional)
+        /// and name (required), separated by a slash (/). Prefix must be a DNS subdomain. Name must be 63 characters or
+        /// less, begin and end with alphanumerics, with dashes (-), underscores (_), dots (.), and alphanumerics
+        /// between.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("annotations")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Annotations { get; set; }
+
+        /// <summary>A user-settable field to provide a human-readable name to be used in user interfaces.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>Fingerprint of the RecommenderConfig. Provides optimistic locking when updating.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>
+        /// Identifier. Name of recommender config. Eg,
+        /// projects/[PROJECT_NUMBER]/locations/[LOCATION]/recommenders/[RECOMMENDER_ID]/config
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// RecommenderGenerationConfig which configures the Generation of recommendations for this recommender.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("recommenderGenerationConfig")]
+        public virtual GoogleCloudRecommenderV1RecommenderGenerationConfig RecommenderGenerationConfig { get; set; }
+
+        /// <summary>
+        /// Output only. Immutable. The revision ID of the config. A new revision is committed whenever the config is
+        /// changed in any way. The format is an 8-character hexadecimal string.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("revisionId")]
+        public virtual string RevisionId { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
+        /// <summary>Last time when the config was updated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+    }
+
+    /// <summary>
+    /// A Configuration to customize the generation of recommendations. Eg, customizing the lookback period considered
+    /// when generating a recommendation.
+    /// </summary>
+    public class GoogleCloudRecommenderV1RecommenderGenerationConfig : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Parameters for this RecommenderGenerationConfig. These configs can be used by or are applied to all
+        /// subtypes.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("params")]
+        public virtual System.Collections.Generic.IDictionary<string, object> Params__ { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Contains information on the impact of a reliability recommendation.</summary>
+    public class GoogleCloudRecommenderV1ReliabilityProjection : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Per-recommender projection.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("details")]
+        public virtual System.Collections.Generic.IDictionary<string, object> Details { get; set; }
+
+        /// <summary>Reliability risks mitigated by this recommendation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("risks")]
+        public virtual System.Collections.Generic.IList<string> Risks { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Contains various ways of describing the impact on Security.</summary>
     public class GoogleCloudRecommenderV1SecurityProjection : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>Additional security impact details that is provided by the recommender.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("details")]
         public virtual System.Collections.Generic.IDictionary<string, object> Details { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Contains metadata about how much sustainability a recommendation can save or incur.</summary>
+    public class GoogleCloudRecommenderV1SustainabilityProjection : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Duration for which this sustainability applies.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("duration")]
+        public virtual object Duration { get; set; }
+
+        /// <summary>
+        /// Carbon Footprint generated in kg of CO2 equivalent. Chose kg_c_o2e so that the name renders correctly in
+        /// camelCase (kgCO2e).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kgCO2e")]
+        public virtual System.Nullable<double> KgCO2e { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

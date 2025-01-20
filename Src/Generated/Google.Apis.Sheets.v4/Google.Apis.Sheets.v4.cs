@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.Sheets.v4
         public SheetsService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Spreadsheets = new SpreadsheetsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://sheets.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://sheets.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.Sheets.v4
         public override string Name => "sheets";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://sheets.googleapis.com/";
-        #else
-            "https://sheets.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://sheets.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Google Sheets API.</summary>
         public class Scope
@@ -331,7 +326,7 @@ namespace Google.Apis.Sheets.v4
             /// <param name="metadataId">The ID of the developer metadata to retrieve.</param>
             public virtual GetRequest Get(string spreadsheetId, int metadataId)
             {
-                return new GetRequest(service, spreadsheetId, metadataId);
+                return new GetRequest(this.service, spreadsheetId, metadataId);
             }
 
             /// <summary>
@@ -398,7 +393,7 @@ namespace Google.Apis.Sheets.v4
             /// <param name="spreadsheetId">The ID of the spreadsheet to retrieve metadata from.</param>
             public virtual SearchRequest Search(Google.Apis.Sheets.v4.Data.SearchDeveloperMetadataRequest body, string spreadsheetId)
             {
-                return new SearchRequest(service, body, spreadsheetId);
+                return new SearchRequest(this.service, body, spreadsheetId);
             }
 
             /// <summary>
@@ -478,7 +473,7 @@ namespace Google.Apis.Sheets.v4
             /// <param name="sheetId">The ID of the sheet to copy.</param>
             public virtual CopyToRequest CopyTo(Google.Apis.Sheets.v4.Data.CopySheetToAnotherSpreadsheetRequest body, string spreadsheetId, int sheetId)
             {
-                return new CopyToRequest(service, body, spreadsheetId, sheetId);
+                return new CopyToRequest(this.service, body, spreadsheetId, sheetId);
             }
 
             /// <summary>
@@ -572,12 +567,12 @@ namespace Google.Apis.Sheets.v4
             /// <param name="body">The body of the request.</param>
             /// <param name="spreadsheetId">The ID of the spreadsheet to update.</param>
             /// <param name="range">
-            /// The A1 notation of a range to search for a logical table of data. Values are appended after the last row
-            /// of the table.
+            /// The [A1 notation](/sheets/api/guides/concepts#cell) of a range to search for a logical table of data.
+            /// Values are appended after the last row of the table.
             /// </param>
             public virtual AppendRequest Append(Google.Apis.Sheets.v4.Data.ValueRange body, string spreadsheetId, string range)
             {
-                return new AppendRequest(service, body, spreadsheetId, range);
+                return new AppendRequest(this.service, body, spreadsheetId, range);
             }
 
             /// <summary>
@@ -605,8 +600,8 @@ namespace Google.Apis.Sheets.v4
                 public virtual string SpreadsheetId { get; private set; }
 
                 /// <summary>
-                /// The A1 notation of a range to search for a logical table of data. Values are appended after the last
-                /// row of the table.
+                /// The [A1 notation](/sheets/api/guides/concepts#cell) of a range to search for a logical table of
+                /// data. Values are appended after the last row of the table.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("range", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Range { get; private set; }
@@ -657,7 +652,7 @@ namespace Google.Apis.Sheets.v4
                     /// format, as popularized by Lotus 1-2-3. The whole number portion of the value (left of the
                     /// decimal) counts the days since December 30th 1899. The fractional portion (right of the decimal)
                     /// counts the time as a fraction of the day. For example, January 1st 1900 at noon would be 2.5, 2
-                    /// because it's 2 days after December 30st 1899, and .5 because noon is half a day. February 1st
+                    /// because it's 2 days after December 30th 1899, and .5 because noon is half a day. February 1st
                     /// 1900 at 3pm would be 33.625. This correctly treats the year 1900 as not a leap year.
                     /// </summary>
                     [Google.Apis.Util.StringValueAttribute("SERIAL_NUMBER")]
@@ -665,7 +660,7 @@ namespace Google.Apis.Sheets.v4
 
                     /// <summary>
                     /// Instructs date, time, datetime, and duration fields to be output as strings in their given
-                    /// number format (which is dependent on the spreadsheet locale).
+                    /// number format (which depends on the spreadsheet locale).
                     /// </summary>
                     [Google.Apis.Util.StringValueAttribute("FORMATTED_STRING")]
                     FORMATTEDSTRING = 1,
@@ -685,9 +680,10 @@ namespace Google.Apis.Sheets.v4
                 public enum ResponseValueRenderOptionEnum
                 {
                     /// <summary>
-                    /// Values will be calculated &amp;amp; formatted in the reply according to the cell's formatting.
-                    /// Formatting is based on the spreadsheet's locale, not the requesting user's locale. For example,
-                    /// if `A1` is `1.23` and `A2` is `=A1` and formatted as currency, then `A2` would return `"$1.23"`.
+                    /// Values will be calculated &amp;amp; formatted in the response according to the cell's
+                    /// formatting. Formatting is based on the spreadsheet's locale, not the requesting user's locale.
+                    /// For example, if `A1` is `1.23` and `A2` is `=A1` and formatted as currency, then `A2` would
+                    /// return `"$1.23"`.
                     /// </summary>
                     [Google.Apis.Util.StringValueAttribute("FORMATTED_VALUE")]
                     FORMATTEDVALUE = 0,
@@ -701,7 +697,10 @@ namespace Google.Apis.Sheets.v4
 
                     /// <summary>
                     /// Values will not be calculated. The reply will include the formulas. For example, if `A1` is
-                    /// `1.23` and `A2` is `=A1` and formatted as currency, then A2 would return `"=A1"`.
+                    /// `1.23` and `A2` is `=A1` and formatted as currency, then A2 would return `"=A1"`. Sheets treats
+                    /// date and time values as decimal values. This lets you perform arithmetic on them in formulas.
+                    /// For more information on interpreting date and time values, see [About date &amp;amp; time
+                    /// values](https://developers.google.com/sheets/api/guides/formats#about_date_time_values).
                     /// </summary>
                     [Google.Apis.Util.StringValueAttribute("FORMULA")]
                     FORMULA = 2,
@@ -811,20 +810,20 @@ namespace Google.Apis.Sheets.v4
 
             /// <summary>
             /// Clears one or more ranges of values from a spreadsheet. The caller must specify the spreadsheet ID and
-            /// one or more ranges. Only values are cleared -- all other properties of the cell (such as formatting,
-            /// data validation, etc..) are kept.
+            /// one or more ranges. Only values are cleared -- all other properties of the cell (such as formatting and
+            /// data validation) are kept.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="spreadsheetId">The ID of the spreadsheet to update.</param>
             public virtual BatchClearRequest BatchClear(Google.Apis.Sheets.v4.Data.BatchClearValuesRequest body, string spreadsheetId)
             {
-                return new BatchClearRequest(service, body, spreadsheetId);
+                return new BatchClearRequest(this.service, body, spreadsheetId);
             }
 
             /// <summary>
             /// Clears one or more ranges of values from a spreadsheet. The caller must specify the spreadsheet ID and
-            /// one or more ranges. Only values are cleared -- all other properties of the cell (such as formatting,
-            /// data validation, etc..) are kept.
+            /// one or more ranges. Only values are cleared -- all other properties of the cell (such as formatting and
+            /// data validation) are kept.
             /// </summary>
             public class BatchClearRequest : SheetsBaseServiceRequest<Google.Apis.Sheets.v4.Data.BatchClearValuesResponse>
             {
@@ -879,7 +878,7 @@ namespace Google.Apis.Sheets.v4
             /// <param name="spreadsheetId">The ID of the spreadsheet to update.</param>
             public virtual BatchClearByDataFilterRequest BatchClearByDataFilter(Google.Apis.Sheets.v4.Data.BatchClearValuesByDataFilterRequest body, string spreadsheetId)
             {
-                return new BatchClearByDataFilterRequest(service, body, spreadsheetId);
+                return new BatchClearByDataFilterRequest(this.service, body, spreadsheetId);
             }
 
             /// <summary>
@@ -938,7 +937,7 @@ namespace Google.Apis.Sheets.v4
             /// <param name="spreadsheetId">The ID of the spreadsheet to retrieve data from.</param>
             public virtual BatchGetRequest BatchGet(string spreadsheetId)
             {
-                return new BatchGetRequest(service, spreadsheetId);
+                return new BatchGetRequest(this.service, spreadsheetId);
             }
 
             /// <summary>
@@ -976,7 +975,7 @@ namespace Google.Apis.Sheets.v4
                     /// format, as popularized by Lotus 1-2-3. The whole number portion of the value (left of the
                     /// decimal) counts the days since December 30th 1899. The fractional portion (right of the decimal)
                     /// counts the time as a fraction of the day. For example, January 1st 1900 at noon would be 2.5, 2
-                    /// because it's 2 days after December 30st 1899, and .5 because noon is half a day. February 1st
+                    /// because it's 2 days after December 30th 1899, and .5 because noon is half a day. February 1st
                     /// 1900 at 3pm would be 33.625. This correctly treats the year 1900 as not a leap year.
                     /// </summary>
                     [Google.Apis.Util.StringValueAttribute("SERIAL_NUMBER")]
@@ -984,7 +983,7 @@ namespace Google.Apis.Sheets.v4
 
                     /// <summary>
                     /// Instructs date, time, datetime, and duration fields to be output as strings in their given
-                    /// number format (which is dependent on the spreadsheet locale).
+                    /// number format (which depends on the spreadsheet locale).
                     /// </summary>
                     [Google.Apis.Util.StringValueAttribute("FORMATTED_STRING")]
                     FORMATTEDSTRING = 1,
@@ -992,16 +991,18 @@ namespace Google.Apis.Sheets.v4
 
                 /// <summary>
                 /// The major dimension that results should use. For example, if the spreadsheet data is:
-                /// `A1=1,B1=2,A2=3,B2=4`, then requesting `range=A1:B2,majorDimension=ROWS` returns `[[1,2],[3,4]]`,
-                /// whereas requesting `range=A1:B2,majorDimension=COLUMNS` returns `[[1,3],[2,4]]`.
+                /// `A1=1,B1=2,A2=3,B2=4`, then requesting `ranges=["A1:B2"],majorDimension=ROWS` returns
+                /// `[[1,2],[3,4]]`, whereas requesting `ranges=["A1:B2"],majorDimension=COLUMNS` returns
+                /// `[[1,3],[2,4]]`.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("majorDimension", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<MajorDimensionEnum> MajorDimension { get; set; }
 
                 /// <summary>
                 /// The major dimension that results should use. For example, if the spreadsheet data is:
-                /// `A1=1,B1=2,A2=3,B2=4`, then requesting `range=A1:B2,majorDimension=ROWS` returns `[[1,2],[3,4]]`,
-                /// whereas requesting `range=A1:B2,majorDimension=COLUMNS` returns `[[1,3],[2,4]]`.
+                /// `A1=1,B1=2,A2=3,B2=4`, then requesting `ranges=["A1:B2"],majorDimension=ROWS` returns
+                /// `[[1,2],[3,4]]`, whereas requesting `ranges=["A1:B2"],majorDimension=COLUMNS` returns
+                /// `[[1,3],[2,4]]`.
                 /// </summary>
                 public enum MajorDimensionEnum
                 {
@@ -1018,7 +1019,10 @@ namespace Google.Apis.Sheets.v4
                     COLUMNS = 2,
                 }
 
-                /// <summary>The A1 notation or R1C1 notation of the range to retrieve values from.</summary>
+                /// <summary>
+                /// The [A1 notation or R1C1 notation](/sheets/api/guides/concepts#cell) of the range to retrieve values
+                /// from.
+                /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("ranges", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual Google.Apis.Util.Repeatable<string> Ranges { get; set; }
 
@@ -1036,9 +1040,10 @@ namespace Google.Apis.Sheets.v4
                 public enum ValueRenderOptionEnum
                 {
                     /// <summary>
-                    /// Values will be calculated &amp;amp; formatted in the reply according to the cell's formatting.
-                    /// Formatting is based on the spreadsheet's locale, not the requesting user's locale. For example,
-                    /// if `A1` is `1.23` and `A2` is `=A1` and formatted as currency, then `A2` would return `"$1.23"`.
+                    /// Values will be calculated &amp;amp; formatted in the response according to the cell's
+                    /// formatting. Formatting is based on the spreadsheet's locale, not the requesting user's locale.
+                    /// For example, if `A1` is `1.23` and `A2` is `=A1` and formatted as currency, then `A2` would
+                    /// return `"$1.23"`.
                     /// </summary>
                     [Google.Apis.Util.StringValueAttribute("FORMATTED_VALUE")]
                     FORMATTEDVALUE = 0,
@@ -1052,7 +1057,10 @@ namespace Google.Apis.Sheets.v4
 
                     /// <summary>
                     /// Values will not be calculated. The reply will include the formulas. For example, if `A1` is
-                    /// `1.23` and `A2` is `=A1` and formatted as currency, then A2 would return `"=A1"`.
+                    /// `1.23` and `A2` is `=A1` and formatted as currency, then A2 would return `"=A1"`. Sheets treats
+                    /// date and time values as decimal values. This lets you perform arithmetic on them in formulas.
+                    /// For more information on interpreting date and time values, see [About date &amp;amp; time
+                    /// values](https://developers.google.com/sheets/api/guides/formats#about_date_time_values).
                     /// </summary>
                     [Google.Apis.Util.StringValueAttribute("FORMULA")]
                     FORMULA = 2,
@@ -1123,7 +1131,7 @@ namespace Google.Apis.Sheets.v4
             /// <param name="spreadsheetId">The ID of the spreadsheet to retrieve data from.</param>
             public virtual BatchGetByDataFilterRequest BatchGetByDataFilter(Google.Apis.Sheets.v4.Data.BatchGetValuesByDataFilterRequest body, string spreadsheetId)
             {
-                return new BatchGetByDataFilterRequest(service, body, spreadsheetId);
+                return new BatchGetByDataFilterRequest(this.service, body, spreadsheetId);
             }
 
             /// <summary>
@@ -1183,7 +1191,7 @@ namespace Google.Apis.Sheets.v4
             /// <param name="spreadsheetId">The ID of the spreadsheet to update.</param>
             public virtual BatchUpdateRequest BatchUpdate(Google.Apis.Sheets.v4.Data.BatchUpdateValuesRequest body, string spreadsheetId)
             {
-                return new BatchUpdateRequest(service, body, spreadsheetId);
+                return new BatchUpdateRequest(this.service, body, spreadsheetId);
             }
 
             /// <summary>
@@ -1242,7 +1250,7 @@ namespace Google.Apis.Sheets.v4
             /// <param name="spreadsheetId">The ID of the spreadsheet to update.</param>
             public virtual BatchUpdateByDataFilterRequest BatchUpdateByDataFilter(Google.Apis.Sheets.v4.Data.BatchUpdateValuesByDataFilterRequest body, string spreadsheetId)
             {
-                return new BatchUpdateByDataFilterRequest(service, body, spreadsheetId);
+                return new BatchUpdateByDataFilterRequest(this.service, body, spreadsheetId);
             }
 
             /// <summary>
@@ -1299,10 +1307,12 @@ namespace Google.Apis.Sheets.v4
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="spreadsheetId">The ID of the spreadsheet to update.</param>
-            /// <param name="range">The A1 notation or R1C1 notation of the values to clear.</param>
+            /// <param name="range">
+            /// The [A1 notation or R1C1 notation](/sheets/api/guides/concepts#cell) of the values to clear.
+            /// </param>
             public virtual ClearRequest Clear(Google.Apis.Sheets.v4.Data.ClearValuesRequest body, string spreadsheetId, string range)
             {
-                return new ClearRequest(service, body, spreadsheetId, range);
+                return new ClearRequest(this.service, body, spreadsheetId, range);
             }
 
             /// <summary>
@@ -1324,7 +1334,9 @@ namespace Google.Apis.Sheets.v4
                 [Google.Apis.Util.RequestParameterAttribute("spreadsheetId", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string SpreadsheetId { get; private set; }
 
-                /// <summary>The A1 notation or R1C1 notation of the values to clear.</summary>
+                /// <summary>
+                /// The [A1 notation or R1C1 notation](/sheets/api/guides/concepts#cell) of the values to clear.
+                /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("range", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Range { get; private set; }
 
@@ -1370,10 +1382,13 @@ namespace Google.Apis.Sheets.v4
             /// Returns a range of values from a spreadsheet. The caller must specify the spreadsheet ID and a range.
             /// </summary>
             /// <param name="spreadsheetId">The ID of the spreadsheet to retrieve data from.</param>
-            /// <param name="range">The A1 notation or R1C1 notation of the range to retrieve values from.</param>
+            /// <param name="range">
+            /// The [A1 notation or R1C1 notation](/sheets/api/guides/concepts#cell) of the range to retrieve values
+            /// from.
+            /// </param>
             public virtual GetRequest Get(string spreadsheetId, string range)
             {
-                return new GetRequest(service, spreadsheetId, range);
+                return new GetRequest(this.service, spreadsheetId, range);
             }
 
             /// <summary>
@@ -1393,7 +1408,10 @@ namespace Google.Apis.Sheets.v4
                 [Google.Apis.Util.RequestParameterAttribute("spreadsheetId", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string SpreadsheetId { get; private set; }
 
-                /// <summary>The A1 notation or R1C1 notation of the range to retrieve values from.</summary>
+                /// <summary>
+                /// The [A1 notation or R1C1 notation](/sheets/api/guides/concepts#cell) of the range to retrieve values
+                /// from.
+                /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("range", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Range { get; private set; }
 
@@ -1415,7 +1433,7 @@ namespace Google.Apis.Sheets.v4
                     /// format, as popularized by Lotus 1-2-3. The whole number portion of the value (left of the
                     /// decimal) counts the days since December 30th 1899. The fractional portion (right of the decimal)
                     /// counts the time as a fraction of the day. For example, January 1st 1900 at noon would be 2.5, 2
-                    /// because it's 2 days after December 30st 1899, and .5 because noon is half a day. February 1st
+                    /// because it's 2 days after December 30th 1899, and .5 because noon is half a day. February 1st
                     /// 1900 at 3pm would be 33.625. This correctly treats the year 1900 as not a leap year.
                     /// </summary>
                     [Google.Apis.Util.StringValueAttribute("SERIAL_NUMBER")]
@@ -1423,24 +1441,26 @@ namespace Google.Apis.Sheets.v4
 
                     /// <summary>
                     /// Instructs date, time, datetime, and duration fields to be output as strings in their given
-                    /// number format (which is dependent on the spreadsheet locale).
+                    /// number format (which depends on the spreadsheet locale).
                     /// </summary>
                     [Google.Apis.Util.StringValueAttribute("FORMATTED_STRING")]
                     FORMATTEDSTRING = 1,
                 }
 
                 /// <summary>
-                /// The major dimension that results should use. For example, if the spreadsheet data is:
-                /// `A1=1,B1=2,A2=3,B2=4`, then requesting `range=A1:B2,majorDimension=ROWS` returns `[[1,2],[3,4]]`,
-                /// whereas requesting `range=A1:B2,majorDimension=COLUMNS` returns `[[1,3],[2,4]]`.
+                /// The major dimension that results should use. For example, if the spreadsheet data in Sheet1 is:
+                /// `A1=1,B1=2,A2=3,B2=4`, then requesting `range=Sheet1!A1:B2?majorDimension=ROWS` returns
+                /// `[[1,2],[3,4]]`, whereas requesting `range=Sheet1!A1:B2?majorDimension=COLUMNS` returns
+                /// `[[1,3],[2,4]]`.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("majorDimension", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<MajorDimensionEnum> MajorDimension { get; set; }
 
                 /// <summary>
-                /// The major dimension that results should use. For example, if the spreadsheet data is:
-                /// `A1=1,B1=2,A2=3,B2=4`, then requesting `range=A1:B2,majorDimension=ROWS` returns `[[1,2],[3,4]]`,
-                /// whereas requesting `range=A1:B2,majorDimension=COLUMNS` returns `[[1,3],[2,4]]`.
+                /// The major dimension that results should use. For example, if the spreadsheet data in Sheet1 is:
+                /// `A1=1,B1=2,A2=3,B2=4`, then requesting `range=Sheet1!A1:B2?majorDimension=ROWS` returns
+                /// `[[1,2],[3,4]]`, whereas requesting `range=Sheet1!A1:B2?majorDimension=COLUMNS` returns
+                /// `[[1,3],[2,4]]`.
                 /// </summary>
                 public enum MajorDimensionEnum
                 {
@@ -1469,9 +1489,10 @@ namespace Google.Apis.Sheets.v4
                 public enum ValueRenderOptionEnum
                 {
                     /// <summary>
-                    /// Values will be calculated &amp;amp; formatted in the reply according to the cell's formatting.
-                    /// Formatting is based on the spreadsheet's locale, not the requesting user's locale. For example,
-                    /// if `A1` is `1.23` and `A2` is `=A1` and formatted as currency, then `A2` would return `"$1.23"`.
+                    /// Values will be calculated &amp;amp; formatted in the response according to the cell's
+                    /// formatting. Formatting is based on the spreadsheet's locale, not the requesting user's locale.
+                    /// For example, if `A1` is `1.23` and `A2` is `=A1` and formatted as currency, then `A2` would
+                    /// return `"$1.23"`.
                     /// </summary>
                     [Google.Apis.Util.StringValueAttribute("FORMATTED_VALUE")]
                     FORMATTEDVALUE = 0,
@@ -1485,7 +1506,10 @@ namespace Google.Apis.Sheets.v4
 
                     /// <summary>
                     /// Values will not be calculated. The reply will include the formulas. For example, if `A1` is
-                    /// `1.23` and `A2` is `=A1` and formatted as currency, then A2 would return `"=A1"`.
+                    /// `1.23` and `A2` is `=A1` and formatted as currency, then A2 would return `"=A1"`. Sheets treats
+                    /// date and time values as decimal values. This lets you perform arithmetic on them in formulas.
+                    /// For more information on interpreting date and time values, see [About date &amp;amp; time
+                    /// values](https://developers.google.com/sheets/api/guides/formats#about_date_time_values).
                     /// </summary>
                     [Google.Apis.Util.StringValueAttribute("FORMULA")]
                     FORMULA = 2,
@@ -1553,10 +1577,10 @@ namespace Google.Apis.Sheets.v4
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="spreadsheetId">The ID of the spreadsheet to update.</param>
-            /// <param name="range">The A1 notation of the values to update.</param>
+            /// <param name="range">The [A1 notation](/sheets/api/guides/concepts#cell) of the values to update.</param>
             public virtual UpdateRequest Update(Google.Apis.Sheets.v4.Data.ValueRange body, string spreadsheetId, string range)
             {
-                return new UpdateRequest(service, body, spreadsheetId, range);
+                return new UpdateRequest(this.service, body, spreadsheetId, range);
             }
 
             /// <summary>
@@ -1578,7 +1602,7 @@ namespace Google.Apis.Sheets.v4
                 [Google.Apis.Util.RequestParameterAttribute("spreadsheetId", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string SpreadsheetId { get; private set; }
 
-                /// <summary>The A1 notation of the values to update.</summary>
+                /// <summary>The [A1 notation](/sheets/api/guides/concepts#cell) of the values to update.</summary>
                 [Google.Apis.Util.RequestParameterAttribute("range", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Range { get; private set; }
 
@@ -1611,7 +1635,7 @@ namespace Google.Apis.Sheets.v4
                     /// format, as popularized by Lotus 1-2-3. The whole number portion of the value (left of the
                     /// decimal) counts the days since December 30th 1899. The fractional portion (right of the decimal)
                     /// counts the time as a fraction of the day. For example, January 1st 1900 at noon would be 2.5, 2
-                    /// because it's 2 days after December 30st 1899, and .5 because noon is half a day. February 1st
+                    /// because it's 2 days after December 30th 1899, and .5 because noon is half a day. February 1st
                     /// 1900 at 3pm would be 33.625. This correctly treats the year 1900 as not a leap year.
                     /// </summary>
                     [Google.Apis.Util.StringValueAttribute("SERIAL_NUMBER")]
@@ -1619,7 +1643,7 @@ namespace Google.Apis.Sheets.v4
 
                     /// <summary>
                     /// Instructs date, time, datetime, and duration fields to be output as strings in their given
-                    /// number format (which is dependent on the spreadsheet locale).
+                    /// number format (which depends on the spreadsheet locale).
                     /// </summary>
                     [Google.Apis.Util.StringValueAttribute("FORMATTED_STRING")]
                     FORMATTEDSTRING = 1,
@@ -1639,9 +1663,10 @@ namespace Google.Apis.Sheets.v4
                 public enum ResponseValueRenderOptionEnum
                 {
                     /// <summary>
-                    /// Values will be calculated &amp;amp; formatted in the reply according to the cell's formatting.
-                    /// Formatting is based on the spreadsheet's locale, not the requesting user's locale. For example,
-                    /// if `A1` is `1.23` and `A2` is `=A1` and formatted as currency, then `A2` would return `"$1.23"`.
+                    /// Values will be calculated &amp;amp; formatted in the response according to the cell's
+                    /// formatting. Formatting is based on the spreadsheet's locale, not the requesting user's locale.
+                    /// For example, if `A1` is `1.23` and `A2` is `=A1` and formatted as currency, then `A2` would
+                    /// return `"$1.23"`.
                     /// </summary>
                     [Google.Apis.Util.StringValueAttribute("FORMATTED_VALUE")]
                     FORMATTEDVALUE = 0,
@@ -1655,7 +1680,10 @@ namespace Google.Apis.Sheets.v4
 
                     /// <summary>
                     /// Values will not be calculated. The reply will include the formulas. For example, if `A1` is
-                    /// `1.23` and `A2` is `=A1` and formatted as currency, then A2 would return `"=A1"`.
+                    /// `1.23` and `A2` is `=A1` and formatted as currency, then A2 would return `"=A1"`. Sheets treats
+                    /// date and time values as decimal values. This lets you perform arithmetic on them in formulas.
+                    /// For more information on interpreting date and time values, see [About date &amp;amp; time
+                    /// values](https://developers.google.com/sheets/api/guides/formats#about_date_time_values).
                     /// </summary>
                     [Google.Apis.Util.StringValueAttribute("FORMULA")]
                     FORMULA = 2,
@@ -1771,7 +1799,7 @@ namespace Google.Apis.Sheets.v4
         /// <param name="spreadsheetId">The spreadsheet to apply the updates to.</param>
         public virtual BatchUpdateRequest BatchUpdate(Google.Apis.Sheets.v4.Data.BatchUpdateSpreadsheetRequest body, string spreadsheetId)
         {
-            return new BatchUpdateRequest(service, body, spreadsheetId);
+            return new BatchUpdateRequest(this.service, body, spreadsheetId);
         }
 
         /// <summary>
@@ -1833,7 +1861,7 @@ namespace Google.Apis.Sheets.v4
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.Sheets.v4.Data.Spreadsheet body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>Creates a spreadsheet, returning the newly created spreadsheet.</summary>
@@ -1870,29 +1898,35 @@ namespace Google.Apis.Sheets.v4
 
         /// <summary>
         /// Returns the spreadsheet at the given ID. The caller must specify the spreadsheet ID. By default, data within
-        /// grids will not be returned. You can include grid data one of two ways: * Specify a field mask listing your
-        /// desired fields using the `fields` URL parameter in HTTP * Set the includeGridData URL parameter to true. If
-        /// a field mask is set, the `includeGridData` parameter is ignored For large spreadsheets, it is recommended to
-        /// retrieve only the specific fields of the spreadsheet that you want. To retrieve only subsets of the
-        /// spreadsheet, use the ranges URL parameter. Multiple ranges can be specified. Limiting the range will return
-        /// only the portions of the spreadsheet that intersect the requested ranges. Ranges are specified using A1
-        /// notation.
+        /// grids is not returned. You can include grid data in one of 2 ways: * Specify a [field
+        /// mask](https://developers.google.com/sheets/api/guides/field-masks) listing your desired fields using the
+        /// `fields` URL parameter in HTTP * Set the includeGridData URL parameter to true. If a field mask is set, the
+        /// `includeGridData` parameter is ignored For large spreadsheets, as a best practice, retrieve only the
+        /// specific spreadsheet fields that you want. To retrieve only subsets of spreadsheet data, use the ranges URL
+        /// parameter. Ranges are specified using [A1 notation](/sheets/api/guides/concepts#cell). You can define a
+        /// single cell (for example, `A1`) or multiple cells (for example, `A1:D5`). You can also get cells from other
+        /// sheets within the same spreadsheet (for example, `Sheet2!A1:C4`) or retrieve multiple ranges at once (for
+        /// example, `?ranges=A1:D5&amp;amp;ranges=Sheet2!A1:C4`). Limiting the range returns only the portions of the
+        /// spreadsheet that intersect the requested ranges.
         /// </summary>
         /// <param name="spreadsheetId">The spreadsheet to request.</param>
         public virtual GetRequest Get(string spreadsheetId)
         {
-            return new GetRequest(service, spreadsheetId);
+            return new GetRequest(this.service, spreadsheetId);
         }
 
         /// <summary>
         /// Returns the spreadsheet at the given ID. The caller must specify the spreadsheet ID. By default, data within
-        /// grids will not be returned. You can include grid data one of two ways: * Specify a field mask listing your
-        /// desired fields using the `fields` URL parameter in HTTP * Set the includeGridData URL parameter to true. If
-        /// a field mask is set, the `includeGridData` parameter is ignored For large spreadsheets, it is recommended to
-        /// retrieve only the specific fields of the spreadsheet that you want. To retrieve only subsets of the
-        /// spreadsheet, use the ranges URL parameter. Multiple ranges can be specified. Limiting the range will return
-        /// only the portions of the spreadsheet that intersect the requested ranges. Ranges are specified using A1
-        /// notation.
+        /// grids is not returned. You can include grid data in one of 2 ways: * Specify a [field
+        /// mask](https://developers.google.com/sheets/api/guides/field-masks) listing your desired fields using the
+        /// `fields` URL parameter in HTTP * Set the includeGridData URL parameter to true. If a field mask is set, the
+        /// `includeGridData` parameter is ignored For large spreadsheets, as a best practice, retrieve only the
+        /// specific spreadsheet fields that you want. To retrieve only subsets of spreadsheet data, use the ranges URL
+        /// parameter. Ranges are specified using [A1 notation](/sheets/api/guides/concepts#cell). You can define a
+        /// single cell (for example, `A1`) or multiple cells (for example, `A1:D5`). You can also get cells from other
+        /// sheets within the same spreadsheet (for example, `Sheet2!A1:C4`) or retrieve multiple ranges at once (for
+        /// example, `?ranges=A1:D5&amp;amp;ranges=Sheet2!A1:C4`). Limiting the range returns only the portions of the
+        /// spreadsheet that intersect the requested ranges.
         /// </summary>
         public class GetRequest : SheetsBaseServiceRequest<Google.Apis.Sheets.v4.Data.Spreadsheet>
         {
@@ -1960,29 +1994,31 @@ namespace Google.Apis.Sheets.v4
         /// <summary>
         /// Returns the spreadsheet at the given ID. The caller must specify the spreadsheet ID. This method differs
         /// from GetSpreadsheet in that it allows selecting which subsets of spreadsheet data to return by specifying a
-        /// dataFilters parameter. Multiple DataFilters can be specified. Specifying one or more data filters will
-        /// return the portions of the spreadsheet that intersect ranges matched by any of the filters. By default, data
-        /// within grids will not be returned. You can include grid data one of two ways: * Specify a field mask listing
-        /// your desired fields using the `fields` URL parameter in HTTP * Set the includeGridData parameter to true. If
-        /// a field mask is set, the `includeGridData` parameter is ignored For large spreadsheets, it is recommended to
-        /// retrieve only the specific fields of the spreadsheet that you want.
+        /// dataFilters parameter. Multiple DataFilters can be specified. Specifying one or more data filters returns
+        /// the portions of the spreadsheet that intersect ranges matched by any of the filters. By default, data within
+        /// grids is not returned. You can include grid data one of 2 ways: * Specify a [field
+        /// mask](https://developers.google.com/sheets/api/guides/field-masks) listing your desired fields using the
+        /// `fields` URL parameter in HTTP * Set the includeGridData parameter to true. If a field mask is set, the
+        /// `includeGridData` parameter is ignored For large spreadsheets, as a best practice, retrieve only the
+        /// specific spreadsheet fields that you want.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="spreadsheetId">The spreadsheet to request.</param>
         public virtual GetByDataFilterRequest GetByDataFilter(Google.Apis.Sheets.v4.Data.GetSpreadsheetByDataFilterRequest body, string spreadsheetId)
         {
-            return new GetByDataFilterRequest(service, body, spreadsheetId);
+            return new GetByDataFilterRequest(this.service, body, spreadsheetId);
         }
 
         /// <summary>
         /// Returns the spreadsheet at the given ID. The caller must specify the spreadsheet ID. This method differs
         /// from GetSpreadsheet in that it allows selecting which subsets of spreadsheet data to return by specifying a
-        /// dataFilters parameter. Multiple DataFilters can be specified. Specifying one or more data filters will
-        /// return the portions of the spreadsheet that intersect ranges matched by any of the filters. By default, data
-        /// within grids will not be returned. You can include grid data one of two ways: * Specify a field mask listing
-        /// your desired fields using the `fields` URL parameter in HTTP * Set the includeGridData parameter to true. If
-        /// a field mask is set, the `includeGridData` parameter is ignored For large spreadsheets, it is recommended to
-        /// retrieve only the specific fields of the spreadsheet that you want.
+        /// dataFilters parameter. Multiple DataFilters can be specified. Specifying one or more data filters returns
+        /// the portions of the spreadsheet that intersect ranges matched by any of the filters. By default, data within
+        /// grids is not returned. You can include grid data one of 2 ways: * Specify a [field
+        /// mask](https://developers.google.com/sheets/api/guides/field-masks) listing your desired fields using the
+        /// `fields` URL parameter in HTTP * Set the includeGridData parameter to true. If a field mask is set, the
+        /// `includeGridData` parameter is ignored For large spreadsheets, as a best practice, retrieve only the
+        /// specific spreadsheet fields that you want.
         /// </summary>
         public class GetByDataFilterRequest : SheetsBaseServiceRequest<Google.Apis.Sheets.v4.Data.Spreadsheet>
         {
@@ -2102,7 +2138,7 @@ namespace Google.Apis.Sheets.v4.Data
     /// <summary>
     /// Adds a data source. After the data source is added successfully, an associated DATA_SOURCE sheet is created and
     /// an execution is triggered to refresh the sheet to read data from the data source. The request requires an
-    /// additional `bigquery.readonly` OAuth scope.
+    /// additional `bigquery.readonly` OAuth scope if you are adding a BigQuery data source.
     /// </summary>
     public class AddDataSourceRequest : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2406,7 +2442,7 @@ namespace Google.Apis.Sheets.v4.Data
     /// <summary>A banded (alternating colors) range in a sheet.</summary>
     public class BandedRange : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The id of the banded range.</summary>
+        /// <summary>The ID of the banded range.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("bandedRangeId")]
         public virtual System.Nullable<int> BandedRangeId { get; set; }
 
@@ -2443,7 +2479,7 @@ namespace Google.Apis.Sheets.v4.Data
     /// </summary>
     public class BandingProperties : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The first color that is alternating. (Required)</summary>
+        /// <summary>The first color that is alternating. (Required) Deprecated: Use first_band_color_style.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("firstBandColor")]
         public virtual Color FirstBandColor { get; set; }
 
@@ -2456,7 +2492,8 @@ namespace Google.Apis.Sheets.v4.Data
 
         /// <summary>
         /// The color of the last row or column. If this field is not set, the last row or column is filled with either
-        /// first_band_color or second_band_color, depending on the color of the previous row or column.
+        /// first_band_color or second_band_color, depending on the color of the previous row or column. Deprecated: Use
+        /// footer_color_style.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("footerColor")]
         public virtual Color FooterColor { get; set; }
@@ -2473,7 +2510,7 @@ namespace Google.Apis.Sheets.v4.Data
         /// The color of the first row or column. If this field is set, the first row or column is filled with this
         /// color and the colors alternate between first_band_color and second_band_color starting from the second row
         /// or column. Otherwise, the first row or column is filled with first_band_color and the colors proceed to
-        /// alternate as they normally would.
+        /// alternate as they normally would. Deprecated: Use header_color_style.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("headerColor")]
         public virtual Color HeaderColor { get; set; }
@@ -2487,7 +2524,7 @@ namespace Google.Apis.Sheets.v4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("headerColorStyle")]
         public virtual ColorStyle HeaderColorStyle { get; set; }
 
-        /// <summary>The second color that is alternating. (Required)</summary>
+        /// <summary>The second color that is alternating. (Required) Deprecated: Use second_band_color_style.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("secondBandColor")]
         public virtual Color SecondBandColor { get; set; }
 
@@ -2515,6 +2552,7 @@ namespace Google.Apis.Sheets.v4.Data
 
         /// <summary>
         /// Color to be used, in case baseline value represents a negative change for key value. This field is optional.
+        /// Deprecated: Use negative_color_style.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("negativeColor")]
         public virtual Color NegativeColor { get; set; }
@@ -2535,6 +2573,7 @@ namespace Google.Apis.Sheets.v4.Data
 
         /// <summary>
         /// Color to be used, in case baseline value represents a positive change for key value. This field is optional.
+        /// Deprecated: Use positive_color_style.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("positiveColor")]
         public virtual Color PositiveColor { get; set; }
@@ -2614,7 +2653,7 @@ namespace Google.Apis.Sheets.v4.Data
     {
         /// <summary>
         /// The color for elements (such as bars, lines, and points) associated with this series. If empty, a default
-        /// color is used.
+        /// color is used. Deprecated: Use color_style.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("color")]
         public virtual Color Color { get; set; }
@@ -2784,7 +2823,9 @@ namespace Google.Apis.Sheets.v4.Data
     /// <summary>Style override settings for a single series data point.</summary>
     public class BasicSeriesDataPointStyleOverride : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Color of the series data point. If empty, the series default is used.</summary>
+        /// <summary>
+        /// Color of the series data point. If empty, the series default is used. Deprecated: Use color_style.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("color")]
         public virtual Color Color { get; set; }
 
@@ -2795,7 +2836,7 @@ namespace Google.Apis.Sheets.v4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("colorStyle")]
         public virtual ColorStyle ColorStyle { get; set; }
 
-        /// <summary>Zero based index of the series data point.</summary>
+        /// <summary>The zero-based index of the series data point.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("index")]
         public virtual System.Nullable<int> Index { get; set; }
 
@@ -2825,8 +2866,9 @@ namespace Google.Apis.Sheets.v4.Data
     public class BatchClearValuesByDataFilterResponse : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The ranges that were cleared, in A1 notation. If the requests are for an unbounded range or a ranger larger
-        /// than the bounds of the sheet, this is the actual ranges that were cleared, bounded to the sheet's limits.
+        /// The ranges that were cleared, in [A1 notation](/sheets/api/guides/concepts#cell). If the requests are for an
+        /// unbounded range or a ranger larger than the bounds of the sheet, this is the actual ranges that were
+        /// cleared, bounded to the sheet's limits.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("clearedRanges")]
         public virtual System.Collections.Generic.IList<string> ClearedRanges { get; set; }
@@ -2842,7 +2884,7 @@ namespace Google.Apis.Sheets.v4.Data
     /// <summary>The request for clearing more than one range of values in a spreadsheet.</summary>
     public class BatchClearValuesRequest : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The ranges to clear, in A1 or R1C1 notation.</summary>
+        /// <summary>The ranges to clear, in [A1 notation or R1C1 notation](/sheets/api/guides/concepts#cell).</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("ranges")]
         public virtual System.Collections.Generic.IList<string> Ranges { get; set; }
 
@@ -3140,8 +3182,8 @@ namespace Google.Apis.Sheets.v4.Data
     public class BigQueryDataSourceSpec : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The ID of a BigQuery enabled GCP project with a billing account attached. For any queries executed against
-        /// the data source, the project is charged.
+        /// The ID of a BigQuery enabled Google Cloud project with a billing account attached. For any queries executed
+        /// against the data source, the project is charged.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
         public virtual string ProjectId { get; set; }
@@ -3171,7 +3213,7 @@ namespace Google.Apis.Sheets.v4.Data
 
     /// <summary>
     /// Specifies a BigQuery table definition. Only [native tables](https://cloud.google.com/bigquery/docs/tables-intro)
-    /// is allowed.
+    /// are allowed.
     /// </summary>
     public class BigQueryTableSpec : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3223,7 +3265,7 @@ namespace Google.Apis.Sheets.v4.Data
 
         /// <summary>
         /// The format to apply. Conditional formatting can only apply a subset of formatting: bold, italic,
-        /// strikethrough, foreground color &amp;amp; background color.
+        /// strikethrough, foreground color and, background color.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("format")]
         public virtual CellFormat Format { get; set; }
@@ -3235,7 +3277,7 @@ namespace Google.Apis.Sheets.v4.Data
     /// <summary>A border along a cell.</summary>
     public class Border : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The color of the border.</summary>
+        /// <summary>The color of the border. Deprecated: Use color_style.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("color")]
         public virtual Color Color { get; set; }
 
@@ -3283,7 +3325,7 @@ namespace Google.Apis.Sheets.v4.Data
     /// <summary>A bubble chart.</summary>
     public class BubbleChartSpec : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The bubble border color.</summary>
+        /// <summary>The bubble border color. Deprecated: Use bubble_border_color_style.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("bubbleBorderColor")]
         public virtual Color BubbleBorderColor { get; set; }
 
@@ -3349,6 +3391,64 @@ namespace Google.Apis.Sheets.v4.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("series")]
         public virtual ChartData Series { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Cancels one or multiple refreshes of data source objects in the spreadsheet by the specified references. The
+    /// request requires an additional `bigquery.readonly` OAuth scope if you are cancelling a refresh on a BigQuery
+    /// data source.
+    /// </summary>
+    public class CancelDataSourceRefreshRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Reference to a DataSource. If specified, cancels all associated data source object refreshes for this data
+        /// source.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dataSourceId")]
+        public virtual string DataSourceId { get; set; }
+
+        /// <summary>
+        /// Cancels all existing data source object refreshes for all data sources in the spreadsheet.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("isAll")]
+        public virtual System.Nullable<bool> IsAll { get; set; }
+
+        /// <summary>References to data source objects whose refreshes are to be cancelled.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("references")]
+        public virtual DataSourceObjectReferences References { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The response from cancelling one or multiple data source object refreshes.</summary>
+    public class CancelDataSourceRefreshResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The cancellation statuses of refreshes of all data source objects specified in the request. If is_all is
+        /// specified, the field contains only those in failure status. Refreshing and canceling refresh the same data
+        /// source object is also not allowed in the same `batchUpdate`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("statuses")]
+        public virtual System.Collections.Generic.IList<CancelDataSourceRefreshStatus> Statuses { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The status of cancelling a single data source object refresh.</summary>
+    public class CancelDataSourceRefreshStatus : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Reference to the data source object whose refresh is being cancelled.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("reference")]
+        public virtual DataSourceObjectReference Reference { get; set; }
+
+        /// <summary>The cancellation status.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("refreshCancellationStatus")]
+        public virtual RefreshCancellationStatus RefreshCancellationStatus { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3521,8 +3621,8 @@ namespace Google.Apis.Sheets.v4.Data
         public virtual CellFormat UserEnteredFormat { get; set; }
 
         /// <summary>
-        /// The value the user entered in the cell. e.g, `1234`, `'Hello'`, or `=NOW()` Note: Dates, Times and DateTimes
-        /// are represented as doubles in serial number format.
+        /// The value the user entered in the cell. e.g., `1234`, `'Hello'`, or `=NOW()` Note: Dates, Times and
+        /// DateTimes are represented as doubles in serial number format.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("userEnteredValue")]
         public virtual ExtendedValue UserEnteredValue { get; set; }
@@ -3534,7 +3634,7 @@ namespace Google.Apis.Sheets.v4.Data
     /// <summary>The format of a cell.</summary>
     public class CellFormat : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The background color of the cell.</summary>
+        /// <summary>The background color of the cell. Deprecated: Use background_color_style.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("backgroundColor")]
         public virtual Color BackgroundColor { get; set; }
 
@@ -3552,7 +3652,7 @@ namespace Google.Apis.Sheets.v4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("horizontalAlignment")]
         public virtual string HorizontalAlignment { get; set; }
 
-        /// <summary>How a hyperlink, if it exists, should be displayed in the cell.</summary>
+        /// <summary>If one exists, how a hyperlink should be displayed in the cell.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("hyperlinkDisplayType")]
         public virtual string HyperlinkDisplayType { get; set; }
 
@@ -3569,14 +3669,14 @@ namespace Google.Apis.Sheets.v4.Data
         public virtual string TextDirection { get; set; }
 
         /// <summary>
-        /// The format of the text in the cell (unless overridden by a format run). Setting a cell-level link here will
-        /// clear the cell's existing links. Setting the link field in a TextFormatRun will take precedence over the
+        /// The format of the text in the cell (unless overridden by a format run). Setting a cell-level link here
+        /// clears the cell's existing links. Setting the link field in a TextFormatRun takes precedence over the
         /// cell-level link.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("textFormat")]
         public virtual TextFormat TextFormat { get; set; }
 
-        /// <summary>The rotation applied to text in a cell</summary>
+        /// <summary>The rotation applied to text in the cell.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("textRotation")]
         public virtual TextRotation TextRotation { get; set; }
 
@@ -3744,7 +3844,10 @@ namespace Google.Apis.Sheets.v4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("altText")]
         public virtual string AltText { get; set; }
 
-        /// <summary>The background color of the entire chart. Not applicable to Org charts.</summary>
+        /// <summary>
+        /// The background color of the entire chart. Not applicable to Org charts. Deprecated: Use
+        /// background_color_style.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("backgroundColor")]
         public virtual Color BackgroundColor { get; set; }
 
@@ -3895,15 +3998,15 @@ namespace Google.Apis.Sheets.v4.Data
     }
 
     /// <summary>
-    /// Represents a color in the RGBA color space. This representation is designed for simplicity of conversion to/from
-    /// color representations in various languages over compactness. For example, the fields of this representation can
-    /// be trivially provided to the constructor of `java.awt.Color` in Java; it can also be trivially provided to
+    /// Represents a color in the RGBA color space. This representation is designed for simplicity of conversion to and
+    /// from color representations in various languages over compactness. For example, the fields of this representation
+    /// can be trivially provided to the constructor of `java.awt.Color` in Java; it can also be trivially provided to
     /// UIColor's `+colorWithRed:green:blue:alpha` method in iOS; and, with just a little work, it can be easily
-    /// formatted into a CSS `rgba()` string in JavaScript. This reference page doesn't carry information about the
-    /// absolute color space that should be used to interpret the RGB value (e.g. sRGB, Adobe RGB, DCI-P3, BT.2020,
-    /// etc.). By default, applications should assume the sRGB color space. When color equality needs to be decided,
+    /// formatted into a CSS `rgba()` string in JavaScript. This reference page doesn't have information about the
+    /// absolute color space that should be used to interpret the RGB value—for example, sRGB, Adobe RGB, DCI-P3, and
+    /// BT.2020. By default, applications should assume the sRGB color space. When color equality needs to be decided,
     /// implementations, unless documented otherwise, treat two colors as equal if all their red, green, blue, and alpha
-    /// values each differ by at most 1e-5. Example (Java): import com.google.type.Color; // ... public static
+    /// values each differ by at most `1e-5`. Example (Java): import com.google.type.Color; // ... public static
     /// java.awt.Color fromProto(Color protocolor) { float alpha = protocolor.hasAlpha() ?
     /// protocolor.getAlpha().getValue() : 1.0; return new java.awt.Color( protocolor.getRed(), protocolor.getGreen(),
     /// protocolor.getBlue(), alpha); } public static Color toProto(java.awt.Color color) { float red = (float)
@@ -3961,7 +4064,10 @@ namespace Google.Apis.Sheets.v4.Data
     /// <summary>A color value.</summary>
     public class ColorStyle : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>RGB color.</summary>
+        /// <summary>
+        /// RGB color. The [`alpha`](/sheets/api/reference/rest/v4/spreadsheets/other#Color.FIELDS.alpha) value in the
+        /// [`Color`](/sheets/api/reference/rest/v4/spreadsheets/other#color) object isn't generally supported.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("rgbColor")]
         public virtual Color RgbColor { get; set; }
 
@@ -4115,9 +4221,44 @@ namespace Google.Apis.Sheets.v4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("errorMessage")]
         public virtual string ErrorMessage { get; set; }
 
+        private string _lastRefreshTimeRaw;
+
+        private object _lastRefreshTime;
+
         /// <summary>Gets the time the data last successfully refreshed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastRefreshTime")]
-        public virtual object LastRefreshTime { get; set; }
+        public virtual string LastRefreshTimeRaw
+        {
+            get => _lastRefreshTimeRaw;
+            set
+            {
+                _lastRefreshTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastRefreshTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastRefreshTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastRefreshTimeDateTimeOffset instead.")]
+        public virtual object LastRefreshTime
+        {
+            get => _lastRefreshTime;
+            set
+            {
+                _lastRefreshTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastRefreshTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastRefreshTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastRefreshTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastRefreshTimeRaw);
+            set => LastRefreshTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The state of the data execution.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
@@ -4370,7 +4511,7 @@ namespace Google.Apis.Sheets.v4.Data
     public class DataSourceRefreshMonthlySchedule : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Days of the month to refresh. Only 1-28 are supported, mapping to the 1st to the 28th day. At lesat one day
+        /// Days of the month to refresh. Only 1-28 are supported, mapping to the 1st to the 28th day. At least one day
         /// must be specified.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("daysOfMonth")]
@@ -4390,8 +4531,8 @@ namespace Google.Apis.Sheets.v4.Data
     /// <summary>
     /// Schedule for refreshing the data source. Data sources in the spreadsheet are refreshed within a time interval.
     /// You can specify the start time by clicking the Scheduled Refresh button in the Sheets editor, but the interval
-    /// is fixed at 4 hours. For example, if you specify a start time of 8am , the refresh will take place between 8am
-    /// and 12pm every day.
+    /// is fixed at 4 hours. For example, if you specify a start time of 8 AM , the refresh will take place between 8 AM
+    /// and 12 PM every day.
     /// </summary>
     public class DataSourceRefreshSchedule : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4484,6 +4625,10 @@ namespace Google.Apis.Sheets.v4.Data
         /// <summary>A BigQueryDataSourceSpec.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("bigQuery")]
         public virtual BigQueryDataSourceSpec BigQuery { get; set; }
+
+        /// <summary>A LookerDatasourceSpec.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("looker")]
+        public virtual LookerDataSourceSpec Looker { get; set; }
 
         /// <summary>The parameters of the data source, used when querying the data source.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("parameters")]
@@ -4685,7 +4830,7 @@ namespace Google.Apis.Sheets.v4.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Deletes the dimensions from the sheet.</summary>
+    /// <summary> Deletes the dimensions from the sheet.</summary>
     public class DeleteDimensionRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The dimensions to delete from the sheet.</summary>
@@ -4934,7 +5079,7 @@ namespace Google.Apis.Sheets.v4.Data
 
         /// <summary>
         /// Limits the selected developer metadata to that which has a matching DeveloperMetadata.visibility. If left
-        /// unspecified, all developer metadata visibile to the requesting project is considered.
+        /// unspecified, all developer metadata visible to the requesting project is considered.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("visibility")]
         public virtual string Visibility { get; set; }
@@ -5141,7 +5286,7 @@ namespace Google.Apis.Sheets.v4.Data
     /// <summary>A border along an embedded object.</summary>
     public class EmbeddedObjectBorder : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The color of the border.</summary>
+        /// <summary>The color of the border. Deprecated: Use color_style.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("color")]
         public virtual Color Color { get; set; }
 
@@ -5240,7 +5385,7 @@ namespace Google.Apis.Sheets.v4.Data
 
         /// <summary>
         /// The background fill color to filter by; only cells with this fill color are shown. Mutually exclusive with
-        /// visible_foreground_color.
+        /// visible_foreground_color. Deprecated: Use visible_background_color_style.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("visibleBackgroundColor")]
         public virtual Color VisibleBackgroundColor { get; set; }
@@ -5255,7 +5400,7 @@ namespace Google.Apis.Sheets.v4.Data
 
         /// <summary>
         /// The foreground color to filter by; only cells with this foreground color are shown. Mutually exclusive with
-        /// visible_background_color.
+        /// visible_background_color. Deprecated: Use visible_foreground_color_style.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("visibleForegroundColor")]
         public virtual Color VisibleForegroundColor { get; set; }
@@ -5275,7 +5420,7 @@ namespace Google.Apis.Sheets.v4.Data
     /// <summary>The filter criteria associated with a specific column.</summary>
     public class FilterSpec : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The column index.</summary>
+        /// <summary>The zero-based column index.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("columnIndex")]
         public virtual System.Nullable<int> ColumnIndex { get; set; }
 
@@ -5547,13 +5692,13 @@ namespace Google.Apis.Sheets.v4.Data
     /// <summary>
     /// A range on a sheet. All indexes are zero-based. Indexes are half open, i.e. the start index is inclusive and the
     /// end index is exclusive -- [start_index, end_index). Missing indexes indicate the range is unbounded on that
-    /// side. For example, if `"Sheet1"` is sheet ID 0, then: `Sheet1!A1:A1 == sheet_id: 0, start_row_index: 0,
-    /// end_row_index: 1, start_column_index: 0, end_column_index: 1` `Sheet1!A3:B4 == sheet_id: 0, start_row_index: 2,
-    /// end_row_index: 4, start_column_index: 0, end_column_index: 2` `Sheet1!A:B == sheet_id: 0, start_column_index: 0,
-    /// end_column_index: 2` `Sheet1!A5:B == sheet_id: 0, start_row_index: 4, start_column_index: 0, end_column_index:
-    /// 2` `Sheet1 == sheet_id:0` The start index must always be less than or equal to the end index. If the start index
-    /// equals the end index, then the range is empty. Empty ranges are typically not meaningful and are usually
-    /// rendered in the UI as `#REF!`.
+    /// side. For example, if `"Sheet1"` is sheet ID 123456, then: `Sheet1!A1:A1 == sheet_id: 123456, start_row_index:
+    /// 0, end_row_index: 1, start_column_index: 0, end_column_index: 1` `Sheet1!A3:B4 == sheet_id: 123456,
+    /// start_row_index: 2, end_row_index: 4, start_column_index: 0, end_column_index: 2` `Sheet1!A:B == sheet_id:
+    /// 123456, start_column_index: 0, end_column_index: 2` `Sheet1!A5:B == sheet_id: 123456, start_row_index: 4,
+    /// start_column_index: 0, end_column_index: 2` `Sheet1 == sheet_id: 123456` The start index must always be less
+    /// than or equal to the end index. If the start index equals the end index, then the range is empty. Empty ranges
+    /// are typically not meaningful and are usually rendered in the UI as `#REF!`.
     /// </summary>
     public class GridRange : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -5665,7 +5810,10 @@ namespace Google.Apis.Sheets.v4.Data
     /// <summary>A histogram series containing the series color and data.</summary>
     public class HistogramSeries : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The color of the column representing this series in each bucket. This field is optional.</summary>
+        /// <summary>
+        /// The color of the column representing this series in each bucket. This field is optional. Deprecated: Use
+        /// bar_color_style.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("barColor")]
         public virtual Color BarColor { get; set; }
 
@@ -5731,7 +5879,7 @@ namespace Google.Apis.Sheets.v4.Data
     /// </summary>
     public class InterpolationPoint : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The color this interpolation point should use.</summary>
+        /// <summary>The color this interpolation point should use. Deprecated: Use color_style.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("color")]
         public virtual Color Color { get; set; }
 
@@ -5760,19 +5908,85 @@ namespace Google.Apis.Sheets.v4.Data
     /// </summary>
     public class Interval : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>
         /// Optional. Exclusive end of the interval. If specified, a Timestamp matching this interval will have to be
         /// before the end.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
 
         /// <summary>
         /// Optional. Inclusive start of the interval. If specified, a Timestamp matching this interval will have to be
         /// the same or after the start.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5837,6 +6051,25 @@ namespace Google.Apis.Sheets.v4.Data
         /// <summary>The link identifier.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("uri")]
         public virtual string Uri { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The specification of a Looker data source.</summary>
+    public class LookerDataSourceSpec : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Name of a Looker model explore.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("explore")]
+        public virtual string Explore { get; set; }
+
+        /// <summary>A Looker instance URL.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("instanceUri")]
+        public virtual string InstanceUri { get; set; }
+
+        /// <summary>Name of a Looker model.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("model")]
+        public virtual string Model { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6008,7 +6241,7 @@ namespace Google.Apis.Sheets.v4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("labels")]
         public virtual ChartData Labels { get; set; }
 
-        /// <summary>The color of the org chart nodes.</summary>
+        /// <summary>The color of the org chart nodes. Deprecated: Use node_color_style.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nodeColor")]
         public virtual Color NodeColor { get; set; }
 
@@ -6027,7 +6260,7 @@ namespace Google.Apis.Sheets.v4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("parentLabels")]
         public virtual ChartData ParentLabels { get; set; }
 
-        /// <summary>The color of the selected org chart nodes.</summary>
+        /// <summary>The color of the selected org chart nodes. Deprecated: Use selected_node_color_style.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("selectedNodeColor")]
         public virtual Color SelectedNodeColor { get; set; }
 
@@ -6189,7 +6422,7 @@ namespace Google.Apis.Sheets.v4.Data
     /// <summary>The pivot table filter criteria associated with a specific source column offset.</summary>
     public class PivotFilterSpec : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The column offset of the source range.</summary>
+        /// <summary>The zero-based column offset of the source range.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("columnOffsetIndex")]
         public virtual System.Nullable<int> ColumnOffsetIndex { get; set; }
 
@@ -6520,7 +6753,7 @@ namespace Google.Apis.Sheets.v4.Data
         /// <summary>
         /// True if this protected range will show a warning when editing. Warning-based protection means that every
         /// user can edit data in the protected range, except editing will prompt a warning asking the user to confirm
-        /// the edit. When writing: if this field is true, then editors is ignored. Additionally, if this field is
+        /// the edit. When writing: if this field is true, then editors are ignored. Additionally, if this field is
         /// changed from true to false and the `editors` field is not set (nor included in the field mask), then the
         /// editors will be set to all the editors in the document.
         /// </summary>
@@ -6537,6 +6770,24 @@ namespace Google.Apis.Sheets.v4.Data
         /// <summary>The range to randomize.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("range")]
         public virtual GridRange Range { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// The status of a refresh cancellation. You can send a cancel request to explicitly cancel one or multiple data
+    /// source object refreshes.
+    /// </summary>
+    public class RefreshCancellationStatus : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The error code.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("errorCode")]
+        public virtual string ErrorCode { get; set; }
+
+        /// <summary>The state of a call to cancel a refresh in Sheets.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6559,9 +6810,9 @@ namespace Google.Apis.Sheets.v4.Data
 
     /// <summary>
     /// Refreshes one or multiple data source objects in the spreadsheet by the specified references. The request
-    /// requires an additional `bigquery.readonly` OAuth scope. If there are multiple refresh requests referencing the
-    /// same data source objects in one batch, only the last refresh request is processed, and all those requests will
-    /// have the same response accordingly.
+    /// requires an additional `bigquery.readonly` OAuth scope if you are refreshing a BigQuery data source. If there
+    /// are multiple refresh requests referencing the same data source objects in one batch, only the last refresh
+    /// request is processed, and all those requests will have the same response accordingly.
     /// </summary>
     public class RefreshDataSourceRequest : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -6694,6 +6945,10 @@ namespace Google.Apis.Sheets.v4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("autoResizeDimensions")]
         public virtual AutoResizeDimensionsRequest AutoResizeDimensions { get; set; }
 
+        /// <summary>Cancels refreshes of one or multiple data sources and associated dbobjects.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cancelDataSourceRefresh")]
+        public virtual CancelDataSourceRefreshRequest CancelDataSourceRefresh { get; set; }
+
         /// <summary>Clears the basic filter on a sheet.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("clearBasicFilter")]
         public virtual ClearBasicFilterRequest ClearBasicFilter { get; set; }
@@ -6798,7 +7053,7 @@ namespace Google.Apis.Sheets.v4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("randomizeRange")]
         public virtual RandomizeRangeRequest RandomizeRange { get; set; }
 
-        /// <summary>Refreshs one or multiple data sources and associated dbobjects.</summary>
+        /// <summary>Refreshes one or multiple data sources and associated dbobjects.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("refreshDataSource")]
         public virtual RefreshDataSourceRequest RefreshDataSource { get; set; }
 
@@ -6940,6 +7195,10 @@ namespace Google.Apis.Sheets.v4.Data
         /// <summary>A reply from adding a slicer.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("addSlicer")]
         public virtual AddSlicerResponse AddSlicer { get; set; }
+
+        /// <summary>A reply from cancelling data source object refreshes.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cancelDataSourceRefresh")]
+        public virtual CancelDataSourceRefreshResponse CancelDataSourceRefresh { get; set; }
 
         /// <summary>A reply from creating a developer metadata entry.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createDeveloperMetadata")]
@@ -7110,6 +7369,10 @@ namespace Google.Apis.Sheets.v4.Data
     /// </summary>
     public class SetDataValidationRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Optional. If true, the data validation rule will be applied to the filtered rows as well.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("filteredRowsIncluded")]
+        public virtual System.Nullable<bool> FilteredRowsIncluded { get; set; }
+
         /// <summary>The range the data validation rule should apply to.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("range")]
         public virtual GridRange Range { get; set; }
@@ -7218,10 +7481,10 @@ namespace Google.Apis.Sheets.v4.Data
         /// <summary>
         /// The index of the sheet within the spreadsheet. When adding or updating sheet properties, if this field is
         /// excluded then the sheet is added or moved to the end of the sheet list. When updating sheet indices or
-        /// inserting sheets, movement is considered in "before the move" indexes. For example, if there were 3 sheets
-        /// (S1, S2, S3) in order to move S1 ahead of S2 the index would have to be set to 2. A sheet index update
-        /// request is ignored if the requested index is identical to the sheets current index or if the requested new
-        /// index is equal to the current sheet index + 1.
+        /// inserting sheets, movement is considered in "before the move" indexes. For example, if there were three
+        /// sheets (S1, S2, S3) in order to move S1 ahead of S2 the index would have to be set to 2. A sheet index
+        /// update request is ignored if the requested index is identical to the sheets current index or if the
+        /// requested new index is equal to the current sheet index + 1.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("index")]
         public virtual System.Nullable<int> Index { get; set; }
@@ -7238,7 +7501,7 @@ namespace Google.Apis.Sheets.v4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("sheetType")]
         public virtual string SheetType { get; set; }
 
-        /// <summary>The color of the tab in the UI.</summary>
+        /// <summary>The color of the tab in the UI. Deprecated: Use tab_color_style.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("tabColor")]
         public virtual Color TabColor { get; set; }
 
@@ -7283,7 +7546,7 @@ namespace Google.Apis.Sheets.v4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("applyToPivotTables")]
         public virtual System.Nullable<bool> ApplyToPivotTables { get; set; }
 
-        /// <summary>The background color of the slicer.</summary>
+        /// <summary>The background color of the slicer. Deprecated: Use background_color_style.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("backgroundColor")]
         public virtual Color BackgroundColor { get; set; }
 
@@ -7293,7 +7556,7 @@ namespace Google.Apis.Sheets.v4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("backgroundColorStyle")]
         public virtual ColorStyle BackgroundColorStyle { get; set; }
 
-        /// <summary>The column index in the data table on which the filter is applied to.</summary>
+        /// <summary>The zero-based column index in the data table on which the filter is applied to.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("columnIndex")]
         public virtual System.Nullable<int> ColumnIndex { get; set; }
 
@@ -7344,7 +7607,7 @@ namespace Google.Apis.Sheets.v4.Data
     {
         /// <summary>
         /// The background fill color to sort by; cells with this fill color are sorted to the top. Mutually exclusive
-        /// with foreground_color.
+        /// with foreground_color. Deprecated: Use background_color_style.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("backgroundColor")]
         public virtual Color BackgroundColor { get; set; }
@@ -7367,7 +7630,7 @@ namespace Google.Apis.Sheets.v4.Data
 
         /// <summary>
         /// The foreground color to sort by; cells with this foreground color are sorted to the top. Mutually exclusive
-        /// with background_color.
+        /// with background_color. Deprecated: Use foreground_color_style.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("foregroundColor")]
         public virtual Color ForegroundColor { get; set; }
@@ -7464,6 +7727,14 @@ namespace Google.Apis.Sheets.v4.Data
         public virtual CellFormat DefaultFormat { get; set; }
 
         /// <summary>
+        /// Whether to allow external URL access for image and import functions. Read only when true. When false, you
+        /// can set to true. This value will be bypassed and always return true if the admin has enabled the
+        /// [allowlisting feature](https://support.google.com/a?p=url_allowlist).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("importFunctionsExternalUrlAccessAllowed")]
+        public virtual System.Nullable<bool> ImportFunctionsExternalUrlAccessAllowed { get; set; }
+
+        /// <summary>
         /// Determines whether and how circular references are resolved with iterative calculation. Absence of this
         /// field means that circular references result in calculation errors.
         /// </summary>
@@ -7527,7 +7798,7 @@ namespace Google.Apis.Sheets.v4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("fontSize")]
         public virtual System.Nullable<int> FontSize { get; set; }
 
-        /// <summary>The foreground color of the text.</summary>
+        /// <summary>The foreground color of the text. Deprecated: Use foreground_color_style.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("foregroundColor")]
         public virtual Color ForegroundColor { get; set; }
 
@@ -7572,7 +7843,7 @@ namespace Google.Apis.Sheets.v4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("format")]
         public virtual TextFormat Format { get; set; }
 
-        /// <summary>The character index where this run starts.</summary>
+        /// <summary>The zero-based character index where this run starts, in UTF-16 code units.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startIndex")]
         public virtual System.Nullable<int> StartIndex { get; set; }
 
@@ -7655,23 +7926,26 @@ namespace Google.Apis.Sheets.v4.Data
     public class TimeOfDay : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for
-        /// scenarios like business closing time.
+        /// Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or
+        /// equal to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("hours")]
         public virtual System.Nullable<int> Hours { get; set; }
 
-        /// <summary>Minutes of hour of day. Must be from 0 to 59.</summary>
+        /// <summary>Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minutes")]
         public virtual System.Nullable<int> Minutes { get; set; }
 
-        /// <summary>Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.</summary>
+        /// <summary>
+        /// Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to
+        /// 999,999,999.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nanos")]
         public virtual System.Nullable<int> Nanos { get; set; }
 
         /// <summary>
-        /// Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows
-        /// leap-seconds.
+        /// Seconds of a minute. Must be greater than or equal to 0 and typically must be less than or equal to 59. An
+        /// API may allow the value 60 if it allows leap-seconds.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("seconds")]
         public virtual System.Nullable<int> Seconds { get; set; }
@@ -7685,7 +7959,7 @@ namespace Google.Apis.Sheets.v4.Data
     {
         /// <summary>
         /// The background color for cells with a color value greater than or equal to maxValue. Defaults to #109618 if
-        /// not specified.
+        /// not specified. Deprecated: Use max_value_color_style.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("maxValueColor")]
         public virtual Color MaxValueColor { get; set; }
@@ -7699,7 +7973,7 @@ namespace Google.Apis.Sheets.v4.Data
 
         /// <summary>
         /// The background color for cells with a color value at the midpoint between minValue and maxValue. Defaults to
-        /// #efe6dc if not specified.
+        /// #efe6dc if not specified. Deprecated: Use mid_value_color_style.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("midValueColor")]
         public virtual Color MidValueColor { get; set; }
@@ -7713,7 +7987,7 @@ namespace Google.Apis.Sheets.v4.Data
 
         /// <summary>
         /// The background color for cells with a color value less than or equal to minValue. Defaults to #dc3912 if not
-        /// specified.
+        /// specified. Deprecated: Use min_value_color_style.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minValueColor")]
         public virtual Color MinValueColor { get; set; }
@@ -7727,7 +8001,7 @@ namespace Google.Apis.Sheets.v4.Data
 
         /// <summary>
         /// The background color for cells that have no color data associated with them. Defaults to #000000 if not
-        /// specified.
+        /// specified. Deprecated: Use no_data_color_style.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("noDataColor")]
         public virtual Color NoDataColor { get; set; }
@@ -7766,7 +8040,7 @@ namespace Google.Apis.Sheets.v4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("colorScale")]
         public virtual TreemapChartColorScale ColorScale { get; set; }
 
-        /// <summary>The background color for header cells.</summary>
+        /// <summary>The background color for header cells. Deprecated: Use header_color_style.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("headerColor")]
         public virtual Color HeaderColor { get; set; }
 
@@ -8039,7 +8313,7 @@ namespace Google.Apis.Sheets.v4.Data
     /// <summary>
     /// Updates a data source. After the data source is updated successfully, an execution is triggered to refresh the
     /// associated DATA_SOURCE sheet to read data from the updated data source. The request requires an additional
-    /// `bigquery.readonly` OAuth scope.
+    /// `bigquery.readonly` OAuth scope if you are updating a BigQuery data source.
     /// </summary>
     public class UpdateDataSourceRequest : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -8356,7 +8630,9 @@ namespace Google.Apis.Sheets.v4.Data
         [Newtonsoft.Json.JsonPropertyAttribute("updatedData")]
         public virtual ValueRange UpdatedData { get; set; }
 
-        /// <summary>The range (in A1 notation) that updates were applied to.</summary>
+        /// <summary>
+        /// The range (in [A1 notation](/sheets/api/guides/concepts#cell)) that updates were applied to.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updatedRange")]
         public virtual string UpdatedRange { get; set; }
 
@@ -8417,9 +8693,10 @@ namespace Google.Apis.Sheets.v4.Data
         public virtual string MajorDimension { get; set; }
 
         /// <summary>
-        /// The range the values cover, in A1 notation. For output, this range indicates the entire requested range,
-        /// even though the values will exclude trailing rows and columns. When appending values, this field represents
-        /// the range to search for a table, after which values will be appended.
+        /// The range the values cover, in [A1 notation](/sheets/api/guides/concepts#cell). For output, this range
+        /// indicates the entire requested range, even though the values will exclude trailing rows and columns. When
+        /// appending values, this field represents the range to search for a table, after which values will be
+        /// appended.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("range")]
         public virtual string Range { get; set; }
@@ -8441,7 +8718,7 @@ namespace Google.Apis.Sheets.v4.Data
     /// <summary>Styles for a waterfall chart column.</summary>
     public class WaterfallChartColumnStyle : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The color of the column.</summary>
+        /// <summary>The color of the column. Deprecated: Use color_style.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("color")]
         public virtual Color Color { get; set; }
 
@@ -8472,7 +8749,7 @@ namespace Google.Apis.Sheets.v4.Data
         public virtual string Label { get; set; }
 
         /// <summary>
-        /// The 0-based index of a data point within the series. If data_is_subtotal is true, the data point at this
+        /// The zero-based index of a data point within the series. If data_is_subtotal is true, the data point at this
         /// index is the subtotal. Otherwise, the subtotal appears after the data point with this index. A series can
         /// have multiple subtotals at arbitrary indices, but subtotals do not affect the indices of the data points.
         /// For example, if a series has three data points, their indices will always be 0, 1, and 2, regardless of how

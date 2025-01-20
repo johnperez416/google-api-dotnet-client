@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ namespace Google.Apis.Games.v1
         /// <param name="initializer">The service initializer.</param>
         public GamesService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
+            Accesstokens = new AccesstokensResource(this);
             AchievementDefinitions = new AchievementDefinitionsResource(this);
             Achievements = new AchievementsResource(this);
             Applications = new ApplicationsResource(this);
@@ -41,10 +42,13 @@ namespace Google.Apis.Games.v1
             Leaderboards = new LeaderboardsResource(this);
             Metagame = new MetagameResource(this);
             Players = new PlayersResource(this);
+            Recall = new RecallResource(this);
             Revisions = new RevisionsResource(this);
             Scores = new ScoresResource(this);
             Snapshots = new SnapshotsResource(this);
             Stats = new StatsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://games.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://games.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -54,27 +58,23 @@ namespace Google.Apis.Games.v1
         public override string Name => "games";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://games.googleapis.com/";
-        #else
-            "https://games.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://games.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Google Play Game Services.</summary>
         public class Scope
         {
+            /// <summary>View and manage your Google Play Developer account</summary>
+            public static string Androidpublisher = "https://www.googleapis.com/auth/androidpublisher";
+
             /// <summary>See, create, and delete its own configuration data in your Google Drive</summary>
             public static string DriveAppdata = "https://www.googleapis.com/auth/drive.appdata";
 
@@ -85,12 +85,18 @@ namespace Google.Apis.Games.v1
         /// <summary>Available OAuth 2.0 scope constants for use with the Google Play Game Services.</summary>
         public static class ScopeConstants
         {
+            /// <summary>View and manage your Google Play Developer account</summary>
+            public const string Androidpublisher = "https://www.googleapis.com/auth/androidpublisher";
+
             /// <summary>See, create, and delete its own configuration data in your Google Drive</summary>
             public const string DriveAppdata = "https://www.googleapis.com/auth/drive.appdata";
 
             /// <summary>Create, edit, and delete your Google Play Games activity</summary>
             public const string Games = "https://www.googleapis.com/auth/games";
         }
+
+        /// <summary>Gets the Accesstokens resource.</summary>
+        public virtual AccesstokensResource Accesstokens { get; }
 
         /// <summary>Gets the AchievementDefinitions resource.</summary>
         public virtual AchievementDefinitionsResource AchievementDefinitions { get; }
@@ -112,6 +118,9 @@ namespace Google.Apis.Games.v1
 
         /// <summary>Gets the Players resource.</summary>
         public virtual PlayersResource Players { get; }
+
+        /// <summary>Gets the Recall resource.</summary>
+        public virtual RecallResource Recall { get; }
 
         /// <summary>Gets the Revisions resource.</summary>
         public virtual RevisionsResource Revisions { get; }
@@ -307,6 +316,165 @@ namespace Google.Apis.Games.v1
         }
     }
 
+    /// <summary>The "accesstokens" collection of methods.</summary>
+    public class AccesstokensResource
+    {
+        private const string Resource = "accesstokens";
+
+        /// <summary>The service which this resource belongs to.</summary>
+        private readonly Google.Apis.Services.IClientService service;
+
+        /// <summary>Constructs a new resource.</summary>
+        public AccesstokensResource(Google.Apis.Services.IClientService service)
+        {
+            this.service = service;
+        }
+
+        /// <summary>
+        /// Generates a Play Grouping API token for the PGS user identified by the attached credential.
+        /// </summary>
+        public virtual GeneratePlayGroupingApiTokenRequest GeneratePlayGroupingApiToken()
+        {
+            return new GeneratePlayGroupingApiTokenRequest(this.service);
+        }
+
+        /// <summary>
+        /// Generates a Play Grouping API token for the PGS user identified by the attached credential.
+        /// </summary>
+        public class GeneratePlayGroupingApiTokenRequest : GamesBaseServiceRequest<Google.Apis.Games.v1.Data.GeneratePlayGroupingApiTokenResponse>
+        {
+            /// <summary>Constructs a new GeneratePlayGroupingApiToken request.</summary>
+            public GeneratePlayGroupingApiTokenRequest(Google.Apis.Services.IClientService service) : base(service)
+            {
+                InitParameters();
+            }
+
+            /// <summary>Required. App package name to generate the token for (e.g. com.example.mygame).</summary>
+            [Google.Apis.Util.RequestParameterAttribute("packageName", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string PackageName { get; set; }
+
+            /// <summary>
+            /// Required. Persona to associate with the token. Persona is a developer-provided stable identifier of the
+            /// user. Must be deterministically generated (e.g. as a one-way hash) from the user account ID and user
+            /// profile ID (if the app has the concept), according to the developer's own user identity system.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("persona", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Persona { get; set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "generatePlayGroupingApiToken";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "games/v1/accesstokens/generatePlayGroupingApiToken";
+
+            /// <summary>Initializes GeneratePlayGroupingApiToken parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("packageName", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "packageName",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("persona", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "persona",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>
+        /// Generates a Play Grouping API token for the PGS user identified by the Recall session ID provided in the
+        /// request.
+        /// </summary>
+        public virtual GenerateRecallPlayGroupingApiTokenRequest GenerateRecallPlayGroupingApiToken()
+        {
+            return new GenerateRecallPlayGroupingApiTokenRequest(this.service);
+        }
+
+        /// <summary>
+        /// Generates a Play Grouping API token for the PGS user identified by the Recall session ID provided in the
+        /// request.
+        /// </summary>
+        public class GenerateRecallPlayGroupingApiTokenRequest : GamesBaseServiceRequest<Google.Apis.Games.v1.Data.GenerateRecallPlayGroupingApiTokenResponse>
+        {
+            /// <summary>Constructs a new GenerateRecallPlayGroupingApiToken request.</summary>
+            public GenerateRecallPlayGroupingApiTokenRequest(Google.Apis.Services.IClientService service) : base(service)
+            {
+                InitParameters();
+            }
+
+            /// <summary>Required. App package name to generate the token for (e.g. com.example.mygame).</summary>
+            [Google.Apis.Util.RequestParameterAttribute("packageName", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string PackageName { get; set; }
+
+            /// <summary>
+            /// Required. Persona to associate with the token. Persona is a developer-provided stable identifier of the
+            /// user. Must be deterministically generated (e.g. as a one-way hash) from the user account ID and user
+            /// profile ID (if the app has the concept), according to the developer's own user identity system.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("persona", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Persona { get; set; }
+
+            /// <summary>
+            /// Required. Opaque server-generated string that encodes all the necessary information to identify the PGS
+            /// player / Google user and application. See https://developer.android.com/games/pgs/recall/recall-setup on
+            /// how to integrate with Recall and get session ID.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("recallSessionId", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string RecallSessionId { get; set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "generateRecallPlayGroupingApiToken";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "games/v1/accesstokens/generateRecallPlayGroupingApiToken";
+
+            /// <summary>Initializes GenerateRecallPlayGroupingApiToken parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("packageName", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "packageName",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("persona", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "persona",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("recallSessionId", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "recallSessionId",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+    }
+
     /// <summary>The "achievementDefinitions" collection of methods.</summary>
     public class AchievementDefinitionsResource
     {
@@ -324,7 +492,7 @@ namespace Google.Apis.Games.v1
         /// <summary>Lists all the achievement definitions for your application.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>Lists all the achievement definitions for your application.</summary>
@@ -411,10 +579,10 @@ namespace Google.Apis.Games.v1
         /// Increments the steps of the achievement with the given ID for the currently authenticated player.
         /// </summary>
         /// <param name="achievementId">The ID of the achievement used by this method.</param>
-        /// <param name="stepsToIncrement">The number of steps to increment.</param>
+        /// <param name="stepsToIncrement">Required. The number of steps to increment.</param>
         public virtual IncrementRequest Increment(string achievementId, int stepsToIncrement)
         {
-            return new IncrementRequest(service, achievementId, stepsToIncrement);
+            return new IncrementRequest(this.service, achievementId, stepsToIncrement);
         }
 
         /// <summary>
@@ -434,7 +602,7 @@ namespace Google.Apis.Games.v1
             [Google.Apis.Util.RequestParameterAttribute("achievementId", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string AchievementId { get; private set; }
 
-            /// <summary>The number of steps to increment.</summary>
+            /// <summary>Required. The number of steps to increment.</summary>
             [Google.Apis.Util.RequestParameterAttribute("stepsToIncrement", Google.Apis.Util.RequestParameterType.Query)]
             public virtual int StepsToIncrement { get; private set; }
 
@@ -493,7 +661,7 @@ namespace Google.Apis.Games.v1
         /// </param>
         public virtual ListRequest List(string playerId)
         {
-            return new ListRequest(service, playerId);
+            return new ListRequest(this.service, playerId);
         }
 
         /// <summary>
@@ -620,7 +788,7 @@ namespace Google.Apis.Games.v1
         /// <param name="achievementId">The ID of the achievement used by this method.</param>
         public virtual RevealRequest Reveal(string achievementId)
         {
-            return new RevealRequest(service, achievementId);
+            return new RevealRequest(this.service, achievementId);
         }
 
         /// <summary>
@@ -669,10 +837,10 @@ namespace Google.Apis.Games.v1
         /// achievement is not modified.
         /// </summary>
         /// <param name="achievementId">The ID of the achievement used by this method.</param>
-        /// <param name="steps">The minimum value to set the steps to.</param>
+        /// <param name="steps">Required. The minimum value to set the steps to.</param>
         public virtual SetStepsAtLeastRequest SetStepsAtLeast(string achievementId, int steps)
         {
-            return new SetStepsAtLeastRequest(service, achievementId, steps);
+            return new SetStepsAtLeastRequest(this.service, achievementId, steps);
         }
 
         /// <summary>
@@ -694,7 +862,7 @@ namespace Google.Apis.Games.v1
             [Google.Apis.Util.RequestParameterAttribute("achievementId", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string AchievementId { get; private set; }
 
-            /// <summary>The minimum value to set the steps to.</summary>
+            /// <summary>Required. The minimum value to set the steps to.</summary>
             [Google.Apis.Util.RequestParameterAttribute("steps", Google.Apis.Util.RequestParameterType.Query)]
             public virtual int Steps { get; private set; }
 
@@ -734,7 +902,7 @@ namespace Google.Apis.Games.v1
         /// <param name="achievementId">The ID of the achievement used by this method.</param>
         public virtual UnlockRequest Unlock(string achievementId)
         {
-            return new UnlockRequest(service, achievementId);
+            return new UnlockRequest(this.service, achievementId);
         }
 
         /// <summary>Unlocks this achievement for the currently authenticated player.</summary>
@@ -779,7 +947,7 @@ namespace Google.Apis.Games.v1
         /// <param name="body">The body of the request.</param>
         public virtual UpdateMultipleRequest UpdateMultiple(Google.Apis.Games.v1.Data.AchievementUpdateMultipleRequest body)
         {
-            return new UpdateMultipleRequest(service, body);
+            return new UpdateMultipleRequest(this.service, body);
         }
 
         /// <summary>Updates multiple achievements for the currently authenticated player.</summary>
@@ -836,7 +1004,7 @@ namespace Google.Apis.Games.v1
         /// <param name="applicationId">The application ID from the Google Play developer console.</param>
         public virtual GetRequest Get(string applicationId)
         {
-            return new GetRequest(service, applicationId);
+            return new GetRequest(this.service, applicationId);
         }
 
         /// <summary>
@@ -867,10 +1035,6 @@ namespace Google.Apis.Games.v1
             /// <summary>Restrict application details returned to the specific platform.</summary>
             public enum PlatformTypeEnum
             {
-                /// <summary>Default value, don't use.</summary>
-                [Google.Apis.Util.StringValueAttribute("PLATFORM_TYPE_UNSPECIFIED")]
-                PLATFORMTYPEUNSPECIFIED = 0,
-
                 /// <summary>Retrieve applications that can be played on Android.</summary>
                 [Google.Apis.Util.StringValueAttribute("ANDROID")]
                 ANDROID = 1,
@@ -927,7 +1091,7 @@ namespace Google.Apis.Games.v1
         /// <summary>Returns a URL for the requested end point type.</summary>
         public virtual GetEndPointRequest GetEndPoint()
         {
-            return new GetEndPointRequest(service);
+            return new GetEndPointRequest(this.service);
         }
 
         /// <summary>Returns a URL for the requested end point type.</summary>
@@ -950,10 +1114,6 @@ namespace Google.Apis.Games.v1
             /// <summary>Type of endpoint being requested.</summary>
             public enum EndPointTypeEnum
             {
-                /// <summary>Default value. This value is unused.</summary>
-                [Google.Apis.Util.StringValueAttribute("END_POINT_TYPE_UNSPECIFIED")]
-                ENDPOINTTYPEUNSPECIFIED = 0,
-
                 /// <summary>Request a URL to create a new profile.</summary>
                 [Google.Apis.Util.StringValueAttribute("PROFILE_CREATION")]
                 PROFILECREATION = 1,
@@ -998,7 +1158,7 @@ namespace Google.Apis.Games.v1
         /// <summary>Indicate that the currently authenticated user is playing your application.</summary>
         public virtual PlayedRequest Played()
         {
-            return new PlayedRequest(service);
+            return new PlayedRequest(this.service);
         }
 
         /// <summary>Indicate that the currently authenticated user is playing your application.</summary>
@@ -1033,7 +1193,7 @@ namespace Google.Apis.Games.v1
         /// <param name="applicationId">The application ID from the Google Play developer console.</param>
         public virtual VerifyRequest Verify(string applicationId)
         {
-            return new VerifyRequest(service, applicationId);
+            return new VerifyRequest(this.service, applicationId);
         }
 
         /// <summary>
@@ -1098,7 +1258,7 @@ namespace Google.Apis.Games.v1
         /// </summary>
         public virtual ListByPlayerRequest ListByPlayer()
         {
-            return new ListByPlayerRequest(service);
+            return new ListByPlayerRequest(this.service);
         }
 
         /// <summary>
@@ -1171,7 +1331,7 @@ namespace Google.Apis.Games.v1
         /// <summary>Returns a list of the event definitions in this application.</summary>
         public virtual ListDefinitionsRequest ListDefinitions()
         {
-            return new ListDefinitionsRequest(service);
+            return new ListDefinitionsRequest(this.service);
         }
 
         /// <summary>Returns a list of the event definitions in this application.</summary>
@@ -1245,7 +1405,7 @@ namespace Google.Apis.Games.v1
         /// <param name="body">The body of the request.</param>
         public virtual RecordRequest Record(Google.Apis.Games.v1.Data.EventRecordRequest body)
         {
-            return new RecordRequest(service, body);
+            return new RecordRequest(this.service, body);
         }
 
         /// <summary>
@@ -1314,7 +1474,7 @@ namespace Google.Apis.Games.v1
         /// <param name="leaderboardId">The ID of the leaderboard.</param>
         public virtual GetRequest Get(string leaderboardId)
         {
-            return new GetRequest(service, leaderboardId);
+            return new GetRequest(this.service, leaderboardId);
         }
 
         /// <summary>Retrieves the metadata of the leaderboard with the given ID.</summary>
@@ -1370,7 +1530,7 @@ namespace Google.Apis.Games.v1
         /// <summary>Lists all the leaderboard metadata for your application.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>Lists all the leaderboard metadata for your application.</summary>
@@ -1455,7 +1615,7 @@ namespace Google.Apis.Games.v1
         /// <summary>Return the metagame configuration data for the calling application.</summary>
         public virtual GetMetagameConfigRequest GetMetagameConfig()
         {
-            return new GetMetagameConfigRequest(service);
+            return new GetMetagameConfigRequest(this.service);
         }
 
         /// <summary>Return the metagame configuration data for the calling application.</summary>
@@ -1490,7 +1650,7 @@ namespace Google.Apis.Games.v1
         /// <param name="collection">The collection of categories for which data will be returned.</param>
         public virtual ListCategoriesByPlayerRequest ListCategoriesByPlayer(string playerId, ListCategoriesByPlayerRequest.CollectionEnum collection)
         {
-            return new ListCategoriesByPlayerRequest(service, playerId, collection);
+            return new ListCategoriesByPlayerRequest(this.service, playerId, collection);
         }
 
         /// <summary>List play data aggregated per category for the player corresponding to `playerId`.</summary>
@@ -1515,10 +1675,6 @@ namespace Google.Apis.Games.v1
             /// <summary>The collection of categories for which data will be returned.</summary>
             public enum CollectionEnum
             {
-                /// <summary>Default value. This value is unused.</summary>
-                [Google.Apis.Util.StringValueAttribute("COLLECTION_UNSPECIFIED")]
-                COLLECTIONUNSPECIFIED = 0,
-
                 /// <summary>Retrieve data for all categories. This is the default.</summary>
                 [Google.Apis.Util.StringValueAttribute("ALL")]
                 ALL = 1,
@@ -1619,7 +1775,7 @@ namespace Google.Apis.Games.v1
         /// </param>
         public virtual GetRequest Get(string playerId)
         {
-            return new GetRequest(service, playerId);
+            return new GetRequest(this.service, playerId);
         }
 
         /// <summary>
@@ -1642,6 +1798,13 @@ namespace Google.Apis.Games.v1
             /// <summary>The preferred language to use for strings returned by this method.</summary>
             [Google.Apis.Util.RequestParameterAttribute("language", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Language { get; set; }
+
+            /// <summary>
+            /// Consistency token of the player id. The call returns a 'not found' result when the token is present and
+            /// invalid. Empty value is ignored. See also GlobalPlayerIdConsistencyTokenProto
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("playerIdConsistencyToken", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string PlayerIdConsistencyToken { get; set; }
 
             /// <summary>Gets the method name.</summary>
             public override string MethodName => "get";
@@ -1672,6 +1835,99 @@ namespace Google.Apis.Games.v1
                     DefaultValue = null,
                     Pattern = null,
                 });
+                RequestParameters.Add("playerIdConsistencyToken", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "playerIdConsistencyToken",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>
+        /// Get the application player ids for the currently authenticated player across all requested games by the same
+        /// developer as the calling application. This will only return ids for players that actually have an id (scoped
+        /// or otherwise) with that game.
+        /// </summary>
+        public virtual GetMultipleApplicationPlayerIdsRequest GetMultipleApplicationPlayerIds()
+        {
+            return new GetMultipleApplicationPlayerIdsRequest(this.service);
+        }
+
+        /// <summary>
+        /// Get the application player ids for the currently authenticated player across all requested games by the same
+        /// developer as the calling application. This will only return ids for players that actually have an id (scoped
+        /// or otherwise) with that game.
+        /// </summary>
+        public class GetMultipleApplicationPlayerIdsRequest : GamesBaseServiceRequest<Google.Apis.Games.v1.Data.GetMultipleApplicationPlayerIdsResponse>
+        {
+            /// <summary>Constructs a new GetMultipleApplicationPlayerIds request.</summary>
+            public GetMultipleApplicationPlayerIdsRequest(Google.Apis.Services.IClientService service) : base(service)
+            {
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. The application IDs from the Google Play developer console for the games to return scoped ids
+            /// for.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("applicationIds", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual Google.Apis.Util.Repeatable<string> ApplicationIds { get; set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "getMultipleApplicationPlayerIds";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "games/v1/players/me/multipleApplicationPlayerIds";
+
+            /// <summary>Initializes GetMultipleApplicationPlayerIds parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("applicationIds", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "applicationIds",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>Retrieves scoped player identifiers for currently authenticated user.</summary>
+        public virtual GetScopedPlayerIdsRequest GetScopedPlayerIds()
+        {
+            return new GetScopedPlayerIdsRequest(this.service);
+        }
+
+        /// <summary>Retrieves scoped player identifiers for currently authenticated user.</summary>
+        public class GetScopedPlayerIdsRequest : GamesBaseServiceRequest<Google.Apis.Games.v1.Data.ScopedPlayerIds>
+        {
+            /// <summary>Constructs a new GetScopedPlayerIds request.</summary>
+            public GetScopedPlayerIdsRequest(Google.Apis.Services.IClientService service) : base(service)
+            {
+                InitParameters();
+            }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "getScopedPlayerIds";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "games/v1/players/me/scopedIds";
+
+            /// <summary>Initializes GetScopedPlayerIds parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
             }
         }
 
@@ -1679,7 +1935,7 @@ namespace Google.Apis.Games.v1
         /// <param name="collection">Collection of players being retrieved</param>
         public virtual ListRequest List(ListRequest.CollectionEnum collection)
         {
-            return new ListRequest(service, collection);
+            return new ListRequest(this.service, collection);
         }
 
         /// <summary>Get the collection of players for the currently authenticated user.</summary>
@@ -1780,6 +2036,338 @@ namespace Google.Apis.Games.v1
         }
     }
 
+    /// <summary>The "recall" collection of methods.</summary>
+    public class RecallResource
+    {
+        private const string Resource = "recall";
+
+        /// <summary>The service which this resource belongs to.</summary>
+        private readonly Google.Apis.Services.IClientService service;
+
+        /// <summary>Constructs a new resource.</summary>
+        public RecallResource(Google.Apis.Services.IClientService service)
+        {
+            this.service = service;
+        }
+
+        /// <summary>
+        /// Retrieve the Recall tokens from all requested games that is associated with the PGS Player encoded in the
+        /// provided recall session id. The API is only available for users that have an active PGS Player profile.
+        /// </summary>
+        /// <param name="sessionId">
+        /// Required. Opaque server-generated string that encodes all the necessary information to identify the PGS
+        /// player / Google user and application.
+        /// </param>
+        public virtual GamesPlayerTokensRequest GamesPlayerTokens(string sessionId)
+        {
+            return new GamesPlayerTokensRequest(this.service, sessionId);
+        }
+
+        /// <summary>
+        /// Retrieve the Recall tokens from all requested games that is associated with the PGS Player encoded in the
+        /// provided recall session id. The API is only available for users that have an active PGS Player profile.
+        /// </summary>
+        public class GamesPlayerTokensRequest : GamesBaseServiceRequest<Google.Apis.Games.v1.Data.RetrieveGamesPlayerTokensResponse>
+        {
+            /// <summary>Constructs a new GamesPlayerTokens request.</summary>
+            public GamesPlayerTokensRequest(Google.Apis.Services.IClientService service, string sessionId) : base(service)
+            {
+                SessionId = sessionId;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. Opaque server-generated string that encodes all the necessary information to identify the PGS
+            /// player / Google user and application.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("sessionId", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string SessionId { get; private set; }
+
+            /// <summary>
+            /// Required. The application IDs from the Google Play developer console for the games to return scoped ids
+            /// for.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("applicationIds", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual Google.Apis.Util.Repeatable<string> ApplicationIds { get; set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "gamesPlayerTokens";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "games/v1/recall/gamesPlayerTokens/{sessionId}";
+
+            /// <summary>Initializes GamesPlayerTokens parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("sessionId", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "sessionId",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("applicationIds", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "applicationIds",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>
+        /// Retrieve the last Recall token from all developer games that is associated with the PGS Player encoded in
+        /// the provided recall session id. The API is only available for users that have active PGS Player profile.
+        /// </summary>
+        /// <param name="sessionId">
+        /// Required. Opaque server-generated string that encodes all the necessary information to identify the PGS
+        /// player / Google user and application.
+        /// </param>
+        public virtual LastTokenFromAllDeveloperGamesRequest LastTokenFromAllDeveloperGames(string sessionId)
+        {
+            return new LastTokenFromAllDeveloperGamesRequest(this.service, sessionId);
+        }
+
+        /// <summary>
+        /// Retrieve the last Recall token from all developer games that is associated with the PGS Player encoded in
+        /// the provided recall session id. The API is only available for users that have active PGS Player profile.
+        /// </summary>
+        public class LastTokenFromAllDeveloperGamesRequest : GamesBaseServiceRequest<Google.Apis.Games.v1.Data.RetrieveDeveloperGamesLastPlayerTokenResponse>
+        {
+            /// <summary>Constructs a new LastTokenFromAllDeveloperGames request.</summary>
+            public LastTokenFromAllDeveloperGamesRequest(Google.Apis.Services.IClientService service, string sessionId) : base(service)
+            {
+                SessionId = sessionId;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. Opaque server-generated string that encodes all the necessary information to identify the PGS
+            /// player / Google user and application.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("sessionId", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string SessionId { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "lastTokenFromAllDeveloperGames";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "games/v1/recall/developerGamesLastPlayerToken/{sessionId}";
+
+            /// <summary>Initializes LastTokenFromAllDeveloperGames parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("sessionId", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "sessionId",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>
+        /// Associate the PGS Player principal encoded in the provided recall session id with an in-game account
+        /// </summary>
+        /// <param name="body">The body of the request.</param>
+        public virtual LinkPersonaRequest LinkPersona(Google.Apis.Games.v1.Data.LinkPersonaRequest body)
+        {
+            return new LinkPersonaRequest(this.service, body);
+        }
+
+        /// <summary>
+        /// Associate the PGS Player principal encoded in the provided recall session id with an in-game account
+        /// </summary>
+        public class LinkPersonaRequest : GamesBaseServiceRequest<Google.Apis.Games.v1.Data.LinkPersonaResponse>
+        {
+            /// <summary>Constructs a new LinkPersona request.</summary>
+            public LinkPersonaRequest(Google.Apis.Services.IClientService service, Google.Apis.Games.v1.Data.LinkPersonaRequest body) : base(service)
+            {
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.Games.v1.Data.LinkPersonaRequest Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "linkPersona";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "games/v1/recall:linkPersona";
+
+            /// <summary>Initializes LinkPersona parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+            }
+        }
+
+        /// <summary>
+        /// Delete all Recall tokens linking the given persona to any player (with or without a profile).
+        /// </summary>
+        /// <param name="body">The body of the request.</param>
+        public virtual ResetPersonaRequest ResetPersona(Google.Apis.Games.v1.Data.ResetPersonaRequest body)
+        {
+            return new ResetPersonaRequest(this.service, body);
+        }
+
+        /// <summary>
+        /// Delete all Recall tokens linking the given persona to any player (with or without a profile).
+        /// </summary>
+        public class ResetPersonaRequest : GamesBaseServiceRequest<Google.Apis.Games.v1.Data.ResetPersonaResponse>
+        {
+            /// <summary>Constructs a new ResetPersona request.</summary>
+            public ResetPersonaRequest(Google.Apis.Services.IClientService service, Google.Apis.Games.v1.Data.ResetPersonaRequest body) : base(service)
+            {
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.Games.v1.Data.ResetPersonaRequest Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "resetPersona";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "games/v1/recall:resetPersona";
+
+            /// <summary>Initializes ResetPersona parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+            }
+        }
+
+        /// <summary>
+        /// Retrieve all Recall tokens associated with the PGS Player encoded in the provided recall session id. The API
+        /// is only available for users that have active PGS Player profile.
+        /// </summary>
+        /// <param name="sessionId">
+        /// Required. Opaque server-generated string that encodes all the necessary information to identify the PGS
+        /// player / Google user and application.
+        /// </param>
+        public virtual RetrieveTokensRequest RetrieveTokens(string sessionId)
+        {
+            return new RetrieveTokensRequest(this.service, sessionId);
+        }
+
+        /// <summary>
+        /// Retrieve all Recall tokens associated with the PGS Player encoded in the provided recall session id. The API
+        /// is only available for users that have active PGS Player profile.
+        /// </summary>
+        public class RetrieveTokensRequest : GamesBaseServiceRequest<Google.Apis.Games.v1.Data.RetrievePlayerTokensResponse>
+        {
+            /// <summary>Constructs a new RetrieveTokens request.</summary>
+            public RetrieveTokensRequest(Google.Apis.Services.IClientService service, string sessionId) : base(service)
+            {
+                SessionId = sessionId;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. Opaque server-generated string that encodes all the necessary information to identify the PGS
+            /// player / Google user and application.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("sessionId", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string SessionId { get; private set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "retrieveTokens";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "games/v1/recall/tokens/{sessionId}";
+
+            /// <summary>Initializes RetrieveTokens parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("sessionId", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "sessionId",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>
+        /// Delete a Recall token linking the PGS Player principal identified by the Recall session and an in-game
+        /// account identified either by the 'persona' or by the token value.
+        /// </summary>
+        /// <param name="body">The body of the request.</param>
+        public virtual UnlinkPersonaRequest UnlinkPersona(Google.Apis.Games.v1.Data.UnlinkPersonaRequest body)
+        {
+            return new UnlinkPersonaRequest(this.service, body);
+        }
+
+        /// <summary>
+        /// Delete a Recall token linking the PGS Player principal identified by the Recall session and an in-game
+        /// account identified either by the 'persona' or by the token value.
+        /// </summary>
+        public class UnlinkPersonaRequest : GamesBaseServiceRequest<Google.Apis.Games.v1.Data.UnlinkPersonaResponse>
+        {
+            /// <summary>Constructs a new UnlinkPersona request.</summary>
+            public UnlinkPersonaRequest(Google.Apis.Services.IClientService service, Google.Apis.Games.v1.Data.UnlinkPersonaRequest body) : base(service)
+            {
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.Games.v1.Data.UnlinkPersonaRequest Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "unlinkPersona";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "games/v1/recall:unlinkPersona";
+
+            /// <summary>Initializes UnlinkPersona parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+            }
+        }
+    }
+
     /// <summary>The "revisions" collection of methods.</summary>
     public class RevisionsResource
     {
@@ -1796,13 +2384,13 @@ namespace Google.Apis.Games.v1
 
         /// <summary>Checks whether the games client is out of date.</summary>
         /// <param name="clientRevision">
-        /// The revision of the client SDK used by your application. Format: `[PLATFORM_TYPE]:[VERSION_NUMBER]`.
-        /// Possible values of `PLATFORM_TYPE` are: * `ANDROID` - Client is running the Android SDK. * `IOS` - Client is
-        /// running the iOS SDK. * `WEB_APP` - Client is running as a Web App.
+        /// Required. The revision of the client SDK used by your application. Format:
+        /// `[PLATFORM_TYPE]:[VERSION_NUMBER]`. Possible values of `PLATFORM_TYPE` are: * `ANDROID` - Client is running
+        /// the Android SDK. * `IOS` - Client is running the iOS SDK. * `WEB_APP` - Client is running as a Web App.
         /// </param>
         public virtual CheckRequest Check(string clientRevision)
         {
-            return new CheckRequest(service, clientRevision);
+            return new CheckRequest(this.service, clientRevision);
         }
 
         /// <summary>Checks whether the games client is out of date.</summary>
@@ -1816,9 +2404,10 @@ namespace Google.Apis.Games.v1
             }
 
             /// <summary>
-            /// The revision of the client SDK used by your application. Format: `[PLATFORM_TYPE]:[VERSION_NUMBER]`.
-            /// Possible values of `PLATFORM_TYPE` are: * `ANDROID` - Client is running the Android SDK. * `IOS` -
-            /// Client is running the iOS SDK. * `WEB_APP` - Client is running as a Web App.
+            /// Required. The revision of the client SDK used by your application. Format:
+            /// `[PLATFORM_TYPE]:[VERSION_NUMBER]`. Possible values of `PLATFORM_TYPE` are: * `ANDROID` - Client is
+            /// running the Android SDK. * `IOS` - Client is running the iOS SDK. * `WEB_APP` - Client is running as a
+            /// Web App.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("clientRevision", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string ClientRevision { get; private set; }
@@ -1877,7 +2466,7 @@ namespace Google.Apis.Games.v1
         /// <param name="timeSpan">The time span for the scores and ranks you're requesting.</param>
         public virtual GetRequest Get(string playerId, string leaderboardId, GetRequest.TimeSpanEnum timeSpan)
         {
-            return new GetRequest(service, playerId, leaderboardId, timeSpan);
+            return new GetRequest(this.service, playerId, leaderboardId, timeSpan);
         }
 
         /// <summary>
@@ -1915,10 +2504,6 @@ namespace Google.Apis.Games.v1
             /// <summary>The time span for the scores and ranks you're requesting.</summary>
             public enum TimeSpanEnum
             {
-                /// <summary>Default value. This value is unused.</summary>
-                [Google.Apis.Util.StringValueAttribute("SCORE_TIME_SPAN_UNSPECIFIED")]
-                SCORETIMESPANUNSPECIFIED = 0,
-
                 /// <summary>
                 /// Get the high scores for all time spans. If this is used, maxResults values will be ignored.
                 /// </summary>
@@ -1945,10 +2530,6 @@ namespace Google.Apis.Games.v1
             /// <summary>The types of ranks to return. If the parameter is omitted, no ranks will be returned.</summary>
             public enum IncludeRankTypeEnum
             {
-                /// <summary>Default value. Should be unused.</summary>
-                [Google.Apis.Util.StringValueAttribute("INCLUDE_RANK_TYPE_UNSPECIFIED")]
-                INCLUDERANKTYPEUNSPECIFIED = 0,
-
                 /// <summary>
                 /// Retrieve all supported ranks. In HTTP, this parameter value can also be specified as `ALL`.
                 /// </summary>
@@ -2058,10 +2639,10 @@ namespace Google.Apis.Games.v1
         /// <summary>Lists the scores in a leaderboard, starting from the top.</summary>
         /// <param name="leaderboardId">The ID of the leaderboard.</param>
         /// <param name="collection">The collection of scores you're requesting.</param>
-        /// <param name="timeSpan">The time span for the scores and ranks you're requesting.</param>
+        /// <param name="timeSpan">Required. The time span for the scores and ranks you're requesting.</param>
         public virtual ListRequest List(string leaderboardId, ListRequest.CollectionEnum collection, ListRequest.TimeSpanEnum timeSpan)
         {
-            return new ListRequest(service, leaderboardId, collection, timeSpan);
+            return new ListRequest(this.service, leaderboardId, collection, timeSpan);
         }
 
         /// <summary>Lists the scores in a leaderboard, starting from the top.</summary>
@@ -2087,10 +2668,6 @@ namespace Google.Apis.Games.v1
             /// <summary>The collection of scores you're requesting.</summary>
             public enum CollectionEnum
             {
-                /// <summary>Default value. This value is unused.</summary>
-                [Google.Apis.Util.StringValueAttribute("SCORE_COLLECTION_UNSPECIFIED")]
-                SCORECOLLECTIONUNSPECIFIED = 0,
-
                 /// <summary>List all scores in the public leaderboard.</summary>
                 [Google.Apis.Util.StringValueAttribute("PUBLIC")]
                 PUBLIC__ = 1,
@@ -2104,17 +2681,13 @@ namespace Google.Apis.Games.v1
                 FRIENDS = 3,
             }
 
-            /// <summary>The time span for the scores and ranks you're requesting.</summary>
+            /// <summary>Required. The time span for the scores and ranks you're requesting.</summary>
             [Google.Apis.Util.RequestParameterAttribute("timeSpan", Google.Apis.Util.RequestParameterType.Query)]
             public virtual TimeSpanEnum TimeSpan { get; private set; }
 
-            /// <summary>The time span for the scores and ranks you're requesting.</summary>
+            /// <summary>Required. The time span for the scores and ranks you're requesting.</summary>
             public enum TimeSpanEnum
             {
-                /// <summary>Default value. This value is unused.</summary>
-                [Google.Apis.Util.StringValueAttribute("SCORE_TIME_SPAN_UNSPECIFIED")]
-                SCORETIMESPANUNSPECIFIED = 0,
-
                 /// <summary>The score is an all-time score.</summary>
                 [Google.Apis.Util.StringValueAttribute("ALL_TIME")]
                 ALLTIME = 1,
@@ -2210,10 +2783,10 @@ namespace Google.Apis.Games.v1
         /// <summary>Lists the scores in a leaderboard around (and including) a player's score.</summary>
         /// <param name="leaderboardId">The ID of the leaderboard.</param>
         /// <param name="collection">The collection of scores you're requesting.</param>
-        /// <param name="timeSpan">The time span for the scores and ranks you're requesting.</param>
+        /// <param name="timeSpan">Required. The time span for the scores and ranks you're requesting.</param>
         public virtual ListWindowRequest ListWindow(string leaderboardId, ListWindowRequest.CollectionEnum collection, ListWindowRequest.TimeSpanEnum timeSpan)
         {
-            return new ListWindowRequest(service, leaderboardId, collection, timeSpan);
+            return new ListWindowRequest(this.service, leaderboardId, collection, timeSpan);
         }
 
         /// <summary>Lists the scores in a leaderboard around (and including) a player's score.</summary>
@@ -2239,10 +2812,6 @@ namespace Google.Apis.Games.v1
             /// <summary>The collection of scores you're requesting.</summary>
             public enum CollectionEnum
             {
-                /// <summary>Default value. This value is unused.</summary>
-                [Google.Apis.Util.StringValueAttribute("SCORE_COLLECTION_UNSPECIFIED")]
-                SCORECOLLECTIONUNSPECIFIED = 0,
-
                 /// <summary>List all scores in the public leaderboard.</summary>
                 [Google.Apis.Util.StringValueAttribute("PUBLIC")]
                 PUBLIC__ = 1,
@@ -2256,17 +2825,13 @@ namespace Google.Apis.Games.v1
                 FRIENDS = 3,
             }
 
-            /// <summary>The time span for the scores and ranks you're requesting.</summary>
+            /// <summary>Required. The time span for the scores and ranks you're requesting.</summary>
             [Google.Apis.Util.RequestParameterAttribute("timeSpan", Google.Apis.Util.RequestParameterType.Query)]
             public virtual TimeSpanEnum TimeSpan { get; private set; }
 
-            /// <summary>The time span for the scores and ranks you're requesting.</summary>
+            /// <summary>Required. The time span for the scores and ranks you're requesting.</summary>
             public enum TimeSpanEnum
             {
-                /// <summary>Default value. This value is unused.</summary>
-                [Google.Apis.Util.StringValueAttribute("SCORE_TIME_SPAN_UNSPECIFIED")]
-                SCORETIMESPANUNSPECIFIED = 0,
-
                 /// <summary>The score is an all-time score.</summary>
                 [Google.Apis.Util.StringValueAttribute("ALL_TIME")]
                 ALLTIME = 1,
@@ -2392,14 +2957,14 @@ namespace Google.Apis.Games.v1
         /// <summary>Submits a score to the specified leaderboard.</summary>
         /// <param name="leaderboardId">The ID of the leaderboard.</param>
         /// <param name="score">
-        /// The score you're submitting. The submitted score is ignored if it is worse than a previously submitted
-        /// score, where worse depends on the leaderboard sort order. The meaning of the score value depends on the
-        /// leaderboard format type. For fixed-point, the score represents the raw value. For time, the score represents
-        /// elapsed time in milliseconds. For currency, the score represents a value in micro units.
+        /// Required. The score you're submitting. The submitted score is ignored if it is worse than a previously
+        /// submitted score, where worse depends on the leaderboard sort order. The meaning of the score value depends
+        /// on the leaderboard format type. For fixed-point, the score represents the raw value. For time, the score
+        /// represents elapsed time in milliseconds. For currency, the score represents a value in micro units.
         /// </param>
         public virtual SubmitRequest Submit(string leaderboardId, long score)
         {
-            return new SubmitRequest(service, leaderboardId, score);
+            return new SubmitRequest(this.service, leaderboardId, score);
         }
 
         /// <summary>Submits a score to the specified leaderboard.</summary>
@@ -2418,10 +2983,11 @@ namespace Google.Apis.Games.v1
             public virtual string LeaderboardId { get; private set; }
 
             /// <summary>
-            /// The score you're submitting. The submitted score is ignored if it is worse than a previously submitted
-            /// score, where worse depends on the leaderboard sort order. The meaning of the score value depends on the
-            /// leaderboard format type. For fixed-point, the score represents the raw value. For time, the score
-            /// represents elapsed time in milliseconds. For currency, the score represents a value in micro units.
+            /// Required. The score you're submitting. The submitted score is ignored if it is worse than a previously
+            /// submitted score, where worse depends on the leaderboard sort order. The meaning of the score value
+            /// depends on the leaderboard format type. For fixed-point, the score represents the raw value. For time,
+            /// the score represents elapsed time in milliseconds. For currency, the score represents a value in micro
+            /// units.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("score", Google.Apis.Util.RequestParameterType.Query)]
             public virtual long Score { get; private set; }
@@ -2489,7 +3055,7 @@ namespace Google.Apis.Games.v1
         /// <param name="body">The body of the request.</param>
         public virtual SubmitMultipleRequest SubmitMultiple(Google.Apis.Games.v1.Data.PlayerScoreSubmissionList body)
         {
-            return new SubmitMultipleRequest(service, body);
+            return new SubmitMultipleRequest(this.service, body);
         }
 
         /// <summary>Submits multiple scores to leaderboards.</summary>
@@ -2555,7 +3121,7 @@ namespace Google.Apis.Games.v1
         /// <param name="snapshotId">The ID of the snapshot.</param>
         public virtual GetRequest Get(string snapshotId)
         {
-            return new GetRequest(service, snapshotId);
+            return new GetRequest(this.service, snapshotId);
         }
 
         /// <summary>Retrieves the metadata for a given snapshot ID.</summary>
@@ -2616,7 +3182,7 @@ namespace Google.Apis.Games.v1
         /// </param>
         public virtual ListRequest List(string playerId)
         {
-            return new ListRequest(service, playerId);
+            return new ListRequest(this.service, playerId);
         }
 
         /// <summary>
@@ -2718,7 +3284,7 @@ namespace Google.Apis.Games.v1
         /// </summary>
         public virtual GetRequest Get()
         {
-            return new GetRequest(service);
+            return new GetRequest(this.service);
         }
 
         /// <summary>
@@ -3117,6 +3683,21 @@ namespace Google.Apis.Games.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Primary scoped player identifier for an application.</summary>
+    public class ApplicationPlayerId : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The application that this player identifier is for.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("applicationId")]
+        public virtual string ApplicationId { get; set; }
+
+        /// <summary>The player identifier for the application.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("playerId")]
+        public virtual string PlayerId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>A third party application verification response resource.</summary>
     public class ApplicationVerifyResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3432,6 +4013,21 @@ namespace Google.Apis.Games.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Recall tokens for a game.</summary>
+    public class GamePlayerToken : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The application that this player identifier is for.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("applicationId")]
+        public virtual string ApplicationId { get; set; }
+
+        /// <summary>Recall token data.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("recallToken")]
+        public virtual RecallToken RecallToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The payload to request to increment an achievement.</summary>
     public class GamesAchievementIncrement : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3467,6 +4063,42 @@ namespace Google.Apis.Games.v1.Data
         /// <summary>The minimum number of steps for the achievement to be set to.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("steps")]
         public virtual System.Nullable<int> Steps { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response for the GeneratePlayGroupingApiToken RPC.</summary>
+    public class GeneratePlayGroupingApiTokenResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Token for accessing the Play Grouping API.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("token")]
+        public virtual PlayGroupingApiToken Token { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response for the GenerateRecallPlayGroupingApiToken RPC.</summary>
+    public class GenerateRecallPlayGroupingApiTokenResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Token for accessing the Play Grouping API.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("token")]
+        public virtual PlayGroupingApiToken Token { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response message for GetMultipleApplicationPlayerIds rpc.</summary>
+    public class GetMultipleApplicationPlayerIdsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Output only. The requested applications along with the scoped ids for tha player, if that player has an id
+        /// for the application. If not, the application is not included in the response.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("playerIds")]
+        public virtual System.Collections.Generic.IList<ApplicationPlayerId> PlayerIds { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3800,6 +4432,99 @@ namespace Google.Apis.Games.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Request to link an in-game account with a PGS principal (encoded in the session id).</summary>
+    public class LinkPersonaRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. Cardinality constraint to observe when linking a persona to a player in the scope of a game.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cardinalityConstraint")]
+        public virtual string CardinalityConstraint { get; set; }
+
+        /// <summary>
+        /// Required. Resolution policy to apply when the linking of a persona to a player would result in violating the
+        /// specified cardinality constraint.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("conflictingLinksResolutionPolicy")]
+        public virtual string ConflictingLinksResolutionPolicy { get; set; }
+
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
+        /// <summary>Input only. Optional expiration time.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Required. Stable identifier of the in-game account. Please refrain from re-using the same persona for
+        /// different games.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("persona")]
+        public virtual string Persona { get; set; }
+
+        /// <summary>
+        /// Required. Opaque server-generated string that encodes all the necessary information to identify the PGS
+        /// player / Google user and application.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sessionId")]
+        public virtual string SessionId { get; set; }
+
+        /// <summary>
+        /// Required. Value of the token to create. Opaque to Play Games and assumed to be non-stable (encrypted with
+        /// key rotation).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("token")]
+        public virtual string Token { get; set; }
+
+        /// <summary>Input only. Optional time-to-live.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ttl")]
+        public virtual object Ttl { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Outcome of a persona linking attempt.</summary>
+    public class LinkPersonaResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Output only. State of a persona linking attempt.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The metagame config resource</summary>
     public class MetagameConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3819,6 +4544,17 @@ namespace Google.Apis.Games.v1.Data
         /// <summary>The list of player levels.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("playerLevels")]
         public virtual System.Collections.Generic.IList<PlayerLevel> PlayerLevels { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Token data returned from GeneratePlayGroupingApiToken RPC.</summary>
+    public class PlayGroupingApiToken : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Value of the token.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tokenValue")]
+        public virtual string TokenValue { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -3853,6 +4589,10 @@ namespace Google.Apis.Games.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("friendStatus")]
         public virtual string FriendStatus { get; set; }
+
+        /// <summary>Per-application unique player identifier.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gamePlayerId")]
+        public virtual string GamePlayerId { get; set; }
 
         /// <summary>
         /// Uniquely identifies the type of this resource. Value is always the fixed string `games#player`
@@ -4309,6 +5049,119 @@ namespace Google.Apis.Games.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Recall token data returned from RetrievePlayerTokens RPC</summary>
+    public class RecallToken : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
+        /// <summary>Optional. Optional expiration time of the token</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Required. Whether the persona identified by the token is linked to multiple PGS Players</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("multiPlayerPersona")]
+        public virtual System.Nullable<bool> MultiPlayerPersona { get; set; }
+
+        /// <summary>Required. Value of the Recall token as it is provided by the client via LinkPersona RPC</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("token")]
+        public virtual string Token { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request to remove all Recall tokens associated with a persona for an app.</summary>
+    public class ResetPersonaRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Value of the 'persona' field as it was provided by the client in LinkPersona RPC</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("persona")]
+        public virtual string Persona { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response for the ResetPersona RPC</summary>
+    public class ResetPersonaResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Whether any tokens were unlinked as a result of this request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("unlinked")]
+        public virtual System.Nullable<bool> Unlinked { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Recall token data returned from for the RetrieveDeveloperGamesLastPlayerToken RPC</summary>
+    public class RetrieveDeveloperGamesLastPlayerTokenResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The recall token associated with the requested PGS Player principal. It can be unset if there is no recall
+        /// token associated with the requested principal.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gamePlayerToken")]
+        public virtual GamePlayerToken GamePlayerToken { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A list of recall token data returned from the RetrieveGamesPlayerTokens RPC</summary>
+    public class RetrieveGamesPlayerTokensResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The requested applications along with the recall tokens for the player. If the player does not have recall
+        /// tokens for an application, that application is not included in the response.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gamePlayerTokens")]
+        public virtual System.Collections.Generic.IList<GamePlayerToken> GamePlayerTokens { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response for the RetrievePlayerTokens RPC</summary>
+    public class RetrievePlayerTokensResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Recall tokens associated with the requested PGS Player principal</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tokens")]
+        public virtual System.Collections.Generic.IList<RecallToken> Tokens { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>A third party checking a revision response.</summary>
     public class RevisionCheckResponse : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4326,6 +5179,27 @@ namespace Google.Apis.Games.v1.Data
         /// <summary>The result of the revision check.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("revisionStatus")]
         public virtual string RevisionStatus { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Scoped player identifiers.</summary>
+    public class ScopedPlayerIds : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Identifier of the player across all games of the given developer. Every player has the same
+        /// developer_player_key in all games of one developer. Developer player key changes for the game if the game is
+        /// transferred to another developer. Note that game_player_id will stay unchanged.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("developerPlayerKey")]
+        public virtual string DeveloperPlayerKey { get; set; }
+
+        /// <summary>
+        /// Game-scoped player identifier. This is the same id that is returned in GetPlayer game_player_id field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gamePlayerId")]
+        public virtual string GamePlayerId { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4552,6 +5426,42 @@ namespace Google.Apis.Games.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("total_spend_next_28_days")]
         public virtual System.Nullable<float> TotalSpendNext28Days { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request to remove a Recall token linking PGS principal and an in-game account</summary>
+    public class UnlinkPersonaRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Value of the 'persona' field as it was provided by the client in LinkPersona RPC</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("persona")]
+        public virtual string Persona { get; set; }
+
+        /// <summary>
+        /// Required. Opaque server-generated string that encodes all the necessary information to identify the PGS
+        /// player / Google user and application.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sessionId")]
+        public virtual string SessionId { get; set; }
+
+        /// <summary>Value of the Recall token as it was provided by the client in LinkPersona RPC</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("token")]
+        public virtual string Token { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response for the UnlinkPersona RPC</summary>
+    public class UnlinkPersonaResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. Whether a Recall token specified by the request was deleted. Can be 'false' when there were no
+        /// Recall tokens satisfied the criteria from the request.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("unlinked")]
+        public virtual System.Nullable<bool> Unlinked { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

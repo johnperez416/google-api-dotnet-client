@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.OSConfig.v1beta
         public OSConfigService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://osconfig.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://osconfig.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.OSConfig.v1beta
         public override string Name => "osconfig";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://osconfig.googleapis.com/";
-        #else
-            "https://osconfig.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://osconfig.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the OS Config API.</summary>
         public class Scope
@@ -309,7 +304,7 @@ namespace Google.Apis.OSConfig.v1beta
             /// </param>
             public virtual CreateRequest Create(Google.Apis.OSConfig.v1beta.Data.GuestPolicy body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Create an OS Config guest policy.</summary>
@@ -383,7 +378,7 @@ namespace Google.Apis.OSConfig.v1beta
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Delete an OS Config guest policy.</summary>
@@ -434,7 +429,7 @@ namespace Google.Apis.OSConfig.v1beta
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Get an OS Config guest policy.</summary>
@@ -484,7 +479,7 @@ namespace Google.Apis.OSConfig.v1beta
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Get a page of OS Config guest policies.</summary>
@@ -563,7 +558,7 @@ namespace Google.Apis.OSConfig.v1beta
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.OSConfig.v1beta.Data.GuestPolicy body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Update an OS Config guest policy.</summary>
@@ -651,7 +646,7 @@ namespace Google.Apis.OSConfig.v1beta
             /// </param>
             public virtual CreateRequest Create(Google.Apis.OSConfig.v1beta.Data.PatchDeployment body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Create an OS Config patch deployment.</summary>
@@ -722,7 +717,7 @@ namespace Google.Apis.OSConfig.v1beta
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Delete an OS Config patch deployment.</summary>
@@ -771,7 +766,7 @@ namespace Google.Apis.OSConfig.v1beta
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Get an OS Config patch deployment.</summary>
@@ -818,7 +813,7 @@ namespace Google.Apis.OSConfig.v1beta
             /// <param name="parent">Required. The resource name of the parent in the form `projects/*`.</param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Get a page of OS Config patch deployments.</summary>
@@ -895,7 +890,7 @@ namespace Google.Apis.OSConfig.v1beta
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.OSConfig.v1beta.Data.PatchDeployment body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Update an OS Config patch deployment.</summary>
@@ -960,6 +955,132 @@ namespace Google.Apis.OSConfig.v1beta
                     });
                 }
             }
+
+            /// <summary>
+            /// Change state of patch deployment to "PAUSED". Patch deployment in paused state doesn't generate patch
+            /// jobs.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">
+            /// Required. The resource name of the patch deployment in the form `projects/*/patchDeployments/*`.
+            /// </param>
+            public virtual PauseRequest Pause(Google.Apis.OSConfig.v1beta.Data.PausePatchDeploymentRequest body, string name)
+            {
+                return new PauseRequest(this.service, body, name);
+            }
+
+            /// <summary>
+            /// Change state of patch deployment to "PAUSED". Patch deployment in paused state doesn't generate patch
+            /// jobs.
+            /// </summary>
+            public class PauseRequest : OSConfigBaseServiceRequest<Google.Apis.OSConfig.v1beta.Data.PatchDeployment>
+            {
+                /// <summary>Constructs a new Pause request.</summary>
+                public PauseRequest(Google.Apis.Services.IClientService service, Google.Apis.OSConfig.v1beta.Data.PausePatchDeploymentRequest body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The resource name of the patch deployment in the form `projects/*/patchDeployments/*`.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.OSConfig.v1beta.Data.PausePatchDeploymentRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "pause";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1beta/{+name}:pause";
+
+                /// <summary>Initializes Pause parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/patchDeployments/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>
+            /// Change state of patch deployment back to "ACTIVE". Patch deployment in active state continues to
+            /// generate patch jobs.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">
+            /// Required. The resource name of the patch deployment in the form `projects/*/patchDeployments/*`.
+            /// </param>
+            public virtual ResumeRequest Resume(Google.Apis.OSConfig.v1beta.Data.ResumePatchDeploymentRequest body, string name)
+            {
+                return new ResumeRequest(this.service, body, name);
+            }
+
+            /// <summary>
+            /// Change state of patch deployment back to "ACTIVE". Patch deployment in active state continues to
+            /// generate patch jobs.
+            /// </summary>
+            public class ResumeRequest : OSConfigBaseServiceRequest<Google.Apis.OSConfig.v1beta.Data.PatchDeployment>
+            {
+                /// <summary>Constructs a new Resume request.</summary>
+                public ResumeRequest(Google.Apis.Services.IClientService service, Google.Apis.OSConfig.v1beta.Data.ResumePatchDeploymentRequest body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The resource name of the patch deployment in the form `projects/*/patchDeployments/*`.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.OSConfig.v1beta.Data.ResumePatchDeploymentRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "resume";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1beta/{+name}:resume";
+
+                /// <summary>Initializes Resume parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/patchDeployments/[^/]+$",
+                    });
+                }
+            }
         }
 
         /// <summary>Gets the PatchJobs resource.</summary>
@@ -1003,7 +1124,7 @@ namespace Google.Apis.OSConfig.v1beta
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Get a list of instance details for a given patch job.</summary>
@@ -1096,7 +1217,7 @@ namespace Google.Apis.OSConfig.v1beta
             /// <param name="name">Required. Name of the patch in the form `projects/*/patchJobs/*`</param>
             public virtual CancelRequest Cancel(Google.Apis.OSConfig.v1beta.Data.CancelPatchJobRequest body, string name)
             {
-                return new CancelRequest(service, body, name);
+                return new CancelRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -1151,7 +1272,7 @@ namespace Google.Apis.OSConfig.v1beta
             /// <param name="parent">Required. The project in which to run this patch in the form `projects/*`</param>
             public virtual ExecuteRequest Execute(Google.Apis.OSConfig.v1beta.Data.ExecutePatchJobRequest body, string parent)
             {
-                return new ExecuteRequest(service, body, parent);
+                return new ExecuteRequest(this.service, body, parent);
             }
 
             /// <summary>Patch VM instances by creating and running a patch job.</summary>
@@ -1206,7 +1327,7 @@ namespace Google.Apis.OSConfig.v1beta
             /// <param name="name">Required. Name of the patch in the form `projects/*/patchJobs/*`</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
@@ -1254,7 +1375,7 @@ namespace Google.Apis.OSConfig.v1beta
             /// <param name="parent">Required. In the form of `projects/*`</param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Get a list of patch jobs.</summary>
@@ -1381,7 +1502,7 @@ namespace Google.Apis.OSConfig.v1beta
                 /// <param name="instance">Required. The VM instance whose policies are being looked up.</param>
                 public virtual LookupEffectiveGuestPolicyRequest LookupEffectiveGuestPolicy(Google.Apis.OSConfig.v1beta.Data.LookupEffectiveGuestPolicyRequest body, string instance)
                 {
-                    return new LookupEffectiveGuestPolicyRequest(service, body, instance);
+                    return new LookupEffectiveGuestPolicyRequest(this.service, body, instance);
                 }
 
                 /// <summary>
@@ -1662,8 +1783,7 @@ namespace Google.Apis.OSConfig.v1beta.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1837,17 +1957,192 @@ namespace Google.Apis.OSConfig.v1beta.Data
         [Newtonsoft.Json.JsonPropertyAttribute("osPolicyAssignment")]
         public virtual string OsPolicyAssignment { get; set; }
 
+        private string _rolloutStartTimeRaw;
+
+        private object _rolloutStartTime;
+
         /// <summary>Rollout start time</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("rolloutStartTime")]
-        public virtual object RolloutStartTime { get; set; }
+        public virtual string RolloutStartTimeRaw
+        {
+            get => _rolloutStartTimeRaw;
+            set
+            {
+                _rolloutStartTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _rolloutStartTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="RolloutStartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RolloutStartTimeDateTimeOffset instead.")]
+        public virtual object RolloutStartTime
+        {
+            get => _rolloutStartTime;
+            set
+            {
+                _rolloutStartTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _rolloutStartTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="RolloutStartTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RolloutStartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(RolloutStartTimeRaw);
+            set => RolloutStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>State of the rollout</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("rolloutState")]
         public virtual string RolloutState { get; set; }
 
+        private string _rolloutUpdateTimeRaw;
+
+        private object _rolloutUpdateTime;
+
         /// <summary>Rollout update time</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("rolloutUpdateTime")]
-        public virtual object RolloutUpdateTime { get; set; }
+        public virtual string RolloutUpdateTimeRaw
+        {
+            get => _rolloutUpdateTimeRaw;
+            set
+            {
+                _rolloutUpdateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _rolloutUpdateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="RolloutUpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RolloutUpdateTimeDateTimeOffset instead.")]
+        public virtual object RolloutUpdateTime
+        {
+            get => _rolloutUpdateTime;
+            set
+            {
+                _rolloutUpdateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _rolloutUpdateTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="RolloutUpdateTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RolloutUpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(RolloutUpdateTimeRaw);
+            set => RolloutUpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Represents the metadata of the long-running operation.</summary>
+    public class GoogleCloudOsconfigV2betaOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Output only. API version used to start the operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("apiVersion")]
+        public virtual string ApiVersion { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>Output only. The time the operation was created.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
+
+        /// <summary>Output only. The time the operation finished running.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Output only. Identifies whether the user has requested cancellation of the operation. Operations that have
+        /// been cancelled successfully have Operation.error value with a google.rpc.Status.code of 1, corresponding to
+        /// `Code.CANCELLED`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requestedCancellation")]
+        public virtual System.Nullable<bool> RequestedCancellation { get; set; }
+
+        /// <summary>Output only. Human-readable status of the operation, if any.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("statusMessage")]
+        public virtual string StatusMessage { get; set; }
+
+        /// <summary>Output only. Server-defined resource path for the target of the operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("target")]
+        public virtual string Target { get; set; }
+
+        /// <summary>Output only. Name of the verb executed by the operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("verb")]
+        public virtual string Verb { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1871,9 +2166,42 @@ namespace Google.Apis.OSConfig.v1beta.Data
         [Newtonsoft.Json.JsonPropertyAttribute("assignment")]
         public virtual Assignment Assignment { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. Time this guest policy was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Description of the guest policy. Length of the description is limited to 1024 characters.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
@@ -1908,9 +2236,42 @@ namespace Google.Apis.OSConfig.v1beta.Data
         [Newtonsoft.Json.JsonPropertyAttribute("recipes")]
         public virtual System.Collections.Generic.IList<SoftwareRecipe> Recipes { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. Last time this guest policy was updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
     }
 
     /// <summary>A response message for listing guest policies.</summary>
@@ -2040,17 +2401,87 @@ namespace Google.Apis.OSConfig.v1beta.Data
         [Newtonsoft.Json.JsonPropertyAttribute("osPolicyAssignment")]
         public virtual string OsPolicyAssignment { get; set; }
 
+        private string _rolloutStartTimeRaw;
+
+        private object _rolloutStartTime;
+
         /// <summary>Rollout start time</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("rolloutStartTime")]
-        public virtual object RolloutStartTime { get; set; }
+        public virtual string RolloutStartTimeRaw
+        {
+            get => _rolloutStartTimeRaw;
+            set
+            {
+                _rolloutStartTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _rolloutStartTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="RolloutStartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RolloutStartTimeDateTimeOffset instead.")]
+        public virtual object RolloutStartTime
+        {
+            get => _rolloutStartTime;
+            set
+            {
+                _rolloutStartTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _rolloutStartTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="RolloutStartTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RolloutStartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(RolloutStartTimeRaw);
+            set => RolloutStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>State of the rollout</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("rolloutState")]
         public virtual string RolloutState { get; set; }
 
+        private string _rolloutUpdateTimeRaw;
+
+        private object _rolloutUpdateTime;
+
         /// <summary>Rollout update time</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("rolloutUpdateTime")]
-        public virtual object RolloutUpdateTime { get; set; }
+        public virtual string RolloutUpdateTimeRaw
+        {
+            get => _rolloutUpdateTimeRaw;
+            set
+            {
+                _rolloutUpdateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _rolloutUpdateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="RolloutUpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use RolloutUpdateTimeDateTimeOffset instead.")]
+        public virtual object RolloutUpdateTime
+        {
+            get => _rolloutUpdateTime;
+            set
+            {
+                _rolloutUpdateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _rolloutUpdateTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="RolloutUpdateTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? RolloutUpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(RolloutUpdateTimeRaw);
+            set => RolloutUpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2062,9 +2493,42 @@ namespace Google.Apis.OSConfig.v1beta.Data
     /// </summary>
     public class OneTimeSchedule : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _executeTimeRaw;
+
+        private object _executeTime;
+
         /// <summary>Required. The desired patch job execution time.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("executeTime")]
-        public virtual object ExecuteTime { get; set; }
+        public virtual string ExecuteTimeRaw
+        {
+            get => _executeTimeRaw;
+            set
+            {
+                _executeTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _executeTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExecuteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExecuteTimeDateTimeOffset instead.")]
+        public virtual object ExecuteTime
+        {
+            get => _executeTime;
+            set
+            {
+                _executeTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _executeTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExecuteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExecuteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExecuteTimeRaw);
+            set => ExecuteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2144,6 +2608,10 @@ namespace Google.Apis.OSConfig.v1beta.Data
         [Newtonsoft.Json.JsonPropertyAttribute("goo")]
         public virtual GooSettings Goo { get; set; }
 
+        /// <summary>Allows the patch job to run on Managed instance groups (MIGs).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("migInstancesAllowed")]
+        public virtual System.Nullable<bool> MigInstancesAllowed { get; set; }
+
         /// <summary>The `ExecStep` to run after the patch update.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("postStep")]
         public virtual ExecStep PostStep { get; set; }
@@ -2180,12 +2648,45 @@ namespace Google.Apis.OSConfig.v1beta.Data
     /// </summary>
     public class PatchDeployment : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>
         /// Output only. Time the patch deployment was created. Timestamp is in
         /// [RFC3339](https://www.ietf.org/rfc/rfc3339.txt) text format.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Optional. Description of the patch deployment. Length of the description is limited to 1024 characters.
@@ -2201,12 +2702,47 @@ namespace Google.Apis.OSConfig.v1beta.Data
         [Newtonsoft.Json.JsonPropertyAttribute("instanceFilter")]
         public virtual PatchInstanceFilter InstanceFilter { get; set; }
 
+        private string _lastExecuteTimeRaw;
+
+        private object _lastExecuteTime;
+
         /// <summary>
         /// Output only. The last time a patch job was started by this deployment. Timestamp is in
         /// [RFC3339](https://www.ietf.org/rfc/rfc3339.txt) text format.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastExecuteTime")]
-        public virtual object LastExecuteTime { get; set; }
+        public virtual string LastExecuteTimeRaw
+        {
+            get => _lastExecuteTimeRaw;
+            set
+            {
+                _lastExecuteTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastExecuteTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastExecuteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastExecuteTimeDateTimeOffset instead.")]
+        public virtual object LastExecuteTime
+        {
+            get => _lastExecuteTime;
+            set
+            {
+                _lastExecuteTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastExecuteTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastExecuteTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastExecuteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastExecuteTimeRaw);
+            set => LastExecuteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Unique name for the patch deployment resource in a project. The patch deployment name is in the form:
@@ -2232,12 +2768,49 @@ namespace Google.Apis.OSConfig.v1beta.Data
         [Newtonsoft.Json.JsonPropertyAttribute("rollout")]
         public virtual PatchRollout Rollout { get; set; }
 
+        /// <summary>Output only. Current state of the patch deployment.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>
         /// Output only. Time the patch deployment was last updated. Timestamp is in
         /// [RFC3339](https://www.ietf.org/rfc/rfc3339.txt) text format.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2308,9 +2881,42 @@ namespace Google.Apis.OSConfig.v1beta.Data
     /// </summary>
     public class PatchJob : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Time this patch job was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Description of the patch job. Length of the description is limited to 1024 characters.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
@@ -2370,9 +2976,42 @@ namespace Google.Apis.OSConfig.v1beta.Data
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Last time this patch job was updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2515,37 +3154,180 @@ namespace Google.Apis.OSConfig.v1beta.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>A request message for pausing a patch deployment.</summary>
+    public class PausePatchDeploymentRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Sets the time for recurring patch deployments.</summary>
     public class RecurringSchedule : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>
         /// Optional. The end time at which a recurring patch deployment schedule is no longer active.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Required. The frequency unit of this recurring schedule.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("frequency")]
         public virtual string Frequency { get; set; }
 
+        private string _lastExecuteTimeRaw;
+
+        private object _lastExecuteTime;
+
         /// <summary>Output only. The time the last patch job ran successfully.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastExecuteTime")]
-        public virtual object LastExecuteTime { get; set; }
+        public virtual string LastExecuteTimeRaw
+        {
+            get => _lastExecuteTimeRaw;
+            set
+            {
+                _lastExecuteTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastExecuteTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastExecuteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastExecuteTimeDateTimeOffset instead.")]
+        public virtual object LastExecuteTime
+        {
+            get => _lastExecuteTime;
+            set
+            {
+                _lastExecuteTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastExecuteTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastExecuteTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastExecuteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastExecuteTimeRaw);
+            set => LastExecuteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Required. Schedule with monthly executions.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("monthly")]
         public virtual MonthlySchedule Monthly { get; set; }
 
+        private string _nextExecuteTimeRaw;
+
+        private object _nextExecuteTime;
+
         /// <summary>Output only. The time the next patch job is scheduled to run.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextExecuteTime")]
-        public virtual object NextExecuteTime { get; set; }
+        public virtual string NextExecuteTimeRaw
+        {
+            get => _nextExecuteTimeRaw;
+            set
+            {
+                _nextExecuteTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _nextExecuteTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="NextExecuteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use NextExecuteTimeDateTimeOffset instead.")]
+        public virtual object NextExecuteTime
+        {
+            get => _nextExecuteTime;
+            set
+            {
+                _nextExecuteTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _nextExecuteTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="NextExecuteTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? NextExecuteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(NextExecuteTimeRaw);
+            set => NextExecuteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
 
         /// <summary>
         /// Optional. The time that the recurring schedule becomes effective. Defaults to `create_time` of the patch
         /// deployment.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Required. Time of the day to run a recurring deployment.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("timeOfDay")]
@@ -2562,6 +3344,13 @@ namespace Google.Apis.OSConfig.v1beta.Data
         [Newtonsoft.Json.JsonPropertyAttribute("weekly")]
         public virtual WeeklySchedule Weekly { get; set; }
 
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A request message for resuming a patch deployment.</summary>
+    public class ResumePatchDeploymentRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -2894,23 +3683,26 @@ namespace Google.Apis.OSConfig.v1beta.Data
     public class TimeOfDay : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for
-        /// scenarios like business closing time.
+        /// Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or
+        /// equal to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("hours")]
         public virtual System.Nullable<int> Hours { get; set; }
 
-        /// <summary>Minutes of hour of day. Must be from 0 to 59.</summary>
+        /// <summary>Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minutes")]
         public virtual System.Nullable<int> Minutes { get; set; }
 
-        /// <summary>Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.</summary>
+        /// <summary>
+        /// Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to
+        /// 999,999,999.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nanos")]
         public virtual System.Nullable<int> Nanos { get; set; }
 
         /// <summary>
-        /// Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows
-        /// leap-seconds.
+        /// Seconds of a minute. Must be greater than or equal to 0 and typically must be less than or equal to 59. An
+        /// API may allow the value 60 if it allows leap-seconds.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("seconds")]
         public virtual System.Nullable<int> Seconds { get; set; }
@@ -2922,11 +3714,11 @@ namespace Google.Apis.OSConfig.v1beta.Data
     /// <summary>Represents a time zone from the [IANA Time Zone Database](https://www.iana.org/time-zones).</summary>
     public class TimeZone : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>IANA Time Zone Database time zone, e.g. "America/New_York".</summary>
+        /// <summary>IANA Time Zone Database time zone. For example "America/New_York".</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("id")]
         public virtual string Id { get; set; }
 
-        /// <summary>Optional. IANA Time Zone Database version number, e.g. "2019a".</summary>
+        /// <summary>Optional. IANA Time Zone Database version number. For example "2019a".</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("version")]
         public virtual string Version { get; set; }
 

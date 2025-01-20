@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ namespace Google.Apis.YouTubeAnalytics.v2
             GroupItems = new GroupItemsResource(this);
             Groups = new GroupsResource(this);
             Reports = new ReportsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://youtubeanalytics.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://youtubeanalytics.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -46,23 +48,16 @@ namespace Google.Apis.YouTubeAnalytics.v2
         public override string Name => "youtubeAnalytics";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://youtubeanalytics.googleapis.com/";
-        #else
-            "https://youtubeanalytics.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://youtubeanalytics.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the YouTube Analytics API.</summary>
         public class Scope
@@ -310,7 +305,7 @@ namespace Google.Apis.YouTubeAnalytics.v2
         /// <summary>Removes an item from a group.</summary>
         public virtual DeleteRequest Delete()
         {
-            return new DeleteRequest(service);
+            return new DeleteRequest(this.service);
         }
 
         /// <summary>Removes an item from a group.</summary>
@@ -376,7 +371,7 @@ namespace Google.Apis.YouTubeAnalytics.v2
         /// <param name="body">The body of the request.</param>
         public virtual InsertRequest Insert(Google.Apis.YouTubeAnalytics.v2.Data.GroupItem body)
         {
-            return new InsertRequest(service, body);
+            return new InsertRequest(this.service, body);
         }
 
         /// <summary>Creates a group item.</summary>
@@ -434,7 +429,7 @@ namespace Google.Apis.YouTubeAnalytics.v2
         /// <summary>Returns a collection of group items that match the API request parameters.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>Returns a collection of group items that match the API request parameters.</summary>
@@ -514,7 +509,7 @@ namespace Google.Apis.YouTubeAnalytics.v2
         /// <summary>Deletes a group.</summary>
         public virtual DeleteRequest Delete()
         {
-            return new DeleteRequest(service);
+            return new DeleteRequest(this.service);
         }
 
         /// <summary>Deletes a group.</summary>
@@ -578,7 +573,7 @@ namespace Google.Apis.YouTubeAnalytics.v2
         /// <param name="body">The body of the request.</param>
         public virtual InsertRequest Insert(Google.Apis.YouTubeAnalytics.v2.Data.Group body)
         {
-            return new InsertRequest(service, body);
+            return new InsertRequest(this.service, body);
         }
 
         /// <summary>Creates a group.</summary>
@@ -639,7 +634,7 @@ namespace Google.Apis.YouTubeAnalytics.v2
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
@@ -741,7 +736,7 @@ namespace Google.Apis.YouTubeAnalytics.v2
         /// <param name="body">The body of the request.</param>
         public virtual UpdateRequest Update(Google.Apis.YouTubeAnalytics.v2.Data.Group body)
         {
-            return new UpdateRequest(service, body);
+            return new UpdateRequest(this.service, body);
         }
 
         /// <summary>Modifies a group. For example, you could change a group's title.</summary>
@@ -814,7 +809,7 @@ namespace Google.Apis.YouTubeAnalytics.v2
         /// <summary>Retrieve your YouTube Analytics reports.</summary>
         public virtual QueryRequest Query()
         {
-            return new QueryRequest(service);
+            return new QueryRequest(this.service);
         }
 
         /// <summary>Retrieve your YouTube Analytics reports.</summary>
@@ -1223,12 +1218,45 @@ namespace Google.Apis.YouTubeAnalytics.v2.Data
     /// <summary>A group snippet.</summary>
     public class GroupSnippet : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _publishedAtRaw;
+
+        private object _publishedAt;
+
         /// <summary>
         /// The date and time that the group was created. The value is specified in ISO 8601 (YYYY-MM-DDThh:mm:ss.sZ)
         /// format.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("publishedAt")]
-        public virtual object PublishedAt { get; set; }
+        public virtual string PublishedAtRaw
+        {
+            get => _publishedAtRaw;
+            set
+            {
+                _publishedAt = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _publishedAtRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="PublishedAtRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use PublishedAtDateTimeOffset instead.")]
+        public virtual object PublishedAt
+        {
+            get => _publishedAt;
+            set
+            {
+                _publishedAtRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _publishedAt = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="PublishedAtRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? PublishedAtDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(PublishedAtRaw);
+            set => PublishedAtRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The group name. The value must be a non-empty string.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("title")]

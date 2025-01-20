@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.Verifiedaccess.v1
         public VerifiedaccessService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Challenge = new ChallengeResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://verifiedaccess.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://verifiedaccess.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.Verifiedaccess.v1
         public override string Name => "verifiedaccess";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://verifiedaccess.googleapis.com/";
-        #else
-            "https://verifiedaccess.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://verifiedaccess.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Chrome Verified Access API.</summary>
         public class Scope
@@ -279,7 +274,7 @@ namespace Google.Apis.Verifiedaccess.v1
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.Verifiedaccess.v1.Data.Empty body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>CreateChallenge API</summary>
@@ -318,7 +313,7 @@ namespace Google.Apis.Verifiedaccess.v1
         /// <param name="body">The body of the request.</param>
         public virtual VerifyRequest Verify(Google.Apis.Verifiedaccess.v1.Data.VerifyChallengeResponseRequest body)
         {
-            return new VerifyRequest(service, body);
+            return new VerifyRequest(this.service, body);
         }
 
         /// <summary>VerifyChallengeResponse API</summary>
@@ -376,8 +371,7 @@ namespace Google.Apis.Verifiedaccess.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -422,6 +416,10 @@ namespace Google.Apis.Verifiedaccess.v1.Data
     /// <summary>Result message for VerifiedAccess.VerifyChallengeResponse.</summary>
     public class VerifyChallengeResponseResult : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Attested device id (ADID) of the device, read from the verified data.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("attestedDeviceId")]
+        public virtual string AttestedDeviceId { get; set; }
+
         /// <summary>Device enrollment id is returned in this field (for the machine response only).</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("deviceEnrollmentId")]
         public virtual string DeviceEnrollmentId { get; set; }

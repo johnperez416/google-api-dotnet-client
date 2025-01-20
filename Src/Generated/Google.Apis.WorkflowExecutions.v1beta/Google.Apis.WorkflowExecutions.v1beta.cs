@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.WorkflowExecutions.v1beta
         public WorkflowExecutionsService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://workflowexecutions.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://workflowexecutions.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.WorkflowExecutions.v1beta
         public override string Name => "workflowexecutions";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://workflowexecutions.googleapis.com/";
-        #else
-            "https://workflowexecutions.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://workflowexecutions.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Workflow Executions API.</summary>
         public class Scope
@@ -343,7 +338,7 @@ namespace Google.Apis.WorkflowExecutions.v1beta
                     /// </param>
                     public virtual CancelRequest Cancel(Google.Apis.WorkflowExecutions.v1beta.Data.CancelExecutionRequest body, string name)
                     {
-                        return new CancelRequest(service, body, name);
+                        return new CancelRequest(this.service, body, name);
                     }
 
                     /// <summary>Cancels an execution of the given name.</summary>
@@ -403,7 +398,7 @@ namespace Google.Apis.WorkflowExecutions.v1beta
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.WorkflowExecutions.v1beta.Data.Execution body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>Creates a new execution using the latest revision of the given workflow.</summary>
@@ -462,7 +457,7 @@ namespace Google.Apis.WorkflowExecutions.v1beta
                     /// </param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Returns an execution of the given name.</summary>
@@ -554,7 +549,7 @@ namespace Google.Apis.WorkflowExecutions.v1beta
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>
@@ -721,9 +716,42 @@ namespace Google.Apis.WorkflowExecutions.v1beta.Data
         [Newtonsoft.Json.JsonPropertyAttribute("callLogLevel")]
         public virtual string CallLogLevel { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>Output only. Marks the end of execution, successful or not.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. The error which caused the execution to finish prematurely. The value is only present if the
@@ -746,13 +774,50 @@ namespace Google.Apis.WorkflowExecutions.v1beta.Data
         [Newtonsoft.Json.JsonPropertyAttribute("result")]
         public virtual string Result { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>Output only. Marks the beginning of execution.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. Current state of the execution.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
+
+        /// <summary>Output only. Status tracks the current steps and progress data of this execution.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("status")]
+        public virtual Status Status { get; set; }
 
         /// <summary>Output only. Revision of the workflow this execution is using.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("workflowRevisionId")]
@@ -827,6 +892,38 @@ namespace Google.Apis.WorkflowExecutions.v1beta.Data
         /// <summary>The step the error occurred at.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("step")]
         public virtual string Step { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Represents the current status of this execution.</summary>
+    public class Status : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// A list of currently executing or last executed step names for the workflow execution currently running. If
+        /// the workflow has succeeded or failed, this is the last attempted or executed step. Presently, if the current
+        /// step is inside a subworkflow, the list only includes that step. In the future, the list will contain items
+        /// for each step in the call stack, starting with the outermost step in the `main` subworkflow, and ending with
+        /// the most deeply nested step.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("currentSteps")]
+        public virtual System.Collections.Generic.IList<Step> CurrentSteps { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Represents a step of the workflow this execution is running.</summary>
+    public class Step : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Name of a routine within the workflow.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("routine")]
+        public virtual string Routine { get; set; }
+
+        /// <summary>Name of a step within the routine.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("step")]
+        public virtual string StepValue { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

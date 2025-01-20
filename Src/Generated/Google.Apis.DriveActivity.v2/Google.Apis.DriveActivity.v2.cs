@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.DriveActivity.v2
         public DriveActivityService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Activity = new ActivityResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://driveactivity.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://driveactivity.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.DriveActivity.v2
         public override string Name => "driveactivity";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://driveactivity.googleapis.com/";
-        #else
-            "https://driveactivity.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://driveactivity.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Drive Activity API.</summary>
         public class Scope
@@ -285,7 +280,7 @@ namespace Google.Apis.DriveActivity.v2
         /// <param name="body">The body of the request.</param>
         public virtual QueryRequest Query(Google.Apis.DriveActivity.v2.Data.QueryDriveActivityRequest body)
         {
-            return new QueryRequest(service, body);
+            return new QueryRequest(this.service, body);
         }
 
         /// <summary>Query past activity in Google Drive.</summary>
@@ -345,9 +340,42 @@ namespace Google.Apis.DriveActivity.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("timeRange")]
         public virtual TimeRange TimeRange { get; set; }
 
+        private string _timestampRaw;
+
+        private object _timestamp;
+
         /// <summary>The action occurred at this specific time.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("timestamp")]
-        public virtual object Timestamp { get; set; }
+        public virtual string TimestampRaw
+        {
+            get => _timestampRaw;
+            set
+            {
+                _timestamp = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _timestampRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="TimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimestampDateTimeOffset instead.")]
+        public virtual object Timestamp
+        {
+            get => _timestamp;
+            set
+            {
+                _timestampRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _timestamp = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="TimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? TimestampDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(TimestampRaw);
+            set => TimestampRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -356,6 +384,10 @@ namespace Google.Apis.DriveActivity.v2.Data
     /// <summary>Data describing the type and additional information of an action.</summary>
     public class ActionDetail : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Label was changed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("appliedLabelChange")]
+        public virtual AppliedLabelChange AppliedLabelChange { get; set; }
+
         /// <summary>A change about comments was made.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("comment")]
         public virtual Comment Comment { get; set; }
@@ -465,6 +497,43 @@ namespace Google.Apis.DriveActivity.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Label changes that were made on the Target.</summary>
+    public class AppliedLabelChange : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Changes that were made to the Label on the Target.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("changes")]
+        public virtual System.Collections.Generic.IList<AppliedLabelChangeDetail> Changes { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A change made to a Label on the Target.</summary>
+    public class AppliedLabelChangeDetail : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Field Changes. Only present if `types` contains `LABEL_FIELD_VALUE_CHANGED`.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fieldChanges")]
+        public virtual System.Collections.Generic.IList<FieldValueChange> FieldChanges { get; set; }
+
+        /// <summary>
+        /// The Label name representing the Label that changed. This name always contains the revision of the Label that
+        /// was used when this Action occurred. The format is `labels/id@revision`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("label")]
+        public virtual string Label { get; set; }
+
+        /// <summary>The human-readable title of the label that changed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("title")]
+        public virtual string Title { get; set; }
+
+        /// <summary>The types of changes made to the Label on the Target.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("types")]
+        public virtual System.Collections.Generic.IList<string> Types { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>A comment with an assignment.</summary>
     public class Assignment : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -504,10 +573,9 @@ namespace Google.Apis.DriveActivity.v2.Data
     }
 
     /// <summary>
-    /// How the individual activities are consolidated. A set of activities may be consolidated into one combined
-    /// activity if they are related in some way, such as one actor performing the same action on multiple targets, or
-    /// multiple actors performing the same action on a single target. The strategy defines the rules for which
-    /// activities are related.
+    /// How the individual activities are consolidated. If a set of activities is related they can be consolidated into
+    /// one combined activity, such as one actor performing the same action on multiple targets, or multiple actors
+    /// performing the same action on a single target. The strategy defines the rules for which activities are related.
     /// </summary>
     public class ConsolidationStrategy : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -562,6 +630,50 @@ namespace Google.Apis.DriveActivity.v2.Data
         /// <summary>The type of Data Leak Prevention (DLP) change.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Wrapper for Date Field value.</summary>
+    public class Date : Google.Apis.Requests.IDirectResponseSchema
+    {
+        private string _valueRaw;
+
+        private object _value;
+
+        /// <summary>Date value.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("value")]
+        public virtual string ValueRaw
+        {
+            get => _valueRaw;
+            set
+            {
+                _value = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _valueRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ValueRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ValueDateTimeOffset instead.")]
+        public virtual object Value
+        {
+            get => _value;
+            set
+            {
+                _valueRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _value = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ValueRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ValueDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ValueRaw);
+            set => ValueRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -656,9 +768,42 @@ namespace Google.Apis.DriveActivity.v2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("timeRange")]
         public virtual TimeRange TimeRange { get; set; }
 
+        private string _timestampRaw;
+
+        private object _timestamp;
+
         /// <summary>The activity occurred at this specific time.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("timestamp")]
-        public virtual object Timestamp { get; set; }
+        public virtual string TimestampRaw
+        {
+            get => _timestampRaw;
+            set
+            {
+                _timestamp = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _timestampRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="TimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimestampDateTimeOffset instead.")]
+        public virtual object Timestamp
+        {
+            get => _timestamp;
+            set
+            {
+                _timestampRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _timestamp = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="TimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? TimestampDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(TimestampRaw);
+            set => TimestampRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -779,6 +924,74 @@ namespace Google.Apis.DriveActivity.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Contains a value of a Field.</summary>
+    public class FieldValue : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Date Field value.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("date")]
+        public virtual Date Date { get; set; }
+
+        /// <summary>Integer Field value.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("integer")]
+        public virtual Integer Integer { get; set; }
+
+        /// <summary>Selection Field value.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("selection")]
+        public virtual Selection Selection { get; set; }
+
+        /// <summary>Selection List Field value.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("selectionList")]
+        public virtual SelectionList SelectionList { get; set; }
+
+        /// <summary>Text Field value.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("text")]
+        public virtual Text Text { get; set; }
+
+        /// <summary>Text List Field value.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("textList")]
+        public virtual TextList TextList { get; set; }
+
+        /// <summary>User Field value.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("user")]
+        public virtual SingleUser User { get; set; }
+
+        /// <summary>User List Field value.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("userList")]
+        public virtual UserList UserList { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Change to a Field value.</summary>
+    public class FieldValueChange : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The human-readable display name for this field.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>The ID of this field. Field IDs are unique within a Label.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fieldId")]
+        public virtual string FieldId { get; set; }
+
+        /// <summary>
+        /// The value that is now set on the field. If not present, the field was cleared. At least one of
+        /// {old_value|new_value} is always set.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("newValue")]
+        public virtual FieldValue NewValue { get; set; }
+
+        /// <summary>
+        /// The value that was previously set on the field. If not present, the field was newly set. At least one of
+        /// {old_value|new_value} is always set.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("oldValue")]
+        public virtual FieldValue OldValue { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>This item is deprecated; please see `DriveFile` instead.</summary>
     public class File : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -859,6 +1072,17 @@ namespace Google.Apis.DriveActivity.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Wrapper for Integer Field value.</summary>
+    public class Integer : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Integer value.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("value")]
+        public virtual System.Nullable<long> Value { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>A known user.</summary>
     public class KnownUser : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -878,7 +1102,7 @@ namespace Google.Apis.DriveActivity.v2.Data
     }
 
     /// <summary>
-    /// A strategy which consolidates activities using the grouping rules from the legacy V1 Activity API. Similar
+    /// A strategy that consolidates activities using the grouping rules from the legacy V1 Activity API. Similar
     /// actions occurring within a window of time can be grouped across multiple targets (such as moving a set of files
     /// at once) or multiple actors (such as several users editing the same item). Grouping rules for this strategy are
     /// specific to each type of action.
@@ -911,7 +1135,7 @@ namespace Google.Apis.DriveActivity.v2.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A strategy which does no consolidation of individual activities.</summary>
+    /// <summary>A strategy that does no consolidation of individual activities.</summary>
     public class NoConsolidation : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The ETag of the item.</summary>
@@ -1008,14 +1232,14 @@ namespace Google.Apis.DriveActivity.v2.Data
     public class QueryDriveActivityRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Return activities for this Drive folder and all children and descendants. The format is `items/ITEM_ID`.
+        /// Return activities for this Drive folder, plus all children and descendants. The format is `items/ITEM_ID`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("ancestorName")]
         public virtual string AncestorName { get; set; }
 
         /// <summary>
         /// Details on how to consolidate related actions that make up the activity. If not set, then related actions
-        /// are not consolidated.
+        /// aren't consolidated.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("consolidationStrategy")]
         public virtual ConsolidationStrategy ConsolidationStrategy { get; set; }
@@ -1026,9 +1250,10 @@ namespace Google.Apis.DriveActivity.v2.Data
         /// Supported fields: - `time`: Uses numerical operators on date values either in terms of milliseconds since
         /// Jan 1, 1970 or in RFC 3339 format. Examples: - `time &amp;gt; 1452409200000 AND time &amp;lt;=
         /// 1492812924310` - `time &amp;gt;= "2016-01-10T01:02:03-05:00"` - `detail.action_detail_case`: Uses the "has"
-        /// operator (:) and either a singular value or a list of allowed action types enclosed in parentheses.
-        /// Examples: - `detail.action_detail_case: RENAME` - `detail.action_detail_case:(CREATE EDIT)` -
-        /// `-detail.action_detail_case:MOVE`
+        /// operator (:) and either a singular value or a list of allowed action types enclosed in parentheses,
+        /// separated by a space. To exclude a result from the response, prepend a hyphen (`-`) to the beginning of the
+        /// filter string. Examples: - `detail.action_detail_case:RENAME` - `detail.action_detail_case:(CREATE RESTORE)`
+        /// - `-detail.action_detail_case:MOVE`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("filter")]
         public virtual string Filter { get; set; }
@@ -1038,17 +1263,16 @@ namespace Google.Apis.DriveActivity.v2.Data
         public virtual string ItemName { get; set; }
 
         /// <summary>
-        /// The miminum number of activities desired in the response; the server will attempt to return at least this
-        /// quanitity. The server may also return fewer activities if it has a partial response ready before the request
+        /// The minimum number of activities desired in the response; the server attempts to return at least this
+        /// quantity. The server may also return fewer activities if it has a partial response ready before the request
         /// times out. If not set, a default value is used.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("pageSize")]
         public virtual System.Nullable<int> PageSize { get; set; }
 
         /// <summary>
-        /// The token identifying which page of results to return. Set this to the next_page_token value returned from a
-        /// previous query to obtain the following page of results. If not set, the first page of results will be
-        /// returned.
+        /// The token identifies which page of results to return. Set this to the next_page_token value returned from a
+        /// previous query to obtain the following page of results. If not set, the first page of results is returned.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("pageToken")]
         public virtual string PageToken { get; set; }
@@ -1115,12 +1339,49 @@ namespace Google.Apis.DriveActivity.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Wrapper for Selection Field value as combined value/display_name pair for selected choice.</summary>
+    public class Selection : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Selection value as human-readable display string.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>Selection value as Field Choice ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("value")]
+        public virtual string Value { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Wrapper for SelectionList Field value.</summary>
+    public class SelectionList : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Selection values.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("values")]
+        public virtual System.Collections.Generic.IList<Selection> Values { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Information about settings changes.</summary>
     public class SettingsChange : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The set of changes made to restrictions.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("restrictionChanges")]
         public virtual System.Collections.Generic.IList<RestrictionChange> RestrictionChanges { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Wrapper for User Field value.</summary>
+    public class SingleUser : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>User value as email.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("value")]
+        public virtual string Value { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1148,7 +1409,10 @@ namespace Google.Apis.DriveActivity.v2.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Information about the target of activity.</summary>
+    /// <summary>
+    /// Information about the target of activity. For more information on how activity history is shared with users, see
+    /// [Activity history visibility](https://developers.google.com/drive/activity/v2#activityhistory).
+    /// </summary>
     public class Target : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The target is a shared drive.</summary>
@@ -1224,16 +1488,104 @@ namespace Google.Apis.DriveActivity.v2.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Wrapper for Text Field value.</summary>
+    public class Text : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Value of Text Field.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("value")]
+        public virtual string Value { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Wrapper for Text List Field value.</summary>
+    public class TextList : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Text values.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("values")]
+        public virtual System.Collections.Generic.IList<Text> Values { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Information about time ranges.</summary>
     public class TimeRange : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>The end of the time range.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
 
         /// <summary>The start of the time range.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1267,6 +1619,17 @@ namespace Google.Apis.DriveActivity.v2.Data
         /// <summary>A user about whom nothing is currently known.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("unknownUser")]
         public virtual UnknownUser UnknownUser { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Wrapper for UserList Field value.</summary>
+    public class UserList : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>User values.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("values")]
+        public virtual System.Collections.Generic.IList<SingleUser> Values { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

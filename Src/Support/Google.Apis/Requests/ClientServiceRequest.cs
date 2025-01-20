@@ -14,23 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+using Google.Apis.Discovery;
+using Google.Apis.Http;
+using Google.Apis.Logging;
+using Google.Apis.Requests.Parameters;
+using Google.Apis.Services;
+using Google.Apis.Testing;
+using Google.Apis.Util;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Text;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
-
-using Google.Apis.Discovery;
-using Google.Apis.Http;
-using Google.Apis.Logging;
-using Google.Apis.Services;
-using Google.Apis.Testing;
-using Google.Apis.Util;
-using Google.Apis.Requests.Parameters;
-using System.Runtime.ExceptionServices;
 
 namespace Google.Apis.Requests
 {
@@ -43,7 +40,7 @@ namespace Google.Apis.Requests
         protected List<IHttpUnsuccessfulResponseHandler> _unsuccessfulResponseHandlers;
         /// <summary>Exception handlers for this request only.</summary>
         protected List<IHttpExceptionHandler> _exceptionHandlers;
-        /// <summary>Unsuccessful response handlers for this request only.</summary>
+        /// <summary>Execute interceptors for this request only.</summary>
         protected List<IHttpExecuteInterceptor> _executeInterceptors;
 
         /// <summary>
@@ -82,9 +79,10 @@ namespace Google.Apis.Requests
         }
 
         /// <summary>
-        /// Add an unsuccessful response handler for this request only.
+        /// Add an execute interceptor for this request only.
+        /// If the request is retried, the interceptor will be called on each attempt.
         /// </summary>
-        /// <param name="handler">The unsuccessful response handler. Must not be <c>null</c>.</param>
+        /// <param name="handler">The execute interceptor. Must not be <c>null</c>.</param>
         public void AddExecuteInterceptor(IHttpExecuteInterceptor handler)
         {
             handler.ThrowIfNull(nameof(handler));
@@ -103,6 +101,8 @@ namespace Google.Apis.Requests
     /// <typeparam name="TResponse">The type of the response object</typeparam>
     public abstract class ClientServiceRequest<TResponse> : ClientServiceRequest, IClientServiceRequest<TResponse>
     {
+        internal const string ApiVersionHeaderName = "x-goog-api-version";
+
         /// <summary>The class logger.</summary>
         private static readonly ILogger Logger = ApplicationContext.Logger.ForType<ClientServiceRequest<TResponse>>();
 
@@ -124,6 +124,13 @@ namespace Google.Apis.Requests
         /// whatever value is specified in the service.
         /// </summary>
         public bool? ValidateParameters { get; set; }
+
+        /// <summary>
+        /// The precise API version represented by this request.
+        /// Subclasses generated from a specific known version should override this property,
+        /// which will result in an x-api-version header being sent on the HTTP request.
+        /// </summary>
+        public virtual string ApiVersion => null;
 
         #region IClientServiceRequest Properties
 
@@ -198,10 +205,7 @@ namespace Google.Apis.Requests
                 // If an exception was thrown during the tasks, unwrap and throw it.
                 throw aex.InnerException;
             }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            // Any other exception will just bubble up.
         }
 
         /// <inheritdoc/>
@@ -255,7 +259,7 @@ namespace Google.Apis.Requests
                 return await service.DeserializeResponse<TResponse>(response).ConfigureAwait(false);
             }
             var error = await service.DeserializeError(response).ConfigureAwait(false);
-            throw new GoogleApiException(service.Name, error.ToString())
+            throw new GoogleApiException(service.Name)
             {
                 Error = error,
                 HttpStatusCode = response.StatusCode
@@ -267,7 +271,7 @@ namespace Google.Apis.Requests
         #endregion
 
         /// <inheritdoc/>
-        public HttpRequestMessage CreateRequest(Nullable<bool> overrideGZipEnabled = null)
+        public HttpRequestMessage CreateRequest(bool? overrideGZipEnabled = null)
         {
             var builder = CreateBuilder();
             var request = builder.CreateRequest();
@@ -275,22 +279,28 @@ namespace Google.Apis.Requests
             request.SetRequestSerailizedContent(service, body, overrideGZipEnabled.HasValue
                 ? overrideGZipEnabled.Value : service.GZipEnabled);
             AddETag(request);
+
             if (_unsuccessfulResponseHandlers != null)
             {
-                request.Properties.Add(ConfigurableMessageHandler.UnsuccessfulResponseHandlerKey, _unsuccessfulResponseHandlers);
+                request.SetOption(ConfigurableMessageHandler.UnsuccessfulResponseHandlerKey, _unsuccessfulResponseHandlers);
             }
             if (_exceptionHandlers != null)
             {
-                request.Properties.Add(ConfigurableMessageHandler.ExceptionHandlerKey, _exceptionHandlers);
+                request.SetOption(ConfigurableMessageHandler.ExceptionHandlerKey, _exceptionHandlers);
             }
             if (_executeInterceptors != null)
             {
-                request.Properties.Add(ConfigurableMessageHandler.ExecuteInterceptorKey, _executeInterceptors);
+                request.SetOption(ConfigurableMessageHandler.ExecuteInterceptorKey, _executeInterceptors);
             }
             if (Credential != null)
             {
-                request.Properties.Add(ConfigurableMessageHandler.CredentialKey, Credential);
+                request.SetOption(ConfigurableMessageHandler.CredentialKey, Credential);
             }
+            if (ApiVersion is string apiVersion)
+            {
+                request.Headers.Add(ApiVersionHeaderName, apiVersion);
+            }
+
             ModifyRequest?.Invoke(request);
             return request;
         }

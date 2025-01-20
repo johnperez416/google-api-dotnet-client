@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ namespace Google.Apis.AlertCenter.v1beta1
         {
             Alerts = new AlertsResource(this);
             V1beta1 = new V1beta1Resource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://alertcenter.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://alertcenter.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -45,23 +47,16 @@ namespace Google.Apis.AlertCenter.v1beta1
         public override string Name => "alertcenter";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://alertcenter.googleapis.com/";
-        #else
-            "https://alertcenter.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://alertcenter.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Google Workspace Alert Center API.</summary>
         public class Scope
@@ -306,7 +301,7 @@ namespace Google.Apis.AlertCenter.v1beta1
             /// <param name="alertId">Required. The identifier of the alert this feedback belongs to.</param>
             public virtual CreateRequest Create(Google.Apis.AlertCenter.v1beta1.Data.AlertFeedback body, string alertId)
             {
-                return new CreateRequest(service, body, alertId);
+                return new CreateRequest(this.service, body, alertId);
             }
 
             /// <summary>
@@ -329,8 +324,10 @@ namespace Google.Apis.AlertCenter.v1beta1
                 public virtual string AlertId { get; private set; }
 
                 /// <summary>
-                /// Optional. The unique identifier of the Google Workspace organization account of the customer the
-                /// alert is associated with. Inferred from the caller identity if not provided.
+                /// Optional. The unique identifier of the Google Workspace account of the customer the alert is
+                /// associated with. The `customer_id` must have the initial "C" stripped (for example, `046psxkn`).
+                /// Inferred from the caller identity if not provided. [Find your customer
+                /// ID](https://support.google.com/cloudidentity/answer/10070793).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("customerId", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string CustomerId { get; set; }
@@ -382,7 +379,7 @@ namespace Google.Apis.AlertCenter.v1beta1
             /// </param>
             public virtual ListRequest List(string alertId)
             {
-                return new ListRequest(service, alertId);
+                return new ListRequest(this.service, alertId);
             }
 
             /// <summary>
@@ -405,8 +402,10 @@ namespace Google.Apis.AlertCenter.v1beta1
                 public virtual string AlertId { get; private set; }
 
                 /// <summary>
-                /// Optional. The unique identifier of the Google Workspace organization account of the customer the
-                /// alert feedback are associated with. Inferred from the caller identity if not provided.
+                /// Optional. The unique identifier of the Google Workspace account of the customer the alert is
+                /// associated with. The `customer_id` must have the initial "C" stripped (for example, `046psxkn`).
+                /// Inferred from the caller identity if not provided. [Find your customer
+                /// ID](https://support.google.com/cloudidentity/answer/10070793).
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("customerId", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string CustomerId { get; set; }
@@ -465,7 +464,7 @@ namespace Google.Apis.AlertCenter.v1beta1
         /// <param name="body">The body of the request.</param>
         public virtual BatchDeleteRequest BatchDelete(Google.Apis.AlertCenter.v1beta1.Data.BatchDeleteAlertsRequest body)
         {
-            return new BatchDeleteRequest(service, body);
+            return new BatchDeleteRequest(this.service, body);
         }
 
         /// <summary>Performs batch delete operation on alerts.</summary>
@@ -504,7 +503,7 @@ namespace Google.Apis.AlertCenter.v1beta1
         /// <param name="body">The body of the request.</param>
         public virtual BatchUndeleteRequest BatchUndelete(Google.Apis.AlertCenter.v1beta1.Data.BatchUndeleteAlertsRequest body)
         {
-            return new BatchUndeleteRequest(service, body);
+            return new BatchUndeleteRequest(this.service, body);
         }
 
         /// <summary>Performs batch undelete operation on alerts.</summary>
@@ -547,7 +546,7 @@ namespace Google.Apis.AlertCenter.v1beta1
         /// <param name="alertId">Required. The identifier of the alert to delete.</param>
         public virtual DeleteRequest Delete(string alertId)
         {
-            return new DeleteRequest(service, alertId);
+            return new DeleteRequest(this.service, alertId);
         }
 
         /// <summary>
@@ -569,8 +568,10 @@ namespace Google.Apis.AlertCenter.v1beta1
             public virtual string AlertId { get; private set; }
 
             /// <summary>
-            /// Optional. The unique identifier of the Google Workspace organization account of the customer the alert
-            /// is associated with. Inferred from the caller identity if not provided.
+            /// Optional. The unique identifier of the Google Workspace account of the customer the alert is associated
+            /// with. The `customer_id` must have the initial "C" stripped (for example, `046psxkn`). Inferred from the
+            /// caller identity if not provided. [Find your customer
+            /// ID](https://support.google.com/cloudidentity/answer/10070793).
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("customerId", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string CustomerId { get; set; }
@@ -613,7 +614,7 @@ namespace Google.Apis.AlertCenter.v1beta1
         /// <param name="alertId">Required. The identifier of the alert to retrieve.</param>
         public virtual GetRequest Get(string alertId)
         {
-            return new GetRequest(service, alertId);
+            return new GetRequest(this.service, alertId);
         }
 
         /// <summary>
@@ -633,8 +634,10 @@ namespace Google.Apis.AlertCenter.v1beta1
             public virtual string AlertId { get; private set; }
 
             /// <summary>
-            /// Optional. The unique identifier of the Google Workspace organization account of the customer the alert
-            /// is associated with. Inferred from the caller identity if not provided.
+            /// Optional. The unique identifier of the Google Workspace account of the customer the alert is associated
+            /// with. The `customer_id` must have the initial "C" stripped (for example, `046psxkn`). Inferred from the
+            /// caller identity if not provided. [Find your customer
+            /// ID](https://support.google.com/cloudidentity/answer/10070793).
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("customerId", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string CustomerId { get; set; }
@@ -678,7 +681,7 @@ namespace Google.Apis.AlertCenter.v1beta1
         /// <param name="alertId">Required. The identifier of the alert this metadata belongs to.</param>
         public virtual GetMetadataRequest GetMetadata(string alertId)
         {
-            return new GetMetadataRequest(service, alertId);
+            return new GetMetadataRequest(this.service, alertId);
         }
 
         /// <summary>
@@ -699,8 +702,10 @@ namespace Google.Apis.AlertCenter.v1beta1
             public virtual string AlertId { get; private set; }
 
             /// <summary>
-            /// Optional. The unique identifier of the Google Workspace organization account of the customer the alert
-            /// metadata is associated with. Inferred from the caller identity if not provided.
+            /// Optional. The unique identifier of the Google Workspace account of the customer the alert metadata is
+            /// associated with. The `customer_id` must have the initial "C" stripped (for example, `046psxkn`).
+            /// Inferred from the caller identity if not provided. [Find your customer
+            /// ID](https://support.google.com/cloudidentity/answer/10070793).
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("customerId", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string CustomerId { get; set; }
@@ -740,7 +745,7 @@ namespace Google.Apis.AlertCenter.v1beta1
         /// <summary>Lists the alerts.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>Lists the alerts.</summary>
@@ -753,8 +758,10 @@ namespace Google.Apis.AlertCenter.v1beta1
             }
 
             /// <summary>
-            /// Optional. The unique identifier of the Google Workspace organization account of the customer the alerts
-            /// are associated with. Inferred from the caller identity if not provided.
+            /// Optional. The unique identifier of the Google Workspace account of the customer the alerts are
+            /// associated with. The `customer_id` must have the initial "C" stripped (for example, `046psxkn`).
+            /// Inferred from the caller identity if not provided. [Find your customer
+            /// ID](https://support.google.com/cloudidentity/answer/10070793).
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("customerId", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string CustomerId { get; set; }
@@ -857,7 +864,7 @@ namespace Google.Apis.AlertCenter.v1beta1
         /// <param name="alertId">Required. The identifier of the alert to undelete.</param>
         public virtual UndeleteRequest Undelete(Google.Apis.AlertCenter.v1beta1.Data.UndeleteAlertRequest body, string alertId)
         {
-            return new UndeleteRequest(service, body, alertId);
+            return new UndeleteRequest(this.service, body, alertId);
         }
 
         /// <summary>
@@ -928,7 +935,7 @@ namespace Google.Apis.AlertCenter.v1beta1
         /// <summary>Returns customer-level settings.</summary>
         public virtual GetSettingsRequest GetSettings()
         {
-            return new GetSettingsRequest(service);
+            return new GetSettingsRequest(this.service);
         }
 
         /// <summary>Returns customer-level settings.</summary>
@@ -941,8 +948,10 @@ namespace Google.Apis.AlertCenter.v1beta1
             }
 
             /// <summary>
-            /// Optional. The unique identifier of the Google Workspace organization account of the customer the alert
-            /// settings are associated with. Inferred from the caller identity if not provided.
+            /// Optional. The unique identifier of the Google Workspace account of the customer the alert settings are
+            /// associated with. The `customer_id` must/ have the initial "C" stripped (for example, `046psxkn`).
+            /// Inferred from the caller identity if not provided. [Find your customer
+            /// ID](https://support.google.com/cloudidentity/answer/10070793).
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("customerId", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string CustomerId { get; set; }
@@ -975,7 +984,7 @@ namespace Google.Apis.AlertCenter.v1beta1
         /// <param name="body">The body of the request.</param>
         public virtual UpdateSettingsRequest UpdateSettings(Google.Apis.AlertCenter.v1beta1.Data.Settings body)
         {
-            return new UpdateSettingsRequest(service, body);
+            return new UpdateSettingsRequest(this.service, body);
         }
 
         /// <summary>Updates the customer-level settings.</summary>
@@ -989,8 +998,10 @@ namespace Google.Apis.AlertCenter.v1beta1
             }
 
             /// <summary>
-            /// Optional. The unique identifier of the Google Workspace organization account of the customer the alert
-            /// settings are associated with. Inferred from the caller identity if not provided.
+            /// Optional. The unique identifier of the Google Workspace account of the customer the alert settings are
+            /// associated with. The `customer_id` must have the initial "C" stripped (for example, `046psxkn`).
+            /// Inferred from the caller identity if not provided. [Find your customer
+            /// ID](https://support.google.com/cloudidentity/answer/10070793).
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("customerId", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string CustomerId { get; set; }
@@ -1028,6 +1039,70 @@ namespace Google.Apis.AlertCenter.v1beta1
 }
 namespace Google.Apis.AlertCenter.v1beta1.Data
 {
+    /// <summary>A generic alert for abusive user activity occurring with a customer.</summary>
+    public class AbuseDetected : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>List of abusive users/entities to be displayed in a table in the alert.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("additionalDetails")]
+        public virtual EntityList AdditionalDetails { get; set; }
+
+        /// <summary>Product that the abuse is originating from.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("product")]
+        public virtual string Product { get; set; }
+
+        /// <summary>Unique identifier of each sub alert that is onboarded.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("subAlertId")]
+        public virtual string SubAlertId { get; set; }
+
+        /// <summary>
+        /// Variation of AbuseDetected alerts. The variation_type determines the texts displayed the alert details. This
+        /// differs from sub_alert_id because each sub alert can have multiple variation_types, representing different
+        /// stages of the alert.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("variationType")]
+        public virtual string VariationType { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Alert that is triggered when Google support requests to access customer data.</summary>
+    public class AccessApproval : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Justification for data access based on justification enums.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("justificationReason")]
+        public virtual System.Collections.Generic.IList<string> JustificationReason { get; set; }
+
+        /// <summary>Office location of Google staff requesting access such as "US".</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("officeLocation")]
+        public virtual string OfficeLocation { get; set; }
+
+        /// <summary>Products within scope of the Access Approvals request.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("products")]
+        public virtual System.Collections.Generic.IList<string> Products { get; set; }
+
+        /// <summary>
+        /// ID of the Access Approvals request. This is a helpful field when requesting support from Google.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requestId")]
+        public virtual string RequestId { get; set; }
+
+        /// <summary>
+        /// Scope of access, also known as a resource. This is further narrowed down by the product field.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("scope")]
+        public virtual string Scope { get; set; }
+
+        /// <summary>
+        /// Support tickets related to this Access Approvals request. Populated if there is an associated case number.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tickets")]
+        public virtual System.Collections.Generic.IList<SupportTicket> Tickets { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Details about why an account is receiving an account suspension warning.</summary>
     public class AccountSuspensionDetails : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1101,9 +1176,42 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("actionNames")]
         public virtual System.Collections.Generic.IList<string> ActionNames { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Rule create timestamp.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Description of the rule.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
@@ -1143,9 +1251,42 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("triggerSource")]
         public virtual string TriggerSource { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>The timestamp of the last update to the rule.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Rule window size. Possible values are 1 hour or 24 hours.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("windowSize")]
@@ -1162,11 +1303,44 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("alertId")]
         public virtual string AlertId { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time this alert was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
 
-        /// <summary>Output only. The unique identifier of the Google account of the customer.</summary>
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Output only. The unique identifier of the Google Workspace account of the customer.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("customerId")]
         public virtual string CustomerId { get; set; }
 
@@ -1180,12 +1354,45 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("deleted")]
         public virtual System.Nullable<bool> Deleted { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>
         /// Optional. The time the event that caused this alert ceased being active. If provided, the end time must not
         /// be earlier than the start time. If not provided, it indicates an ongoing alert.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Optional. `etag` is used for optimistic concurrency control as a way to help prevent simultaneous updates of
@@ -1218,9 +1425,42 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("source")]
         public virtual string Source { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>Required. The time the event that caused this alert was started or detected.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Required. The type of the alert. This is output only after alert is created. For a list of available alert
@@ -1230,9 +1470,42 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The time this alert was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
     }
 
     /// <summary>A customer feedback about an alert.</summary>
@@ -1242,11 +1515,44 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("alertId")]
         public virtual string AlertId { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time this feedback was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
 
-        /// <summary>Output only. The unique identifier of the Google account of the customer.</summary>
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Output only. The unique identifier of the Google Workspace account of the customer.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("customerId")]
         public virtual string CustomerId { get; set; }
 
@@ -1277,14 +1583,14 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("assignee")]
         public virtual string Assignee { get; set; }
 
-        /// <summary>Output only. The unique identifier of the Google account of the customer.</summary>
+        /// <summary>Output only. The unique identifier of the Google Workspace account of the customer.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("customerId")]
         public virtual string CustomerId { get; set; }
 
         /// <summary>
         /// Optional. `etag` is used for optimistic concurrency control as a way to help prevent simultaneous updates of
         /// an alert metadata from overwriting each other. It is strongly suggested that systems make use of the `etag`
-        /// in the read-modify-write cycle to perform metatdata updates in order to avoid race conditions: An `etag` is
+        /// in the read-modify-write cycle to perform metadata updates in order to avoid race conditions: An `etag` is
         /// returned in the response which contains alert metadata, and systems are expected to put that etag in the
         /// request to update alert metadata to ensure that their change will be applied to the same version of the
         /// alert metadata. If no `etag` is provided in the call to update alert metadata, then the existing alert
@@ -1308,9 +1614,99 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("status")]
         public virtual string Status { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The time this metadata was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+    }
+
+    /// <summary>
+    /// The explanation message associated with "APNS certificate is expiring soon" and "APNS certificate has expired"
+    /// alerts.
+    /// </summary>
+    public class ApnsCertificateExpirationInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The Apple ID used to create the certificate. It may be blank if admins didn't enter it.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("appleId")]
+        public virtual string AppleId { get; set; }
+
+        private string _expirationTimeRaw;
+
+        private object _expirationTime;
+
+        /// <summary>The expiration date of the APNS certificate.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expirationTime")]
+        public virtual string ExpirationTimeRaw
+        {
+            get => _expirationTimeRaw;
+            set
+            {
+                _expirationTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expirationTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpirationTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpirationTimeDateTimeOffset instead.")]
+        public virtual object ExpirationTime
+        {
+            get => _expirationTime;
+            set
+            {
+                _expirationTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expirationTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpirationTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpirationTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpirationTimeRaw);
+            set => ExpirationTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The UID of the certificate.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uid")]
+        public virtual string Uid { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
     }
 
     /// <summary>Alerts from App Maker to notify admins to set up default SQL instance.</summary>
@@ -1325,8 +1721,8 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
     }
 
     /// <summary>
-    /// Alerts from AppSettingsChanged bucket Rules configured by Admin which contain the below rules. Calendar settings
-    /// changed Drive settings changed Email settings changed Mobile settings changed
+    /// * Alerts from AppSettingsChanged bucket Rules configured by Admin which contain the below rules. Calendar
+    /// settings changed Drive settings changed Email settings changed Mobile settings changed
     /// </summary>
     public class AppSettingsChanged : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1349,19 +1745,99 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("dashboardUri")]
         public virtual string DashboardUri { get; set; }
 
+        /// <summary>Incident tracking ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("incidentTrackingId")]
+        public virtual string IncidentTrackingId { get; set; }
+
+        /// <summary>
+        /// Indicates new alert details under which the outage is communicated. Only populated when Status is MERGED.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mergeInfo")]
+        public virtual MergeInfo MergeInfo { get; set; }
+
+        private string _nextUpdateTimeRaw;
+
+        private object _nextUpdateTime;
+
         /// <summary>Timestamp by which the next update is expected to arrive.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextUpdateTime")]
-        public virtual object NextUpdateTime { get; set; }
+        public virtual string NextUpdateTimeRaw
+        {
+            get => _nextUpdateTimeRaw;
+            set
+            {
+                _nextUpdateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _nextUpdateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="NextUpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use NextUpdateTimeDateTimeOffset instead.")]
+        public virtual object NextUpdateTime
+        {
+            get => _nextUpdateTime;
+            set
+            {
+                _nextUpdateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _nextUpdateTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="NextUpdateTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? NextUpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(NextUpdateTimeRaw);
+            set => NextUpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>List of products impacted by the outage.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("products")]
         public virtual System.Collections.Generic.IList<string> Products { get; set; }
 
+        private string _resolutionTimeRaw;
+
+        private object _resolutionTime;
+
         /// <summary>
         /// Timestamp when the outage is expected to be resolved, or has confirmed resolution. Provided only when known.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("resolutionTime")]
-        public virtual object ResolutionTime { get; set; }
+        public virtual string ResolutionTimeRaw
+        {
+            get => _resolutionTimeRaw;
+            set
+            {
+                _resolutionTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _resolutionTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ResolutionTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ResolutionTimeDateTimeOffset instead.")]
+        public virtual object ResolutionTime
+        {
+            get => _resolutionTime;
+            set
+            {
+                _resolutionTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _resolutionTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="ResolutionTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ResolutionTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ResolutionTimeRaw);
+            set => ResolutionTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Current outage status.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("status")]
@@ -1411,13 +1887,15 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
     /// <summary>A request to perform batch delete on alerts.</summary>
     public class BatchDeleteAlertsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Required. list of alert IDs.</summary>
+        /// <summary>Required. The list of alert IDs to delete.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("alertId")]
         public virtual System.Collections.Generic.IList<string> AlertId { get; set; }
 
         /// <summary>
-        /// Optional. The unique identifier of the Google Workspace organization account of the customer the alerts are
-        /// associated with.
+        /// Optional. The unique identifier of the Google Workspace account of the customer the alerts are associated
+        /// with. The `customer_id` must have the initial "C" stripped (for example, `046psxkn`). Inferred from the
+        /// caller identity if not provided. [Find your customer
+        /// ID](https://support.google.com/cloudidentity/answer/10070793).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("customerId")]
         public virtual string CustomerId { get; set; }
@@ -1429,7 +1907,7 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
     /// <summary>Response to batch delete operation on alerts.</summary>
     public class BatchDeleteAlertsResponse : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The status details for each failed alert_id.</summary>
+        /// <summary>The status details for each failed `alert_id`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("failedAlertStatus")]
         public virtual System.Collections.Generic.IDictionary<string, Status> FailedAlertStatus { get; set; }
 
@@ -1444,13 +1922,15 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
     /// <summary>A request to perform batch undelete on alerts.</summary>
     public class BatchUndeleteAlertsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Required. list of alert IDs.</summary>
+        /// <summary>Required. The list of alert IDs to undelete.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("alertId")]
         public virtual System.Collections.Generic.IList<string> AlertId { get; set; }
 
         /// <summary>
-        /// Optional. The unique identifier of the Google Workspace organization account of the customer the alerts are
-        /// associated with.
+        /// Optional. The unique identifier of the Google Workspace account of the customer the alerts are associated
+        /// with. The `customer_id` must have the initial "C" stripped (for example, `046psxkn`). Inferred from the
+        /// caller identity if not provided. [Find your customer
+        /// ID](https://support.google.com/cloudidentity/answer/10070793).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("customerId")]
         public virtual string CustomerId { get; set; }
@@ -1462,7 +1942,7 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
     /// <summary>Response to batch undelete operation on alerts.</summary>
     public class BatchUndeleteAlertsResponse : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The status details for each failed alert_id.</summary>
+        /// <summary>The status details for each failed `alert_id`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("failedAlertStatus")]
         public virtual System.Collections.Generic.IDictionary<string, Status> FailedAlertStatus { get; set; }
 
@@ -1579,6 +2059,53 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Alerts from Device Management Rules configured by Admin.</summary>
+    public class DeviceManagementRule : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The device ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deviceId")]
+        public virtual string DeviceId { get; set; }
+
+        /// <summary>The model of the device.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deviceModel")]
+        public virtual string DeviceModel { get; set; }
+
+        /// <summary>The type of the device.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deviceType")]
+        public virtual string DeviceType { get; set; }
+
+        /// <summary>The email of the user this alert was created for.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("email")]
+        public virtual string Email { get; set; }
+
+        /// <summary>ID of the rule that triggered the alert</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>Required for iOS, empty for others.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("iosVendorId")]
+        public virtual string IosVendorId { get; set; }
+
+        /// <summary>Obfuscated ID of the owner of the device</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ownerId")]
+        public virtual string OwnerId { get; set; }
+
+        /// <summary>The device resource ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("resourceId")]
+        public virtual string ResourceId { get; set; }
+
+        /// <summary>Action taken as result of the rule</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ruleAction")]
+        public virtual string RuleAction { get; set; }
+
+        /// <summary>The serial number of the device.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("serialNumber")]
+        public virtual string SerialNumber { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Alerts that get triggered on violations of Data Loss Prevention (DLP) rules.</summary>
     public class DlpRuleViolation : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1623,11 +2150,52 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Individual entity affected by, or related to, an alert.</summary>
+    public class Entity : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Link to a Security Investigation Tool search based on this entity, if available.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("link")]
+        public virtual string Link { get; set; }
+
+        /// <summary>Human-readable name of this entity, such as an email address, file ID, or device name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Extra values beyond name. The order of values should align with headers in EntityList.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("values")]
+        public virtual System.Collections.Generic.IList<string> Values { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// EntityList stores entities in a format that can be translated to a table in the Alert Center UI.
+    /// </summary>
+    public class EntityList : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>List of entities affected by the alert.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("entities")]
+        public virtual System.Collections.Generic.IList<Entity> Entities { get; set; }
+
+        /// <summary>
+        /// Headers of the values in entities. If no value is defined in Entity, this field should be empty.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("headers")]
+        public virtual System.Collections.Generic.IList<string> Headers { get; set; }
+
+        /// <summary>Name of the key detail used to display this entity list.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -1639,9 +2207,42 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("attachmentsSha256Hash")]
         public virtual System.Collections.Generic.IList<string> AttachmentsSha256Hash { get; set; }
 
+        private string _dateRaw;
+
+        private object _date;
+
         /// <summary>The date of the event related to this email.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("date")]
-        public virtual object Date { get; set; }
+        public virtual string DateRaw
+        {
+            get => _dateRaw;
+            set
+            {
+                _date = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _dateRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="DateRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use DateDateTimeOffset instead.")]
+        public virtual object Date
+        {
+            get => _date;
+            set
+            {
+                _dateRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _date = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="DateRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? DateDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(DateRaw);
+            set => DateRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The hash of the message body text.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("md5HashMessageBody")]
@@ -1662,6 +2263,43 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
         /// <summary>The recipient of this email.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("recipient")]
         public virtual string Recipient { get; set; }
+
+        private string _sentTimeRaw;
+
+        private object _sentTime;
+
+        /// <summary>The sent time of the email.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sentTime")]
+        public virtual string SentTimeRaw
+        {
+            get => _sentTimeRaw;
+            set
+            {
+                _sentTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _sentTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="SentTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use SentTimeDateTimeOffset instead.")]
+        public virtual object SentTime
+        {
+            get => _sentTime;
+            set
+            {
+                _sentTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _sentTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="SentTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? SentTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(SentTimeRaw);
+            set => SentTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The email subject text (only available for reported emails).</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("subjectText")]
@@ -1688,6 +2326,10 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
         /// <summary>A detailed, freeform incident description.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
         public virtual string Description { get; set; }
+
+        /// <summary>Customer domain for email template personalization.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("domain")]
+        public virtual string Domain { get; set; }
 
         /// <summary>
         /// A header to display above the incident message. Typically used to attach a localized notice on the timeline
@@ -1746,12 +2388,45 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("ipAddress")]
         public virtual string IpAddress { get; set; }
 
+        private string _loginTimeRaw;
+
+        private object _loginTime;
+
         /// <summary>
         /// Optional. The successful login time that is associated with the warning event. This isn't present for
         /// blocked login attempts.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("loginTime")]
-        public virtual object LoginTime { get; set; }
+        public virtual string LoginTimeRaw
+        {
+            get => _loginTimeRaw;
+            set
+            {
+                _loginTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _loginTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LoginTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LoginTimeDateTimeOffset instead.")]
+        public virtual object LoginTime
+        {
+            get => _loginTime;
+            set
+            {
+                _loginTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _loginTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LoginTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LoginTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LoginTimeRaw);
+            set => LoginTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1807,6 +2482,23 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// Alert Created by the MSA team for communications necessary for continued use of Google Workspace Products.
+    /// </summary>
+    public class MandatoryServiceAnnouncement : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Detailed, freeform text describing the announcement</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>One line summary of the announcement</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("title")]
+        public virtual string Title { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Proto that contains match information from the condition part of the rule.</summary>
     public class MatchInfo : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1817,6 +2509,23 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
         /// <summary>For matched detector defined by administrators.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("userDefinedDetector")]
         public virtual UserDefinedDetectorInfo UserDefinedDetector { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>New alert tracking numbers.</summary>
+    public class MergeInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Optional. New alert ID. Reference the [google.apps.alertcenter.Alert] with this ID for the current state.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("newAlertId")]
+        public virtual string NewAlertId { get; set; }
+
+        /// <summary>The new tracking ID from the parent incident.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("newIncidentTrackingId")]
+        public virtual string NewIncidentTrackingId { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1873,6 +2582,28 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// * Event occurred when primary admin changed in customer's account. The event are being received from insight
+    /// forwarder
+    /// </summary>
+    public class PrimaryAdminChangedEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>domain in which actioned occurred</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("domain")]
+        public virtual string Domain { get; set; }
+
+        /// <summary>Email of person who was the primary admin before the action</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("previousAdminEmail")]
+        public virtual string PreviousAdminEmail { get; set; }
+
+        /// <summary>Email of person who is the primary admin after the action</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updatedAdminEmail")]
+        public virtual string UpdatedAdminEmail { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Alerts from Reporting Rules configured by Admin.</summary>
     public class ReportingRule : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1917,6 +2648,21 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
     /// <summary>Proto that contains resource information.</summary>
     public class ResourceInfo : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Chat attachment ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("chatAttachmentId")]
+        public virtual string ChatAttachmentId { get; set; }
+
+        /// <summary>Chat message ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("chatMessageId")]
+        public virtual string ChatMessageId { get; set; }
+
+        /// <summary>
+        /// Id to identify a device. For example, for Android devices, this is the "Android Device Id" and for Chrome OS
+        /// devices, it's the "Device Virtual Id".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deviceId")]
+        public virtual string DeviceId { get; set; }
+
         /// <summary>Drive file ID.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("documentId")]
         public virtual string DocumentId { get; set; }
@@ -1952,6 +2698,10 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
         /// <summary>Source of the data.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dataSource")]
         public virtual string DataSource { get; set; }
+
+        /// <summary>Event associated with this alert after applying the rule.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("eventType")]
+        public virtual string EventType { get; set; }
 
         /// <summary>List of matches that were found in the resource content.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("matchInfo")]
@@ -1996,6 +2746,120 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("triggeringUserEmail")]
         public virtual string TriggeringUserEmail { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// * Event occurred when SSO Profile created in customer's account. The event are being received from insight
+    /// forwarder
+    /// </summary>
+    public class SSOProfileCreatedEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>sso profile name which got created</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inboundSsoProfileName")]
+        public virtual string InboundSsoProfileName { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// * Event occurred when SSO Profile deleted in customer's account. The event are being received from insight
+    /// forwarder
+    /// </summary>
+    public class SSOProfileDeletedEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>sso profile name which got deleted</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inboundSsoProfileName")]
+        public virtual string InboundSsoProfileName { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// * Event occurred when SSO Profile updated in customer's account. The event are being received from insight
+    /// forwarder
+    /// </summary>
+    public class SSOProfileUpdatedEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>changes made to sso profile</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inboundSsoProfileChanges")]
+        public virtual string InboundSsoProfileChanges { get; set; }
+
+        /// <summary>sso profile name which got updated</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("inboundSsoProfileName")]
+        public virtual string InboundSsoProfileName { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Alert that is triggered when Sensitive Admin Action occur in customer account.</summary>
+    public class SensitiveAdminAction : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Email of person who performed the action</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("actorEmail")]
+        public virtual string ActorEmail { get; set; }
+
+        private string _eventTimeRaw;
+
+        private object _eventTime;
+
+        /// <summary>The time at which event occurred</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("eventTime")]
+        public virtual string EventTimeRaw
+        {
+            get => _eventTimeRaw;
+            set
+            {
+                _eventTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _eventTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EventTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EventTimeDateTimeOffset instead.")]
+        public virtual object EventTime
+        {
+            get => _eventTime;
+            set
+            {
+                _eventTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _eventTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EventTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EventTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EventTimeRaw);
+            set => EventTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Event occurred when primary admin changed in customer's account</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("primaryAdminChangedEvent")]
+        public virtual PrimaryAdminChangedEvent PrimaryAdminChangedEvent { get; set; }
+
+        /// <summary>Event occurred when SSO Profile created in customer's account</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ssoProfileCreatedEvent")]
+        public virtual SSOProfileCreatedEvent SsoProfileCreatedEvent { get; set; }
+
+        /// <summary>Event occurred when SSO Profile deleted in customer's account</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ssoProfileDeletedEvent")]
+        public virtual SSOProfileDeletedEvent SsoProfileDeletedEvent { get; set; }
+
+        /// <summary>Event occurred when SSO Profile updated in customer's account</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ssoProfileUpdatedEvent")]
+        public virtual SSOProfileUpdatedEvent SsoProfileUpdatedEvent { get; set; }
+
+        /// <summary>Event occurred when password was reset for super admin in customer's account</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("superAdminPasswordResetEvent")]
+        public virtual SuperAdminPasswordResetEvent SuperAdminPasswordResetEvent { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2047,6 +2911,35 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("message")]
         public virtual string Message { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// * Event occurred when password was reset for super admin in customer's account. The event are being received
+    /// from insight forwarder
+    /// </summary>
+    public class SuperAdminPasswordResetEvent : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>email of person whose password was reset</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("userEmail")]
+        public virtual string UserEmail { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Support ticket related to Access Approvals request</summary>
+    public class SupportTicket : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Support ticket ID</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ticketId")]
+        public virtual string TicketId { get; set; }
+
+        /// <summary>Link to support ticket</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ticketUrl")]
+        public virtual string TicketUrl { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2110,12 +3003,55 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Details for an invalid transfer or forward.</summary>
+    public class TransferError : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>User's email address. This may be unavailable if the entity was deleted.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("email")]
+        public virtual string Email { get; set; }
+
+        /// <summary>Type of entity being transferred to. For ring group members, this should always be USER.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("entityType")]
+        public virtual string EntityType { get; set; }
+
+        /// <summary>Ring group or auto attendant ID. Not set for users.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("id")]
+        public virtual string Id { get; set; }
+
+        /// <summary>Reason for the error.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("invalidReason")]
+        public virtual string InvalidReason { get; set; }
+
+        /// <summary>
+        /// User's full name, or the ring group / auto attendant name. This may be unavailable if the entity was
+        /// deleted.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Error related to transferring or forwarding a phone call.</summary>
+    public class TransferMisconfiguration : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Details for each invalid transfer or forward.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("errors")]
+        public virtual System.Collections.Generic.IList<TransferError> Errors { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>A request to undelete a specific alert that was marked for deletion.</summary>
     public class UndeleteAlertRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Optional. The unique identifier of the Google Workspace organization account of the customer the alert is
-        /// associated with. Inferred from the caller identity if not provided.
+        /// Optional. The unique identifier of the Google Workspace account of the customer the alert is associated
+        /// with. The `customer_id` must have the initial "C" stripped (for example, `046psxkn`). Inferred from the
+        /// caller identity if not provided. [Find your customer
+        /// ID](https://support.google.com/cloudidentity/answer/10070793).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("customerId")]
         public virtual string CustomerId { get; set; }
@@ -2140,7 +3076,7 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
     }
 
     /// <summary>
-    /// Alerts from UserChanges bucket Rules for predefined rules which contain the below rules. Suspended user made
+    /// * Alerts from UserChanges bucket Rules for predefined rules which contain the below rules. Suspended user made
     /// active New user Added User suspended (by admin) User granted admin privileges User admin privileges revoked User
     /// deleted Users password changed
     /// </summary>
@@ -2164,6 +3100,68 @@ namespace Google.Apis.AlertCenter.v1beta1.Data
         /// <summary>Resource name that uniquely identifies the detector.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("resourceName")]
         public virtual string ResourceName { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// An alert triggered when Google Voice configuration becomes invalid, generally due to an external entity being
+    /// modified or deleted.
+    /// </summary>
+    public class VoiceMisconfiguration : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Name of the entity whose configuration is now invalid.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("entityName")]
+        public virtual string EntityName { get; set; }
+
+        /// <summary>Type of the entity whose configuration is now invalid.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("entityType")]
+        public virtual string EntityType { get; set; }
+
+        /// <summary>Link that the admin can follow to fix the issue.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fixUri")]
+        public virtual string FixUri { get; set; }
+
+        /// <summary>Issue(s) with members of a ring group.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("membersMisconfiguration")]
+        public virtual TransferMisconfiguration MembersMisconfiguration { get; set; }
+
+        /// <summary>Issue(s) with transferring or forwarding to an external entity.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("transferMisconfiguration")]
+        public virtual TransferMisconfiguration TransferMisconfiguration { get; set; }
+
+        /// <summary>Issue(s) with sending to voicemail.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("voicemailMisconfiguration")]
+        public virtual VoicemailMisconfiguration VoicemailMisconfiguration { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Issue(s) with sending to voicemail.</summary>
+    public class VoicemailMisconfiguration : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Issue(s) with voicemail recipients.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("errors")]
+        public virtual System.Collections.Generic.IList<VoicemailRecipientError> Errors { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Issue(s) with a voicemail recipient.</summary>
+    public class VoicemailRecipientError : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Email address of the invalid recipient. This may be unavailable if the recipient was deleted.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("email")]
+        public virtual string Email { get; set; }
+
+        /// <summary>Reason for the error.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("invalidReason")]
+        public virtual string InvalidReason { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

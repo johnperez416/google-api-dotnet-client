@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ namespace Google.Apis.Speech.v1p1beta1
             Operations = new OperationsResource(this);
             Projects = new ProjectsResource(this);
             Speech = new SpeechResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://speech.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://speech.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -46,23 +48,16 @@ namespace Google.Apis.Speech.v1p1beta1
         public override string Name => "speech";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://speech.googleapis.com/";
-        #else
-            "https://speech.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://speech.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Speech-to-Text API.</summary>
         public class Scope
@@ -296,7 +291,7 @@ namespace Google.Apis.Speech.v1p1beta1
         /// <param name="name">The name of the operation resource.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>
@@ -342,24 +337,16 @@ namespace Google.Apis.Speech.v1p1beta1
 
         /// <summary>
         /// Lists operations that match the specified filter in the request. If the server doesn't support this method,
-        /// it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the binding to use
-        /// different resource name schemes, such as `users/*/operations`. To override the binding, API services can add
-        /// a binding such as `"/v1/{name=users/*}/operations"` to their service configuration. For backwards
-        /// compatibility, the default name includes the operations collection id, however overriding users must ensure
-        /// the name binding is the parent resource, without the operations collection id.
+        /// it returns `UNIMPLEMENTED`.
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
         /// Lists operations that match the specified filter in the request. If the server doesn't support this method,
-        /// it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the binding to use
-        /// different resource name schemes, such as `users/*/operations`. To override the binding, API services can add
-        /// a binding such as `"/v1/{name=users/*}/operations"` to their service configuration. For backwards
-        /// compatibility, the default name includes the operations collection id, however overriding users must ensure
-        /// the name binding is the parent resource, without the operations collection id.
+        /// it returns `UNIMPLEMENTED`.
         /// </summary>
         public class ListRequest : SpeechBaseServiceRequest<Google.Apis.Speech.v1p1beta1.Data.ListOperationsResponse>
         {
@@ -489,11 +476,15 @@ namespace Google.Apis.Speech.v1p1beta1
                 /// <param name="body">The body of the request.</param>
                 /// <param name="parent">
                 /// Required. The parent resource where this custom class will be created. Format:
-                /// {api_version}/projects/{project}/locations/{location}/customClasses
+                /// `projects/{project}/locations/{location}/customClasses` Speech-to-Text supports three locations:
+                /// `global`, `us` (US North America), and `eu` (Europe). If you are calling the `speech.googleapis.com`
+                /// endpoint, use the `global` location. To specify a region, use a [regional
+                /// endpoint](https://cloud.google.com/speech-to-text/docs/endpoints) with matching `us` or `eu`
+                /// location value.
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.Speech.v1p1beta1.Data.CreateCustomClassRequest body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Create a custom class.</summary>
@@ -509,7 +500,11 @@ namespace Google.Apis.Speech.v1p1beta1
 
                     /// <summary>
                     /// Required. The parent resource where this custom class will be created. Format:
-                    /// {api_version}/projects/{project}/locations/{location}/customClasses
+                    /// `projects/{project}/locations/{location}/customClasses` Speech-to-Text supports three locations:
+                    /// `global`, `us` (US North America), and `eu` (Europe). If you are calling the
+                    /// `speech.googleapis.com` endpoint, use the `global` location. To specify a region, use a
+                    /// [regional endpoint](https://cloud.google.com/speech-to-text/docs/endpoints) with matching `us`
+                    /// or `eu` location value.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
@@ -547,11 +542,15 @@ namespace Google.Apis.Speech.v1p1beta1
                 /// <summary>Delete a custom class.</summary>
                 /// <param name="name">
                 /// Required. The name of the custom class to delete. Format:
-                /// {api_version}/projects/{project}/locations/{location}/customClasses/{custom_class}
+                /// `projects/{project}/locations/{location}/customClasses/{custom_class}` Speech-to-Text supports three
+                /// locations: `global`, `us` (US North America), and `eu` (Europe). If you are calling the
+                /// `speech.googleapis.com` endpoint, use the `global` location. To specify a region, use a [regional
+                /// endpoint](https://cloud.google.com/speech-to-text/docs/endpoints) with matching `us` or `eu`
+                /// location value.
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Delete a custom class.</summary>
@@ -566,7 +565,11 @@ namespace Google.Apis.Speech.v1p1beta1
 
                     /// <summary>
                     /// Required. The name of the custom class to delete. Format:
-                    /// {api_version}/projects/{project}/locations/{location}/customClasses/{custom_class}
+                    /// `projects/{project}/locations/{location}/customClasses/{custom_class}` Speech-to-Text supports
+                    /// three locations: `global`, `us` (US North America), and `eu` (Europe). If you are calling the
+                    /// `speech.googleapis.com` endpoint, use the `global` location. To specify a region, use a
+                    /// [regional endpoint](https://cloud.google.com/speech-to-text/docs/endpoints) with matching `us`
+                    /// or `eu` location value.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
@@ -598,11 +601,11 @@ namespace Google.Apis.Speech.v1p1beta1
                 /// <summary>Get a custom class.</summary>
                 /// <param name="name">
                 /// Required. The name of the custom class to retrieve. Format:
-                /// {api_version}/projects/{project}/locations/{location}/customClasses/{custom_class}
+                /// `projects/{project}/locations/{location}/customClasses/{custom_class}`
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Get a custom class.</summary>
@@ -617,7 +620,7 @@ namespace Google.Apis.Speech.v1p1beta1
 
                     /// <summary>
                     /// Required. The name of the custom class to retrieve. Format:
-                    /// {api_version}/projects/{project}/locations/{location}/customClasses/{custom_class}
+                    /// `projects/{project}/locations/{location}/customClasses/{custom_class}`
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
@@ -649,11 +652,15 @@ namespace Google.Apis.Speech.v1p1beta1
                 /// <summary>List custom classes.</summary>
                 /// <param name="parent">
                 /// Required. The parent, which owns this collection of custom classes. Format:
-                /// {api_version}/projects/{project}/locations/{location}/customClasses
+                /// `projects/{project}/locations/{location}/customClasses` Speech-to-Text supports three locations:
+                /// `global`, `us` (US North America), and `eu` (Europe). If you are calling the `speech.googleapis.com`
+                /// endpoint, use the `global` location. To specify a region, use a [regional
+                /// endpoint](https://cloud.google.com/speech-to-text/docs/endpoints) with matching `us` or `eu`
+                /// location value.
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>List custom classes.</summary>
@@ -668,7 +675,11 @@ namespace Google.Apis.Speech.v1p1beta1
 
                     /// <summary>
                     /// Required. The parent, which owns this collection of custom classes. Format:
-                    /// {api_version}/projects/{project}/locations/{location}/customClasses
+                    /// `projects/{project}/locations/{location}/customClasses` Speech-to-Text supports three locations:
+                    /// `global`, `us` (US North America), and `eu` (Europe). If you are calling the
+                    /// `speech.googleapis.com` endpoint, use the `global` location. To specify a region, use a
+                    /// [regional endpoint](https://cloud.google.com/speech-to-text/docs/endpoints) with matching `us`
+                    /// or `eu` location value.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
@@ -734,7 +745,7 @@ namespace Google.Apis.Speech.v1p1beta1
                 /// <param name="name">The resource name of the custom class.</param>
                 public virtual PatchRequest Patch(Google.Apis.Speech.v1p1beta1.Data.CustomClass body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>Update a custom class.</summary>
@@ -820,11 +831,15 @@ namespace Google.Apis.Speech.v1p1beta1
                 /// <param name="body">The body of the request.</param>
                 /// <param name="parent">
                 /// Required. The parent resource where this phrase set will be created. Format:
-                /// {api_version}/projects/{project}/locations/{location}/phraseSets
+                /// `projects/{project}/locations/{location}` Speech-to-Text supports three locations: `global`, `us`
+                /// (US North America), and `eu` (Europe). If you are calling the `speech.googleapis.com` endpoint, use
+                /// the `global` location. To specify a region, use a [regional
+                /// endpoint](https://cloud.google.com/speech-to-text/docs/endpoints) with matching `us` or `eu`
+                /// location value.
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.Speech.v1p1beta1.Data.CreatePhraseSetRequest body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>
@@ -844,7 +859,11 @@ namespace Google.Apis.Speech.v1p1beta1
 
                     /// <summary>
                     /// Required. The parent resource where this phrase set will be created. Format:
-                    /// {api_version}/projects/{project}/locations/{location}/phraseSets
+                    /// `projects/{project}/locations/{location}` Speech-to-Text supports three locations: `global`,
+                    /// `us` (US North America), and `eu` (Europe). If you are calling the `speech.googleapis.com`
+                    /// endpoint, use the `global` location. To specify a region, use a [regional
+                    /// endpoint](https://cloud.google.com/speech-to-text/docs/endpoints) with matching `us` or `eu`
+                    /// location value.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
@@ -882,11 +901,11 @@ namespace Google.Apis.Speech.v1p1beta1
                 /// <summary>Delete a phrase set.</summary>
                 /// <param name="name">
                 /// Required. The name of the phrase set to delete. Format:
-                /// {api_version}/projects/{project}/locations/{location}/phraseSets/{phrase_set}
+                /// `projects/{project}/locations/{location}/phraseSets/{phrase_set}`
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Delete a phrase set.</summary>
@@ -901,7 +920,7 @@ namespace Google.Apis.Speech.v1p1beta1
 
                     /// <summary>
                     /// Required. The name of the phrase set to delete. Format:
-                    /// {api_version}/projects/{project}/locations/{location}/phraseSets/{phrase_set}
+                    /// `projects/{project}/locations/{location}/phraseSets/{phrase_set}`
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
@@ -933,11 +952,15 @@ namespace Google.Apis.Speech.v1p1beta1
                 /// <summary>Get a phrase set.</summary>
                 /// <param name="name">
                 /// Required. The name of the phrase set to retrieve. Format:
-                /// {api_version}/projects/{project}/locations/{location}/phraseSets/{phrase_set}
+                /// `projects/{project}/locations/{location}/phraseSets/{phrase_set}` Speech-to-Text supports three
+                /// locations: `global`, `us` (US North America), and `eu` (Europe). If you are calling the
+                /// `speech.googleapis.com` endpoint, use the `global` location. To specify a region, use a [regional
+                /// endpoint](https://cloud.google.com/speech-to-text/docs/endpoints) with matching `us` or `eu`
+                /// location value.
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Get a phrase set.</summary>
@@ -952,7 +975,11 @@ namespace Google.Apis.Speech.v1p1beta1
 
                     /// <summary>
                     /// Required. The name of the phrase set to retrieve. Format:
-                    /// {api_version}/projects/{project}/locations/{location}/phraseSets/{phrase_set}
+                    /// `projects/{project}/locations/{location}/phraseSets/{phrase_set}` Speech-to-Text supports three
+                    /// locations: `global`, `us` (US North America), and `eu` (Europe). If you are calling the
+                    /// `speech.googleapis.com` endpoint, use the `global` location. To specify a region, use a
+                    /// [regional endpoint](https://cloud.google.com/speech-to-text/docs/endpoints) with matching `us`
+                    /// or `eu` location value.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
@@ -984,11 +1011,15 @@ namespace Google.Apis.Speech.v1p1beta1
                 /// <summary>List phrase sets.</summary>
                 /// <param name="parent">
                 /// Required. The parent, which owns this collection of phrase set. Format:
-                /// projects/{project}/locations/{location}
+                /// `projects/{project}/locations/{location}` Speech-to-Text supports three locations: `global`, `us`
+                /// (US North America), and `eu` (Europe). If you are calling the `speech.googleapis.com` endpoint, use
+                /// the `global` location. To specify a region, use a [regional
+                /// endpoint](https://cloud.google.com/speech-to-text/docs/endpoints) with matching `us` or `eu`
+                /// location value.
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>List phrase sets.</summary>
@@ -1003,7 +1034,11 @@ namespace Google.Apis.Speech.v1p1beta1
 
                     /// <summary>
                     /// Required. The parent, which owns this collection of phrase set. Format:
-                    /// projects/{project}/locations/{location}
+                    /// `projects/{project}/locations/{location}` Speech-to-Text supports three locations: `global`,
+                    /// `us` (US North America), and `eu` (Europe). If you are calling the `speech.googleapis.com`
+                    /// endpoint, use the `global` location. To specify a region, use a [regional
+                    /// endpoint](https://cloud.google.com/speech-to-text/docs/endpoints) with matching `us` or `eu`
+                    /// location value.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Parent { get; private set; }
@@ -1069,7 +1104,7 @@ namespace Google.Apis.Speech.v1p1beta1
                 /// <param name="name">The resource name of the phrase set.</param>
                 public virtual PatchRequest Patch(Google.Apis.Speech.v1p1beta1.Data.PhraseSet body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>Update a phrase set.</summary>
@@ -1155,7 +1190,7 @@ namespace Google.Apis.Speech.v1p1beta1
         /// <param name="body">The body of the request.</param>
         public virtual LongrunningrecognizeRequest Longrunningrecognize(Google.Apis.Speech.v1p1beta1.Data.LongRunningRecognizeRequest body)
         {
-            return new LongrunningrecognizeRequest(service, body);
+            return new LongrunningrecognizeRequest(this.service, body);
         }
 
         /// <summary>
@@ -1201,7 +1236,7 @@ namespace Google.Apis.Speech.v1p1beta1
         /// <param name="body">The body of the request.</param>
         public virtual RecognizeRequest Recognize(Google.Apis.Speech.v1p1beta1.Data.RecognizeRequest body)
         {
-            return new RecognizeRequest(service, body);
+            return new RecognizeRequest(this.service, body);
         }
 
         /// <summary>
@@ -1241,6 +1276,18 @@ namespace Google.Apis.Speech.v1p1beta1
 }
 namespace Google.Apis.Speech.v1p1beta1.Data
 {
+    public class ABNFGrammar : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// All declarations and rules of an ABNF grammar broken up into multiple strings that will end up concatenated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("abnfStrings")]
+        public virtual System.Collections.Generic.IList<string> AbnfStrings { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>An item of the class.</summary>
     public class ClassItem : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1261,7 +1308,8 @@ namespace Google.Apis.Speech.v1p1beta1.Data
 
         /// <summary>
         /// Required. The ID to use for the custom class, which will become the final component of the custom class'
-        /// resource name. This value should be 4-63 characters, and valid characters are /a-z-/.
+        /// resource name. This value should restrict to letters, numbers, and hyphens, with the first character a
+        /// letter, the last a letter or a number, and be 4-63 characters.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("customClassId")]
         public virtual string CustomClassId { get; set; }
@@ -1279,7 +1327,8 @@ namespace Google.Apis.Speech.v1p1beta1.Data
 
         /// <summary>
         /// Required. The ID to use for the phrase set, which will become the final component of the phrase set's
-        /// resource name. This value should be 4-63 characters, and valid characters are /a-z-/.
+        /// resource name. This value should restrict to letters, numbers, and hyphens, with the first character a
+        /// letter, the last a letter or a number, and be 4-63 characters.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("phraseSetId")]
         public virtual string PhraseSetId { get; set; }
@@ -1295,29 +1344,155 @@ namespace Google.Apis.Speech.v1p1beta1.Data
     public class CustomClass : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// Output only. Allows users to store small amounts of arbitrary data. Both the key and the value must be 63
+        /// characters or less each. At most 100 annotations. This field is not used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("annotations")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Annotations { get; set; }
+
+        /// <summary>
         /// If this custom class is a resource, the custom_class_id is the resource id of the CustomClass. Case
         /// sensitive.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("customClassId")]
         public virtual string CustomClassId { get; set; }
 
+        private string _deleteTimeRaw;
+
+        private object _deleteTime;
+
+        /// <summary>
+        /// Output only. The time at which this resource was requested for deletion. This field is not used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deleteTime")]
+        public virtual string DeleteTimeRaw
+        {
+            get => _deleteTimeRaw;
+            set
+            {
+                _deleteTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _deleteTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="DeleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use DeleteTimeDateTimeOffset instead.")]
+        public virtual object DeleteTime
+        {
+            get => _deleteTime;
+            set
+            {
+                _deleteTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _deleteTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="DeleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? DeleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(DeleteTimeRaw);
+            set => DeleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Output only. User-settable, human-readable name for the CustomClass. Must be 63 characters or less. This
+        /// field is not used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>
+        /// Output only. This checksum is computed by the server based on the value of other fields. This may be sent on
+        /// update, undelete, and delete requests to ensure the client has an up-to-date value before proceeding. This
+        /// field is not used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
+        /// <summary>Output only. The time at which this resource will be purged. This field is not used.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
         /// <summary>A collection of class items.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("items")]
         public virtual System.Collections.Generic.IList<ClassItem> Items { get; set; }
+
+        /// <summary>
+        /// Output only. The [KMS key name](https://cloud.google.com/kms/docs/resource-hierarchy#keys) with which the
+        /// content of the ClassItem is encrypted. The expected format is
+        /// `projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kmsKeyName")]
+        public virtual string KmsKeyName { get; set; }
+
+        /// <summary>
+        /// Output only. The [KMS key version name](https://cloud.google.com/kms/docs/resource-hierarchy#key_versions)
+        /// with which content of the ClassItem is encrypted. The expected format is
+        /// `projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}/cryptoKeyVersions/{crypto_key_version}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kmsKeyVersionName")]
+        public virtual string KmsKeyVersionName { get; set; }
 
         /// <summary>The resource name of the custom class.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
+        /// <summary>
+        /// Output only. Whether or not this CustomClass is in the process of being updated. This field is not used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("reconciling")]
+        public virtual System.Nullable<bool> Reconciling { get; set; }
+
+        /// <summary>Output only. The CustomClass lifecycle state. This field is not used.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>
+        /// Output only. System-assigned unique identifier for the CustomClass. This field is not used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uid")]
+        public virtual string Uid { get; set; }
     }
 
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1401,9 +1576,44 @@ namespace Google.Apis.Speech.v1p1beta1.Data
     /// </summary>
     public class LongRunningRecognizeMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _lastUpdateTimeRaw;
+
+        private object _lastUpdateTime;
+
         /// <summary>Time of the most recent processing update.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastUpdateTime")]
-        public virtual object LastUpdateTime { get; set; }
+        public virtual string LastUpdateTimeRaw
+        {
+            get => _lastUpdateTimeRaw;
+            set
+            {
+                _lastUpdateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastUpdateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastUpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastUpdateTimeDateTimeOffset instead.")]
+        public virtual object LastUpdateTime
+        {
+            get => _lastUpdateTime;
+            set
+            {
+                _lastUpdateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastUpdateTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastUpdateTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastUpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastUpdateTimeRaw);
+            set => LastUpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. A copy of the TranscriptOutputConfig if it was set in the request.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("outputConfig")]
@@ -1416,9 +1626,42 @@ namespace Google.Apis.Speech.v1p1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("progressPercent")]
         public virtual System.Nullable<int> ProgressPercent { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>Time when the request was received.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. The URI of the audio file being transcribed. Empty if the audio was sent as byte content.
@@ -1466,9 +1709,19 @@ namespace Google.Apis.Speech.v1p1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("outputError")]
         public virtual Status OutputError { get; set; }
 
+        /// <summary>
+        /// The ID associated with the request. This is a unique ID specific only to the given request.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requestId")]
+        public virtual System.Nullable<long> RequestId { get; set; }
+
         /// <summary>Sequential list of transcription results corresponding to sequential portions of audio.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("results")]
         public virtual System.Collections.Generic.IList<SpeechRecognitionResult> Results { get; set; }
+
+        /// <summary>Provides information on speech adaptation behavior in response</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("speechAdaptationInfo")]
+        public virtual SpeechAdaptationInfo SpeechAdaptationInfo { get; set; }
 
         /// <summary>When available, billed audio seconds for the corresponding request.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("totalBilledTime")]
@@ -1508,8 +1761,8 @@ namespace Google.Apis.Speech.v1p1beta1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -1533,7 +1786,10 @@ namespace Google.Apis.Speech.v1p1beta1.Data
     /// class' symbol prepended with `$` e.g. `$MONTH`. To refer to custom classes that were defined inline in the
     /// request, set the class's `custom_class_id` to a string unique to all class resources and inline classes. Then
     /// use the class' id wrapped in $`{...}` e.g. "${my-months}". To refer to custom classes resources, use the class'
-    /// id wrapped in `${}` (e.g. `${my-months}`).
+    /// id wrapped in `${}` (e.g. `${my-months}`). Speech-to-Text supports three locations: `global`, `us` (US North
+    /// America), and `eu` (Europe). If you are calling the `speech.googleapis.com` endpoint, use the `global` location.
+    /// To specify a region, use a [regional endpoint](https://cloud.google.com/speech-to-text/docs/endpoints) with
+    /// matching `us` or `eu` location value.
     /// </summary>
     public class Phrase : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1542,8 +1798,8 @@ namespace Google.Apis.Speech.v1p1beta1.Data
         /// that a specific phrase will be recognized over other similar sounding phrases. The higher the boost, the
         /// higher the chance of false positive recognition as well. Negative boost will simply be ignored. Though
         /// `boost` can accept a wide range of positive values, most use cases are best served with values between 0 and
-        /// 20. We recommend using a binary search approach to finding the optimal value for your use case. Speech
-        /// recognition will skip PhraseSets with a boost value of 0.
+        /// 20. We recommend using a binary search approach to finding the optimal value for your use case as well as
+        /// adding phrases both with and without boost to your requests.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("boost")]
         public virtual System.Nullable<float> Boost { get; set; }
@@ -1560,15 +1816,129 @@ namespace Google.Apis.Speech.v1p1beta1.Data
     public class PhraseSet : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// Output only. Allows users to store small amounts of arbitrary data. Both the key and the value must be 63
+        /// characters or less each. At most 100 annotations. This field is not used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("annotations")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Annotations { get; set; }
+
+        /// <summary>
         /// Hint Boost. Positive value will increase the probability that a specific phrase will be recognized over
         /// other similar sounding phrases. The higher the boost, the higher the chance of false positive recognition as
         /// well. Negative boost values would correspond to anti-biasing. Anti-biasing is not enabled, so negative boost
         /// will simply be ignored. Though `boost` can accept a wide range of positive values, most use cases are best
         /// served with values between 0 (exclusive) and 20. We recommend using a binary search approach to finding the
-        /// optimal value for your use case. Speech recognition will skip PhraseSets with a boost value of 0.
+        /// optimal value for your use case as well as adding phrases both with and without boost to your requests.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("boost")]
         public virtual System.Nullable<float> Boost { get; set; }
+
+        private string _deleteTimeRaw;
+
+        private object _deleteTime;
+
+        /// <summary>
+        /// Output only. The time at which this resource was requested for deletion. This field is not used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deleteTime")]
+        public virtual string DeleteTimeRaw
+        {
+            get => _deleteTimeRaw;
+            set
+            {
+                _deleteTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _deleteTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="DeleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use DeleteTimeDateTimeOffset instead.")]
+        public virtual object DeleteTime
+        {
+            get => _deleteTime;
+            set
+            {
+                _deleteTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _deleteTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="DeleteTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? DeleteTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(DeleteTimeRaw);
+            set => DeleteTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Output only. User-settable, human-readable name for the PhraseSet. Must be 63 characters or less. This field
+        /// is not used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>
+        /// Output only. This checksum is computed by the server based on the value of other fields. This may be sent on
+        /// update, undelete, and delete requests to ensure the client has an up-to-date value before proceeding. This
+        /// field is not used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
+        /// <summary>Output only. The time at which this resource will be purged. This field is not used.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
+        /// Output only. The [KMS key name](https://cloud.google.com/kms/docs/resource-hierarchy#keys) with which the
+        /// content of the PhraseSet is encrypted. The expected format is
+        /// `projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kmsKeyName")]
+        public virtual string KmsKeyName { get; set; }
+
+        /// <summary>
+        /// Output only. The [KMS key version name](https://cloud.google.com/kms/docs/resource-hierarchy#key_versions)
+        /// with which content of the PhraseSet is encrypted. The expected format is
+        /// `projects/{project}/locations/{location}/keyRings/{key_ring}/cryptoKeys/{crypto_key}/cryptoKeyVersions/{crypto_key_version}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("kmsKeyVersionName")]
+        public virtual string KmsKeyVersionName { get; set; }
 
         /// <summary>The resource name of the phrase set.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
@@ -1578,8 +1948,19 @@ namespace Google.Apis.Speech.v1p1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("phrases")]
         public virtual System.Collections.Generic.IList<Phrase> Phrases { get; set; }
 
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
+        /// <summary>
+        /// Output only. Whether or not this PhraseSet is in the process of being updated. This field is not used.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("reconciling")]
+        public virtual System.Nullable<bool> Reconciling { get; set; }
+
+        /// <summary>Output only. The CustomClass lifecycle state. This field is not used.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
+        /// <summary>Output only. System-assigned unique identifier for the PhraseSet. This field is not used.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("uid")]
+        public virtual string Uid { get; set; }
     }
 
     /// <summary>
@@ -1635,10 +2016,10 @@ namespace Google.Apis.Speech.v1p1beta1.Data
 
         /// <summary>
         /// The number of channels in the input audio data. ONLY set this for MULTI-CHANNEL recognition. Valid values
-        /// for LINEAR16 and FLAC are `1`-`8`. Valid values for OGG_OPUS are '1'-'254'. Valid value for MULAW, AMR,
-        /// AMR_WB and SPEEX_WITH_HEADER_BYTE is only `1`. If `0` or omitted, defaults to one channel (mono). Note: We
-        /// only recognize the first channel by default. To perform independent recognition on each channel set
-        /// `enable_separate_recognition_per_channel` to 'true'.
+        /// for LINEAR16, OGG_OPUS and FLAC are `1`-`8`. Valid value for MULAW, AMR, AMR_WB and SPEEX_WITH_HEADER_BYTE
+        /// is only `1`. If `0` or omitted, defaults to one channel (mono). Note: We only recognize the first channel by
+        /// default. To perform independent recognition on each channel set `enable_separate_recognition_per_channel` to
+        /// 'true'.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("audioChannelCount")]
         public virtual System.Nullable<int> AudioChannelCount { get; set; }
@@ -1679,7 +2060,7 @@ namespace Google.Apis.Speech.v1p1beta1.Data
 
         /// <summary>
         /// If 'true', enables speaker detection for each recognized word in the top alternative of the recognition
-        /// result using a speaker_tag provided in the WordInfo. Note: Use diarization_config instead.
+        /// result using a speaker_label provided in the WordInfo. Note: Use diarization_config instead.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("enableSpeakerDiarization")]
         public virtual System.Nullable<bool> EnableSpeakerDiarization { get; set; }
@@ -1748,12 +2129,16 @@ namespace Google.Apis.Speech.v1p1beta1.Data
         /// <summary>
         /// Which model to select for the given request. Select the model best suited to your domain to get best
         /// results. If a model is not explicitly specified, then we auto-select a model based on the parameters in the
-        /// RecognitionConfig. *Model* *Description* command_and_search Best for short queries such as voice commands or
-        /// voice search. phone_call Best for audio that originated from a phone call (typically recorded at an 8khz
-        /// sampling rate). video Best for audio that originated from video or includes multiple speakers. Ideally the
-        /// audio is recorded at a 16khz or greater sampling rate. This is a premium model that costs more than the
-        /// standard rate. default Best for audio that is not one of the specific audio models. For example, long-form
-        /// audio. Ideally the audio is high-fidelity, recorded at a 16khz or greater sampling rate.
+        /// RecognitionConfig. *Model* *Description* latest_long Best for long form content like media or conversation.
+        /// latest_short Best for short form content like commands or single shot directed speech. command_and_search
+        /// Best for short queries such as voice commands or voice search. phone_call Best for audio that originated
+        /// from a phone call (typically recorded at an 8khz sampling rate). video Best for audio that originated from
+        /// video or includes multiple speakers. Ideally the audio is recorded at a 16khz or greater sampling rate. This
+        /// is a premium model that costs more than the standard rate. default Best for audio that is not one of the
+        /// specific audio models. For example, long-form audio. Ideally the audio is high-fidelity, recorded at a 16khz
+        /// or greater sampling rate. medical_conversation Best for audio that originated from a conversation between a
+        /// medical provider and patient. medical_dictation Best for audio that originated from dictation notes by a
+        /// medical provider.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("model")]
         public virtual string Model { get; set; }
@@ -1784,9 +2169,9 @@ namespace Google.Apis.Speech.v1p1beta1.Data
         public virtual System.Collections.Generic.IList<SpeechContext> SpeechContexts { get; set; }
 
         /// <summary>
-        /// Use transcription normalization to automatically replace parts of the transcript with phrases of your
-        /// choosing. For StreamingRecognize, this normalization only applies to stable partial transcripts (stability
-        /// &amp;gt; 0.8) and final transcripts.
+        /// Optional. Use transcription normalization to automatically replace parts of the transcript with phrases of
+        /// your choosing. For StreamingRecognize, this normalization only applies to stable partial transcripts
+        /// (stability &amp;gt; 0.8) and final transcripts.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("transcriptNormalization")]
         public virtual TranscriptNormalization TranscriptNormalization { get; set; }
@@ -1883,13 +2268,29 @@ namespace Google.Apis.Speech.v1p1beta1.Data
     /// </summary>
     public class RecognizeResponse : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// The ID associated with the request. This is a unique ID specific only to the given request.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requestId")]
+        public virtual System.Nullable<long> RequestId { get; set; }
+
         /// <summary>Sequential list of transcription results corresponding to sequential portions of audio.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("results")]
         public virtual System.Collections.Generic.IList<SpeechRecognitionResult> Results { get; set; }
 
+        /// <summary>Provides information on adaptation behavior in response</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("speechAdaptationInfo")]
+        public virtual SpeechAdaptationInfo SpeechAdaptationInfo { get; set; }
+
         /// <summary>When available, billed audio seconds for the corresponding request.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("totalBilledTime")]
         public virtual object TotalBilledTime { get; set; }
+
+        /// <summary>
+        /// Whether request used legacy asr models (was not automatically migrated to use conformer models).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("usingLegacyModels")]
+        public virtual System.Nullable<bool> UsingLegacyModels { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1900,7 +2301,7 @@ namespace Google.Apis.Speech.v1p1beta1.Data
     {
         /// <summary>
         /// If 'true', enables speaker detection for each recognized word in the top alternative of the recognition
-        /// result using a speaker_tag provided in the WordInfo.
+        /// result using a speaker_label provided in the WordInfo.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("enableSpeakerDiarization")]
         public virtual System.Nullable<bool> EnableSpeakerDiarization { get; set; }
@@ -1931,6 +2332,13 @@ namespace Google.Apis.Speech.v1p1beta1.Data
     public class SpeechAdaptation : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// Augmented Backus-Naur form (ABNF) is a standardized grammar notation comprised by a set of derivation rules.
+        /// See specifications: https://www.w3.org/TR/speech-grammar
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("abnfGrammar")]
+        public virtual ABNFGrammar AbnfGrammar { get; set; }
+
+        /// <summary>
         /// A collection of custom classes. To specify the classes inline, leave the class' `name` blank and fill in the
         /// rest of its fields, giving it a unique `custom_class_id`. Refer to the inline defined class in phrase hints
         /// by its `custom_class_id`.
@@ -1948,6 +2356,26 @@ namespace Google.Apis.Speech.v1p1beta1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("phraseSets")]
         public virtual System.Collections.Generic.IList<PhraseSet> PhraseSets { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Information on speech adaptation use in results</summary>
+    public class SpeechAdaptationInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Whether there was a timeout when applying speech adaptation. If true, adaptation had no effect in the
+        /// response transcript.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("adaptationTimeout")]
+        public virtual System.Nullable<bool> AdaptationTimeout { get; set; }
+
+        /// <summary>
+        /// If set, returns a message specifying which part of the speech adaptation request timed out.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("timeoutMessage")]
+        public virtual string TimeoutMessage { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1996,7 +2424,11 @@ namespace Google.Apis.Speech.v1p1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("confidence")]
         public virtual System.Nullable<float> Confidence { get; set; }
 
-        /// <summary>Transcript text representing the words that the user spoke.</summary>
+        /// <summary>
+        /// Transcript text representing the words that the user spoke. In languages that use spaces to separate words,
+        /// the transcript might have a leading space if it isn't the first result. You can concatenate each result to
+        /// obtain the full transcript without using a separator.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("transcript")]
         public virtual string Transcript { get; set; }
 
@@ -2128,10 +2560,19 @@ namespace Google.Apis.Speech.v1p1beta1.Data
         public virtual object EndTime { get; set; }
 
         /// <summary>
+        /// Output only. A label value assigned for every unique speaker within the audio. This field specifies which
+        /// speaker was detected to have spoken this word. For some models, like medical_conversation this can be actual
+        /// speaker role, for example "patient" or "provider", but generally this would be a number identifying a
+        /// speaker. This field is only set if enable_speaker_diarization = 'true' and only for the top alternative.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("speakerLabel")]
+        public virtual string SpeakerLabel { get; set; }
+
+        /// <summary>
         /// Output only. A distinct integer value is assigned for every speaker within the audio. This field specifies
         /// which one of those speakers was detected to have spoken this word. Value ranges from '1' to
-        /// diarization_speaker_count. speaker_tag is set if enable_speaker_diarization = 'true' and only in the top
-        /// alternative.
+        /// diarization_speaker_count. speaker_tag is set if enable_speaker_diarization = 'true' and only for the top
+        /// alternative. Note: Use speaker_label instead.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("speakerTag")]
         public virtual System.Nullable<int> SpeakerTag { get; set; }

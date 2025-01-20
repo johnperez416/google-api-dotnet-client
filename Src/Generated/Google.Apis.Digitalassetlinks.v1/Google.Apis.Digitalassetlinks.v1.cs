@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ namespace Google.Apis.Digitalassetlinks.v1
         {
             Assetlinks = new AssetlinksResource(this);
             Statements = new StatementsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://digitalassetlinks.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://digitalassetlinks.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -45,23 +47,16 @@ namespace Google.Apis.Digitalassetlinks.v1
         public override string Name => "digitalassetlinks";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://digitalassetlinks.googleapis.com/";
-        #else
-            "https://digitalassetlinks.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://digitalassetlinks.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Gets the Assetlinks resource.</summary>
         public virtual AssetlinksResource Assetlinks { get; }
@@ -282,7 +277,7 @@ namespace Google.Apis.Digitalassetlinks.v1
         /// </summary>
         public virtual CheckRequest Check()
         {
-            return new CheckRequest(service);
+            return new CheckRequest(this.service);
         }
 
         /// <summary>
@@ -498,7 +493,7 @@ namespace Google.Apis.Digitalassetlinks.v1
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>

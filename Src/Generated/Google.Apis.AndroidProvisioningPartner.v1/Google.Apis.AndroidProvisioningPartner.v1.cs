@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             Customers = new CustomersResource(this);
             Operations = new OperationsResource(this);
             Partners = new PartnersResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://androiddeviceprovisioning.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://androiddeviceprovisioning.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -46,23 +48,16 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
         public override string Name => "androiddeviceprovisioning";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://androiddeviceprovisioning.googleapis.com/";
-        #else
-            "https://androiddeviceprovisioning.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://androiddeviceprovisioning.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Gets the Customers resource.</summary>
         public virtual CustomersResource Customers { get; }
@@ -295,11 +290,11 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">
             /// Required. The customer that manages the configuration. An API resource name in the format
-            /// `customers/[CUSTOMER_ID]`.
+            /// `customers/[CUSTOMER_ID]`. This field has custom validation in CreateConfigurationRequestValidator
             /// </param>
             public virtual CreateRequest Create(Google.Apis.AndroidProvisioningPartner.v1.Data.Configuration body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -317,7 +312,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
 
                 /// <summary>
                 /// Required. The customer that manages the configuration. An API resource name in the format
-                /// `customers/[CUSTOMER_ID]`.
+                /// `customers/[CUSTOMER_ID]`. This field has custom validation in CreateConfigurationRequestValidator
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -363,7 +358,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
@@ -418,7 +413,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets the details of a configuration.</summary>
@@ -469,7 +464,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists a customer's configurations.</summary>
@@ -521,7 +516,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.AndroidProvisioningPartner.v1.Data.Configuration body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Updates a configuration's field values.</summary>
@@ -619,7 +614,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             /// </param>
             public virtual ApplyConfigurationRequest ApplyConfiguration(Google.Apis.AndroidProvisioningPartner.v1.Data.CustomerApplyConfigurationRequest body, string parent)
             {
-                return new ApplyConfigurationRequest(service, body, parent);
+                return new ApplyConfigurationRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -681,7 +676,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets the details of a device.</summary>
@@ -732,7 +727,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists a customer's devices.</summary>
@@ -753,7 +748,8 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
                 public virtual string Parent { get; private set; }
 
                 /// <summary>
-                /// The maximum number of devices to show in a page of results. Must be between 1 and 100 inclusive.
+                /// Required. The maximum number of devices to show in a page of results. Must be between 1 and 100
+                /// inclusive.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<long> PageSize { get; set; }
@@ -809,7 +805,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             /// </param>
             public virtual RemoveConfigurationRequest RemoveConfiguration(Google.Apis.AndroidProvisioningPartner.v1.Data.CustomerRemoveConfigurationRequest body, string parent)
             {
-                return new RemoveConfigurationRequest(service, body, parent);
+                return new RemoveConfigurationRequest(this.service, body, parent);
             }
 
             /// <summary>Removes a configuration from device.</summary>
@@ -870,7 +866,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             /// </param>
             public virtual UnclaimRequest Unclaim(Google.Apis.AndroidProvisioningPartner.v1.Data.CustomerUnclaimDeviceRequest body, string parent)
             {
-                return new UnclaimRequest(service, body, parent);
+                return new UnclaimRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -949,7 +945,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists the DPCs (device policy controllers) that support zero-touch enrollment.</summary>
@@ -997,7 +993,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
         /// <summary>Lists the user's customer accounts.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>Lists the user's customer accounts.</summary>
@@ -1010,12 +1006,16 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             }
 
             /// <summary>
-            /// The maximum number of customers to show in a page of results. A number between 1 and 100 (inclusive).
+            /// Required. The maximum number of customers to show in a page of results. A number between 1 and 100
+            /// (inclusive).
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
             public virtual System.Nullable<int> PageSize { get; set; }
 
-            /// <summary>A token specifying which result page to return.</summary>
+            /// <summary>
+            /// A token specifying which result page to return. This field has custom validations in
+            /// ListCustomersRequestValidator
+            /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string PageToken { get; set; }
 
@@ -1073,7 +1073,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
         /// <param name="name">The name of the operation resource.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>
@@ -1164,7 +1164,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.AndroidProvisioningPartner.v1.Data.CreateCustomerRequest body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -1226,7 +1226,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             /// <param name="partnerId">Required. The ID of the reseller partner.</param>
             public virtual ListRequest List(long partnerId)
             {
-                return new ListRequest(service, partnerId);
+                return new ListRequest(this.service, partnerId);
             }
 
             /// <summary>
@@ -1322,7 +1322,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             /// <param name="partnerId">Required. The ID of the reseller partner.</param>
             public virtual ClaimRequest Claim(Google.Apis.AndroidProvisioningPartner.v1.Data.ClaimDeviceRequest body, long partnerId)
             {
-                return new ClaimRequest(service, body, partnerId);
+                return new ClaimRequest(this.service, body, partnerId);
             }
 
             /// <summary>
@@ -1381,7 +1381,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             /// <param name="partnerId">Required. The ID of the reseller partner.</param>
             public virtual ClaimAsyncRequest ClaimAsync(Google.Apis.AndroidProvisioningPartner.v1.Data.ClaimDevicesRequest body, long partnerId)
             {
-                return new ClaimAsyncRequest(service, body, partnerId);
+                return new ClaimAsyncRequest(this.service, body, partnerId);
             }
 
             /// <summary>
@@ -1437,7 +1437,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             /// <param name="partnerId">Required. The ID of the reseller partner.</param>
             public virtual FindByIdentifierRequest FindByIdentifier(Google.Apis.AndroidProvisioningPartner.v1.Data.FindDevicesByDeviceIdentifierRequest body, long partnerId)
             {
-                return new FindByIdentifierRequest(service, body, partnerId);
+                return new FindByIdentifierRequest(this.service, body, partnerId);
             }
 
             /// <summary>Finds devices by hardware identifiers, such as IMEI.</summary>
@@ -1494,7 +1494,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             /// <param name="partnerId">Required. The ID of the reseller partner.</param>
             public virtual FindByOwnerRequest FindByOwner(Google.Apis.AndroidProvisioningPartner.v1.Data.FindDevicesByOwnerRequest body, long partnerId)
             {
-                return new FindByOwnerRequest(service, body, partnerId);
+                return new FindByOwnerRequest(this.service, body, partnerId);
             }
 
             /// <summary>
@@ -1552,7 +1552,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets a device.</summary>
@@ -1595,7 +1595,60 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
                 }
             }
 
-            /// <summary>Updates reseller metadata associated with the device.</summary>
+            /// <summary>Gets a device's SIM lock state.</summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="partnerId">Required. The ID of the partner.</param>
+            public virtual GetSimLockStateRequest GetSimLockState(Google.Apis.AndroidProvisioningPartner.v1.Data.GetDeviceSimLockStateRequest body, long partnerId)
+            {
+                return new GetSimLockStateRequest(this.service, body, partnerId);
+            }
+
+            /// <summary>Gets a device's SIM lock state.</summary>
+            public class GetSimLockStateRequest : AndroidProvisioningPartnerBaseServiceRequest<Google.Apis.AndroidProvisioningPartner.v1.Data.GetDeviceSimLockStateResponse>
+            {
+                /// <summary>Constructs a new GetSimLockState request.</summary>
+                public GetSimLockStateRequest(Google.Apis.Services.IClientService service, Google.Apis.AndroidProvisioningPartner.v1.Data.GetDeviceSimLockStateRequest body, long partnerId) : base(service)
+                {
+                    PartnerId = partnerId;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>Required. The ID of the partner.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("partnerId", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual long PartnerId { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.AndroidProvisioningPartner.v1.Data.GetDeviceSimLockStateRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "getSimLockState";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/partners/{+partnerId}/devices:getSimLockState";
+
+                /// <summary>Initializes GetSimLockState parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("partnerId", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "partnerId",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>Updates reseller metadata associated with the device. Android devices only.</summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="metadataOwnerId">
             /// Required. The owner of the newly set metadata. Set this to the partner ID.
@@ -1603,10 +1656,10 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             /// <param name="deviceId">Required. The ID of the device.</param>
             public virtual MetadataRequest Metadata(Google.Apis.AndroidProvisioningPartner.v1.Data.UpdateDeviceMetadataRequest body, long metadataOwnerId, long deviceId)
             {
-                return new MetadataRequest(service, body, metadataOwnerId, deviceId);
+                return new MetadataRequest(this.service, body, metadataOwnerId, deviceId);
             }
 
-            /// <summary>Updates reseller metadata associated with the device.</summary>
+            /// <summary>Updates reseller metadata associated with the device. Android devices only.</summary>
             public class MetadataRequest : AndroidProvisioningPartnerBaseServiceRequest<Google.Apis.AndroidProvisioningPartner.v1.Data.DeviceMetadata>
             {
                 /// <summary>Constructs a new Metadata request.</summary>
@@ -1669,7 +1722,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             /// <param name="partnerId">Required. The ID of the reseller partner.</param>
             public virtual UnclaimRequest Unclaim(Google.Apis.AndroidProvisioningPartner.v1.Data.UnclaimDeviceRequest body, long partnerId)
             {
-                return new UnclaimRequest(service, body, partnerId);
+                return new UnclaimRequest(this.service, body, partnerId);
             }
 
             /// <summary>Unclaims a device from a customer and removes it from zero-touch enrollment.</summary>
@@ -1726,7 +1779,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             /// <param name="partnerId">Required. The reseller partner ID.</param>
             public virtual UnclaimAsyncRequest UnclaimAsync(Google.Apis.AndroidProvisioningPartner.v1.Data.UnclaimDevicesRequest body, long partnerId)
             {
-                return new UnclaimAsyncRequest(service, body, partnerId);
+                return new UnclaimAsyncRequest(this.service, body, partnerId);
             }
 
             /// <summary>
@@ -1781,19 +1834,19 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             /// <summary>
             /// Updates the reseller metadata attached to a batch of devices. This method updates devices asynchronously
             /// and returns an `Operation` that can be used to track progress. Read [Long‑running batch
-            /// operations](/zero-touch/guides/how-it-works#operations).
+            /// operations](/zero-touch/guides/how-it-works#operations). Android Devices only.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="partnerId">Required. The reseller partner ID.</param>
             public virtual UpdateMetadataAsyncRequest UpdateMetadataAsync(Google.Apis.AndroidProvisioningPartner.v1.Data.UpdateDeviceMetadataInBatchRequest body, long partnerId)
             {
-                return new UpdateMetadataAsyncRequest(service, body, partnerId);
+                return new UpdateMetadataAsyncRequest(this.service, body, partnerId);
             }
 
             /// <summary>
             /// Updates the reseller metadata attached to a batch of devices. This method updates devices asynchronously
             /// and returns an `Operation` that can be used to track progress. Read [Long‑running batch
-            /// operations](/zero-touch/guides/how-it-works#operations).
+            /// operations](/zero-touch/guides/how-it-works#operations). Android Devices only.
             /// </summary>
             public class UpdateMetadataAsyncRequest : AndroidProvisioningPartnerBaseServiceRequest<Google.Apis.AndroidProvisioningPartner.v1.Data.Operation>
             {
@@ -1881,7 +1934,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists the customers of the vendor.</summary>
@@ -1953,7 +2006,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1
             /// <param name="parent">Required. The resource name in the format `partners/[PARTNER_ID]`.</param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists the vendors of the partner.</summary>
@@ -2025,7 +2078,11 @@ namespace Google.Apis.AndroidProvisioningPartner.v1.Data
     /// <summary>Request message to claim a device on behalf of a customer.</summary>
     public class ClaimDeviceRequest : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Required. The ID of the customer for whom the device is being claimed.</summary>
+        /// <summary>Optional. The ID of the configuration applied to the device section.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("configurationId")]
+        public virtual System.Nullable<long> ConfigurationId { get; set; }
+
+        /// <summary>The ID of the customer for whom the device is being claimed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("customerId")]
         public virtual System.Nullable<long> CustomerId { get; set; }
 
@@ -2037,9 +2094,24 @@ namespace Google.Apis.AndroidProvisioningPartner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("deviceMetadata")]
         public virtual DeviceMetadata DeviceMetadata { get; set; }
 
+        /// <summary>The Google Workspace customer ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("googleWorkspaceCustomerId")]
+        public virtual string GoogleWorkspaceCustomerId { get; set; }
+
+        /// <summary>Optional. Must and can only be set for Chrome OS devices.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("preProvisioningToken")]
+        public virtual string PreProvisioningToken { get; set; }
+
         /// <summary>Required. The section type of the device's provisioning record.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sectionType")]
         public virtual string SectionType { get; set; }
+
+        /// <summary>
+        /// Optional. Must and can only be set when DeviceProvisioningSectionType is SECTION_TYPE_SIM_LOCK. The unique
+        /// identifier of the SimLock profile.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("simlockProfileId")]
+        public virtual System.Nullable<long> SimlockProfileId { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2096,6 +2168,12 @@ namespace Google.Apis.AndroidProvisioningPartner.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("companyName")]
         public virtual string CompanyName { get; set; }
+
+        /// <summary>
+        /// Output only. The Google Workspace account associated with this customer. Only used for customer Companies.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("googleWorkspaceAccount")]
+        public virtual GoogleWorkspaceAccount GoogleWorkspaceAccount { get; set; }
 
         /// <summary>
         /// Input only. The preferred locale of the customer represented as a BCP47 language code. This field is
@@ -2206,6 +2284,14 @@ namespace Google.Apis.AndroidProvisioningPartner.v1.Data
         public virtual string DpcResourcePath { get; set; }
 
         /// <summary>
+        /// Optional. The timeout before forcing factory reset the device if the device doesn't go through provisioning
+        /// in the setup wizard, usually due to lack of network connectivity during setup wizard. Ranges from 0-6 hours,
+        /// with 2 hours being the default if unset.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("forcedResetTime")]
+        public virtual object ForcedResetTime { get; set; }
+
+        /// <summary>
         /// Required. Whether this is the default configuration that zero-touch enrollment applies to any new devices
         /// the organization purchases in the future. Only one customer configuration can be the default. Setting this
         /// value to `true`, changes the previous default configuration's `isDefault` value to `false`.
@@ -2249,7 +2335,10 @@ namespace Google.Apis.AndroidProvisioningPartner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("configuration")]
         public virtual string Configuration { get; set; }
 
-        /// <summary>Required. The device the configuration is applied to.</summary>
+        /// <summary>
+        /// Required. The device the configuration is applied to. There are custom validations in
+        /// ApplyConfigurationRequestValidator
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("device")]
         public virtual DeviceReference Device { get; set; }
 
@@ -2316,7 +2405,10 @@ namespace Google.Apis.AndroidProvisioningPartner.v1.Data
     /// <summary>Request message for customer to remove the configuration from device.</summary>
     public class CustomerRemoveConfigurationRequest : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Required. The device to remove the configuration from.</summary>
+        /// <summary>
+        /// Required. The device to remove the configuration from. There are custom validations in
+        /// RemoveConfigurationRequestValidator
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("device")]
         public virtual DeviceReference Device { get; set; }
 
@@ -2327,7 +2419,9 @@ namespace Google.Apis.AndroidProvisioningPartner.v1.Data
     /// <summary>Request message for customer to unclaim a device.</summary>
     public class CustomerUnclaimDeviceRequest : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Required. The device to unclaim.</summary>
+        /// <summary>
+        /// Required. The device to unclaim. There are custom validations in UnclaimDeviceRequestValidator.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("device")]
         public virtual DeviceReference Device { get; set; }
 
@@ -2335,7 +2429,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>An Android device registered for zero-touch enrollment.</summary>
+    /// <summary>An Android or Chrome OS device registered for zero-touch enrollment.</summary>
     public class Device : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
@@ -2390,6 +2484,10 @@ namespace Google.Apis.AndroidProvisioningPartner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("additionalService")]
         public virtual string AdditionalService { get; set; }
 
+        /// <summary>The ID of the Google Workspace account that owns the Chrome OS device.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("googleWorkspaceCustomerId")]
+        public virtual string GoogleWorkspaceCustomerId { get; set; }
+
         /// <summary>The ID of the Customer that purchased the device.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("ownerCompanyId")]
         public virtual System.Nullable<long> OwnerCompanyId { get; set; }
@@ -2402,19 +2500,89 @@ namespace Google.Apis.AndroidProvisioningPartner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("sectionType")]
         public virtual string SectionType { get; set; }
 
+        private string _vacationModeExpireTimeRaw;
+
+        private object _vacationModeExpireTime;
+
         /// <summary>
         /// The timestamp when the device will exit ‘vacation mode’. This value is present iff the device is in
         /// 'vacation mode'.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("vacationModeExpireTime")]
-        public virtual object VacationModeExpireTime { get; set; }
+        public virtual string VacationModeExpireTimeRaw
+        {
+            get => _vacationModeExpireTimeRaw;
+            set
+            {
+                _vacationModeExpireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _vacationModeExpireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="VacationModeExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use VacationModeExpireTimeDateTimeOffset instead.")]
+        public virtual object VacationModeExpireTime
+        {
+            get => _vacationModeExpireTime;
+            set
+            {
+                _vacationModeExpireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _vacationModeExpireTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="VacationModeExpireTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? VacationModeExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(VacationModeExpireTimeRaw);
+            set => VacationModeExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _vacationModeStartTimeRaw;
+
+        private object _vacationModeStartTime;
 
         /// <summary>
         /// The timestamp when the device was put into ‘vacation mode’. This value is present iff the device is in
         /// 'vacation mode'.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("vacationModeStartTime")]
-        public virtual object VacationModeStartTime { get; set; }
+        public virtual string VacationModeStartTimeRaw
+        {
+            get => _vacationModeStartTimeRaw;
+            set
+            {
+                _vacationModeStartTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _vacationModeStartTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="VacationModeStartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use VacationModeStartTimeDateTimeOffset instead.")]
+        public virtual object VacationModeStartTime
+        {
+            get => _vacationModeStartTime;
+            set
+            {
+                _vacationModeStartTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _vacationModeStartTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="VacationModeStartTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? VacationModeStartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(VacationModeStartTimeRaw);
+            set => VacationModeStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2426,14 +2594,29 @@ namespace Google.Apis.AndroidProvisioningPartner.v1.Data
     /// </summary>
     public class DeviceIdentifier : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// An identifier provided by OEMs, carried through the production and sales process. Only applicable to Chrome
+        /// OS devices.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("chromeOsAttestedDeviceId")]
+        public virtual string ChromeOsAttestedDeviceId { get; set; }
+
+        /// <summary>The type of the device</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deviceType")]
+        public virtual string DeviceType { get; set; }
+
         /// <summary>The device’s IMEI number. Validated on input.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("imei")]
         public virtual string Imei { get; set; }
 
+        /// <summary>The device’s second IMEI number.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("imei2")]
+        public virtual string Imei2 { get; set; }
+
         /// <summary>
         /// The device manufacturer’s name. Matches the device's built-in value returned from
-        /// `android.os.Build.MANUFACTURER`. Allowed values are listed in
-        /// [manufacturers](/zero-touch/resources/manufacturer-names#manufacturers-names).
+        /// `android.os.Build.MANUFACTURER`. Allowed values are listed in [Android
+        /// manufacturers](/zero-touch/resources/manufacturer-names#manufacturers-names).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("manufacturer")]
         public virtual string Manufacturer { get; set; }
@@ -2442,9 +2625,14 @@ namespace Google.Apis.AndroidProvisioningPartner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("meid")]
         public virtual string Meid { get; set; }
 
+        /// <summary>The device’s second MEID number.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("meid2")]
+        public virtual string Meid2 { get; set; }
+
         /// <summary>
-        /// The device model's name. Matches the device's built-in value returned from `android.os.Build.MODEL`. Allowed
-        /// values are listed in [models](/zero-touch/resources/manufacturer-names#model-names).
+        /// The device model's name. Allowed values are listed in [Android
+        /// models](/zero-touch/resources/manufacturer-names#model-names) and [Chrome OS
+        /// models](https://support.google.com/chrome/a/answer/10130175#identify_compatible).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("model")]
         public virtual string Model { get; set; }
@@ -2513,7 +2701,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1.Data
         public virtual string ProcessingStatus { get; set; }
 
         /// <summary>
-        /// The processing progress of the operation. Measured as a number from 0 to 100. A value of 10O doesnt always
+        /// The processing progress of the operation. Measured as a number from 0 to 100. A value of 10O doesn't always
         /// mean the operation completed—check for the inclusion of a `done` field.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("progress")]
@@ -2583,8 +2771,7 @@ namespace Google.Apis.AndroidProvisioningPartner.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -2637,9 +2824,13 @@ namespace Google.Apis.AndroidProvisioningPartner.v1.Data
     /// <summary>Request to find devices by customers.</summary>
     public class FindDevicesByOwnerRequest : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Required. The list of customer IDs to search for.</summary>
+        /// <summary>The list of customer IDs to search for.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("customerId")]
         public virtual System.Collections.Generic.IList<System.Nullable<long>> CustomerId { get; set; }
+
+        /// <summary>The list of IDs of Google Workspace accounts to search for.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("googleWorkspaceCustomerId")]
+        public virtual System.Collections.Generic.IList<string> GoogleWorkspaceCustomerId { get; set; }
 
         /// <summary>
         /// Required. The maximum number of devices to show in a page of results. Must be between 1 and 100 inclusive.
@@ -2675,6 +2866,42 @@ namespace Google.Apis.AndroidProvisioningPartner.v1.Data
         /// <summary>The total count of items in the list irrespective of pagination.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("totalSize")]
         public virtual System.Nullable<int> TotalSize { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Request to get a device's SIM lock status.</summary>
+    public class GetDeviceSimLockStateRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. Required. The device identifier to search for.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deviceIdentifier")]
+        public virtual DeviceIdentifier DeviceIdentifier { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response containing a device's SimLock state.</summary>
+    public class GetDeviceSimLockStateResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("simLockState")]
+        public virtual string SimLockState { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A Google Workspace customer.</summary>
+    public class GoogleWorkspaceAccount : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Required. The customer ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customerId")]
+        public virtual string CustomerId { get; set; }
+
+        /// <summary>Output only. The pre-provisioning tokens previously used to claim devices.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("preProvisioningTokens")]
+        public virtual System.Collections.Generic.IList<string> PreProvisioningTokens { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2815,7 +3042,11 @@ namespace Google.Apis.AndroidProvisioningPartner.v1.Data
     /// <summary>Identifies one claim request.</summary>
     public class PartnerClaim : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Required. The ID of the customer for whom the device is being claimed.</summary>
+        /// <summary>Optional. The ID of the configuration applied to the device section.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("configurationId")]
+        public virtual System.Nullable<long> ConfigurationId { get; set; }
+
+        /// <summary>The ID of the customer for whom the device is being claimed.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("customerId")]
         public virtual System.Nullable<long> CustomerId { get; set; }
 
@@ -2827,9 +3058,24 @@ namespace Google.Apis.AndroidProvisioningPartner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("deviceMetadata")]
         public virtual DeviceMetadata DeviceMetadata { get; set; }
 
+        /// <summary>The Google Workspace customer ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("googleWorkspaceCustomerId")]
+        public virtual string GoogleWorkspaceCustomerId { get; set; }
+
+        /// <summary>Optional. Must and can only be set for Chrome OS devices.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("preProvisioningToken")]
+        public virtual string PreProvisioningToken { get; set; }
+
         /// <summary>Required. The section type of the device's provisioning record.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sectionType")]
         public virtual string SectionType { get; set; }
+
+        /// <summary>
+        /// Optional. Must and can only be set when DeviceProvisioningSectionType is SECTION_TYPE_SIM_LOCK. The unique
+        /// identifier of the SimLock profile.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("simlockProfileId")]
+        public virtual System.Nullable<long> SimlockProfileId { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2857,9 +3103,44 @@ namespace Google.Apis.AndroidProvisioningPartner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("vacationModeDays")]
         public virtual System.Nullable<int> VacationModeDays { get; set; }
 
+        private string _vacationModeExpireTimeRaw;
+
+        private object _vacationModeExpireTime;
+
         /// <summary>Optional. The expiration time of the vacation unlock.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("vacationModeExpireTime")]
-        public virtual object VacationModeExpireTime { get; set; }
+        public virtual string VacationModeExpireTimeRaw
+        {
+            get => _vacationModeExpireTimeRaw;
+            set
+            {
+                _vacationModeExpireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _vacationModeExpireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="VacationModeExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use VacationModeExpireTimeDateTimeOffset instead.")]
+        public virtual object VacationModeExpireTime
+        {
+            get => _vacationModeExpireTime;
+            set
+            {
+                _vacationModeExpireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _vacationModeExpireTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="VacationModeExpireTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? VacationModeExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(VacationModeExpireTimeRaw);
+            set => VacationModeExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2939,9 +3220,44 @@ namespace Google.Apis.AndroidProvisioningPartner.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("vacationModeDays")]
         public virtual System.Nullable<int> VacationModeDays { get; set; }
 
+        private string _vacationModeExpireTimeRaw;
+
+        private object _vacationModeExpireTime;
+
         /// <summary>The expiration time of the vacation unlock.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("vacationModeExpireTime")]
-        public virtual object VacationModeExpireTime { get; set; }
+        public virtual string VacationModeExpireTimeRaw
+        {
+            get => _vacationModeExpireTimeRaw;
+            set
+            {
+                _vacationModeExpireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _vacationModeExpireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="VacationModeExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use VacationModeExpireTimeDateTimeOffset instead.")]
+        public virtual object VacationModeExpireTime
+        {
+            get => _vacationModeExpireTime;
+            set
+            {
+                _vacationModeExpireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _vacationModeExpireTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="VacationModeExpireTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? VacationModeExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(VacationModeExpireTimeRaw);
+            set => VacationModeExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

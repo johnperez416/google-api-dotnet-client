@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ namespace Google.Apis.RealTimeBidding.v1
         {
             Bidders = new BiddersResource(this);
             Buyers = new BuyersResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://realtimebidding.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://realtimebidding.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -45,23 +47,16 @@ namespace Google.Apis.RealTimeBidding.v1
         public override string Name => "realtimebidding";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://realtimebidding.googleapis.com/";
-        #else
-            "https://realtimebidding.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://realtimebidding.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Real-time Bidding API.</summary>
         public class Scope
@@ -284,6 +279,7 @@ namespace Google.Apis.RealTimeBidding.v1
             Creatives = new CreativesResource(service);
             Endpoints = new EndpointsResource(service);
             PretargetingConfigs = new PretargetingConfigsResource(service);
+            PublisherConnections = new PublisherConnectionsResource(service);
         }
 
         /// <summary>Gets the Creatives resource.</summary>
@@ -303,7 +299,13 @@ namespace Google.Apis.RealTimeBidding.v1
                 this.service = service;
             }
 
-            /// <summary>Lists creatives.</summary>
+            /// <summary>
+            /// Lists creatives as they are at the time of the initial request. This call may take multiple hours to
+            /// complete. For large, paginated requests, this method returns a snapshot of creatives at the time of
+            /// request for the first page. `lastStatusUpdate` and `creativeServingDecision` may be outdated for
+            /// creatives on sequential pages. We recommend [Google Cloud
+            /// Pub/Sub](//cloud.google.com/pubsub/docs/overview) to view the latest status.
+            /// </summary>
             /// <param name="parent">
             /// Required. Name of the parent buyer that owns the creatives. The pattern for this resource is either
             /// `buyers/{buyerAccountId}` or `bidders/{bidderAccountId}`. For `buyers/{buyerAccountId}`, the
@@ -312,15 +314,21 @@ namespace Google.Apis.RealTimeBidding.v1
             /// to the child seat buyer (`456`) under bidder account (`123`), you would use the pattern: `buyers/456`.
             /// 3. The ID of the bidder itself. So for listing creatives pertaining to bidder (`123`), you would use
             /// `buyers/123`. If you want to access all creatives pertaining to both the bidder and all of its child
-            /// seat accounts, you would use `bidders/{bidderAccountId}`, e.g., for all creatives pertaining to bidder
-            /// (`123`), use `bidders/123`.
+            /// seat accounts, you would use `bidders/{bidderAccountId}`, for example, for all creatives pertaining to
+            /// bidder (`123`), use `bidders/123`.
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
-            /// <summary>Lists creatives.</summary>
+            /// <summary>
+            /// Lists creatives as they are at the time of the initial request. This call may take multiple hours to
+            /// complete. For large, paginated requests, this method returns a snapshot of creatives at the time of
+            /// request for the first page. `lastStatusUpdate` and `creativeServingDecision` may be outdated for
+            /// creatives on sequential pages. We recommend [Google Cloud
+            /// Pub/Sub](//cloud.google.com/pubsub/docs/overview) to view the latest status.
+            /// </summary>
             public class ListRequest : RealTimeBiddingBaseServiceRequest<Google.Apis.RealTimeBidding.v1.Data.ListCreativesResponse>
             {
                 /// <summary>Constructs a new List request.</summary>
@@ -338,8 +346,8 @@ namespace Google.Apis.RealTimeBidding.v1
                 /// pertaining to the child seat buyer (`456`) under bidder account (`123`), you would use the pattern:
                 /// `buyers/456`. 3. The ID of the bidder itself. So for listing creatives pertaining to bidder (`123`),
                 /// you would use `buyers/123`. If you want to access all creatives pertaining to both the bidder and
-                /// all of its child seat accounts, you would use `bidders/{bidderAccountId}`, e.g., for all creatives
-                /// pertaining to bidder (`123`), use `bidders/123`.
+                /// all of its child seat accounts, you would use `bidders/{bidderAccountId}`, for example, for all
+                /// creatives pertaining to bidder (`123`), use `bidders/123`.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -354,7 +362,7 @@ namespace Google.Apis.RealTimeBidding.v1
 
                 /// <summary>
                 /// Requested page size. The server may return fewer creatives than requested (due to timeout
-                /// constraint) even if more are available via another call. If unspecified, server will pick an
+                /// constraint) even if more are available through another call. If unspecified, server will pick an
                 /// appropriate default. Acceptable values are 1 to 1000, inclusive.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
@@ -469,7 +477,7 @@ namespace Google.Apis.RealTimeBidding.v1
             /// </param>
             public virtual WatchRequest Watch(Google.Apis.RealTimeBidding.v1.Data.WatchCreativesRequest body, string parent)
             {
-                return new WatchRequest(service, body, parent);
+                return new WatchRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -549,7 +557,7 @@ namespace Google.Apis.RealTimeBidding.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets a bidder endpoint by its name.</summary>
@@ -599,7 +607,7 @@ namespace Google.Apis.RealTimeBidding.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists all the bidder's endpoints.</summary>
@@ -681,7 +689,7 @@ namespace Google.Apis.RealTimeBidding.v1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.RealTimeBidding.v1.Data.Endpoint body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Updates a bidder's endpoint.</summary>
@@ -771,7 +779,7 @@ namespace Google.Apis.RealTimeBidding.v1
             /// </param>
             public virtual ActivateRequest Activate(Google.Apis.RealTimeBidding.v1.Data.ActivatePretargetingConfigRequest body, string name)
             {
-                return new ActivateRequest(service, body, name);
+                return new ActivateRequest(this.service, body, name);
             }
 
             /// <summary>Activates a pretargeting configuration.</summary>
@@ -830,7 +838,7 @@ namespace Google.Apis.RealTimeBidding.v1
             /// </param>
             public virtual AddTargetedAppsRequest AddTargetedApps(Google.Apis.RealTimeBidding.v1.Data.AddTargetedAppsRequest body, string pretargetingConfig)
             {
-                return new AddTargetedAppsRequest(service, body, pretargetingConfig);
+                return new AddTargetedAppsRequest(this.service, body, pretargetingConfig);
             }
 
             /// <summary>Adds targeted apps to the pretargeting configuration.</summary>
@@ -889,7 +897,7 @@ namespace Google.Apis.RealTimeBidding.v1
             /// </param>
             public virtual AddTargetedPublishersRequest AddTargetedPublishers(Google.Apis.RealTimeBidding.v1.Data.AddTargetedPublishersRequest body, string pretargetingConfig)
             {
-                return new AddTargetedPublishersRequest(service, body, pretargetingConfig);
+                return new AddTargetedPublishersRequest(this.service, body, pretargetingConfig);
             }
 
             /// <summary>Adds targeted publishers to the pretargeting config.</summary>
@@ -948,7 +956,7 @@ namespace Google.Apis.RealTimeBidding.v1
             /// </param>
             public virtual AddTargetedSitesRequest AddTargetedSites(Google.Apis.RealTimeBidding.v1.Data.AddTargetedSitesRequest body, string pretargetingConfig)
             {
-                return new AddTargetedSitesRequest(service, body, pretargetingConfig);
+                return new AddTargetedSitesRequest(this.service, body, pretargetingConfig);
             }
 
             /// <summary>Adds targeted sites to the pretargeting configuration.</summary>
@@ -1011,7 +1019,7 @@ namespace Google.Apis.RealTimeBidding.v1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.RealTimeBidding.v1.Data.PretargetingConfig body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -1073,7 +1081,7 @@ namespace Google.Apis.RealTimeBidding.v1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes a pretargeting configuration.</summary>
@@ -1124,7 +1132,7 @@ namespace Google.Apis.RealTimeBidding.v1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets a pretargeting configuration.</summary>
@@ -1175,7 +1183,7 @@ namespace Google.Apis.RealTimeBidding.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists all pretargeting configurations for a single bidder.</summary>
@@ -1257,7 +1265,7 @@ namespace Google.Apis.RealTimeBidding.v1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.RealTimeBidding.v1.Data.PretargetingConfig body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Updates a pretargeting configuration.</summary>
@@ -1328,7 +1336,7 @@ namespace Google.Apis.RealTimeBidding.v1
             /// </param>
             public virtual RemoveTargetedAppsRequest RemoveTargetedApps(Google.Apis.RealTimeBidding.v1.Data.RemoveTargetedAppsRequest body, string pretargetingConfig)
             {
-                return new RemoveTargetedAppsRequest(service, body, pretargetingConfig);
+                return new RemoveTargetedAppsRequest(this.service, body, pretargetingConfig);
             }
 
             /// <summary>Removes targeted apps from the pretargeting configuration.</summary>
@@ -1387,7 +1395,7 @@ namespace Google.Apis.RealTimeBidding.v1
             /// </param>
             public virtual RemoveTargetedPublishersRequest RemoveTargetedPublishers(Google.Apis.RealTimeBidding.v1.Data.RemoveTargetedPublishersRequest body, string pretargetingConfig)
             {
-                return new RemoveTargetedPublishersRequest(service, body, pretargetingConfig);
+                return new RemoveTargetedPublishersRequest(this.service, body, pretargetingConfig);
             }
 
             /// <summary>Removes targeted publishers from the pretargeting config.</summary>
@@ -1446,7 +1454,7 @@ namespace Google.Apis.RealTimeBidding.v1
             /// </param>
             public virtual RemoveTargetedSitesRequest RemoveTargetedSites(Google.Apis.RealTimeBidding.v1.Data.RemoveTargetedSitesRequest body, string pretargetingConfig)
             {
-                return new RemoveTargetedSitesRequest(service, body, pretargetingConfig);
+                return new RemoveTargetedSitesRequest(this.service, body, pretargetingConfig);
             }
 
             /// <summary>Removes targeted sites from the pretargeting configuration.</summary>
@@ -1505,7 +1513,7 @@ namespace Google.Apis.RealTimeBidding.v1
             /// </param>
             public virtual SuspendRequest Suspend(Google.Apis.RealTimeBidding.v1.Data.SuspendPretargetingConfigRequest body, string name)
             {
-                return new SuspendRequest(service, body, name);
+                return new SuspendRequest(this.service, body, name);
             }
 
             /// <summary>Suspends a pretargeting configuration.</summary>
@@ -1557,11 +1565,316 @@ namespace Google.Apis.RealTimeBidding.v1
             }
         }
 
+        /// <summary>Gets the PublisherConnections resource.</summary>
+        public virtual PublisherConnectionsResource PublisherConnections { get; }
+
+        /// <summary>The "publisherConnections" collection of methods.</summary>
+        public class PublisherConnectionsResource
+        {
+            private const string Resource = "publisherConnections";
+
+            /// <summary>The service which this resource belongs to.</summary>
+            private readonly Google.Apis.Services.IClientService service;
+
+            /// <summary>Constructs a new resource.</summary>
+            public PublisherConnectionsResource(Google.Apis.Services.IClientService service)
+            {
+                this.service = service;
+            }
+
+            /// <summary>Batch approves multiple publisher connections.</summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="parent">
+            /// Required. The bidder for whom publisher connections will be approved. Format: `bidders/{bidder}` where
+            /// `{bidder}` is the account ID of the bidder.
+            /// </param>
+            public virtual BatchApproveRequest BatchApprove(Google.Apis.RealTimeBidding.v1.Data.BatchApprovePublisherConnectionsRequest body, string parent)
+            {
+                return new BatchApproveRequest(this.service, body, parent);
+            }
+
+            /// <summary>Batch approves multiple publisher connections.</summary>
+            public class BatchApproveRequest : RealTimeBiddingBaseServiceRequest<Google.Apis.RealTimeBidding.v1.Data.BatchApprovePublisherConnectionsResponse>
+            {
+                /// <summary>Constructs a new BatchApprove request.</summary>
+                public BatchApproveRequest(Google.Apis.Services.IClientService service, Google.Apis.RealTimeBidding.v1.Data.BatchApprovePublisherConnectionsRequest body, string parent) : base(service)
+                {
+                    Parent = parent;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The bidder for whom publisher connections will be approved. Format: `bidders/{bidder}`
+                /// where `{bidder}` is the account ID of the bidder.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.RealTimeBidding.v1.Data.BatchApprovePublisherConnectionsRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "batchApprove";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+parent}/publisherConnections:batchApprove";
+
+                /// <summary>Initializes BatchApprove parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^bidders/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>Batch rejects multiple publisher connections.</summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="parent">
+            /// Required. The bidder for whom publisher connections will be rejected. Format: `bidders/{bidder}` where
+            /// `{bidder}` is the account ID of the bidder.
+            /// </param>
+            public virtual BatchRejectRequest BatchReject(Google.Apis.RealTimeBidding.v1.Data.BatchRejectPublisherConnectionsRequest body, string parent)
+            {
+                return new BatchRejectRequest(this.service, body, parent);
+            }
+
+            /// <summary>Batch rejects multiple publisher connections.</summary>
+            public class BatchRejectRequest : RealTimeBiddingBaseServiceRequest<Google.Apis.RealTimeBidding.v1.Data.BatchRejectPublisherConnectionsResponse>
+            {
+                /// <summary>Constructs a new BatchReject request.</summary>
+                public BatchRejectRequest(Google.Apis.Services.IClientService service, Google.Apis.RealTimeBidding.v1.Data.BatchRejectPublisherConnectionsRequest body, string parent) : base(service)
+                {
+                    Parent = parent;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The bidder for whom publisher connections will be rejected. Format: `bidders/{bidder}`
+                /// where `{bidder}` is the account ID of the bidder.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.RealTimeBidding.v1.Data.BatchRejectPublisherConnectionsRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "batchReject";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+parent}/publisherConnections:batchReject";
+
+                /// <summary>Initializes BatchReject parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^bidders/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>Gets a publisher connection.</summary>
+            /// <param name="name">
+            /// Required. Name of the publisher whose connection information is to be retrieved. In the pattern
+            /// `bidders/{bidder}/publisherConnections/{publisher}` where `{bidder}` is the account ID of the bidder,
+            /// and `{publisher}` is the ads.txt/app-ads.txt publisher ID. See publisherConnection.name.
+            /// </param>
+            public virtual GetRequest Get(string name)
+            {
+                return new GetRequest(this.service, name);
+            }
+
+            /// <summary>Gets a publisher connection.</summary>
+            public class GetRequest : RealTimeBiddingBaseServiceRequest<Google.Apis.RealTimeBidding.v1.Data.PublisherConnection>
+            {
+                /// <summary>Constructs a new Get request.</summary>
+                public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                {
+                    Name = name;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. Name of the publisher whose connection information is to be retrieved. In the pattern
+                /// `bidders/{bidder}/publisherConnections/{publisher}` where `{bidder}` is the account ID of the
+                /// bidder, and `{publisher}` is the ads.txt/app-ads.txt publisher ID. See publisherConnection.name.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "get";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}";
+
+                /// <summary>Initializes Get parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^bidders/[^/]+/publisherConnections/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>Lists publisher connections for a given bidder.</summary>
+            /// <param name="parent">
+            /// Required. Name of the bidder for which publishers have initiated connections. The pattern for this
+            /// resource is `bidders/{bidder}` where `{bidder}` represents the account ID of the bidder.
+            /// </param>
+            public virtual ListRequest List(string parent)
+            {
+                return new ListRequest(this.service, parent);
+            }
+
+            /// <summary>Lists publisher connections for a given bidder.</summary>
+            public class ListRequest : RealTimeBiddingBaseServiceRequest<Google.Apis.RealTimeBidding.v1.Data.ListPublisherConnectionsResponse>
+            {
+                /// <summary>Constructs a new List request.</summary>
+                public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                {
+                    Parent = parent;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. Name of the bidder for which publishers have initiated connections. The pattern for this
+                /// resource is `bidders/{bidder}` where `{bidder}` represents the account ID of the bidder.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>
+                /// Query string to filter publisher connections. Connections can be filtered by `displayName`,
+                /// `publisherPlatform`, and `biddingState`. If no filter is specified, all publisher connections will
+                /// be returned. Example: 'displayName="Great Publisher*" AND publisherPlatform=ADMOB AND biddingState
+                /// != PENDING' See https://google.aip.dev/160 for more information about filtering syntax.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string Filter { get; set; }
+
+                /// <summary>
+                /// Order specification by which results should be sorted. If no sort order is specified, the results
+                /// will be returned in alphabetic order based on the publisher's publisher code. Results can be sorted
+                /// by `createTime`. Example: 'createTime DESC'.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("orderBy", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string OrderBy { get; set; }
+
+                /// <summary>
+                /// Requested page size. The server may return fewer results than requested (due to timeout constraint)
+                /// even if more are available through another call. If unspecified, the server will pick an appropriate
+                /// default. Acceptable values are 1 to 5000, inclusive.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<int> PageSize { get; set; }
+
+                /// <summary>
+                /// A token identifying a page of results the server should return. Typically, this is the value of
+                /// ListPublisherConnectionsResponse.nextPageToken returned from the previous call to the
+                /// 'ListPublisherConnections' method.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string PageToken { get; set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "list";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+parent}/publisherConnections";
+
+                /// <summary>Initializes List parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^bidders/[^/]+$",
+                    });
+                    RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "filter",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("orderBy", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "orderBy",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageSize",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageToken",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+        }
+
         /// <summary>Gets a bidder account by its name.</summary>
         /// <param name="name">Required. Name of the bidder to get. Format: `bidders/{bidderAccountId}`</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>Gets a bidder account by its name.</summary>
@@ -1605,7 +1918,7 @@ namespace Google.Apis.RealTimeBidding.v1
         /// <summary>Lists all the bidder accounts that belong to the caller.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>Lists all the bidder accounts that belong to the caller.</summary>
@@ -1707,7 +2020,7 @@ namespace Google.Apis.RealTimeBidding.v1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.RealTimeBidding.v1.Data.Creative body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>Creates a creative.</summary>
@@ -1764,7 +2077,7 @@ namespace Google.Apis.RealTimeBidding.v1
             /// <param name="name">Required. Name of the creative to retrieve. See creative.name.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets a creative.</summary>
@@ -1844,7 +2157,13 @@ namespace Google.Apis.RealTimeBidding.v1
                 }
             }
 
-            /// <summary>Lists creatives.</summary>
+            /// <summary>
+            /// Lists creatives as they are at the time of the initial request. This call may take multiple hours to
+            /// complete. For large, paginated requests, this method returns a snapshot of creatives at the time of
+            /// request for the first page. `lastStatusUpdate` and `creativeServingDecision` may be outdated for
+            /// creatives on sequential pages. We recommend [Google Cloud
+            /// Pub/Sub](//cloud.google.com/pubsub/docs/overview) to view the latest status.
+            /// </summary>
             /// <param name="parent">
             /// Required. Name of the parent buyer that owns the creatives. The pattern for this resource is either
             /// `buyers/{buyerAccountId}` or `bidders/{bidderAccountId}`. For `buyers/{buyerAccountId}`, the
@@ -1853,15 +2172,21 @@ namespace Google.Apis.RealTimeBidding.v1
             /// to the child seat buyer (`456`) under bidder account (`123`), you would use the pattern: `buyers/456`.
             /// 3. The ID of the bidder itself. So for listing creatives pertaining to bidder (`123`), you would use
             /// `buyers/123`. If you want to access all creatives pertaining to both the bidder and all of its child
-            /// seat accounts, you would use `bidders/{bidderAccountId}`, e.g., for all creatives pertaining to bidder
-            /// (`123`), use `bidders/123`.
+            /// seat accounts, you would use `bidders/{bidderAccountId}`, for example, for all creatives pertaining to
+            /// bidder (`123`), use `bidders/123`.
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
-            /// <summary>Lists creatives.</summary>
+            /// <summary>
+            /// Lists creatives as they are at the time of the initial request. This call may take multiple hours to
+            /// complete. For large, paginated requests, this method returns a snapshot of creatives at the time of
+            /// request for the first page. `lastStatusUpdate` and `creativeServingDecision` may be outdated for
+            /// creatives on sequential pages. We recommend [Google Cloud
+            /// Pub/Sub](//cloud.google.com/pubsub/docs/overview) to view the latest status.
+            /// </summary>
             public class ListRequest : RealTimeBiddingBaseServiceRequest<Google.Apis.RealTimeBidding.v1.Data.ListCreativesResponse>
             {
                 /// <summary>Constructs a new List request.</summary>
@@ -1879,8 +2204,8 @@ namespace Google.Apis.RealTimeBidding.v1
                 /// pertaining to the child seat buyer (`456`) under bidder account (`123`), you would use the pattern:
                 /// `buyers/456`. 3. The ID of the bidder itself. So for listing creatives pertaining to bidder (`123`),
                 /// you would use `buyers/123`. If you want to access all creatives pertaining to both the bidder and
-                /// all of its child seat accounts, you would use `bidders/{bidderAccountId}`, e.g., for all creatives
-                /// pertaining to bidder (`123`), use `bidders/123`.
+                /// all of its child seat accounts, you would use `bidders/{bidderAccountId}`, for example, for all
+                /// creatives pertaining to bidder (`123`), use `bidders/123`.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -1895,7 +2220,7 @@ namespace Google.Apis.RealTimeBidding.v1
 
                 /// <summary>
                 /// Requested page size. The server may return fewer creatives than requested (due to timeout
-                /// constraint) even if more are available via another call. If unspecified, server will pick an
+                /// constraint) even if more are available through another call. If unspecified, server will pick an
                 /// appropriate default. Acceptable values are 1 to 1000, inclusive.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
@@ -2006,7 +2331,7 @@ namespace Google.Apis.RealTimeBidding.v1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.RealTimeBidding.v1.Data.Creative body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Updates a creative.</summary>
@@ -2089,17 +2414,17 @@ namespace Google.Apis.RealTimeBidding.v1
             }
 
             /// <summary>
-            /// Change the status of a user list to CLOSED. This prevents new users from being added to the user list.
+            /// Changes the status of a user list to CLOSED. This prevents new users from being added to the user list.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">Required. The name of the user list to close. See UserList.name</param>
             public virtual CloseRequest Close(Google.Apis.RealTimeBidding.v1.Data.CloseUserListRequest body, string name)
             {
-                return new CloseRequest(service, body, name);
+                return new CloseRequest(this.service, body, name);
             }
 
             /// <summary>
-            /// Change the status of a user list to CLOSED. This prevents new users from being added to the user list.
+            /// Changes the status of a user list to CLOSED. This prevents new users from being added to the user list.
             /// </summary>
             public class CloseRequest : RealTimeBiddingBaseServiceRequest<Google.Apis.RealTimeBidding.v1.Data.UserList>
             {
@@ -2145,20 +2470,20 @@ namespace Google.Apis.RealTimeBidding.v1
                 }
             }
 
-            /// <summary>Create a new user list.</summary>
+            /// <summary>Creates a new user list.</summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">
-            /// Required. The name of the parent buyer of the user list to be retrieved that must follow the pattern
-            /// `buyers/{buyerAccountId}`, where `{buyerAccountId}` represents the account ID of the buyer who owns user
-            /// lists. For a bidder accessing user lists on behalf of a child seat buyer , `{buyerAccountId}` should
+            /// Required. The name of the parent buyer of the user list to be retrieved, which must follow the pattern
+            /// `buyers/{buyerAccountId}`, where `{buyerAccountId}` represents the account ID of the buyer who owns the
+            /// user list. For a bidder accessing user lists on behalf of a child seat buyer, `{buyerAccountId}` should
             /// represent the account ID of the child seat buyer.
             /// </param>
             public virtual CreateRequest Create(Google.Apis.RealTimeBidding.v1.Data.UserList body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
-            /// <summary>Create a new user list.</summary>
+            /// <summary>Creates a new user list.</summary>
             public class CreateRequest : RealTimeBiddingBaseServiceRequest<Google.Apis.RealTimeBidding.v1.Data.UserList>
             {
                 /// <summary>Constructs a new Create request.</summary>
@@ -2170,10 +2495,10 @@ namespace Google.Apis.RealTimeBidding.v1
                 }
 
                 /// <summary>
-                /// Required. The name of the parent buyer of the user list to be retrieved that must follow the pattern
-                /// `buyers/{buyerAccountId}`, where `{buyerAccountId}` represents the account ID of the buyer who owns
-                /// user lists. For a bidder accessing user lists on behalf of a child seat buyer , `{buyerAccountId}`
-                /// should represent the account ID of the child seat buyer.
+                /// Required. The name of the parent buyer of the user list to be retrieved, which must follow the
+                /// pattern `buyers/{buyerAccountId}`, where `{buyerAccountId}` represents the account ID of the buyer
+                /// who owns the user list. For a bidder accessing user lists on behalf of a child seat buyer,
+                /// `{buyerAccountId}` should represent the account ID of the child seat buyer.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
@@ -2212,7 +2537,7 @@ namespace Google.Apis.RealTimeBidding.v1
             /// <param name="name">Required. The name of the user list to be retrieved. See UserList.name.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets a user list by its name.</summary>
@@ -2254,24 +2579,30 @@ namespace Google.Apis.RealTimeBidding.v1
             }
 
             /// <summary>
-            /// Gets remarketing tag for a buyer. A remarketing tag is a piece of JavaScript code that can be placed on
-            /// a web page. When a user visits a page containing a remarketing tag, Google adds the user to a user list.
+            /// This has been sunset as of October 2023, and will return an error response if called. For more
+            /// information, see the release notes:
+            /// https://developers.google.com/authorized-buyers/apis/relnotes#real-time-bidding-api Gets remarketing tag
+            /// for a buyer. A remarketing tag is a piece of JavaScript code that can be placed on a web page. When a
+            /// user visits a page containing a remarketing tag, Google adds the user to a user list.
             /// </summary>
             /// <param name="name">
-            /// Required. To fetch remarketing tag for an account, name must follow the pattern `buyers/{accountId}`
-            /// where `{accountId}` represents ID of a buyer that owns the remarketing tag. For a bidder accessing
-            /// remarketing tag on behalf of a child seat buyer, `{accountId}` should represent the ID of the child seat
-            /// buyer. To fetch remarketing tag for a specific user list, name must follow the pattern
-            /// `buyers/{accountId}/userLists/{userListId}`. See UserList.name.
+            /// Required. To fetch the remarketing tag for an account, the name must follow the pattern
+            /// `buyers/{accountId}`, where `{accountId}` represents the ID of the buyer that owns the remarketing tag.
+            /// For a bidder accessing the remarketing tag on behalf of a child seat buyer, `{accountId}` should
+            /// represent the ID of the child seat buyer. To fetch the remarketing tag for a specific user list, the
+            /// name must follow the pattern `buyers/{accountId}/userLists/{userListId}`. See UserList.name.
             /// </param>
             public virtual GetRemarketingTagRequest GetRemarketingTag(string name)
             {
-                return new GetRemarketingTagRequest(service, name);
+                return new GetRemarketingTagRequest(this.service, name);
             }
 
             /// <summary>
-            /// Gets remarketing tag for a buyer. A remarketing tag is a piece of JavaScript code that can be placed on
-            /// a web page. When a user visits a page containing a remarketing tag, Google adds the user to a user list.
+            /// This has been sunset as of October 2023, and will return an error response if called. For more
+            /// information, see the release notes:
+            /// https://developers.google.com/authorized-buyers/apis/relnotes#real-time-bidding-api Gets remarketing tag
+            /// for a buyer. A remarketing tag is a piece of JavaScript code that can be placed on a web page. When a
+            /// user visits a page containing a remarketing tag, Google adds the user to a user list.
             /// </summary>
             public class GetRemarketingTagRequest : RealTimeBiddingBaseServiceRequest<Google.Apis.RealTimeBidding.v1.Data.GetRemarketingTagResponse>
             {
@@ -2283,11 +2614,12 @@ namespace Google.Apis.RealTimeBidding.v1
                 }
 
                 /// <summary>
-                /// Required. To fetch remarketing tag for an account, name must follow the pattern `buyers/{accountId}`
-                /// where `{accountId}` represents ID of a buyer that owns the remarketing tag. For a bidder accessing
-                /// remarketing tag on behalf of a child seat buyer, `{accountId}` should represent the ID of the child
-                /// seat buyer. To fetch remarketing tag for a specific user list, name must follow the pattern
-                /// `buyers/{accountId}/userLists/{userListId}`. See UserList.name.
+                /// Required. To fetch the remarketing tag for an account, the name must follow the pattern
+                /// `buyers/{accountId}`, where `{accountId}` represents the ID of the buyer that owns the remarketing
+                /// tag. For a bidder accessing the remarketing tag on behalf of a child seat buyer, `{accountId}`
+                /// should represent the ID of the child seat buyer. To fetch the remarketing tag for a specific user
+                /// list, the name must follow the pattern `buyers/{accountId}/userLists/{userListId}`. See
+                /// UserList.name.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Name { get; private set; }
@@ -2325,7 +2657,7 @@ namespace Google.Apis.RealTimeBidding.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists the user lists visible to the current user.</summary>
@@ -2351,7 +2683,7 @@ namespace Google.Apis.RealTimeBidding.v1
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<int> PageSize { get; set; }
 
-                /// <summary>Continuation page token (as received from a previous response).</summary>
+                /// <summary>Continuation page token as received from a previous response.</summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string PageToken { get; set; }
 
@@ -2396,17 +2728,17 @@ namespace Google.Apis.RealTimeBidding.v1
             }
 
             /// <summary>
-            /// Change the status of a user list to OPEN. This allows new users to be added to the user list.
+            /// Changes the status of a user list to OPEN. This allows new users to be added to the user list.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">Required. The name of the user list to open. See UserList.name</param>
             public virtual OpenRequest Open(Google.Apis.RealTimeBidding.v1.Data.OpenUserListRequest body, string name)
             {
-                return new OpenRequest(service, body, name);
+                return new OpenRequest(this.service, body, name);
             }
 
             /// <summary>
-            /// Change the status of a user list to OPEN. This allows new users to be added to the user list.
+            /// Changes the status of a user list to OPEN. This allows new users to be added to the user list.
             /// </summary>
             public class OpenRequest : RealTimeBiddingBaseServiceRequest<Google.Apis.RealTimeBidding.v1.Data.UserList>
             {
@@ -2452,7 +2784,7 @@ namespace Google.Apis.RealTimeBidding.v1
                 }
             }
 
-            /// <summary>Update the given user list. Only user lists with URLRestrictions can be updated.</summary>
+            /// <summary>Updates the given user list. Only user lists with URLRestrictions can be updated.</summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
             /// Output only. Name of the user list that must follow the pattern `buyers/{buyer}/userLists/{user_list}`,
@@ -2462,10 +2794,10 @@ namespace Google.Apis.RealTimeBidding.v1
             /// </param>
             public virtual UpdateRequest Update(Google.Apis.RealTimeBidding.v1.Data.UserList body, string name)
             {
-                return new UpdateRequest(service, body, name);
+                return new UpdateRequest(this.service, body, name);
             }
 
-            /// <summary>Update the given user list. Only user lists with URLRestrictions can be updated.</summary>
+            /// <summary>Updates the given user list. Only user lists with URLRestrictions can be updated.</summary>
             public class UpdateRequest : RealTimeBiddingBaseServiceRequest<Google.Apis.RealTimeBidding.v1.Data.UserList>
             {
                 /// <summary>Constructs a new Update request.</summary>
@@ -2521,7 +2853,7 @@ namespace Google.Apis.RealTimeBidding.v1
         /// <param name="name">Required. Name of the buyer to get. Format: `buyers/{buyerId}`</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>Gets a buyer account by its name.</summary>
@@ -2563,22 +2895,26 @@ namespace Google.Apis.RealTimeBidding.v1
         }
 
         /// <summary>
+        /// This has been sunset as of October 2023, and will return an error response if called. For more information,
+        /// see the release notes: https://developers.google.com/authorized-buyers/apis/relnotes#real-time-bidding-api
         /// Gets remarketing tag for a buyer. A remarketing tag is a piece of JavaScript code that can be placed on a
         /// web page. When a user visits a page containing a remarketing tag, Google adds the user to a user list.
         /// </summary>
         /// <param name="name">
-        /// Required. To fetch remarketing tag for an account, name must follow the pattern `buyers/{accountId}` where
-        /// `{accountId}` represents ID of a buyer that owns the remarketing tag. For a bidder accessing remarketing tag
-        /// on behalf of a child seat buyer, `{accountId}` should represent the ID of the child seat buyer. To fetch
-        /// remarketing tag for a specific user list, name must follow the pattern
-        /// `buyers/{accountId}/userLists/{userListId}`. See UserList.name.
+        /// Required. To fetch the remarketing tag for an account, the name must follow the pattern
+        /// `buyers/{accountId}`, where `{accountId}` represents the ID of the buyer that owns the remarketing tag. For
+        /// a bidder accessing the remarketing tag on behalf of a child seat buyer, `{accountId}` should represent the
+        /// ID of the child seat buyer. To fetch the remarketing tag for a specific user list, the name must follow the
+        /// pattern `buyers/{accountId}/userLists/{userListId}`. See UserList.name.
         /// </param>
         public virtual GetRemarketingTagRequest GetRemarketingTag(string name)
         {
-            return new GetRemarketingTagRequest(service, name);
+            return new GetRemarketingTagRequest(this.service, name);
         }
 
         /// <summary>
+        /// This has been sunset as of October 2023, and will return an error response if called. For more information,
+        /// see the release notes: https://developers.google.com/authorized-buyers/apis/relnotes#real-time-bidding-api
         /// Gets remarketing tag for a buyer. A remarketing tag is a piece of JavaScript code that can be placed on a
         /// web page. When a user visits a page containing a remarketing tag, Google adds the user to a user list.
         /// </summary>
@@ -2592,11 +2928,11 @@ namespace Google.Apis.RealTimeBidding.v1
             }
 
             /// <summary>
-            /// Required. To fetch remarketing tag for an account, name must follow the pattern `buyers/{accountId}`
-            /// where `{accountId}` represents ID of a buyer that owns the remarketing tag. For a bidder accessing
-            /// remarketing tag on behalf of a child seat buyer, `{accountId}` should represent the ID of the child seat
-            /// buyer. To fetch remarketing tag for a specific user list, name must follow the pattern
-            /// `buyers/{accountId}/userLists/{userListId}`. See UserList.name.
+            /// Required. To fetch the remarketing tag for an account, the name must follow the pattern
+            /// `buyers/{accountId}`, where `{accountId}` represents the ID of the buyer that owns the remarketing tag.
+            /// For a bidder accessing the remarketing tag on behalf of a child seat buyer, `{accountId}` should
+            /// represent the ID of the child seat buyer. To fetch the remarketing tag for a specific user list, the
+            /// name must follow the pattern `buyers/{accountId}/userLists/{userListId}`. See UserList.name.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Name { get; private set; }
@@ -2630,7 +2966,7 @@ namespace Google.Apis.RealTimeBidding.v1
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
@@ -2716,7 +3052,7 @@ namespace Google.Apis.RealTimeBidding.v1.Data
     {
         /// <summary>
         /// The detected IAB Global Vendor List (GVL) IDs for this creative. See the IAB Global Vendor List at
-        /// https://vendorlist.consensu.org/v2/vendor-list.json for details about the vendors.
+        /// https://vendor-list.consensu.org/v2/vendor-list.json for details about the vendors.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("detectedGvlIds")]
         public virtual System.Collections.Generic.IList<System.Nullable<long>> DetectedGvlIds { get; set; }
@@ -2873,15 +3209,67 @@ namespace Google.Apis.RealTimeBidding.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>A request to approve a batch of publisher connections.</summary>
+    public class BatchApprovePublisherConnectionsRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The names of the publishers with which connections will be approved. In the pattern
+        /// `bidders/{bidder}/publisherConnections/{publisher}` where `{bidder}` is the account ID of the bidder, and
+        /// `{publisher}` is the ads.txt/app-ads.txt publisher ID.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("names")]
+        public virtual System.Collections.Generic.IList<string> Names { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A response for the request to approve a batch of publisher connections.</summary>
+    public class BatchApprovePublisherConnectionsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The publisher connections that have been approved.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("publisherConnections")]
+        public virtual System.Collections.Generic.IList<PublisherConnection> PublisherConnections { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A request to reject a batch of publisher connections.</summary>
+    public class BatchRejectPublisherConnectionsRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The names of the publishers with whom connection will be rejected. In the pattern
+        /// `bidders/{bidder}/publisherConnections/{publisher}` where `{bidder}` is the account ID of the bidder, and
+        /// `{publisher}` is the ads.txt/app-ads.txt publisher ID.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("names")]
+        public virtual System.Collections.Generic.IList<string> Names { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A response for the request to reject a batch of publisher connections.</summary>
+    public class BatchRejectPublisherConnectionsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The publisher connections that have been rejected.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("publisherConnections")]
+        public virtual System.Collections.Generic.IList<PublisherConnection> PublisherConnections { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Bidder settings.</summary>
     public class Bidder : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Output only. A flag to bypass pretargeting for private auctions and preferred deals. When true, bid requests
-        /// from these nonguaranteed deals will always be sent. When false, bid requests will be subject to regular
-        /// pretargeting configurations. Programmatic Guaranteed deals will always be sent to the bidder, regardless of
-        /// the value for this flag. Auction packages are not impacted by this value and are subject to the regular
-        /// pretargeting configurations.
+        /// Output only. An option to bypass pretargeting for private auctions and preferred deals. When true, bid
+        /// requests from these nonguaranteed deals will always be sent. When false, bid requests will be subject to
+        /// regular pretargeting configurations. Programmatic Guaranteed deals will always be sent to the bidder,
+        /// regardless of the value for this flag. Auction packages are not impacted by this value and are subject to
+        /// the regular pretargeting configurations.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("bypassNonguaranteedDealsPretargeting")]
         public virtual System.Nullable<bool> BypassNonguaranteedDealsPretargeting { get; set; }
@@ -2924,8 +3312,8 @@ namespace Google.Apis.RealTimeBidding.v1.Data
     public class Buyer : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Output only. The number of creatives that this buyer submitted via the API or bid with in the last 30 days.
-        /// This is counted against the maximum number of active creatives.
+        /// Output only. The number of creatives that this buyer submitted through the API or bid with in the last 30
+        /// days. This is counted against the maximum number of active creatives.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("activeCreativeCount")]
         public virtual System.Nullable<long> ActiveCreativeCount { get; set; }
@@ -2999,9 +3387,42 @@ namespace Google.Apis.RealTimeBidding.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("agencyId")]
         public virtual System.Nullable<long> AgencyId { get; set; }
 
-        /// <summary>Output only. The last update timestamp of the creative via API.</summary>
+        private string _apiUpdateTimeRaw;
+
+        private object _apiUpdateTime;
+
+        /// <summary>Output only. The last update timestamp of the creative through the API.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("apiUpdateTime")]
-        public virtual object ApiUpdateTime { get; set; }
+        public virtual string ApiUpdateTimeRaw
+        {
+            get => _apiUpdateTimeRaw;
+            set
+            {
+                _apiUpdateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _apiUpdateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ApiUpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ApiUpdateTimeDateTimeOffset instead.")]
+        public virtual object ApiUpdateTime
+        {
+            get => _apiUpdateTime;
+            set
+            {
+                _apiUpdateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _apiUpdateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ApiUpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ApiUpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ApiUpdateTimeRaw);
+            set => ApiUpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Output only. The format of this creative. Can be used to filter the response of the creatives.list method.
@@ -3084,12 +3505,23 @@ namespace Google.Apis.RealTimeBidding.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("native")]
         public virtual NativeContent Native { get; set; }
 
+        /// <summary>
+        /// Experimental field that can be used during the [FLEDGE Origin
+        /// Trial](/authorized-buyers/rtb/fledge-origin-trial). The URL to fetch an interest group ad used in
+        /// [TURTLEDOVE on-device
+        /// auction](https://github.com/WICG/turtledove/blob/main/FLEDGE.md#1-browsers-record-interest-groups"). This
+        /// should be unique among all creatives for a given `accountId`. This URL should be the same as the URL
+        /// returned by [generateBid()](https://github.com/WICG/turtledove/blob/main/FLEDGE.md#32-on-device-bidding).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("renderUrl")]
+        public virtual string RenderUrl { get; set; }
+
         /// <summary>All restricted categories for the ads that may be shown from this creative.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("restrictedCategories")]
         public virtual System.Collections.Generic.IList<string> RestrictedCategories { get; set; }
 
         /// <summary>
-        /// Output only. The version of this creative. Version for a new creative is 1 and it increments during
+        /// Output only. The version of the creative. Version for a new creative is 1 and it increments during
         /// subsequent creative updates.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("version")]
@@ -3155,6 +3587,18 @@ namespace Google.Apis.RealTimeBidding.v1.Data
         public virtual System.Collections.Generic.IList<string> DetectedAttributes { get; set; }
 
         /// <summary>
+        /// Output only. IDs of the detected categories, if any. The taxonomy in which the categories are expressed is
+        /// specified by the detected_categories_taxonomy field. Can be used to filter the response of the
+        /// creatives.list method.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("detectedCategories")]
+        public virtual System.Collections.Generic.IList<string> DetectedCategories { get; set; }
+
+        /// <summary>Output only. The taxonomy in which the detected_categories field is expressed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("detectedCategoriesTaxonomy")]
+        public virtual string DetectedCategoriesTaxonomy { get; set; }
+
+        /// <summary>
         /// The set of detected destination URLs for the creative. Can be used to filter the response of the
         /// creatives.list method.
         /// </summary>
@@ -3199,12 +3643,47 @@ namespace Google.Apis.RealTimeBidding.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("detectedVendorIds")]
         public virtual System.Collections.Generic.IList<System.Nullable<int>> DetectedVendorIds { get; set; }
 
+        private string _lastStatusUpdateRaw;
+
+        private object _lastStatusUpdate;
+
         /// <summary>
         /// The last time the creative status was updated. Can be used to filter the response of the creatives.list
         /// method.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastStatusUpdate")]
-        public virtual object LastStatusUpdate { get; set; }
+        public virtual string LastStatusUpdateRaw
+        {
+            get => _lastStatusUpdateRaw;
+            set
+            {
+                _lastStatusUpdate = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastStatusUpdateRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastStatusUpdateRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastStatusUpdateDateTimeOffset instead.")]
+        public virtual object LastStatusUpdate
+        {
+            get => _lastStatusUpdate;
+            set
+            {
+                _lastStatusUpdateRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastStatusUpdate = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="LastStatusUpdateRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastStatusUpdateDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastStatusUpdateRaw);
+            set => LastStatusUpdateRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Policy compliance of this creative when bidding in open auction, private auction, or auction packages
@@ -3235,10 +3714,10 @@ namespace Google.Apis.RealTimeBidding.v1.Data
     /// <summary>
     /// Represents a whole or partial calendar date, such as a birthday. The time of day and time zone are either
     /// specified elsewhere or are insignificant. The date is relative to the Gregorian Calendar. This can represent one
-    /// of the following: * A full date, with non-zero year, month, and day values * A month and day value, with a zero
-    /// year, such as an anniversary * A year on its own, with zero month and day values * A year and month value, with
-    /// a zero day, such as a credit card expiration date Related types are google.type.TimeOfDay and
-    /// `google.protobuf.Timestamp`.
+    /// of the following: * A full date, with non-zero year, month, and day values. * A month and day, with a zero year
+    /// (for example, an anniversary). * A year on its own, with a zero month and a zero day. * A year and month, with a
+    /// zero day (for example, a credit card expiration date). Related types: * google.type.TimeOfDay *
+    /// google.type.DateTime * google.protobuf.Timestamp
     /// </summary>
     public class Date : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3264,9 +3743,42 @@ namespace Google.Apis.RealTimeBidding.v1.Data
     /// <summary>Evidence that the creative's destination URL was not crawlable by Google.</summary>
     public class DestinationNotCrawlableEvidence : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _crawlTimeRaw;
+
+        private object _crawlTime;
+
         /// <summary>Approximate time of the crawl.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("crawlTime")]
-        public virtual object CrawlTime { get; set; }
+        public virtual string CrawlTimeRaw
+        {
+            get => _crawlTimeRaw;
+            set
+            {
+                _crawlTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _crawlTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CrawlTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CrawlTimeDateTimeOffset instead.")]
+        public virtual object CrawlTime
+        {
+            get => _crawlTime;
+            set
+            {
+                _crawlTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _crawlTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CrawlTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CrawlTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CrawlTimeRaw);
+            set => CrawlTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Destination URL that was attempted to be crawled.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("crawledUrl")]
@@ -3293,7 +3805,7 @@ namespace Google.Apis.RealTimeBidding.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("expandedUrl")]
         public virtual string ExpandedUrl { get; set; }
 
-        /// <summary>HTTP error code (e.g. 404 or 5xx)</summary>
+        /// <summary>HTTP error code (for example, 404 or 5xx)</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("httpError")]
         public virtual System.Nullable<int> HttpError { get; set; }
 
@@ -3303,9 +3815,42 @@ namespace Google.Apis.RealTimeBidding.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("invalidPage")]
         public virtual string InvalidPage { get; set; }
 
+        private string _lastCheckTimeRaw;
+
+        private object _lastCheckTime;
+
         /// <summary>Approximate time when the ad destination was last checked.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("lastCheckTime")]
-        public virtual object LastCheckTime { get; set; }
+        public virtual string LastCheckTimeRaw
+        {
+            get => _lastCheckTimeRaw;
+            set
+            {
+                _lastCheckTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _lastCheckTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="LastCheckTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use LastCheckTimeDateTimeOffset instead.")]
+        public virtual object LastCheckTime
+        {
+            get => _lastCheckTime;
+            set
+            {
+                _lastCheckTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _lastCheckTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="LastCheckTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? LastCheckTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(LastCheckTimeRaw);
+            set => LastCheckTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Platform of the non-working URL.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("platform")]
@@ -3337,7 +3882,7 @@ namespace Google.Apis.RealTimeBidding.v1.Data
     /// <summary>Number of HTTP calls made by a creative, broken down by domain.</summary>
     public class DomainCallEvidence : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Breakdown of the most frequent domains called via HTTP by the creative.</summary>
+        /// <summary>Breakdown of the most frequent domains called through HTTP by the creative.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("topHttpCallDomains")]
         public virtual System.Collections.Generic.IList<DomainCalls> TopHttpCallDomains { get; set; }
 
@@ -3385,8 +3930,7 @@ namespace Google.Apis.RealTimeBidding.v1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3428,13 +3972,17 @@ namespace Google.Apis.RealTimeBidding.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Response for a request to get remarketing tag.</summary>
+    /// <summary>
+    /// This has been sunset as of October 2023, and will return an error response if called. For more information, see
+    /// the release notes: https://developers.google.com/authorized-buyers/apis/relnotes#real-time-bidding-api Response
+    /// for a request to get remarketing tag.
+    /// </summary>
     public class GetRemarketingTagResponse : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// A HTML tag that can be placed on the advertiser's page to add users to a user list. For more information and
-        /// code samples on using snippet on your website refer to [Tag your site for remarketing](
-        /// https://support.google.com/google-ads/answer/2476688).
+        /// An HTML tag that can be placed on the advertiser's page to add users to a user list. For more information
+        /// and code samples on using snippets on your website, refer to [Tag your site for
+        /// remarketing](https://support.google.com/google-ads/answer/2476688).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("snippet")]
         public virtual string Snippet { get; set; }
@@ -3611,13 +4159,32 @@ namespace Google.Apis.RealTimeBidding.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>A response to a request for listing publisher connections.</summary>
+    public class ListPublisherConnectionsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// A token to retrieve the next page of results. Pass this value in the
+        /// ListPublisherConnectionsRequest.pageToken field in the subsequent call to the `ListPublisherConnections`
+        /// method to retrieve the next page of results.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
+        public virtual string NextPageToken { get; set; }
+
+        /// <summary>The list of publisher connections.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("publisherConnections")]
+        public virtual System.Collections.Generic.IList<PublisherConnection> PublisherConnections { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The list user list response.</summary>
     public class ListUserListsResponse : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
         /// The continuation page token to send back to the server in a subsequent request. Due to a currently known
-        /// issue, it is recommended that the caller keep invoking the list method till the time a next page token is
-        /// not returned (even if the result set is empty).
+        /// issue, it is recommended that the caller keep invoking the list method until the time a next page token is
+        /// not returned, even if the result set is empty.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -3737,15 +4304,15 @@ namespace Google.Apis.RealTimeBidding.v1.Data
     public class PolicyCompliance : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Serving status for the given transaction type (e.g., open auction, deals) or region (e.g., China, Russia).
-        /// Can be used to filter the response of the creatives.list method.
+        /// Serving status for the given transaction type (for example, open auction, deals) or region (for example,
+        /// China, Russia). Can be used to filter the response of the creatives.list method.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("status")]
         public virtual string Status { get; set; }
 
         /// <summary>
-        /// Topics related to the policy compliance for this transaction type (e.g., open auction, deals) or region
-        /// (e.g., China, Russia). Topics may be present only if status is DISAPPROVED.
+        /// Topics related to the policy compliance for this transaction type (for example, open auction, deals) or
+        /// region (for example, China, Russia). Topics may be present only if status is DISAPPROVED.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("topics")]
         public virtual System.Collections.Generic.IList<PolicyTopicEntry> Topics { get; set; }
@@ -3767,6 +4334,14 @@ namespace Google.Apis.RealTimeBidding.v1.Data
         /// <summary>URL of the help center article describing this policy topic.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("helpCenterUrl")]
         public virtual string HelpCenterUrl { get; set; }
+
+        /// <summary>
+        /// Whether or not the policy topic is missing a certificate. Some policy topics require a certificate to
+        /// unblock serving in some regions. For more information about creative certification, refer to:
+        /// https://support.google.com/authorizedbuyers/answer/7450776
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("missingCertificate")]
+        public virtual System.Nullable<bool> MissingCertificate { get; set; }
 
         /// <summary>
         /// Policy topic this entry refers to. For example, "ALCOHOL", "TRADEMARKS_IN_AD_TEXT", or
@@ -3967,7 +4542,8 @@ namespace Google.Apis.RealTimeBidding.v1.Data
         /// field on the [Google RTB
         /// protocol](https://developers.google.com/authorized-buyers/rtb/downloads/realtime-bidding-proto) or the
         /// `BidRequest.site.publisher.id` / `BidRequest.app.publisher.id` field on the [OpenRTB
-        /// protocol](https://developers.google.com/authorized-buyers/rtb/downloads/openrtb-adx-proto).
+        /// protocol](https://developers.google.com/authorized-buyers/rtb/downloads/openrtb-adx-proto). Publisher IDs
+        /// will be returned in the order that they were entered.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("publisherTargeting")]
         public virtual StringTargetingDimension PublisherTargeting { get; set; }
@@ -3996,6 +4572,77 @@ namespace Google.Apis.RealTimeBidding.v1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("webTargeting")]
         public virtual StringTargetingDimension WebTargeting { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// An Open Bidding exchange's connection to a publisher. This is initiated by the publisher for the bidder to
+    /// review. If approved by the bidder, this means that the bidder agrees to receive bid requests from the publisher.
+    /// </summary>
+    public class PublisherConnection : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Whether the publisher has been approved by the bidder.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("biddingState")]
+        public virtual string BiddingState { get; set; }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
+
+        /// <summary>
+        /// Output only. The time at which the publisher initiated a connection with the bidder (irrespective of if or
+        /// when the bidder approves it). This is subsequently updated if the publisher revokes and re-initiates the
+        /// connection.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Output only. Publisher display name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>
+        /// Output only. Name of the publisher connection. This follows the pattern
+        /// `bidders/{bidder}/publisherConnections/{publisher}`, where `{bidder}` represents the account ID of the
+        /// bidder, and `{publisher}` is the ads.txt/app-ads.txt publisher ID.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Output only. Whether the publisher is an Ad Manager or AdMob publisher.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("publisherPlatform")]
+        public virtual string PublisherPlatform { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4094,7 +4741,11 @@ namespace Google.Apis.RealTimeBidding.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Represents the URL restriction (for the URL captured by the pixel callback) for a user list.</summary>
+    /// <summary>
+    /// Deprecated. This will be removed in October 2023. For more information, see the release notes:
+    /// https://developers.google.com/authorized-buyers/apis/relnotes#real-time-bidding-api Represents the URL
+    /// restriction (for the URL captured by the pixel callback) for a user list.
+    /// </summary>
     public class UrlRestriction : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
@@ -4157,7 +4808,11 @@ namespace Google.Apis.RealTimeBidding.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("status")]
         public virtual string Status { get; set; }
 
-        /// <summary>Required. The URL restriction for the user list.</summary>
+        /// <summary>
+        /// Required. Deprecated. This will be removed in October 2023. For more information, see the release notes:
+        /// https://developers.google.com/authorized-buyers/apis/relnotes#real-time-bidding-api The URL restriction for
+        /// the user list.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("urlRestriction")]
         public virtual UrlRestriction UrlRestriction { get; set; }
 
@@ -4172,12 +4827,15 @@ namespace Google.Apis.RealTimeBidding.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("videoMetadata")]
         public virtual VideoMetadata VideoMetadata { get; set; }
 
-        /// <summary>The URL to fetch a video ad.</summary>
+        /// <summary>
+        /// The URL to fetch a video ad. The URL should return an XML response that conforms to the VAST 2.0, 3.0 or 4.x
+        /// standard.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("videoUrl")]
         public virtual string VideoUrl { get; set; }
 
         /// <summary>
-        /// The contents of a VAST document for a video ad. This document should conform to the VAST 2.0 or 3.0
+        /// The contents of a VAST document for a video ad. This document should conform to the VAST 2.0, 3.0, or 4.x
         /// standard.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("videoVastXml")]
@@ -4246,7 +4904,7 @@ namespace Google.Apis.RealTimeBidding.v1.Data
         /// The Pub/Sub subscription that can be used to pull creative status notifications. This would be of the format
         /// `projects/{project_id}/subscriptions/{subscription_id}`. Subscription is created with pull delivery. All
         /// service accounts belonging to the bidder will have read access to this subscription. Subscriptions that are
-        /// inactive for more than 90 days will be disabled. Please use watchCreatives to re-enable the subscription.
+        /// inactive for more than 90 days will be disabled. Use watchCreatives to re-enable the subscription.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("subscription")]
         public virtual string Subscription { get; set; }

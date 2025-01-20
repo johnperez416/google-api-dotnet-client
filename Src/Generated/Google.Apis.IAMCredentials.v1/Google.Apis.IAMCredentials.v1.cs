@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.IAMCredentials.v1
         public IAMCredentialsService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://iamcredentials.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://iamcredentials.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.IAMCredentials.v1
         public override string Name => "iamcredentials";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://iamcredentials.googleapis.com/";
-        #else
-            "https://iamcredentials.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://iamcredentials.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the IAM Service Account Credentials API.</summary>
         public class Scope
@@ -308,7 +303,7 @@ namespace Google.Apis.IAMCredentials.v1
             /// </param>
             public virtual GenerateAccessTokenRequest GenerateAccessToken(Google.Apis.IAMCredentials.v1.Data.GenerateAccessTokenRequest body, string name)
             {
-                return new GenerateAccessTokenRequest(service, body, name);
+                return new GenerateAccessTokenRequest(this.service, body, name);
             }
 
             /// <summary>Generates an OAuth 2.0 access token for a service account.</summary>
@@ -369,7 +364,7 @@ namespace Google.Apis.IAMCredentials.v1
             /// </param>
             public virtual GenerateIdTokenRequest GenerateIdToken(Google.Apis.IAMCredentials.v1.Data.GenerateIdTokenRequest body, string name)
             {
-                return new GenerateIdTokenRequest(service, body, name);
+                return new GenerateIdTokenRequest(this.service, body, name);
             }
 
             /// <summary>Generates an OpenID Connect ID token for a service account.</summary>
@@ -421,6 +416,51 @@ namespace Google.Apis.IAMCredentials.v1
                 }
             }
 
+            /// <summary>Returns the trust boundary info for a given service account.</summary>
+            /// <param name="name">Required. Resource name of service account.</param>
+            public virtual GetAllowedLocationsRequest GetAllowedLocations(string name)
+            {
+                return new GetAllowedLocationsRequest(this.service, name);
+            }
+
+            /// <summary>Returns the trust boundary info for a given service account.</summary>
+            public class GetAllowedLocationsRequest : IAMCredentialsBaseServiceRequest<Google.Apis.IAMCredentials.v1.Data.ServiceAccountAllowedLocations>
+            {
+                /// <summary>Constructs a new GetAllowedLocations request.</summary>
+                public GetAllowedLocationsRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                {
+                    Name = name;
+                    InitParameters();
+                }
+
+                /// <summary>Required. Resource name of service account.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "getAllowedLocations";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+name}/allowedLocations";
+
+                /// <summary>Initializes GetAllowedLocations parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/serviceAccounts/[^/]+$",
+                    });
+                }
+            }
+
             /// <summary>Signs a blob using a service account's system-managed private key.</summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
@@ -430,7 +470,7 @@ namespace Google.Apis.IAMCredentials.v1
             /// </param>
             public virtual SignBlobRequest SignBlob(Google.Apis.IAMCredentials.v1.Data.SignBlobRequest body, string name)
             {
-                return new SignBlobRequest(service, body, name);
+                return new SignBlobRequest(this.service, body, name);
             }
 
             /// <summary>Signs a blob using a service account's system-managed private key.</summary>
@@ -491,7 +531,7 @@ namespace Google.Apis.IAMCredentials.v1
             /// </param>
             public virtual SignJwtRequest SignJwt(Google.Apis.IAMCredentials.v1.Data.SignJwtRequest body, string name)
             {
-                return new SignJwtRequest(service, body, name);
+                return new SignJwtRequest(this.service, body, name);
             }
 
             /// <summary>Signs a JWT using a service account's system-managed private key.</summary>
@@ -550,10 +590,13 @@ namespace Google.Apis.IAMCredentials.v1.Data
     public class GenerateAccessTokenRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The sequence of service accounts in a delegation chain. Each service account must be granted the
-        /// `roles/iam.serviceAccountTokenCreator` role on its next service account in the chain. The last service
-        /// account in the chain must be granted the `roles/iam.serviceAccountTokenCreator` role on the service account
-        /// that is specified in the `name` field of the request. The delegates must have the following format:
+        /// The sequence of service accounts in a delegation chain. This field is required for [delegated
+        /// requests](https://cloud.google.com/iam/help/credentials/delegated-request). For [direct
+        /// requests](https://cloud.google.com/iam/help/credentials/direct-request), which are more common, do not
+        /// specify this field. Each service account must be granted the `roles/iam.serviceAccountTokenCreator` role on
+        /// its next service account in the chain. The last service account in the chain must be granted the
+        /// `roles/iam.serviceAccountTokenCreator` role on the service account that is specified in the `name` field of
+        /// the request. The delegates must have the following format:
         /// `projects/-/serviceAccounts/{ACCOUNT_EMAIL_OR_UNIQUEID}`. The `-` wildcard character is required; replacing
         /// it with a project ID is invalid.
         /// </summary>
@@ -588,9 +631,42 @@ namespace Google.Apis.IAMCredentials.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("accessToken")]
         public virtual string AccessToken { get; set; }
 
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
         /// <summary>Token expiration time. The expiration time is always set.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
-        public virtual object ExpireTime { get; set; }
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -631,6 +707,23 @@ namespace Google.Apis.IAMCredentials.v1.Data
         /// <summary>The OpenId Connect ID token.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("token")]
         public virtual string Token { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Represents a list of allowed locations for given service account.</summary>
+    public class ServiceAccountAllowedLocations : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Output only. The hex encoded bitmap of the trust boundary locations</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("encodedLocations")]
+        public virtual string EncodedLocations { get; set; }
+
+        /// <summary>
+        /// Output only. The human readable trust boundary locations. For example, ["us-central1", "europe-west1"]
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("locations")]
+        public virtual System.Collections.Generic.IList<string> Locations { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

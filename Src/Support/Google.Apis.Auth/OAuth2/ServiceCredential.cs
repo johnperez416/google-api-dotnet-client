@@ -20,6 +20,7 @@ using Google.Apis.Logging;
 using Google.Apis.Util;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading;
@@ -32,11 +33,23 @@ namespace Google.Apis.Auth.OAuth2
     /// interacting server to server. For example, a service account credential could be used to access Google Cloud
     /// Storage from a web application without a user's involvement.
     /// <para>
-    /// <code>ServiceAccountCredential</code> inherits from this class in order to support Service Account. More
+    /// <see cref="ServiceAccountCredential"/> inherits from this class in order to support Service Accounts. More
     /// details available at: https://developers.google.com/accounts/docs/OAuth2ServiceAccount.
-    /// <see cref="Google.Apis.Auth.OAuth2.ComputeCredential"/> is another example for a class that inherits from this
+    /// <see cref="ComputeCredential"/> is another example of a class that inherits from this
     /// class in order to support Compute credentials. For more information about Compute authentication, see:
     /// https://cloud.google.com/compute/docs/authentication.
+    /// </para>
+    /// <para>
+    /// <see cref="ExternalAccountCredential"/> inherits from this class to support both Workload Identity Federation
+    /// and Workforce Identity Federation. You can read more about these topics in
+    /// https://cloud.google.com/iam/docs/workload-identity-federation and
+    /// https://cloud.google.com/iam/docs/workforce-identity-federation respectively.
+    /// Note that in the case of Workforce Identity Federation, the external account does not represent a service account
+    /// but a user account, so, the fact that <see cref="ExternalAccountCredential"/> inherits from <see cref="ServiceCredential"/>
+    /// might be construed as misleading. In reality <see cref="ServiceCredential"/> is not tied to a service account
+    /// in terms of implementation, only in terms of name. For instance, a better name for this class might have been NoUserFlowCredential, and
+    /// in that sense, it's correct that <see cref="ExternalAccountCredential"/> inherits from <see cref="ServiceCredential"/>
+    /// even when representing a Workforce Identity Federation account.
     /// </para>
     /// </summary>
     public abstract class ServiceCredential : ICredential, ITokenAccessWithHeaders,
@@ -69,12 +82,13 @@ namespace Google.Apis.Auth.OAuth2
             public IHttpClientFactory HttpClientFactory { get; set; }
 
             /// <summary>
-            /// Get or sets the exponential back-off policy. Default value is  <c>UnsuccessfulResponse503</c>, which 
-            /// means that exponential back-off is used on 503 abnormal HTTP responses.
-            /// If the value is set to <c>None</c>, no exponential back-off policy is used, and it's up to the user to
-            /// configure the <see cref="Google.Apis.Http.ConfigurableMessageHandler"/> in an
-            /// <see cref="Google.Apis.Http.IConfigurableHttpClientInitializer"/> to set a specific back-off
-            /// implementation (using <see cref="Google.Apis.Http.BackOffHandler"/>).
+            /// Indicates which of exceptions and / or HTTP status codes are automatically retried using exponential backoff.
+            /// The default value is <see cref="ExponentialBackOffPolicy.RecommendedOrDefault"/> which means retries will be
+            /// executed as recommended by each service. For services that have no specific recommendations
+            /// <see cref="ExponentialBackOffPolicy.UnsuccessfulResponse503"/> will be used, which means HTTP Status code 503
+            /// will be retried with exponential backoff.
+            /// If set to <see cref="ExponentialBackOffPolicy.None" /> no automatic retries will happen.
+            /// Calling code may still specify custom retries by configuring <see cref="HttpClient"/>.
             /// </summary>
             public ExponentialBackOffPolicy DefaultExponentialBackOffPolicy { get; set; }
 
@@ -83,6 +97,15 @@ namespace Google.Apis.Auth.OAuth2
             /// quota calculation and billing. May be null.
             /// </summary>
             public string QuotaProject { get; set; }
+
+            /// <summary>
+            /// Scopes to request during the authorization grant. May be null or empty.
+            /// </summary>
+            /// <remarks>
+            /// If the scopes are pre-granted through the environement, like in GCE where scopes are granted to the VM,
+            /// scopes set here will be ignored.
+            /// </remarks>
+            public IEnumerable<string> Scopes { get; set; }
 
             /// <summary>
             /// Initializers to be sent to the <see cref="HttpClientFactory"/> to be set
@@ -98,7 +121,7 @@ namespace Google.Apis.Auth.OAuth2
 
                 AccessMethod = new BearerToken.AuthorizationHeaderAccessMethod();
                 Clock = SystemClock.Default;
-                DefaultExponentialBackOffPolicy = ExponentialBackOffPolicy.UnsuccessfulResponse503;
+                DefaultExponentialBackOffPolicy = ExponentialBackOffPolicy.RecommendedOrDefault;
 
                 HttpClientInitializers = new List<IConfigurableHttpClientInitializer>();
             }
@@ -112,6 +135,7 @@ namespace Google.Apis.Auth.OAuth2
                 DefaultExponentialBackOffPolicy = other.DefaultExponentialBackOffPolicy;
                 QuotaProject = other.QuotaProject;
                 HttpClientInitializers = new List<IConfigurableHttpClientInitializer>(other.HttpClientInitializers);
+                Scopes = other.Scopes;
             }
 
             internal Initializer(Initializer other)
@@ -123,10 +147,18 @@ namespace Google.Apis.Auth.OAuth2
                 DefaultExponentialBackOffPolicy = other.DefaultExponentialBackOffPolicy;
                 QuotaProject = other.QuotaProject;
                 HttpClientInitializers = new List<IConfigurableHttpClientInitializer>(other.HttpClientInitializers);
+                Scopes = other.Scopes;
             }
         }
 
-        /// <summary>Gets the token server URL.</summary>
+        /// <summary>
+        /// Gets the token server URL.
+        /// </summary>
+        /// <remarks>
+        /// May be null for credential types that resolve token endpoints just before obtaining an access token.
+        /// This is the case for <see cref="ImpersonatedCredential"/> where the <see cref="ImpersonatedCredential.SourceCredential"/>
+        /// is a <see cref="ComputeCredential"/>.
+        /// </remarks>
         public string TokenServerUrl { get; }
 
         /// <summary>Gets the clock used to refresh the token if it expires.</summary>
@@ -137,6 +169,21 @@ namespace Google.Apis.Auth.OAuth2
 
         /// <summary>Gets the HTTP client used to make authentication requests to the server.</summary>
         public ConfigurableHttpClient HttpClient { get; }
+
+        /// <summary>
+        /// Scopes to request during the authorization grant. May be null or empty.
+        /// </summary>
+        /// <remarks>
+        /// If the scopes are pre-granted through the environment, like in GCE where scopes are granted to the VM,
+        /// scopes set here will be ignored.
+        /// </remarks>
+        public IEnumerable<string> Scopes { get; set; }
+
+        /// <summary>
+        /// Returns true if this credential scopes have been explicitly set via this library.
+        /// Returns false otherwise.
+        /// </summary>
+        internal bool HasExplicitScopes => Scopes?.Any() == true;
 
         internal IHttpClientFactory HttpClientFactory { get; }
 
@@ -170,31 +217,83 @@ namespace Google.Apis.Auth.OAuth2
             TokenServerUrl = initializer.TokenServerUrl;
             AccessMethod = initializer.AccessMethod.ThrowIfNull("initializer.AccessMethod");
             Clock = initializer.Clock.ThrowIfNull("initializer.Clock");
+            Scopes = initializer.Scopes?.Where(scope => !string.IsNullOrWhiteSpace(scope)).ToList().AsReadOnly()
+                ?? Enumerable.Empty<string>();
 
-            // Set the HTTP client.
+            DefaultExponentialBackOffPolicy = initializer.DefaultExponentialBackOffPolicy;
+            HttpClientInitializers = new List<IConfigurableHttpClientInitializer>(initializer.HttpClientInitializers).AsReadOnly();
+
+            HttpClientFactory = initializer.HttpClientFactory ?? new HttpClientFactory();
+            HttpClient = HttpClientFactory.CreateHttpClient(BuildCreateHttpClientArgs());
+            _refreshManager = new TokenRefreshManager(RequestAccessTokenAsync, Clock, Logger);
+
+            QuotaProject = initializer.QuotaProject;
+        }
+
+        /// <summary>
+        /// Builds HTTP client creation args from all this credential settings.
+        /// These are used for initializing <see cref="HttpClient"/>.
+        /// </summary>
+        protected internal CreateHttpClientArgs BuildCreateHttpClientArgs()
+        {
+            var args = BuildCreateHttpClientArgsWithNoRetries();
+            AddHttpClientRetryConfiguration(args);
+            return args;
+        }
+
+        /// <summary>
+        /// Builds HTTP client creation args from this credential settings except for <see cref="DefaultExponentialBackOffPolicy"/>.
+        /// </summary>
+        private protected CreateHttpClientArgs BuildCreateHttpClientArgsWithNoRetries()
+        {
             var httpArgs = new CreateHttpClientArgs();
 
-            // Add exponential back-off initializer if necessary.
-            DefaultExponentialBackOffPolicy = initializer.DefaultExponentialBackOffPolicy;
-            if (DefaultExponentialBackOffPolicy != ExponentialBackOffPolicy.None)
-            {
-                httpArgs.Initializers.Add(
-                    new ExponentialBackOffInitializer(DefaultExponentialBackOffPolicy,
-                        () => new BackOffHandler(new ExponentialBackOff())));
-            }
-
-            // Add other initializers
-            HttpClientInitializers = new List<IConfigurableHttpClientInitializer>(initializer.HttpClientInitializers).AsReadOnly();
-            foreach(var httpClientInitializer in HttpClientInitializers)
+            // Add initializers
+            foreach (var httpClientInitializer in HttpClientInitializers)
             {
                 httpArgs.Initializers.Add(httpClientInitializer);
             }
 
-            HttpClientFactory = initializer.HttpClientFactory ?? new HttpClientFactory();
-            HttpClient = HttpClientFactory.CreateHttpClient(httpArgs);
-            _refreshManager = new TokenRefreshManager(RequestAccessTokenAsync, Clock, Logger);
+            return httpArgs;
+        }
 
-            QuotaProject = initializer.QuotaProject;
+        /// <summary>
+        /// Configures <paramref name="args"/> with the expected retry policy for <see cref="HttpClient"/> based on
+        /// <see cref="DefaultExponentialBackOffPolicy"/>. Can be extended as different credentials use different token
+        /// endpoints that may recommende different retry strategies.
+        /// </summary>
+        private protected virtual void AddHttpClientRetryConfiguration(CreateHttpClientArgs args)
+        {
+            // Add exponential back-off initializer if necessary.
+            if (DefaultExponentialBackOffPolicy != ExponentialBackOffPolicy.None)
+            {
+                var effectiveRetryPolicy = DefaultExponentialBackOffPolicy.HasFlag(ExponentialBackOffPolicy.RecommendedOrDefault) ?
+                    // At this level there's no recommendation, but we know default is retry 503.
+                    // Remove RecommendedOrDefault and add UnsuccessfulResponse503.
+                    (DefaultExponentialBackOffPolicy & ~ExponentialBackOffPolicy.RecommendedOrDefault) | ExponentialBackOffPolicy.UnsuccessfulResponse503 :
+                    DefaultExponentialBackOffPolicy;
+
+                args.Initializers.Add(new ExponentialBackOffInitializer(effectiveRetryPolicy, () => new BackOffHandler(new ExponentialBackOff())));
+            }
+        }
+
+        /// <summary>
+        /// Configures <paramref name="args"/> with the expected retry policy for an HttpClient that's used only with the IAM SignBlob endpoint, based on
+        /// <see cref="DefaultExponentialBackOffPolicy"/>.
+        /// </summary>
+        private protected void AddIamSignBlobRetryConfiguration(CreateHttpClientArgs args)
+        {
+            // In case the user explicitly configured retry policy.
+            var customRetryPolicy = GoogleAuthConsts.StripIamSignBlobEndpointRecommendedPolicy(DefaultExponentialBackOffPolicy);
+            if (customRetryPolicy != ExponentialBackOffPolicy.None)
+            {
+                args.Initializers.Add(new ExponentialBackOffInitializer(customRetryPolicy, () => new BackOffHandler(new ExponentialBackOff())));
+            }
+            // In case recommended is also configured.
+            if (DefaultExponentialBackOffPolicy.HasFlag(ExponentialBackOffPolicy.RecommendedOrDefault))
+            {
+                args.Initializers.Add(GoogleAuthConsts.IamSignBlobEndpointRecommendedRetry);
+            }
         }
 
         #region IConfigurableHttpClientInitializer

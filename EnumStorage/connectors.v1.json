@@ -1,0 +1,64 @@
+{
+  "Google.Apis.Connectors.v1.ConnectorsBaseServiceRequest<<TResponse>>.AltEnum": [
+    "json",
+    "media",
+    "proto"
+  ],
+  "Google.Apis.Connectors.v1.ConnectorsBaseServiceRequest<<TResponse>>.XgafvEnum": [
+    "1",
+    "2"
+  ],
+  "Google.Apis.Connectors.v1.ProjectsResource+LocationsResource+ConnectionsResource+ConnectionSchemaMetadataResource+ListActionsRequest.ViewEnum": [
+    "VIEW_UNSPECIFIED",
+    "BASIC"
+  ],
+  "Google.Apis.Connectors.v1.ProjectsResource+LocationsResource+ConnectionsResource+ConnectionSchemaMetadataResource+ListEntityTypesRequest.ViewEnum": [
+    "VIEW_UNSPECIFIED",
+    "BASIC"
+  ],
+  "Google.Apis.Connectors.v1.ProjectsResource+LocationsResource+ConnectionsResource+GetRequest.ViewEnum": [
+    "CONNECTION_VIEW_UNSPECIFIED",
+    "BASIC",
+    "FULL"
+  ],
+  "Google.Apis.Connectors.v1.ProjectsResource+LocationsResource+ConnectionsResource+ListRequest.ViewEnum": [
+    "CONNECTION_VIEW_UNSPECIFIED",
+    "BASIC",
+    "FULL"
+  ],
+  "Google.Apis.Connectors.v1.ProjectsResource+LocationsResource+EndpointAttachmentsResource+GetRequest.ViewEnum": [
+    "ENDPOINT_ATTACHMENT_VIEW_UNSPECIFIED",
+    "ENDPOINT_ATTACHMENT_VIEW_BASIC",
+    "ENDPOINT_ATTACHMENT_VIEW_FULL"
+  ],
+  "Google.Apis.Connectors.v1.ProjectsResource+LocationsResource+EndpointAttachmentsResource+ListRequest.ViewEnum": [
+    "ENDPOINT_ATTACHMENT_VIEW_UNSPECIFIED",
+    "ENDPOINT_ATTACHMENT_VIEW_BASIC",
+    "ENDPOINT_ATTACHMENT_VIEW_FULL"
+  ],
+  "Google.Apis.Connectors.v1.ProjectsResource+LocationsResource+GlobalResource+ProvidersResource+ConnectorsResource+VersionsResource+GetRequest.ViewEnum": [
+    "CONNECTOR_VERSION_VIEW_UNSPECIFIED",
+    "CONNECTOR_VERSION_VIEW_BASIC",
+    "CONNECTOR_VERSION_VIEW_FULL"
+  ],
+  "Google.Apis.Connectors.v1.ProjectsResource+LocationsResource+GlobalResource+ProvidersResource+ConnectorsResource+VersionsResource+ListRequest.ViewEnum": [
+    "CONNECTOR_VERSION_VIEW_UNSPECIFIED",
+    "CONNECTOR_VERSION_VIEW_BASIC",
+    "CONNECTOR_VERSION_VIEW_FULL"
+  ],
+  "Google.Apis.Connectors.v1.ProjectsResource+LocationsResource+ProvidersResource+ConnectorsResource+VersionsResource+FetchAuthSchemaRequest.ViewEnum": [
+    "AUTH_SCHEMA_VIEW_UNSPECIFIED",
+    "BASIC",
+    "JSON_SCHEMA"
+  ],
+  "Google.Apis.Connectors.v1.ProjectsResource+LocationsResource+ProvidersResource+ConnectorsResource+VersionsResource+GetRequest.ViewEnum": [
+    "CONNECTOR_VERSION_VIEW_UNSPECIFIED",
+    "CONNECTOR_VERSION_VIEW_BASIC",
+    "CONNECTOR_VERSION_VIEW_FULL"
+  ],
+  "Google.Apis.Connectors.v1.ProjectsResource+LocationsResource+ProvidersResource+ConnectorsResource+VersionsResource+ListRequest.ViewEnum": [
+    "CONNECTOR_VERSION_VIEW_UNSPECIFIED",
+    "CONNECTOR_VERSION_VIEW_BASIC",
+    "CONNECTOR_VERSION_VIEW_FULL"
+  ]
+}

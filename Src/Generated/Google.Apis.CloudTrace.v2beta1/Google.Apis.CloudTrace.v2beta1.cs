@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.CloudTrace.v2beta1
         public CloudTraceService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://cloudtrace.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://cloudtrace.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.CloudTrace.v2beta1
         public override string Name => "cloudtrace";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://cloudtrace.googleapis.com/";
-        #else
-            "https://cloudtrace.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://cloudtrace.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Trace API.</summary>
         public class Scope
@@ -323,7 +318,7 @@ namespace Google.Apis.CloudTrace.v2beta1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.CloudTrace.v2beta1.Data.TraceSink body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -386,7 +381,7 @@ namespace Google.Apis.CloudTrace.v2beta1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes a sink.</summary>
@@ -438,7 +433,7 @@ namespace Google.Apis.CloudTrace.v2beta1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Get a trace sink by name under the parent resource (GCP project).</summary>
@@ -489,7 +484,7 @@ namespace Google.Apis.CloudTrace.v2beta1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>List all sinks for the parent resource (GCP project).</summary>
@@ -511,7 +506,7 @@ namespace Google.Apis.CloudTrace.v2beta1
 
                 /// <summary>
                 /// Optional. The maximum number of results to return from this request. Non-positive values are
-                /// ignored. The presence of `nextPageToken` in the response indicates that more results might be
+                /// ignored. The presence of `next_page_token` in the response indicates that more results might be
                 /// available.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
@@ -519,8 +514,8 @@ namespace Google.Apis.CloudTrace.v2beta1
 
                 /// <summary>
                 /// Optional. If present, then retrieve the next batch of results from the preceding call to this
-                /// method. `pageToken` must be the value of `nextPageToken` from the previous response. The values of
-                /// other method parameters should be identical to those in the previous call.
+                /// method. `page_token` must be the value of `next_page_token` from the previous response. The values
+                /// of other method parameters should be identical to those in the previous call.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string PageToken { get; set; }
@@ -577,7 +572,7 @@ namespace Google.Apis.CloudTrace.v2beta1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.CloudTrace.v2beta1.Data.TraceSink body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -605,8 +600,8 @@ namespace Google.Apis.CloudTrace.v2beta1
                 /// <summary>
                 /// Required. Field mask that specifies the fields in `trace_sink` that are to be updated. A sink field
                 /// is overwritten if, and only if, it is in the update mask. `name` and `writer_identity` fields cannot
-                /// be updated. An empty updateMask is considered an error. For a detailed `FieldMask` definition, see
-                /// https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#fieldmask Example:
+                /// be updated. An empty `update_mask` is considered an error. For a detailed `FieldMask` definition,
+                /// see https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#fieldmask Example:
                 /// `updateMask=output_config`.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
@@ -657,8 +652,7 @@ namespace Google.Apis.CloudTrace.v2beta1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -670,8 +664,8 @@ namespace Google.Apis.CloudTrace.v2beta1.Data
     public class ListTraceSinksResponse : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// If there might be more results than appear in this response, then `nextPageToken` is included. To get the
-        /// next set of results, call the same method again using the value of `nextPageToken` as `pageToken`.
+        /// A paginated response where more pages might be available has `next_page_token` set. To get the next set of
+        /// results, call the same method again using the value of `next_page_token` as `page_token`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
@@ -688,7 +682,7 @@ namespace Google.Apis.CloudTrace.v2beta1.Data
     public class OutputConfig : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The destination for writing trace data. Currently only BigQuery is supported. E.g.:
+        /// Required. The destination for writing trace data. Supported formats include:
         /// "bigquery.googleapis.com/projects/[PROJECT_ID]/datasets/[DATASET]"
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("destination")]
@@ -704,8 +698,8 @@ namespace Google.Apis.CloudTrace.v2beta1.Data
     public class TraceSink : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Required. The canonical sink resource name, unique within the project. Must be of the form:
-        /// project/[PROJECT_NUMBER]/traceSinks/[SINK_ID]. E.g.: `"projects/12345/traceSinks/my-project-trace-sink"`.
+        /// Identifier. The canonical sink resource name, unique within the project. Must be of the form:
+        /// projects/[PROJECT_NUMBER]/traceSinks/[SINK_ID]. E.g.: `"projects/12345/traceSinks/my-project-trace-sink"`.
         /// Sink identifiers are limited to 256 characters and can include only the following characters: upper and
         /// lower-case alphanumeric characters, underscores, hyphens, and periods.
         /// </summary>
@@ -721,7 +715,7 @@ namespace Google.Apis.CloudTrace.v2beta1.Data
         /// sinks.update. The service account will need to be granted write access to the destination specified in the
         /// output configuration, see [Granting access for a
         /// resource](/iam/docs/granting-roles-to-service-accounts#granting_access_to_a_service_account_for_a_resource).
-        /// To create tables and write data this account will need the dataEditor role. Read more about roles in the
+        /// To create tables and to write data, this account needs the `dataEditor` role. Read more about roles in the
         /// [BigQuery documentation](https://cloud.google.com/bigquery/docs/access-control). E.g.:
         /// "service-00000001@00000002.iam.gserviceaccount.com"
         /// </summary>

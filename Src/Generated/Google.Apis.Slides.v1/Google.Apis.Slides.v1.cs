@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.Slides.v1
         public SlidesService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Presentations = new PresentationsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://slides.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://slides.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.Slides.v1
         public override string Name => "slides";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://slides.googleapis.com/";
-        #else
-            "https://slides.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://slides.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Google Slides API.</summary>
         public class Scope
@@ -338,7 +333,7 @@ namespace Google.Apis.Slides.v1
             /// <param name="pageObjectId">The object ID of the page to retrieve.</param>
             public virtual GetRequest Get(string presentationId, string pageObjectId)
             {
-                return new GetRequest(service, presentationId, pageObjectId);
+                return new GetRequest(this.service, presentationId, pageObjectId);
             }
 
             /// <summary>Gets the latest version of the specified page in the presentation.</summary>
@@ -401,7 +396,7 @@ namespace Google.Apis.Slides.v1
             /// <param name="pageObjectId">The object ID of the page whose thumbnail to retrieve.</param>
             public virtual GetThumbnailRequest GetThumbnail(string presentationId, string pageObjectId)
             {
-                return new GetThumbnailRequest(service, presentationId, pageObjectId);
+                return new GetThumbnailRequest(this.service, presentationId, pageObjectId);
             }
 
             /// <summary>
@@ -543,7 +538,7 @@ namespace Google.Apis.Slides.v1
         /// <param name="presentationId">The presentation to apply the updates to.</param>
         public virtual BatchUpdateRequest BatchUpdate(Google.Apis.Slides.v1.Data.BatchUpdatePresentationRequest body, string presentationId)
         {
-            return new BatchUpdateRequest(service, body, presentationId);
+            return new BatchUpdateRequest(this.service, body, presentationId);
         }
 
         /// <summary>
@@ -610,7 +605,7 @@ namespace Google.Apis.Slides.v1
         /// <param name="body">The body of the request.</param>
         public virtual CreateRequest Create(Google.Apis.Slides.v1.Data.Presentation body)
         {
-            return new CreateRequest(service, body);
+            return new CreateRequest(this.service, body);
         }
 
         /// <summary>
@@ -653,7 +648,7 @@ namespace Google.Apis.Slides.v1
         /// <param name="presentationId">The ID of the presentation to retrieve.</param>
         public virtual GetRequest Get(string presentationId)
         {
-            return new GetRequest(service, presentationId);
+            return new GetRequest(this.service, presentationId);
         }
 
         /// <summary>Gets the latest version of the specified presentation.</summary>
@@ -886,11 +881,11 @@ namespace Google.Apis.Slides.v1.Data
     {
         /// <summary>
         /// The element properties for the image. When the aspect ratio of the provided size does not match the image
-        /// aspect ratio, the image is scaled and centered with respect to the size in order to maintain aspect ratio.
-        /// The provided transform is applied after this operation. The PageElementProperties.size property is optional.
-        /// If you don't specify the size, the default size of the image is used. The PageElementProperties.transform
-        /// property is optional. If you don't specify a transform, the image will be placed at the top left corner of
-        /// the page.
+        /// aspect ratio, the image is scaled and centered with respect to the size in order to maintain the aspect
+        /// ratio. The provided transform is applied after this operation. The PageElementProperties.size property is
+        /// optional. If you don't specify the size, the default size of the image is used. The
+        /// PageElementProperties.transform property is optional. If you don't specify a transform, the image will be
+        /// placed at the top-left corner of the page.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("elementProperties")]
         public virtual PageElementProperties ElementProperties { get; set; }
@@ -907,9 +902,9 @@ namespace Google.Apis.Slides.v1.Data
 
         /// <summary>
         /// The image URL. The image is fetched once at insertion time and a copy is stored for display inside the
-        /// presentation. Images must be less than 50MB in size, cannot exceed 25 megapixels, and must be in one of PNG,
-        /// JPEG, or GIF format. The provided URL can be at most 2 kB in length. The URL itself is saved with the image,
-        /// and exposed via the Image.source_url field.
+        /// presentation. Images must be less than 50 MB in size, can't exceed 25 megapixels, and must be in one of PNG,
+        /// JPEG, or GIF formats. The provided URL must be publicly accessible and up to 2 KB in length. The URL is
+        /// saved with the image, and exposed through the Image.source_url field.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("url")]
         public virtual string Url { get; set; }
@@ -1106,11 +1101,11 @@ namespace Google.Apis.Slides.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Creates a new slide.</summary>
+    /// <summary>Creates a slide.</summary>
     public class CreateSlideRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The optional zero-based index indicating where to insert the slides. If you don't specify an index, the new
+        /// The optional zero-based index indicating where to insert the slides. If you don't specify an index, the
         /// slide is created at the end.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("insertionIndex")]
@@ -1120,16 +1115,15 @@ namespace Google.Apis.Slides.v1.Data
         /// A user-supplied object ID. If you specify an ID, it must be unique among all pages and page elements in the
         /// presentation. The ID must start with an alphanumeric character or an underscore (matches regex
         /// `[a-zA-Z0-9_]`); remaining characters may include those as well as a hyphen or colon (matches regex
-        /// `[a-zA-Z0-9_-:]`). The length of the ID must not be less than 5 or greater than 50. If you don't specify an
-        /// ID, a unique one is generated.
+        /// `[a-zA-Z0-9_-:]`). The ID length must be between 5 and 50 characters, inclusive. If you don't specify an ID,
+        /// a unique one is generated.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("objectId")]
         public virtual string ObjectId { get; set; }
 
         /// <summary>
-        /// An optional list of object ID mappings from the placeholder(s) on the layout to the placeholder(s) that will
-        /// be created on the new slide from that specified layout. Can only be used when `slide_layout_reference` is
-        /// specified.
+        /// An optional list of object ID mappings from the placeholder(s) on the layout to the placeholders that are
+        /// created on the slide from the specified layout. Can only be used when `slide_layout_reference` is specified.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("placeholderIdMappings")]
         public virtual System.Collections.Generic.IList<LayoutPlaceholderIdMapping> PlaceholderIdMappings { get; set; }
@@ -1138,8 +1132,8 @@ namespace Google.Apis.Slides.v1.Data
         /// Layout reference of the slide to be inserted, based on the *current master*, which is one of the following:
         /// - The master of the previous slide index. - The master of the first slide, if the insertion_index is zero. -
         /// The first master in the presentation, if there are no slides. If the LayoutReference is not found in the
-        /// current master, a 400 bad request error is returned. If you don't specify a layout reference, then the new
-        /// slide will use the predefined layout `BLANK`.
+        /// current master, a 400 bad request error is returned. If you don't specify a layout reference, the slide uses
+        /// the predefined `BLANK` layout.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("slideLayoutReference")]
         public virtual LayoutReference SlideLayoutReference { get; set; }
@@ -2104,13 +2098,14 @@ namespace Google.Apis.Slides.v1.Data
         public virtual string PageType { get; set; }
 
         /// <summary>
-        /// The revision ID of the presentation containing this page. Can be used in update requests to assert that the
-        /// presentation revision hasn't changed since the last read operation. Only populated if the user has edit
-        /// access to the presentation. The format of the revision ID may change over time, so it should be treated
-        /// opaquely. A returned revision ID is only guaranteed to be valid for 24 hours after it has been returned and
-        /// cannot be shared across users. If the revision ID is unchanged between calls, then the presentation has not
-        /// changed. Conversely, a changed ID (for the same presentation and user) usually means the presentation has
-        /// been updated; however, a changed ID can also be due to internal factors such as ID format changes.
+        /// Output only. The revision ID of the presentation. Can be used in update requests to assert the presentation
+        /// revision hasn't changed since the last read operation. Only populated if the user has edit access to the
+        /// presentation. The revision ID is not a sequential number but an opaque string. The format of the revision ID
+        /// might change over time. A returned revision ID is only guaranteed to be valid for 24 hours after it has been
+        /// returned and cannot be shared across users. If the revision ID is unchanged between calls, then the
+        /// presentation has not changed. Conversely, a changed ID (for the same presentation and user) usually means
+        /// the presentation has been updated. However, a changed ID can also be due to internal factors such as ID
+        /// format changes.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("revisionId")]
         public virtual string RevisionId { get; set; }
@@ -2186,6 +2181,10 @@ namespace Google.Apis.Slides.v1.Data
         /// <summary>The size of the page element.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("size")]
         public virtual Size Size { get; set; }
+
+        /// <summary>A Speaker Spotlight.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("speakerSpotlight")]
+        public virtual SpeakerSpotlight SpeakerSpotlight { get; set; }
 
         /// <summary>A table page element.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("table")]
@@ -2421,13 +2420,14 @@ namespace Google.Apis.Slides.v1.Data
         public virtual string PresentationId { get; set; }
 
         /// <summary>
-        /// The revision ID of the presentation. Can be used in update requests to assert that the presentation revision
-        /// hasn't changed since the last read operation. Only populated if the user has edit access to the
-        /// presentation. The format of the revision ID may change over time, so it should be treated opaquely. A
-        /// returned revision ID is only guaranteed to be valid for 24 hours after it has been returned and cannot be
-        /// shared across users. If the revision ID is unchanged between calls, then the presentation has not changed.
-        /// Conversely, a changed ID (for the same presentation and user) usually means the presentation has been
-        /// updated; however, a changed ID can also be due to internal factors such as ID format changes.
+        /// Output only. The revision ID of the presentation. Can be used in update requests to assert the presentation
+        /// revision hasn't changed since the last read operation. Only populated if the user has edit access to the
+        /// presentation. The revision ID is not a sequential number but a nebulous string. The format of the revision
+        /// ID may change over time, so it should be treated opaquely. A returned revision ID is only guaranteed to be
+        /// valid for 24 hours after it has been returned and cannot be shared across users. If the revision ID is
+        /// unchanged between calls, then the presentation has not changed. Conversely, a changed ID (for the same
+        /// presentation and user) usually means the presentation has been updated. However, a changed ID can also be
+        /// due to internal factors such as ID format changes.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("revisionId")]
         public virtual string RevisionId { get; set; }
@@ -2655,7 +2655,10 @@ namespace Google.Apis.Slides.v1.Data
     /// </summary>
     public class ReplaceImageRequest : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The ID of the existing image that will be replaced.</summary>
+        /// <summary>
+        /// The ID of the existing image that will be replaced. The ID can be retrieved from the response of a get
+        /// request.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("imageObjectId")]
         public virtual string ImageObjectId { get; set; }
 
@@ -2665,9 +2668,9 @@ namespace Google.Apis.Slides.v1.Data
 
         /// <summary>
         /// The image URL. The image is fetched once at insertion time and a copy is stored for display inside the
-        /// presentation. Images must be less than 50MB in size, cannot exceed 25 megapixels, and must be in one of PNG,
-        /// JPEG, or GIF format. The provided URL can be at most 2 kB in length. The URL itself is saved with the image,
-        /// and exposed via the Image.source_url field.
+        /// presentation. Images must be less than 50MB, cannot exceed 25 megapixels, and must be in PNG, JPEG, or GIF
+        /// format. The provided URL can't surpass 2 KB in length. The URL is saved with the image, and exposed through
+        /// the Image.source_url field.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("url")]
         public virtual string Url { get; set; }
@@ -3209,6 +3212,32 @@ namespace Google.Apis.Slides.v1.Data
         /// <summary>The color value of the solid fill.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("color")]
         public virtual OpaqueColor Color { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A PageElement kind representing a Speaker Spotlight.</summary>
+    public class SpeakerSpotlight : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The properties of the Speaker Spotlight.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("speakerSpotlightProperties")]
+        public virtual SpeakerSpotlightProperties SpeakerSpotlightProperties { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The properties of the SpeakerSpotlight.</summary>
+    public class SpeakerSpotlightProperties : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The outline of the Speaker Spotlight. If not set, it has no outline.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("outline")]
+        public virtual Outline Outline { get; set; }
+
+        /// <summary>The shadow of the Speaker Spotlight. If not set, it has no shadow.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("shadow")]
+        public virtual Shadow Shadow { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -4355,9 +4384,10 @@ namespace Google.Apis.Slides.v1.Data
     public class WriteControl : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The revision ID of the presentation required for the write request. If specified and the
-        /// `required_revision_id` doesn't exactly match the presentation's current `revision_id`, the request will not
-        /// be processed and will return a 400 bad request error.
+        /// The revision ID of the presentation required for the write request. If specified and the required revision
+        /// ID doesn't match the presentation's current revision ID, the request is not processed and returns a 400 bad
+        /// request error. When a required revision ID is returned in a response, it indicates the revision ID of the
+        /// document after the request was applied.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("requiredRevisionId")]
         public virtual string RequiredRevisionId { get; set; }

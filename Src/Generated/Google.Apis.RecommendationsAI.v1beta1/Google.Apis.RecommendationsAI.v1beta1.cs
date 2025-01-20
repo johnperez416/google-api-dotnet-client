@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.RecommendationsAI.v1beta1
         public RecommendationsAIService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://recommendationengine.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://recommendationengine.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.RecommendationsAI.v1beta1
         public override string Name => "recommendationengine";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://recommendationengine.googleapis.com/";
-        #else
-            "https://recommendationengine.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://recommendationengine.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Recommendations AI (Beta).</summary>
         public class Scope
@@ -345,7 +340,7 @@ namespace Google.Apis.RecommendationsAI.v1beta1
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.RecommendationsAI.v1beta1.Data.GoogleCloudRecommendationengineV1beta1CatalogItem body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>Creates a catalog item.</summary>
@@ -403,7 +398,7 @@ namespace Google.Apis.RecommendationsAI.v1beta1
                     /// </param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>Deletes a catalog item.</summary>
@@ -454,7 +449,7 @@ namespace Google.Apis.RecommendationsAI.v1beta1
                     /// </param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Gets a specific catalog item.</summary>
@@ -511,7 +506,7 @@ namespace Google.Apis.RecommendationsAI.v1beta1
                     /// </param>
                     public virtual ImportRequest Import(Google.Apis.RecommendationsAI.v1beta1.Data.GoogleCloudRecommendationengineV1beta1ImportCatalogItemsRequest body, string parent)
                     {
-                        return new ImportRequest(service, body, parent);
+                        return new ImportRequest(this.service, body, parent);
                     }
 
                     /// <summary>
@@ -574,7 +569,7 @@ namespace Google.Apis.RecommendationsAI.v1beta1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Gets a list of catalog items.</summary>
@@ -667,7 +662,7 @@ namespace Google.Apis.RecommendationsAI.v1beta1
                     /// </param>
                     public virtual PatchRequest Patch(Google.Apis.RecommendationsAI.v1beta1.Data.GoogleCloudRecommendationengineV1beta1CatalogItem body, string name)
                     {
-                        return new PatchRequest(service, body, name);
+                        return new PatchRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -781,7 +776,7 @@ namespace Google.Apis.RecommendationsAI.v1beta1
                         /// <param name="name">The name of the operation resource.</param>
                         public virtual GetRequest Get(string name)
                         {
-                            return new GetRequest(service, name);
+                            return new GetRequest(this.service, name);
                         }
 
                         /// <summary>
@@ -827,29 +822,17 @@ namespace Google.Apis.RecommendationsAI.v1beta1
 
                         /// <summary>
                         /// Lists operations that match the specified filter in the request. If the server doesn't
-                        /// support this method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API
-                        /// services to override the binding to use different resource name schemes, such as
-                        /// `users/*/operations`. To override the binding, API services can add a binding such as
-                        /// `"/v1/{name=users/*}/operations"` to their service configuration. For backwards
-                        /// compatibility, the default name includes the operations collection id, however overriding
-                        /// users must ensure the name binding is the parent resource, without the operations collection
-                        /// id.
+                        /// support this method, it returns `UNIMPLEMENTED`.
                         /// </summary>
                         /// <param name="name">The name of the operation's parent resource.</param>
                         public virtual ListRequest List(string name)
                         {
-                            return new ListRequest(service, name);
+                            return new ListRequest(this.service, name);
                         }
 
                         /// <summary>
                         /// Lists operations that match the specified filter in the request. If the server doesn't
-                        /// support this method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API
-                        /// services to override the binding to use different resource name schemes, such as
-                        /// `users/*/operations`. To override the binding, API services can add a binding such as
-                        /// `"/v1/{name=users/*}/operations"` to their service configuration. For backwards
-                        /// compatibility, the default name includes the operations collection id, however overriding
-                        /// users must ensure the name binding is the parent resource, without the operations collection
-                        /// id.
+                        /// support this method, it returns `UNIMPLEMENTED`.
                         /// </summary>
                         public class ListRequest : RecommendationsAIBaseServiceRequest<Google.Apis.RecommendationsAI.v1beta1.Data.GoogleLongrunningListOperationsResponse>
                         {
@@ -948,28 +931,10 @@ namespace Google.Apis.RecommendationsAI.v1beta1
                         /// more](https://cloud.google.com/recommendations-ai/docs/setting-up#register-key).
                         /// </summary>
                         /// <param name="body">The body of the request.</param>
-                        /// <param name="name">
-                        /// Required. Full resource name of the format:
-                        /// `{name=projects/*/locations/global/catalogs/default_catalog/eventStores/default_event_store/placements/*}`
-                        /// The id of the recommendation engine placement. This id is used to identify the set of models
-                        /// that will be used to make the prediction. We currently support three placements with the
-                        /// following IDs by default: * `shopping_cart`: Predicts items frequently bought together with
-                        /// one or more catalog items in the same shopping session. Commonly displayed after
-                        /// `add-to-cart` events, on product detail pages, or on the shopping cart page. * `home_page`:
-                        /// Predicts the next product that a user will most likely engage with or purchase based on the
-                        /// shopping or viewing history of the specified `userId` or `visitorId`. For example -
-                        /// Recommendations for you. * `product_detail`: Predicts the next product that a user will most
-                        /// likely engage with or purchase. The prediction is based on the shopping or viewing history
-                        /// of the specified `userId` or `visitorId` and its relevance to a specified `CatalogItem`.
-                        /// Typically used on product detail pages. For example - More items like this. *
-                        /// `recently_viewed_default`: Returns up to 75 items recently viewed by the specified `userId`
-                        /// or `visitorId`, most recent ones first. Returns nothing if neither of them has viewed any
-                        /// items yet. For example - Recently viewed. The full list of available placements can be seen
-                        /// at https://console.cloud.google.com/recommendation/datafeeds/default_catalog/dashboard
-                        /// </param>
+                        /// <param name="name"><c>null</c></param>
                         public virtual PredictRequest Predict(Google.Apis.RecommendationsAI.v1beta1.Data.GoogleCloudRecommendationengineV1beta1PredictRequest body, string name)
                         {
-                            return new PredictRequest(service, body, name);
+                            return new PredictRequest(this.service, body, name);
                         }
 
                         /// <summary>
@@ -987,26 +952,6 @@ namespace Google.Apis.RecommendationsAI.v1beta1
                                 InitParameters();
                             }
 
-                            /// <summary>
-                            /// Required. Full resource name of the format:
-                            /// `{name=projects/*/locations/global/catalogs/default_catalog/eventStores/default_event_store/placements/*}`
-                            /// The id of the recommendation engine placement. This id is used to identify the set of
-                            /// models that will be used to make the prediction. We currently support three placements
-                            /// with the following IDs by default: * `shopping_cart`: Predicts items frequently bought
-                            /// together with one or more catalog items in the same shopping session. Commonly displayed
-                            /// after `add-to-cart` events, on product detail pages, or on the shopping cart page. *
-                            /// `home_page`: Predicts the next product that a user will most likely engage with or
-                            /// purchase based on the shopping or viewing history of the specified `userId` or
-                            /// `visitorId`. For example - Recommendations for you. * `product_detail`: Predicts the
-                            /// next product that a user will most likely engage with or purchase. The prediction is
-                            /// based on the shopping or viewing history of the specified `userId` or `visitorId` and
-                            /// its relevance to a specified `CatalogItem`. Typically used on product detail pages. For
-                            /// example - More items like this. * `recently_viewed_default`: Returns up to 75 items
-                            /// recently viewed by the specified `userId` or `visitorId`, most recent ones first.
-                            /// Returns nothing if neither of them has viewed any items yet. For example - Recently
-                            /// viewed. The full list of available placements can be seen at
-                            /// https://console.cloud.google.com/recommendation/datafeeds/default_catalog/dashboard
-                            /// </summary>
                             [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                             public virtual string Name { get; private set; }
 
@@ -1066,7 +1011,7 @@ namespace Google.Apis.RecommendationsAI.v1beta1
                         /// </param>
                         public virtual CreateRequest Create(Google.Apis.RecommendationsAI.v1beta1.Data.GoogleCloudRecommendationengineV1beta1CreatePredictionApiKeyRegistrationRequest body, string parent)
                         {
-                            return new CreateRequest(service, body, parent);
+                            return new CreateRequest(this.service, body, parent);
                         }
 
                         /// <summary>Register an API key for use with predict method.</summary>
@@ -1124,7 +1069,7 @@ namespace Google.Apis.RecommendationsAI.v1beta1
                         /// </param>
                         public virtual DeleteRequest Delete(string name)
                         {
-                            return new DeleteRequest(service, name);
+                            return new DeleteRequest(this.service, name);
                         }
 
                         /// <summary>Unregister an apiKey from using for predict method.</summary>
@@ -1175,7 +1120,7 @@ namespace Google.Apis.RecommendationsAI.v1beta1
                         /// </param>
                         public virtual ListRequest List(string parent)
                         {
-                            return new ListRequest(service, parent);
+                            return new ListRequest(this.service, parent);
                         }
 
                         /// <summary>List the registered apiKeys for use with predict method.</summary>
@@ -1277,7 +1222,7 @@ namespace Google.Apis.RecommendationsAI.v1beta1
                         /// </param>
                         public virtual CollectRequest Collect(string parent)
                         {
-                            return new CollectRequest(service, parent);
+                            return new CollectRequest(this.service, parent);
                         }
 
                         /// <summary>
@@ -1382,7 +1327,7 @@ namespace Google.Apis.RecommendationsAI.v1beta1
                         /// </param>
                         public virtual ImportRequest Import(Google.Apis.RecommendationsAI.v1beta1.Data.GoogleCloudRecommendationengineV1beta1ImportUserEventsRequest body, string parent)
                         {
-                            return new ImportRequest(service, body, parent);
+                            return new ImportRequest(this.service, body, parent);
                         }
 
                         /// <summary>
@@ -1451,7 +1396,7 @@ namespace Google.Apis.RecommendationsAI.v1beta1
                         /// </param>
                         public virtual ListRequest List(string parent)
                         {
-                            return new ListRequest(service, parent);
+                            return new ListRequest(this.service, parent);
                         }
 
                         /// <summary>
@@ -1571,7 +1516,7 @@ namespace Google.Apis.RecommendationsAI.v1beta1
                         /// </param>
                         public virtual PurgeRequest Purge(Google.Apis.RecommendationsAI.v1beta1.Data.GoogleCloudRecommendationengineV1beta1PurgeUserEventsRequest body, string parent)
                         {
-                            return new PurgeRequest(service, body, parent);
+                            return new PurgeRequest(this.service, body, parent);
                         }
 
                         /// <summary>
@@ -1642,7 +1587,7 @@ namespace Google.Apis.RecommendationsAI.v1beta1
                         /// </param>
                         public virtual RejoinRequest Rejoin(Google.Apis.RecommendationsAI.v1beta1.Data.GoogleCloudRecommendationengineV1beta1RejoinUserEventsRequest body, string parent)
                         {
-                            return new RejoinRequest(service, body, parent);
+                            return new RejoinRequest(this.service, body, parent);
                         }
 
                         /// <summary>
@@ -1708,7 +1653,7 @@ namespace Google.Apis.RecommendationsAI.v1beta1
                         /// </param>
                         public virtual WriteRequest Write(Google.Apis.RecommendationsAI.v1beta1.Data.GoogleCloudRecommendationengineV1beta1UserEvent body, string parent)
                         {
-                            return new WriteRequest(service, body, parent);
+                            return new WriteRequest(this.service, body, parent);
                         }
 
                         /// <summary>Writes a single user event.</summary>
@@ -1785,7 +1730,7 @@ namespace Google.Apis.RecommendationsAI.v1beta1
                     /// <param name="name">The name of the operation resource.</param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>
@@ -1831,27 +1776,17 @@ namespace Google.Apis.RecommendationsAI.v1beta1
 
                     /// <summary>
                     /// Lists operations that match the specified filter in the request. If the server doesn't support
-                    /// this method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to
-                    /// override the binding to use different resource name schemes, such as `users/*/operations`. To
-                    /// override the binding, API services can add a binding such as `"/v1/{name=users/*}/operations"`
-                    /// to their service configuration. For backwards compatibility, the default name includes the
-                    /// operations collection id, however overriding users must ensure the name binding is the parent
-                    /// resource, without the operations collection id.
+                    /// this method, it returns `UNIMPLEMENTED`.
                     /// </summary>
                     /// <param name="name">The name of the operation's parent resource.</param>
                     public virtual ListRequest List(string name)
                     {
-                        return new ListRequest(service, name);
+                        return new ListRequest(this.service, name);
                     }
 
                     /// <summary>
                     /// Lists operations that match the specified filter in the request. If the server doesn't support
-                    /// this method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to
-                    /// override the binding to use different resource name schemes, such as `users/*/operations`. To
-                    /// override the binding, API services can add a binding such as `"/v1/{name=users/*}/operations"`
-                    /// to their service configuration. For backwards compatibility, the default name includes the
-                    /// operations collection id, however overriding users must ensure the name binding is the parent
-                    /// resource, without the operations collection id.
+                    /// this method, it returns `UNIMPLEMENTED`.
                     /// </summary>
                     public class ListRequest : RecommendationsAIBaseServiceRequest<Google.Apis.RecommendationsAI.v1beta1.Data.GoogleLongrunningListOperationsResponse>
                     {
@@ -1931,7 +1866,7 @@ namespace Google.Apis.RecommendationsAI.v1beta1
                 /// <param name="parent">Required. The account resource name with an associated location.</param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists all the catalog configurations associated with the project.</summary>
@@ -2007,7 +1942,7 @@ namespace Google.Apis.RecommendationsAI.v1beta1
                 /// <param name="name">The fully qualified resource name of the catalog.</param>
                 public virtual PatchRequest Patch(Google.Apis.RecommendationsAI.v1beta1.Data.GoogleCloudRecommendationengineV1beta1Catalog body, string name)
                 {
-                    return new PatchRequest(service, body, name);
+                    return new PatchRequest(this.service, body, name);
                 }
 
                 /// <summary>Updates the catalog configuration.</summary>
@@ -2564,9 +2499,42 @@ namespace Google.Apis.RecommendationsAI.v1beta1.Data
     /// </summary>
     public class GoogleCloudRecommendationengineV1beta1ImportMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Operation create time.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Count of entries that encountered errors while processing.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("failureCount")]
@@ -2586,9 +2554,42 @@ namespace Google.Apis.RecommendationsAI.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("successCount")]
         public virtual System.Nullable<long> SuccessCount { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Operation last update time. If the operation is done, this is also the finish time.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -2732,7 +2733,23 @@ namespace Google.Apis.RecommendationsAI.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Request message for Predict method.</summary>
+    /// <summary>
+    /// Request message for Predict method. Full resource name of the format:
+    /// `{name=projects/*/locations/global/catalogs/default_catalog/eventStores/default_event_store/placements/*}` The
+    /// id of the recommendation engine placement. This id is used to identify the set of models that will be used to
+    /// make the prediction. We currently support three placements with the following IDs by default: // *
+    /// `shopping_cart`: Predicts items frequently bought together with one or more catalog items in the same shopping
+    /// session. Commonly displayed after `add-to-cart` event, on product detail pages, or on the shopping cart page. *
+    /// `home_page`: Predicts the next product that a user will most likely engage with or purchase based on the
+    /// shopping or viewing history of the specified `userId` or `visitorId`. For example - Recommendations for you. *
+    /// `product_detail`: Predicts the next product that a user will most likely engage with or purchase. The prediction
+    /// is based on the shopping or viewing history of the specified `userId` or `visitorId` and its relevance to a
+    /// specified `CatalogItem`. Typically used on product detail pages. For example - More items like this. *
+    /// `recently_viewed_default`: Returns up to 75 items recently viewed by the specified `userId` or `visitorId`, most
+    /// recent ones first. Returns nothing if neither of them has viewed any items yet. For example - Recently viewed.
+    /// The full list of available placements can be seen at
+    /// https://console.cloud.google.com/recommendation/catalogs/default_catalog/placements
+    /// </summary>
     public class GoogleCloudRecommendationengineV1beta1PredictRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
@@ -2800,7 +2817,10 @@ namespace Google.Apis.RecommendationsAI.v1beta1.Data
         /// <summary>
         /// Required. Context about the user, what they are looking at and what action they took to trigger the predict
         /// request. Note that this user event detail won't be ingested to userEvent logs. Thus, a separate userEvent
-        /// write request is required for event logging.
+        /// write request is required for event logging. Don't set UserInfo.visitor_id or UserInfo.user_id to the same
+        /// fixed ID for different users. If you are trying to receive non-personalized recommendations (not
+        /// recommended; this can negatively impact model performance), instead set UserInfo.visitor_id to a random
+        /// unique ID and leave UserInfo.user_id unset.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("userEvent")]
         public virtual GoogleCloudRecommendationengineV1beta1UserEvent UserEvent { get; set; }
@@ -3126,9 +3146,42 @@ namespace Google.Apis.RecommendationsAI.v1beta1.Data
     /// </summary>
     public class GoogleCloudRecommendationengineV1beta1PurgeUserEventsMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Operation create time.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ID of the request / operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("operationName")]
@@ -3236,9 +3289,42 @@ namespace Google.Apis.RecommendationsAI.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("eventSource")]
         public virtual string EventSource { get; set; }
 
+        private string _eventTimeRaw;
+
+        private object _eventTime;
+
         /// <summary>Optional. Only required for ImportUserEvents method. Timestamp of user event created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("eventTime")]
-        public virtual object EventTime { get; set; }
+        public virtual string EventTimeRaw
+        {
+            get => _eventTimeRaw;
+            set
+            {
+                _eventTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _eventTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EventTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EventTimeDateTimeOffset instead.")]
+        public virtual object EventTime
+        {
+            get => _eventTime;
+            set
+            {
+                _eventTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _eventTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EventTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EventTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EventTimeRaw);
+            set => EventTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Required. User event type. Allowed values are: * `add-to-cart` Products being added to cart. * `add-to-list`
@@ -3331,7 +3417,8 @@ namespace Google.Apis.RecommendationsAI.v1beta1.Data
 
         /// <summary>
         /// Optional. Unique identifier for logged-in user with a length limit of 128 bytes. Required only for logged-in
-        /// users.
+        /// users. Don't set for anonymous users. Don't set the field to the same fixed ID for different users. This
+        /// mixes the event history of those users together, which results in degraded model quality.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("userId")]
         public virtual string UserId { get; set; }
@@ -3340,7 +3427,8 @@ namespace Google.Apis.RecommendationsAI.v1beta1.Data
         /// Required. A unique identifier for tracking visitors with a length limit of 128 bytes. For example, this
         /// could be implemented with an HTTP cookie, which should be able to uniquely identify a visitor on a single
         /// device. This unique identifier should not change if the visitor logs in or out of the website. Maximum
-        /// length 128 bytes. Cannot be empty.
+        /// length 128 bytes. Cannot be empty. Don't set the field to the same fixed ID for different users. This mixes
+        /// the event history of those users together, which results in degraded model quality.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("visitorId")]
         public virtual string VisitorId { get; set; }
@@ -3394,8 +3482,8 @@ namespace Google.Apis.RecommendationsAI.v1beta1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -3410,8 +3498,7 @@ namespace Google.Apis.RecommendationsAI.v1beta1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class GoogleProtobufEmpty : Google.Apis.Requests.IDirectResponseSchema
     {

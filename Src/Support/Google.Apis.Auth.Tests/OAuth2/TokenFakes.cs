@@ -24,6 +24,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Xunit;
 
 namespace Google.Apis.Auth.Tests.OAuth2
 {
@@ -158,5 +159,30 @@ namespace Google.Apis.Auth.Tests.OAuth2
                     }),
                     Encoding.UTF8)
             });
+    }
+
+    /// <summary>
+    /// Throws an  <see cref="HttpRequestException"/> when attempting to fetch the token.
+    /// </summary>
+    internal class ResponseExceptionOnFetchingTokenMessageHandler : CountableMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsyncCore(HttpRequestMessage request, CancellationToken cancellationToken) =>
+            throw new HttpRequestException("Couldn't reach server.");
+    }
+
+    /// <summary>
+    /// Message handler that accepts a list of delegates to be used sequentially on incoming requests.
+    /// </summary>
+    internal class DelegatedMessageHandler : CountableMessageHandler
+    {
+        private Func<HttpRequestMessage, Task<HttpResponseMessage>>[] _delegates;
+
+        internal DelegatedMessageHandler(params Func<HttpRequestMessage, Task<HttpResponseMessage>>[] delegates) => _delegates = delegates;
+
+        protected override Task<HttpResponseMessage> SendAsyncCore(HttpRequestMessage request, CancellationToken taskCancellationToken) =>
+            // At this point our call has already been counted.
+            _delegates[Calls - 1](request);
+
+        public void AssertAllCallsMade() => Assert.Equal(_delegates.Length, Calls);
     }
 }

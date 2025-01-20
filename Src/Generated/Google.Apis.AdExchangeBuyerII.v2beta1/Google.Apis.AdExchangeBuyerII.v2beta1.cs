@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,9 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
         {
             Accounts = new AccountsResource(this);
             Bidders = new BiddersResource(this);
+            Buyers = new BuyersResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://adexchangebuyer.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://adexchangebuyer.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -45,23 +48,16 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
         public override string Name => "adexchangebuyer2";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://adexchangebuyer.googleapis.com/";
-        #else
-            "https://adexchangebuyer.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://adexchangebuyer.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Ad Exchange Buyer API II.</summary>
         public class Scope
@@ -82,6 +78,9 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
 
         /// <summary>Gets the Bidders resource.</summary>
         public virtual BiddersResource Bidders { get; }
+
+        /// <summary>Gets the Buyers resource.</summary>
+        public virtual BuyersResource Buyers { get; }
     }
 
     /// <summary>A base abstract class for AdExchangeBuyerII requests.</summary>
@@ -331,7 +330,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.AdExchangeBuyerII.v2beta1.Data.ClientUserInvitation body, long accountId, long clientAccountId)
                 {
-                    return new CreateRequest(service, body, accountId, clientAccountId);
+                    return new CreateRequest(this.service, body, accountId, clientAccountId);
                 }
 
                 /// <summary>
@@ -407,7 +406,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                 /// </param>
                 public virtual GetRequest Get(long accountId, long clientAccountId, long invitationId)
                 {
-                    return new GetRequest(service, accountId, clientAccountId, invitationId);
+                    return new GetRequest(this.service, accountId, clientAccountId, invitationId);
                 }
 
                 /// <summary>Retrieves an existing client user invitation.</summary>
@@ -486,7 +485,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                 /// </param>
                 public virtual ListRequest List(long accountId, string clientAccountId)
                 {
-                    return new ListRequest(service, accountId, clientAccountId);
+                    return new ListRequest(this.service, accountId, clientAccountId);
                 }
 
                 /// <summary>Lists all the client users invitations for a client with a given account ID.</summary>
@@ -602,7 +601,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                 /// <param name="userId">Numerical identifier of the user to retrieve. (required)</param>
                 public virtual GetRequest Get(long accountId, long clientAccountId, long userId)
                 {
-                    return new GetRequest(service, accountId, clientAccountId, userId);
+                    return new GetRequest(this.service, accountId, clientAccountId, userId);
                 }
 
                 /// <summary>Retrieves an existing client user.</summary>
@@ -683,7 +682,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                 /// </param>
                 public virtual ListRequest List(long accountId, string clientAccountId)
                 {
-                    return new ListRequest(service, accountId, clientAccountId);
+                    return new ListRequest(this.service, accountId, clientAccountId);
                 }
 
                 /// <summary>Lists all the known client users for a specified sponsor buyer account ID.</summary>
@@ -784,7 +783,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                 /// <param name="userId">Numerical identifier of the user to retrieve. (required)</param>
                 public virtual UpdateRequest Update(Google.Apis.AdExchangeBuyerII.v2beta1.Data.ClientUser body, long accountId, long clientAccountId, long userId)
                 {
-                    return new UpdateRequest(service, body, accountId, clientAccountId, userId);
+                    return new UpdateRequest(this.service, body, accountId, clientAccountId, userId);
                 }
 
                 /// <summary>Updates an existing client user. Only the user status can be changed on update.</summary>
@@ -870,7 +869,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.AdExchangeBuyerII.v2beta1.Data.Client body, long accountId)
             {
-                return new CreateRequest(service, body, accountId);
+                return new CreateRequest(this.service, body, accountId);
             }
 
             /// <summary>Creates a new client buyer.</summary>
@@ -926,7 +925,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// <param name="clientAccountId">Numerical account ID of the client buyer to retrieve. (required)</param>
             public virtual GetRequest Get(long accountId, long clientAccountId)
             {
-                return new GetRequest(service, accountId, clientAccountId);
+                return new GetRequest(this.service, accountId, clientAccountId);
             }
 
             /// <summary>Gets a client buyer with a given client account ID.</summary>
@@ -986,7 +985,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// </param>
             public virtual ListRequest List(long accountId)
             {
-                return new ListRequest(service, accountId);
+                return new ListRequest(this.service, accountId);
             }
 
             /// <summary>Lists all the clients for the current sponsor buyer.</summary>
@@ -1082,7 +1081,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// <param name="clientAccountId">Unique numerical account ID of the client to update. (required)</param>
             public virtual UpdateRequest Update(Google.Apis.AdExchangeBuyerII.v2beta1.Data.Client body, long accountId, long clientAccountId)
             {
-                return new UpdateRequest(service, body, accountId, clientAccountId);
+                return new UpdateRequest(this.service, body, accountId, clientAccountId);
             }
 
             /// <summary>Updates an existing client buyer.</summary>
@@ -1188,7 +1187,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                 /// <param name="creativeId">The ID of the creative associated with the deal.</param>
                 public virtual AddRequest Add(Google.Apis.AdExchangeBuyerII.v2beta1.Data.AddDealAssociationRequest body, string accountId, string creativeId)
                 {
-                    return new AddRequest(service, body, accountId, creativeId);
+                    return new AddRequest(this.service, body, accountId, creativeId);
                 }
 
                 /// <summary>Associate an existing deal with a creative.</summary>
@@ -1260,7 +1259,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                 /// </param>
                 public virtual ListRequest List(string accountId, string creativeId)
                 {
-                    return new ListRequest(service, accountId, creativeId);
+                    return new ListRequest(this.service, accountId, creativeId);
                 }
 
                 /// <summary>List all creative-deal associations.</summary>
@@ -1376,7 +1375,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                 /// <param name="creativeId">The ID of the creative associated with the deal.</param>
                 public virtual RemoveRequest Remove(Google.Apis.AdExchangeBuyerII.v2beta1.Data.RemoveDealAssociationRequest body, string accountId, string creativeId)
                 {
-                    return new RemoveRequest(service, body, accountId, creativeId);
+                    return new RemoveRequest(this.service, body, accountId, creativeId);
                 }
 
                 /// <summary>Remove the association between a deal and a creative.</summary>
@@ -1446,7 +1445,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.AdExchangeBuyerII.v2beta1.Data.Creative body, string accountId)
             {
-                return new CreateRequest(service, body, accountId);
+                return new CreateRequest(this.service, body, accountId);
             }
 
             /// <summary>Creates a creative.</summary>
@@ -1540,7 +1539,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// <param name="creativeId">The ID of the creative to retrieve.</param>
             public virtual GetRequest Get(string accountId, string creativeId)
             {
-                return new GetRequest(service, accountId, creativeId);
+                return new GetRequest(this.service, accountId, creativeId);
             }
 
             /// <summary>Gets a creative.</summary>
@@ -1601,7 +1600,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// </param>
             public virtual ListRequest List(string accountId)
             {
-                return new ListRequest(service, accountId);
+                return new ListRequest(this.service, accountId);
             }
 
             /// <summary>Lists creatives.</summary>
@@ -1623,7 +1622,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
 
                 /// <summary>
                 /// Requested page size. The server may return fewer creatives than requested (due to timeout
-                /// constraint) even if more are available via another call. If unspecified, server will pick an
+                /// constraint) even if more are available through another call. If unspecified, server will pick an
                 /// appropriate default. Acceptable values are 1 to 1000, inclusive.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
@@ -1708,7 +1707,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// </param>
             public virtual StopWatchingRequest StopWatching(Google.Apis.AdExchangeBuyerII.v2beta1.Data.StopWatchingCreativeRequest body, string accountId, string creativeId)
             {
-                return new StopWatchingRequest(service, body, accountId, creativeId);
+                return new StopWatchingRequest(this.service, body, accountId, creativeId);
             }
 
             /// <summary>
@@ -1787,7 +1786,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// </param>
             public virtual UpdateRequest Update(Google.Apis.AdExchangeBuyerII.v2beta1.Data.Creative body, string accountId, string creativeId)
             {
-                return new UpdateRequest(service, body, accountId, creativeId);
+                return new UpdateRequest(this.service, body, accountId, creativeId);
             }
 
             /// <summary>Updates a creative.</summary>
@@ -1867,7 +1866,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// </param>
             public virtual WatchRequest Watch(Google.Apis.AdExchangeBuyerII.v2beta1.Data.WatchCreativeRequest body, string accountId, string creativeId)
             {
-                return new WatchRequest(service, body, accountId, creativeId);
+                return new WatchRequest(this.service, body, accountId, creativeId);
             }
 
             /// <summary>
@@ -1960,7 +1959,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// <param name="accountId">Account ID of the buyer.</param>
             public virtual ListRequest List(string accountId)
             {
-                return new ListRequest(service, accountId);
+                return new ListRequest(this.service, accountId);
             }
 
             /// <summary>
@@ -2089,26 +2088,24 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// <summary>
             /// Update given deals to pause serving. This method will set the
             /// `DealServingMetadata.DealPauseStatus.has_buyer_paused` bit to true for all listed deals in the request.
-            /// Currently, this method only applies to PG and PD deals. For PA deals, please call
-            /// accounts.proposals.pause endpoint. It is a no-op to pause already-paused deals. It is an error to call
-            /// PauseProposalDeals for deals which are not part of the proposal of proposal_id or which are not
-            /// finalized or renegotiating.
+            /// Currently, this method only applies to PG and PD deals. For PA deals, call accounts.proposals.pause
+            /// endpoint. It is a no-op to pause already-paused deals. It is an error to call PauseProposalDeals for
+            /// deals which are not part of the proposal of proposal_id or which are not finalized or renegotiating.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="accountId">Account ID of the buyer.</param>
             /// <param name="proposalId">The proposal_id of the proposal containing the deals.</param>
             public virtual PauseRequest Pause(Google.Apis.AdExchangeBuyerII.v2beta1.Data.PauseProposalDealsRequest body, string accountId, string proposalId)
             {
-                return new PauseRequest(service, body, accountId, proposalId);
+                return new PauseRequest(this.service, body, accountId, proposalId);
             }
 
             /// <summary>
             /// Update given deals to pause serving. This method will set the
             /// `DealServingMetadata.DealPauseStatus.has_buyer_paused` bit to true for all listed deals in the request.
-            /// Currently, this method only applies to PG and PD deals. For PA deals, please call
-            /// accounts.proposals.pause endpoint. It is a no-op to pause already-paused deals. It is an error to call
-            /// PauseProposalDeals for deals which are not part of the proposal of proposal_id or which are not
-            /// finalized or renegotiating.
+            /// Currently, this method only applies to PG and PD deals. For PA deals, call accounts.proposals.pause
+            /// endpoint. It is a no-op to pause already-paused deals. It is an error to call PauseProposalDeals for
+            /// deals which are not part of the proposal of proposal_id or which are not finalized or renegotiating.
             /// </summary>
             public class PauseRequest : AdExchangeBuyerIIBaseServiceRequest<Google.Apis.AdExchangeBuyerII.v2beta1.Data.Proposal>
             {
@@ -2170,26 +2167,26 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// <summary>
             /// Update given deals to resume serving. This method will set the
             /// `DealServingMetadata.DealPauseStatus.has_buyer_paused` bit to false for all listed deals in the request.
-            /// Currently, this method only applies to PG and PD deals. For PA deals, please call
-            /// accounts.proposals.resume endpoint. It is a no-op to resume running deals or deals paused by the other
-            /// party. It is an error to call ResumeProposalDeals for deals which are not part of the proposal of
-            /// proposal_id or which are not finalized or renegotiating.
+            /// Currently, this method only applies to PG and PD deals. For PA deals, call accounts.proposals.resume
+            /// endpoint. It is a no-op to resume running deals or deals paused by the other party. It is an error to
+            /// call ResumeProposalDeals for deals which are not part of the proposal of proposal_id or which are not
+            /// finalized or renegotiating.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="accountId">Account ID of the buyer.</param>
             /// <param name="proposalId">The proposal_id of the proposal containing the deals.</param>
             public virtual ResumeRequest Resume(Google.Apis.AdExchangeBuyerII.v2beta1.Data.ResumeProposalDealsRequest body, string accountId, string proposalId)
             {
-                return new ResumeRequest(service, body, accountId, proposalId);
+                return new ResumeRequest(this.service, body, accountId, proposalId);
             }
 
             /// <summary>
             /// Update given deals to resume serving. This method will set the
             /// `DealServingMetadata.DealPauseStatus.has_buyer_paused` bit to false for all listed deals in the request.
-            /// Currently, this method only applies to PG and PD deals. For PA deals, please call
-            /// accounts.proposals.resume endpoint. It is a no-op to resume running deals or deals paused by the other
-            /// party. It is an error to call ResumeProposalDeals for deals which are not part of the proposal of
-            /// proposal_id or which are not finalized or renegotiating.
+            /// Currently, this method only applies to PG and PD deals. For PA deals, call accounts.proposals.resume
+            /// endpoint. It is a no-op to resume running deals or deals paused by the other party. It is an error to
+            /// call ResumeProposalDeals for deals which are not part of the proposal of proposal_id or which are not
+            /// finalized or renegotiating.
             /// </summary>
             public class ResumeRequest : AdExchangeBuyerIIBaseServiceRequest<Google.Apis.AdExchangeBuyerII.v2beta1.Data.Proposal>
             {
@@ -2271,7 +2268,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// <param name="productId">The ID for the product to get the head revision for.</param>
             public virtual GetRequest Get(string accountId, string productId)
             {
-                return new GetRequest(service, accountId, productId);
+                return new GetRequest(this.service, accountId, productId);
             }
 
             /// <summary>Gets the requested product by ID.</summary>
@@ -2331,7 +2328,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// <param name="accountId">Account ID of the buyer.</param>
             public virtual ListRequest List(string accountId)
             {
-                return new ListRequest(service, accountId);
+                return new ListRequest(this.service, accountId);
             }
 
             /// <summary>
@@ -2447,7 +2444,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// <param name="proposalId">The ID of the proposal to accept.</param>
             public virtual AcceptRequest Accept(Google.Apis.AdExchangeBuyerII.v2beta1.Data.AcceptProposalRequest body, string accountId, string proposalId)
             {
-                return new AcceptRequest(service, body, accountId, proposalId);
+                return new AcceptRequest(this.service, body, accountId, proposalId);
             }
 
             /// <summary>
@@ -2523,7 +2520,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// <param name="proposalId">The ID of the proposal to attach the note to.</param>
             public virtual AddNoteRequest AddNote(Google.Apis.AdExchangeBuyerII.v2beta1.Data.AddNoteRequest body, string accountId, string proposalId)
             {
-                return new AddNoteRequest(service, body, accountId, proposalId);
+                return new AddNoteRequest(this.service, body, accountId, proposalId);
             }
 
             /// <summary>
@@ -2596,7 +2593,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// <param name="proposalId">The ID of the proposal to cancel negotiation for.</param>
             public virtual CancelNegotiationRequest CancelNegotiation(Google.Apis.AdExchangeBuyerII.v2beta1.Data.CancelNegotiationRequest body, string accountId, string proposalId)
             {
-                return new CancelNegotiationRequest(service, body, accountId, proposalId);
+                return new CancelNegotiationRequest(this.service, body, accountId, proposalId);
             }
 
             /// <summary>
@@ -2661,26 +2658,30 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             }
 
             /// <summary>
-            /// Update the given proposal to indicate that setup has been completed. This method is called by the buyer
-            /// when the line items have been created on their end for a finalized proposal and all the required
-            /// creatives have been uploaded using the creatives API. This call updates the `is_setup_completed` bit on
-            /// the proposal and also notifies the seller. The server will advance the revision number of the most
-            /// recent proposal.
+            /// You can opt-in to manually update proposals to indicate that setup is complete. By default, proposal
+            /// setup is automatically completed after their deals are finalized. Contact your Technical Account Manager
+            /// to opt in. Buyers can call this method when the proposal has been finalized, and all the required
+            /// creatives have been uploaded using the Creatives API. This call updates the `is_setup_completed` field
+            /// on the deals in the proposal, and notifies the seller. The server then advances the revision number of
+            /// the most recent proposal. To mark an individual deal as ready to serve, call
+            /// `buyers.finalizedDeals.setReadyToServe` in the Marketplace API.
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="accountId">Account ID of the buyer.</param>
             /// <param name="proposalId">The ID of the proposal to mark as setup completed.</param>
             public virtual CompleteSetupRequest CompleteSetup(Google.Apis.AdExchangeBuyerII.v2beta1.Data.CompleteSetupRequest body, string accountId, string proposalId)
             {
-                return new CompleteSetupRequest(service, body, accountId, proposalId);
+                return new CompleteSetupRequest(this.service, body, accountId, proposalId);
             }
 
             /// <summary>
-            /// Update the given proposal to indicate that setup has been completed. This method is called by the buyer
-            /// when the line items have been created on their end for a finalized proposal and all the required
-            /// creatives have been uploaded using the creatives API. This call updates the `is_setup_completed` bit on
-            /// the proposal and also notifies the seller. The server will advance the revision number of the most
-            /// recent proposal.
+            /// You can opt-in to manually update proposals to indicate that setup is complete. By default, proposal
+            /// setup is automatically completed after their deals are finalized. Contact your Technical Account Manager
+            /// to opt in. Buyers can call this method when the proposal has been finalized, and all the required
+            /// creatives have been uploaded using the Creatives API. This call updates the `is_setup_completed` field
+            /// on the deals in the proposal, and notifies the seller. The server then advances the revision number of
+            /// the most recent proposal. To mark an individual deal as ready to serve, call
+            /// `buyers.finalizedDeals.setReadyToServe` in the Marketplace API.
             /// </summary>
             public class CompleteSetupRequest : AdExchangeBuyerIIBaseServiceRequest<Google.Apis.AdExchangeBuyerII.v2beta1.Data.Proposal>
             {
@@ -2747,7 +2748,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// <param name="accountId">Account ID of the buyer.</param>
             public virtual CreateRequest Create(Google.Apis.AdExchangeBuyerII.v2beta1.Data.Proposal body, string accountId)
             {
-                return new CreateRequest(service, body, accountId);
+                return new CreateRequest(this.service, body, accountId);
             }
 
             /// <summary>
@@ -2803,7 +2804,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// <param name="proposalId">The unique ID of the proposal</param>
             public virtual GetRequest Get(string accountId, string proposalId)
             {
-                return new GetRequest(service, accountId, proposalId);
+                return new GetRequest(this.service, accountId, proposalId);
             }
 
             /// <summary>Gets a proposal given its ID. The proposal is returned at its head revision.</summary>
@@ -2866,7 +2867,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// <param name="accountId">Account ID of the buyer.</param>
             public virtual ListRequest List(string accountId)
             {
-                return new ListRequest(service, accountId);
+                return new ListRequest(this.service, accountId);
             }
 
             /// <summary>
@@ -3005,7 +3006,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// <param name="proposalId">The ID of the proposal to pause.</param>
             public virtual PauseRequest Pause(Google.Apis.AdExchangeBuyerII.v2beta1.Data.PauseProposalRequest body, string accountId, string proposalId)
             {
-                return new PauseRequest(service, body, accountId, proposalId);
+                return new PauseRequest(this.service, body, accountId, proposalId);
             }
 
             /// <summary>
@@ -3083,7 +3084,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// <param name="proposalId">The ID of the proposal to resume.</param>
             public virtual ResumeRequest Resume(Google.Apis.AdExchangeBuyerII.v2beta1.Data.ResumeProposalRequest body, string accountId, string proposalId)
             {
-                return new ResumeRequest(service, body, accountId, proposalId);
+                return new ResumeRequest(this.service, body, accountId, proposalId);
             }
 
             /// <summary>
@@ -3164,7 +3165,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// <param name="proposalId">The unique ID of the proposal.</param>
             public virtual UpdateRequest Update(Google.Apis.AdExchangeBuyerII.v2beta1.Data.Proposal body, string accountId, string proposalId)
             {
-                return new UpdateRequest(service, body, accountId, proposalId);
+                return new UpdateRequest(this.service, body, accountId, proposalId);
             }
 
             /// <summary>
@@ -3256,7 +3257,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// <param name="publisherProfileId">The id for the publisher profile to get.</param>
             public virtual GetRequest Get(string accountId, string publisherProfileId)
             {
-                return new GetRequest(service, accountId, publisherProfileId);
+                return new GetRequest(this.service, accountId, publisherProfileId);
             }
 
             /// <summary>Gets the requested publisher profile by id.</summary>
@@ -3314,7 +3315,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// <param name="accountId">Account ID of the buyer.</param>
             public virtual ListRequest List(string accountId)
             {
-                return new ListRequest(service, accountId);
+                return new ListRequest(this.service, accountId);
             }
 
             /// <summary>List all publisher profiles visible to the buyer</summary>
@@ -3467,7 +3468,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                     /// </param>
                     public virtual ListRequest List(string filterSetName)
                     {
-                        return new ListRequest(service, filterSetName);
+                        return new ListRequest(this.service, filterSetName);
                     }
 
                     /// <summary>Lists all metrics that are measured in terms of number of bids.</summary>
@@ -3576,7 +3577,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                     /// </param>
                     public virtual ListRequest List(string filterSetName)
                     {
-                        return new ListRequest(service, filterSetName);
+                        return new ListRequest(this.service, filterSetName);
                     }
 
                     /// <summary>
@@ -3688,7 +3689,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                     /// </param>
                     public virtual ListRequest List(string filterSetName)
                     {
-                        return new ListRequest(service, filterSetName);
+                        return new ListRequest(this.service, filterSetName);
                     }
 
                     /// <summary>
@@ -3800,7 +3801,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                     /// </param>
                     public virtual ListRequest List(string filterSetName)
                     {
-                        return new ListRequest(service, filterSetName);
+                        return new ListRequest(this.service, filterSetName);
                     }
 
                     /// <summary>
@@ -3935,7 +3936,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                         /// </param>
                         public virtual ListRequest List(string filterSetName, int creativeStatusId)
                         {
-                            return new ListRequest(service, filterSetName, creativeStatusId);
+                            return new ListRequest(this.service, filterSetName, creativeStatusId);
                         }
 
                         /// <summary>
@@ -4069,7 +4070,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                         /// </param>
                         public virtual ListRequest List(string filterSetName, int creativeStatusId)
                         {
-                            return new ListRequest(service, filterSetName, creativeStatusId);
+                            return new ListRequest(this.service, filterSetName, creativeStatusId);
                         }
 
                         /// <summary>
@@ -4181,7 +4182,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                     /// </param>
                     public virtual ListRequest List(string filterSetName)
                     {
-                        return new ListRequest(service, filterSetName);
+                        return new ListRequest(this.service, filterSetName);
                     }
 
                     /// <summary>
@@ -4289,7 +4290,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                     /// </param>
                     public virtual ListRequest List(string filterSetName)
                     {
-                        return new ListRequest(service, filterSetName);
+                        return new ListRequest(this.service, filterSetName);
                     }
 
                     /// <summary>Lists all metrics that are measured in terms of number of impressions.</summary>
@@ -4398,7 +4399,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                     /// </param>
                     public virtual ListRequest List(string filterSetName)
                     {
-                        return new ListRequest(service, filterSetName);
+                        return new ListRequest(this.service, filterSetName);
                     }
 
                     /// <summary>
@@ -4510,7 +4511,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                     /// </param>
                     public virtual ListRequest List(string filterSetName)
                     {
-                        return new ListRequest(service, filterSetName);
+                        return new ListRequest(this.service, filterSetName);
                     }
 
                     /// <summary>
@@ -4602,7 +4603,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.AdExchangeBuyerII.v2beta1.Data.FilterSet body, string ownerName)
                 {
-                    return new CreateRequest(service, body, ownerName);
+                    return new CreateRequest(this.service, body, ownerName);
                 }
 
                 /// <summary>Creates the specified filter set for the account with the given account ID.</summary>
@@ -4679,7 +4680,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Deletes the requested filter set from the account with the given account ID.</summary>
@@ -4735,7 +4736,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>Retrieves the requested filter set for the account with the given account ID.</summary>
@@ -4791,7 +4792,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                 /// </param>
                 public virtual ListRequest List(string ownerName)
                 {
-                    return new ListRequest(service, ownerName);
+                    return new ListRequest(this.service, ownerName);
                 }
 
                 /// <summary>Lists all filter sets for the account with the given account ID.</summary>
@@ -4922,7 +4923,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                 /// </param>
                 public virtual ListRequest List(string filterSetName)
                 {
-                    return new ListRequest(service, filterSetName);
+                    return new ListRequest(this.service, filterSetName);
                 }
 
                 /// <summary>Lists all metrics that are measured in terms of number of bids.</summary>
@@ -5031,7 +5032,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                 /// </param>
                 public virtual ListRequest List(string filterSetName)
                 {
-                    return new ListRequest(service, filterSetName);
+                    return new ListRequest(this.service, filterSetName);
                 }
 
                 /// <summary>
@@ -5143,7 +5144,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                 /// </param>
                 public virtual ListRequest List(string filterSetName)
                 {
-                    return new ListRequest(service, filterSetName);
+                    return new ListRequest(this.service, filterSetName);
                 }
 
                 /// <summary>
@@ -5255,7 +5256,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                 /// </param>
                 public virtual ListRequest List(string filterSetName)
                 {
-                    return new ListRequest(service, filterSetName);
+                    return new ListRequest(this.service, filterSetName);
                 }
 
                 /// <summary>
@@ -5390,7 +5391,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                     /// </param>
                     public virtual ListRequest List(string filterSetName, int creativeStatusId)
                     {
-                        return new ListRequest(service, filterSetName, creativeStatusId);
+                        return new ListRequest(this.service, filterSetName, creativeStatusId);
                     }
 
                     /// <summary>
@@ -5523,7 +5524,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                     /// </param>
                     public virtual ListRequest List(string filterSetName, int creativeStatusId)
                     {
-                        return new ListRequest(service, filterSetName, creativeStatusId);
+                        return new ListRequest(this.service, filterSetName, creativeStatusId);
                     }
 
                     /// <summary>
@@ -5634,7 +5635,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                 /// </param>
                 public virtual ListRequest List(string filterSetName)
                 {
-                    return new ListRequest(service, filterSetName);
+                    return new ListRequest(this.service, filterSetName);
                 }
 
                 /// <summary>
@@ -5742,7 +5743,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                 /// </param>
                 public virtual ListRequest List(string filterSetName)
                 {
-                    return new ListRequest(service, filterSetName);
+                    return new ListRequest(this.service, filterSetName);
                 }
 
                 /// <summary>Lists all metrics that are measured in terms of number of impressions.</summary>
@@ -5851,7 +5852,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                 /// </param>
                 public virtual ListRequest List(string filterSetName)
                 {
-                    return new ListRequest(service, filterSetName);
+                    return new ListRequest(this.service, filterSetName);
                 }
 
                 /// <summary>
@@ -5963,7 +5964,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                 /// </param>
                 public virtual ListRequest List(string filterSetName)
                 {
-                    return new ListRequest(service, filterSetName);
+                    return new ListRequest(this.service, filterSetName);
                 }
 
                 /// <summary>
@@ -6055,7 +6056,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.AdExchangeBuyerII.v2beta1.Data.FilterSet body, string ownerName)
             {
-                return new CreateRequest(service, body, ownerName);
+                return new CreateRequest(this.service, body, ownerName);
             }
 
             /// <summary>Creates the specified filter set for the account with the given account ID.</summary>
@@ -6132,7 +6133,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes the requested filter set from the account with the given account ID.</summary>
@@ -6187,7 +6188,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Retrieves the requested filter set for the account with the given account ID.</summary>
@@ -6242,7 +6243,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
             /// </param>
             public virtual ListRequest List(string ownerName)
             {
-                return new ListRequest(service, ownerName);
+                return new ListRequest(this.service, ownerName);
             }
 
             /// <summary>Lists all filter sets for the account with the given account ID.</summary>
@@ -6299,6 +6300,1472 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1
                         ParameterType = "path",
                         DefaultValue = null,
                         Pattern = @"^bidders/[^/]+$",
+                    });
+                    RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageSize",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageToken",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+        }
+    }
+
+    /// <summary>The "buyers" collection of methods.</summary>
+    public class BuyersResource
+    {
+        private const string Resource = "buyers";
+
+        /// <summary>The service which this resource belongs to.</summary>
+        private readonly Google.Apis.Services.IClientService service;
+
+        /// <summary>Constructs a new resource.</summary>
+        public BuyersResource(Google.Apis.Services.IClientService service)
+        {
+            this.service = service;
+            FilterSets = new FilterSetsResource(service);
+        }
+
+        /// <summary>Gets the FilterSets resource.</summary>
+        public virtual FilterSetsResource FilterSets { get; }
+
+        /// <summary>The "filterSets" collection of methods.</summary>
+        public class FilterSetsResource
+        {
+            private const string Resource = "filterSets";
+
+            /// <summary>The service which this resource belongs to.</summary>
+            private readonly Google.Apis.Services.IClientService service;
+
+            /// <summary>Constructs a new resource.</summary>
+            public FilterSetsResource(Google.Apis.Services.IClientService service)
+            {
+                this.service = service;
+                BidMetrics = new BidMetricsResource(service);
+                BidResponseErrors = new BidResponseErrorsResource(service);
+                BidResponsesWithoutBids = new BidResponsesWithoutBidsResource(service);
+                FilteredBidRequests = new FilteredBidRequestsResource(service);
+                FilteredBids = new FilteredBidsResource(service);
+                ImpressionMetrics = new ImpressionMetricsResource(service);
+                LosingBids = new LosingBidsResource(service);
+                NonBillableWinningBids = new NonBillableWinningBidsResource(service);
+            }
+
+            /// <summary>Gets the BidMetrics resource.</summary>
+            public virtual BidMetricsResource BidMetrics { get; }
+
+            /// <summary>The "bidMetrics" collection of methods.</summary>
+            public class BidMetricsResource
+            {
+                private const string Resource = "bidMetrics";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public BidMetricsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Lists all metrics that are measured in terms of number of bids.</summary>
+                /// <param name="filterSetName">
+                /// Name of the filter set that should be applied to the requested metrics. For example: - For a
+                /// bidder-level filter set for bidder 123: `bidders/123/filterSets/abc` - For an account-level filter
+                /// set for the buyer account representing bidder 123: `bidders/123/accounts/123/filterSets/abc` - For
+                /// an account-level filter set for the child seat buyer account 456 whose bidder is 123:
+                /// `bidders/123/accounts/456/filterSets/abc`
+                /// </param>
+                public virtual ListRequest List(string filterSetName)
+                {
+                    return new ListRequest(this.service, filterSetName);
+                }
+
+                /// <summary>Lists all metrics that are measured in terms of number of bids.</summary>
+                public class ListRequest : AdExchangeBuyerIIBaseServiceRequest<Google.Apis.AdExchangeBuyerII.v2beta1.Data.ListBidMetricsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string filterSetName) : base(service)
+                    {
+                        FilterSetName = filterSetName;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Name of the filter set that should be applied to the requested metrics. For example: - For a
+                    /// bidder-level filter set for bidder 123: `bidders/123/filterSets/abc` - For an account-level
+                    /// filter set for the buyer account representing bidder 123:
+                    /// `bidders/123/accounts/123/filterSets/abc` - For an account-level filter set for the child seat
+                    /// buyer account 456 whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filterSetName", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string FilterSetName { get; private set; }
+
+                    /// <summary>
+                    /// Requested page size. The server may return fewer results than requested. If unspecified, the
+                    /// server will pick an appropriate default.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// A token identifying a page of results the server should return. Typically, this is the value of
+                    /// ListBidMetricsResponse.nextPageToken returned from the previous call to the bidMetrics.list
+                    /// method.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2beta1/{+filterSetName}/bidMetrics";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("filterSetName", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filterSetName",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^buyers/[^/]+/filterSets/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the BidResponseErrors resource.</summary>
+            public virtual BidResponseErrorsResource BidResponseErrors { get; }
+
+            /// <summary>The "bidResponseErrors" collection of methods.</summary>
+            public class BidResponseErrorsResource
+            {
+                private const string Resource = "bidResponseErrors";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public BidResponseErrorsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>
+                /// List all errors that occurred in bid responses, with the number of bid responses affected for each
+                /// reason.
+                /// </summary>
+                /// <param name="filterSetName">
+                /// Name of the filter set that should be applied to the requested metrics. For example: - For a
+                /// bidder-level filter set for bidder 123: `bidders/123/filterSets/abc` - For an account-level filter
+                /// set for the buyer account representing bidder 123: `bidders/123/accounts/123/filterSets/abc` - For
+                /// an account-level filter set for the child seat buyer account 456 whose bidder is 123:
+                /// `bidders/123/accounts/456/filterSets/abc`
+                /// </param>
+                public virtual ListRequest List(string filterSetName)
+                {
+                    return new ListRequest(this.service, filterSetName);
+                }
+
+                /// <summary>
+                /// List all errors that occurred in bid responses, with the number of bid responses affected for each
+                /// reason.
+                /// </summary>
+                public class ListRequest : AdExchangeBuyerIIBaseServiceRequest<Google.Apis.AdExchangeBuyerII.v2beta1.Data.ListBidResponseErrorsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string filterSetName) : base(service)
+                    {
+                        FilterSetName = filterSetName;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Name of the filter set that should be applied to the requested metrics. For example: - For a
+                    /// bidder-level filter set for bidder 123: `bidders/123/filterSets/abc` - For an account-level
+                    /// filter set for the buyer account representing bidder 123:
+                    /// `bidders/123/accounts/123/filterSets/abc` - For an account-level filter set for the child seat
+                    /// buyer account 456 whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filterSetName", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string FilterSetName { get; private set; }
+
+                    /// <summary>
+                    /// Requested page size. The server may return fewer results than requested. If unspecified, the
+                    /// server will pick an appropriate default.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// A token identifying a page of results the server should return. Typically, this is the value of
+                    /// ListBidResponseErrorsResponse.nextPageToken returned from the previous call to the
+                    /// bidResponseErrors.list method.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2beta1/{+filterSetName}/bidResponseErrors";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("filterSetName", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filterSetName",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^buyers/[^/]+/filterSets/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the BidResponsesWithoutBids resource.</summary>
+            public virtual BidResponsesWithoutBidsResource BidResponsesWithoutBids { get; }
+
+            /// <summary>The "bidResponsesWithoutBids" collection of methods.</summary>
+            public class BidResponsesWithoutBidsResource
+            {
+                private const string Resource = "bidResponsesWithoutBids";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public BidResponsesWithoutBidsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>
+                /// List all reasons for which bid responses were considered to have no applicable bids, with the number
+                /// of bid responses affected for each reason.
+                /// </summary>
+                /// <param name="filterSetName">
+                /// Name of the filter set that should be applied to the requested metrics. For example: - For a
+                /// bidder-level filter set for bidder 123: `bidders/123/filterSets/abc` - For an account-level filter
+                /// set for the buyer account representing bidder 123: `bidders/123/accounts/123/filterSets/abc` - For
+                /// an account-level filter set for the child seat buyer account 456 whose bidder is 123:
+                /// `bidders/123/accounts/456/filterSets/abc`
+                /// </param>
+                public virtual ListRequest List(string filterSetName)
+                {
+                    return new ListRequest(this.service, filterSetName);
+                }
+
+                /// <summary>
+                /// List all reasons for which bid responses were considered to have no applicable bids, with the number
+                /// of bid responses affected for each reason.
+                /// </summary>
+                public class ListRequest : AdExchangeBuyerIIBaseServiceRequest<Google.Apis.AdExchangeBuyerII.v2beta1.Data.ListBidResponsesWithoutBidsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string filterSetName) : base(service)
+                    {
+                        FilterSetName = filterSetName;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Name of the filter set that should be applied to the requested metrics. For example: - For a
+                    /// bidder-level filter set for bidder 123: `bidders/123/filterSets/abc` - For an account-level
+                    /// filter set for the buyer account representing bidder 123:
+                    /// `bidders/123/accounts/123/filterSets/abc` - For an account-level filter set for the child seat
+                    /// buyer account 456 whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filterSetName", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string FilterSetName { get; private set; }
+
+                    /// <summary>
+                    /// Requested page size. The server may return fewer results than requested. If unspecified, the
+                    /// server will pick an appropriate default.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// A token identifying a page of results the server should return. Typically, this is the value of
+                    /// ListBidResponsesWithoutBidsResponse.nextPageToken returned from the previous call to the
+                    /// bidResponsesWithoutBids.list method.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2beta1/{+filterSetName}/bidResponsesWithoutBids";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("filterSetName", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filterSetName",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^buyers/[^/]+/filterSets/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the FilteredBidRequests resource.</summary>
+            public virtual FilteredBidRequestsResource FilteredBidRequests { get; }
+
+            /// <summary>The "filteredBidRequests" collection of methods.</summary>
+            public class FilteredBidRequestsResource
+            {
+                private const string Resource = "filteredBidRequests";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public FilteredBidRequestsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>
+                /// List all reasons that caused a bid request not to be sent for an impression, with the number of bid
+                /// requests not sent for each reason.
+                /// </summary>
+                /// <param name="filterSetName">
+                /// Name of the filter set that should be applied to the requested metrics. For example: - For a
+                /// bidder-level filter set for bidder 123: `bidders/123/filterSets/abc` - For an account-level filter
+                /// set for the buyer account representing bidder 123: `bidders/123/accounts/123/filterSets/abc` - For
+                /// an account-level filter set for the child seat buyer account 456 whose bidder is 123:
+                /// `bidders/123/accounts/456/filterSets/abc`
+                /// </param>
+                public virtual ListRequest List(string filterSetName)
+                {
+                    return new ListRequest(this.service, filterSetName);
+                }
+
+                /// <summary>
+                /// List all reasons that caused a bid request not to be sent for an impression, with the number of bid
+                /// requests not sent for each reason.
+                /// </summary>
+                public class ListRequest : AdExchangeBuyerIIBaseServiceRequest<Google.Apis.AdExchangeBuyerII.v2beta1.Data.ListFilteredBidRequestsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string filterSetName) : base(service)
+                    {
+                        FilterSetName = filterSetName;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Name of the filter set that should be applied to the requested metrics. For example: - For a
+                    /// bidder-level filter set for bidder 123: `bidders/123/filterSets/abc` - For an account-level
+                    /// filter set for the buyer account representing bidder 123:
+                    /// `bidders/123/accounts/123/filterSets/abc` - For an account-level filter set for the child seat
+                    /// buyer account 456 whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filterSetName", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string FilterSetName { get; private set; }
+
+                    /// <summary>
+                    /// Requested page size. The server may return fewer results than requested. If unspecified, the
+                    /// server will pick an appropriate default.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// A token identifying a page of results the server should return. Typically, this is the value of
+                    /// ListFilteredBidRequestsResponse.nextPageToken returned from the previous call to the
+                    /// filteredBidRequests.list method.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2beta1/{+filterSetName}/filteredBidRequests";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("filterSetName", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filterSetName",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^buyers/[^/]+/filterSets/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the FilteredBids resource.</summary>
+            public virtual FilteredBidsResource FilteredBids { get; }
+
+            /// <summary>The "filteredBids" collection of methods.</summary>
+            public class FilteredBidsResource
+            {
+                private const string Resource = "filteredBids";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public FilteredBidsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                    Creatives = new CreativesResource(service);
+                    Details = new DetailsResource(service);
+                }
+
+                /// <summary>Gets the Creatives resource.</summary>
+                public virtual CreativesResource Creatives { get; }
+
+                /// <summary>The "creatives" collection of methods.</summary>
+                public class CreativesResource
+                {
+                    private const string Resource = "creatives";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public CreativesResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>
+                    /// List all creatives associated with a specific reason for which bids were filtered, with the
+                    /// number of bids filtered for each creative.
+                    /// </summary>
+                    /// <param name="filterSetName">
+                    /// Name of the filter set that should be applied to the requested metrics. For example: - For a
+                    /// bidder-level filter set for bidder 123: `bidders/123/filterSets/abc` - For an account-level
+                    /// filter set for the buyer account representing bidder 123:
+                    /// `bidders/123/accounts/123/filterSets/abc` - For an account-level filter set for the child seat
+                    /// buyer account 456 whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`
+                    /// </param>
+                    /// <param name="creativeStatusId">
+                    /// The ID of the creative status for which to retrieve a breakdown by creative. See
+                    /// [creative-status-codes](https://developers.google.com/authorized-buyers/rtb/downloads/creative-status-codes).
+                    /// </param>
+                    public virtual ListRequest List(string filterSetName, int creativeStatusId)
+                    {
+                        return new ListRequest(this.service, filterSetName, creativeStatusId);
+                    }
+
+                    /// <summary>
+                    /// List all creatives associated with a specific reason for which bids were filtered, with the
+                    /// number of bids filtered for each creative.
+                    /// </summary>
+                    public class ListRequest : AdExchangeBuyerIIBaseServiceRequest<Google.Apis.AdExchangeBuyerII.v2beta1.Data.ListCreativeStatusBreakdownByCreativeResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string filterSetName, int creativeStatusId) : base(service)
+                        {
+                            FilterSetName = filterSetName;
+                            CreativeStatusId = creativeStatusId;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Name of the filter set that should be applied to the requested metrics. For example: - For a
+                        /// bidder-level filter set for bidder 123: `bidders/123/filterSets/abc` - For an account-level
+                        /// filter set for the buyer account representing bidder 123:
+                        /// `bidders/123/accounts/123/filterSets/abc` - For an account-level filter set for the child
+                        /// seat buyer account 456 whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("filterSetName", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string FilterSetName { get; private set; }
+
+                        /// <summary>
+                        /// The ID of the creative status for which to retrieve a breakdown by creative. See
+                        /// [creative-status-codes](https://developers.google.com/authorized-buyers/rtb/downloads/creative-status-codes).
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("creativeStatusId", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual int CreativeStatusId { get; private set; }
+
+                        /// <summary>
+                        /// Requested page size. The server may return fewer results than requested. If unspecified, the
+                        /// server will pick an appropriate default.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>
+                        /// A token identifying a page of results the server should return. Typically, this is the value
+                        /// of ListCreativeStatusBreakdownByCreativeResponse.nextPageToken returned from the previous
+                        /// call to the filteredBids.creatives.list method.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2beta1/{+filterSetName}/filteredBids/{creativeStatusId}/creatives";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("filterSetName", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "filterSetName",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^buyers/[^/]+/filterSets/[^/]+$",
+                            });
+                            RequestParameters.Add("creativeStatusId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "creativeStatusId",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+                }
+
+                /// <summary>Gets the Details resource.</summary>
+                public virtual DetailsResource Details { get; }
+
+                /// <summary>The "details" collection of methods.</summary>
+                public class DetailsResource
+                {
+                    private const string Resource = "details";
+
+                    /// <summary>The service which this resource belongs to.</summary>
+                    private readonly Google.Apis.Services.IClientService service;
+
+                    /// <summary>Constructs a new resource.</summary>
+                    public DetailsResource(Google.Apis.Services.IClientService service)
+                    {
+                        this.service = service;
+                    }
+
+                    /// <summary>
+                    /// List all details associated with a specific reason for which bids were filtered, with the number
+                    /// of bids filtered for each detail.
+                    /// </summary>
+                    /// <param name="filterSetName">
+                    /// Name of the filter set that should be applied to the requested metrics. For example: - For a
+                    /// bidder-level filter set for bidder 123: `bidders/123/filterSets/abc` - For an account-level
+                    /// filter set for the buyer account representing bidder 123:
+                    /// `bidders/123/accounts/123/filterSets/abc` - For an account-level filter set for the child seat
+                    /// buyer account 456 whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`
+                    /// </param>
+                    /// <param name="creativeStatusId">
+                    /// The ID of the creative status for which to retrieve a breakdown by detail. See
+                    /// [creative-status-codes](https://developers.google.com/authorized-buyers/rtb/downloads/creative-status-codes).
+                    /// Details are only available for statuses 10, 14, 15, 17, 18, 19, 86, and 87.
+                    /// </param>
+                    public virtual ListRequest List(string filterSetName, int creativeStatusId)
+                    {
+                        return new ListRequest(this.service, filterSetName, creativeStatusId);
+                    }
+
+                    /// <summary>
+                    /// List all details associated with a specific reason for which bids were filtered, with the number
+                    /// of bids filtered for each detail.
+                    /// </summary>
+                    public class ListRequest : AdExchangeBuyerIIBaseServiceRequest<Google.Apis.AdExchangeBuyerII.v2beta1.Data.ListCreativeStatusBreakdownByDetailResponse>
+                    {
+                        /// <summary>Constructs a new List request.</summary>
+                        public ListRequest(Google.Apis.Services.IClientService service, string filterSetName, int creativeStatusId) : base(service)
+                        {
+                            FilterSetName = filterSetName;
+                            CreativeStatusId = creativeStatusId;
+                            InitParameters();
+                        }
+
+                        /// <summary>
+                        /// Name of the filter set that should be applied to the requested metrics. For example: - For a
+                        /// bidder-level filter set for bidder 123: `bidders/123/filterSets/abc` - For an account-level
+                        /// filter set for the buyer account representing bidder 123:
+                        /// `bidders/123/accounts/123/filterSets/abc` - For an account-level filter set for the child
+                        /// seat buyer account 456 whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("filterSetName", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual string FilterSetName { get; private set; }
+
+                        /// <summary>
+                        /// The ID of the creative status for which to retrieve a breakdown by detail. See
+                        /// [creative-status-codes](https://developers.google.com/authorized-buyers/rtb/downloads/creative-status-codes).
+                        /// Details are only available for statuses 10, 14, 15, 17, 18, 19, 86, and 87.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("creativeStatusId", Google.Apis.Util.RequestParameterType.Path)]
+                        public virtual int CreativeStatusId { get; private set; }
+
+                        /// <summary>
+                        /// Requested page size. The server may return fewer results than requested. If unspecified, the
+                        /// server will pick an appropriate default.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual System.Nullable<int> PageSize { get; set; }
+
+                        /// <summary>
+                        /// A token identifying a page of results the server should return. Typically, this is the value
+                        /// of ListCreativeStatusBreakdownByDetailResponse.nextPageToken returned from the previous call
+                        /// to the filteredBids.details.list method.
+                        /// </summary>
+                        [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                        public virtual string PageToken { get; set; }
+
+                        /// <summary>Gets the method name.</summary>
+                        public override string MethodName => "list";
+
+                        /// <summary>Gets the HTTP method.</summary>
+                        public override string HttpMethod => "GET";
+
+                        /// <summary>Gets the REST path.</summary>
+                        public override string RestPath => "v2beta1/{+filterSetName}/filteredBids/{creativeStatusId}/details";
+
+                        /// <summary>Initializes List parameter list.</summary>
+                        protected override void InitParameters()
+                        {
+                            base.InitParameters();
+                            RequestParameters.Add("filterSetName", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "filterSetName",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = @"^buyers/[^/]+/filterSets/[^/]+$",
+                            });
+                            RequestParameters.Add("creativeStatusId", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "creativeStatusId",
+                                IsRequired = true,
+                                ParameterType = "path",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageSize",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                            RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                            {
+                                Name = "pageToken",
+                                IsRequired = false,
+                                ParameterType = "query",
+                                DefaultValue = null,
+                                Pattern = null,
+                            });
+                        }
+                    }
+                }
+
+                /// <summary>
+                /// List all reasons for which bids were filtered, with the number of bids filtered for each reason.
+                /// </summary>
+                /// <param name="filterSetName">
+                /// Name of the filter set that should be applied to the requested metrics. For example: - For a
+                /// bidder-level filter set for bidder 123: `bidders/123/filterSets/abc` - For an account-level filter
+                /// set for the buyer account representing bidder 123: `bidders/123/accounts/123/filterSets/abc` - For
+                /// an account-level filter set for the child seat buyer account 456 whose bidder is 123:
+                /// `bidders/123/accounts/456/filterSets/abc`
+                /// </param>
+                public virtual ListRequest List(string filterSetName)
+                {
+                    return new ListRequest(this.service, filterSetName);
+                }
+
+                /// <summary>
+                /// List all reasons for which bids were filtered, with the number of bids filtered for each reason.
+                /// </summary>
+                public class ListRequest : AdExchangeBuyerIIBaseServiceRequest<Google.Apis.AdExchangeBuyerII.v2beta1.Data.ListFilteredBidsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string filterSetName) : base(service)
+                    {
+                        FilterSetName = filterSetName;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Name of the filter set that should be applied to the requested metrics. For example: - For a
+                    /// bidder-level filter set for bidder 123: `bidders/123/filterSets/abc` - For an account-level
+                    /// filter set for the buyer account representing bidder 123:
+                    /// `bidders/123/accounts/123/filterSets/abc` - For an account-level filter set for the child seat
+                    /// buyer account 456 whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filterSetName", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string FilterSetName { get; private set; }
+
+                    /// <summary>
+                    /// Requested page size. The server may return fewer results than requested. If unspecified, the
+                    /// server will pick an appropriate default.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// A token identifying a page of results the server should return. Typically, this is the value of
+                    /// ListFilteredBidsResponse.nextPageToken returned from the previous call to the filteredBids.list
+                    /// method.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2beta1/{+filterSetName}/filteredBids";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("filterSetName", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filterSetName",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^buyers/[^/]+/filterSets/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the ImpressionMetrics resource.</summary>
+            public virtual ImpressionMetricsResource ImpressionMetrics { get; }
+
+            /// <summary>The "impressionMetrics" collection of methods.</summary>
+            public class ImpressionMetricsResource
+            {
+                private const string Resource = "impressionMetrics";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public ImpressionMetricsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>Lists all metrics that are measured in terms of number of impressions.</summary>
+                /// <param name="filterSetName">
+                /// Name of the filter set that should be applied to the requested metrics. For example: - For a
+                /// bidder-level filter set for bidder 123: `bidders/123/filterSets/abc` - For an account-level filter
+                /// set for the buyer account representing bidder 123: `bidders/123/accounts/123/filterSets/abc` - For
+                /// an account-level filter set for the child seat buyer account 456 whose bidder is 123:
+                /// `bidders/123/accounts/456/filterSets/abc`
+                /// </param>
+                public virtual ListRequest List(string filterSetName)
+                {
+                    return new ListRequest(this.service, filterSetName);
+                }
+
+                /// <summary>Lists all metrics that are measured in terms of number of impressions.</summary>
+                public class ListRequest : AdExchangeBuyerIIBaseServiceRequest<Google.Apis.AdExchangeBuyerII.v2beta1.Data.ListImpressionMetricsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string filterSetName) : base(service)
+                    {
+                        FilterSetName = filterSetName;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Name of the filter set that should be applied to the requested metrics. For example: - For a
+                    /// bidder-level filter set for bidder 123: `bidders/123/filterSets/abc` - For an account-level
+                    /// filter set for the buyer account representing bidder 123:
+                    /// `bidders/123/accounts/123/filterSets/abc` - For an account-level filter set for the child seat
+                    /// buyer account 456 whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filterSetName", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string FilterSetName { get; private set; }
+
+                    /// <summary>
+                    /// Requested page size. The server may return fewer results than requested. If unspecified, the
+                    /// server will pick an appropriate default.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// A token identifying a page of results the server should return. Typically, this is the value of
+                    /// ListImpressionMetricsResponse.nextPageToken returned from the previous call to the
+                    /// impressionMetrics.list method.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2beta1/{+filterSetName}/impressionMetrics";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("filterSetName", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filterSetName",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^buyers/[^/]+/filterSets/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the LosingBids resource.</summary>
+            public virtual LosingBidsResource LosingBids { get; }
+
+            /// <summary>The "losingBids" collection of methods.</summary>
+            public class LosingBidsResource
+            {
+                private const string Resource = "losingBids";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public LosingBidsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>
+                /// List all reasons for which bids lost in the auction, with the number of bids that lost for each
+                /// reason.
+                /// </summary>
+                /// <param name="filterSetName">
+                /// Name of the filter set that should be applied to the requested metrics. For example: - For a
+                /// bidder-level filter set for bidder 123: `bidders/123/filterSets/abc` - For an account-level filter
+                /// set for the buyer account representing bidder 123: `bidders/123/accounts/123/filterSets/abc` - For
+                /// an account-level filter set for the child seat buyer account 456 whose bidder is 123:
+                /// `bidders/123/accounts/456/filterSets/abc`
+                /// </param>
+                public virtual ListRequest List(string filterSetName)
+                {
+                    return new ListRequest(this.service, filterSetName);
+                }
+
+                /// <summary>
+                /// List all reasons for which bids lost in the auction, with the number of bids that lost for each
+                /// reason.
+                /// </summary>
+                public class ListRequest : AdExchangeBuyerIIBaseServiceRequest<Google.Apis.AdExchangeBuyerII.v2beta1.Data.ListLosingBidsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string filterSetName) : base(service)
+                    {
+                        FilterSetName = filterSetName;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Name of the filter set that should be applied to the requested metrics. For example: - For a
+                    /// bidder-level filter set for bidder 123: `bidders/123/filterSets/abc` - For an account-level
+                    /// filter set for the buyer account representing bidder 123:
+                    /// `bidders/123/accounts/123/filterSets/abc` - For an account-level filter set for the child seat
+                    /// buyer account 456 whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filterSetName", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string FilterSetName { get; private set; }
+
+                    /// <summary>
+                    /// Requested page size. The server may return fewer results than requested. If unspecified, the
+                    /// server will pick an appropriate default.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// A token identifying a page of results the server should return. Typically, this is the value of
+                    /// ListLosingBidsResponse.nextPageToken returned from the previous call to the losingBids.list
+                    /// method.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2beta1/{+filterSetName}/losingBids";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("filterSetName", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filterSetName",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^buyers/[^/]+/filterSets/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Gets the NonBillableWinningBids resource.</summary>
+            public virtual NonBillableWinningBidsResource NonBillableWinningBids { get; }
+
+            /// <summary>The "nonBillableWinningBids" collection of methods.</summary>
+            public class NonBillableWinningBidsResource
+            {
+                private const string Resource = "nonBillableWinningBids";
+
+                /// <summary>The service which this resource belongs to.</summary>
+                private readonly Google.Apis.Services.IClientService service;
+
+                /// <summary>Constructs a new resource.</summary>
+                public NonBillableWinningBidsResource(Google.Apis.Services.IClientService service)
+                {
+                    this.service = service;
+                }
+
+                /// <summary>
+                /// List all reasons for which winning bids were not billable, with the number of bids not billed for
+                /// each reason.
+                /// </summary>
+                /// <param name="filterSetName">
+                /// Name of the filter set that should be applied to the requested metrics. For example: - For a
+                /// bidder-level filter set for bidder 123: `bidders/123/filterSets/abc` - For an account-level filter
+                /// set for the buyer account representing bidder 123: `bidders/123/accounts/123/filterSets/abc` - For
+                /// an account-level filter set for the child seat buyer account 456 whose bidder is 123:
+                /// `bidders/123/accounts/456/filterSets/abc`
+                /// </param>
+                public virtual ListRequest List(string filterSetName)
+                {
+                    return new ListRequest(this.service, filterSetName);
+                }
+
+                /// <summary>
+                /// List all reasons for which winning bids were not billable, with the number of bids not billed for
+                /// each reason.
+                /// </summary>
+                public class ListRequest : AdExchangeBuyerIIBaseServiceRequest<Google.Apis.AdExchangeBuyerII.v2beta1.Data.ListNonBillableWinningBidsResponse>
+                {
+                    /// <summary>Constructs a new List request.</summary>
+                    public ListRequest(Google.Apis.Services.IClientService service, string filterSetName) : base(service)
+                    {
+                        FilterSetName = filterSetName;
+                        InitParameters();
+                    }
+
+                    /// <summary>
+                    /// Name of the filter set that should be applied to the requested metrics. For example: - For a
+                    /// bidder-level filter set for bidder 123: `bidders/123/filterSets/abc` - For an account-level
+                    /// filter set for the buyer account representing bidder 123:
+                    /// `bidders/123/accounts/123/filterSets/abc` - For an account-level filter set for the child seat
+                    /// buyer account 456 whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("filterSetName", Google.Apis.Util.RequestParameterType.Path)]
+                    public virtual string FilterSetName { get; private set; }
+
+                    /// <summary>
+                    /// Requested page size. The server may return fewer results than requested. If unspecified, the
+                    /// server will pick an appropriate default.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual System.Nullable<int> PageSize { get; set; }
+
+                    /// <summary>
+                    /// A token identifying a page of results the server should return. Typically, this is the value of
+                    /// ListNonBillableWinningBidsResponse.nextPageToken returned from the previous call to the
+                    /// nonBillableWinningBids.list method.
+                    /// </summary>
+                    [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                    public virtual string PageToken { get; set; }
+
+                    /// <summary>Gets the method name.</summary>
+                    public override string MethodName => "list";
+
+                    /// <summary>Gets the HTTP method.</summary>
+                    public override string HttpMethod => "GET";
+
+                    /// <summary>Gets the REST path.</summary>
+                    public override string RestPath => "v2beta1/{+filterSetName}/nonBillableWinningBids";
+
+                    /// <summary>Initializes List parameter list.</summary>
+                    protected override void InitParameters()
+                    {
+                        base.InitParameters();
+                        RequestParameters.Add("filterSetName", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "filterSetName",
+                            IsRequired = true,
+                            ParameterType = "path",
+                            DefaultValue = null,
+                            Pattern = @"^buyers/[^/]+/filterSets/[^/]+$",
+                        });
+                        RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageSize",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                        RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                        {
+                            Name = "pageToken",
+                            IsRequired = false,
+                            ParameterType = "query",
+                            DefaultValue = null,
+                            Pattern = null,
+                        });
+                    }
+                }
+            }
+
+            /// <summary>Creates the specified filter set for the account with the given account ID.</summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="ownerName">
+            /// Name of the owner (bidder or account) of the filter set to be created. For example: - For a bidder-level
+            /// filter set for bidder 123: `bidders/123` - For an account-level filter set for the buyer account
+            /// representing bidder 123: `bidders/123/accounts/123` - For an account-level filter set for the child seat
+            /// buyer account 456 whose bidder is 123: `bidders/123/accounts/456`
+            /// </param>
+            public virtual CreateRequest Create(Google.Apis.AdExchangeBuyerII.v2beta1.Data.FilterSet body, string ownerName)
+            {
+                return new CreateRequest(this.service, body, ownerName);
+            }
+
+            /// <summary>Creates the specified filter set for the account with the given account ID.</summary>
+            public class CreateRequest : AdExchangeBuyerIIBaseServiceRequest<Google.Apis.AdExchangeBuyerII.v2beta1.Data.FilterSet>
+            {
+                /// <summary>Constructs a new Create request.</summary>
+                public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.AdExchangeBuyerII.v2beta1.Data.FilterSet body, string ownerName) : base(service)
+                {
+                    OwnerName = ownerName;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Name of the owner (bidder or account) of the filter set to be created. For example: - For a
+                /// bidder-level filter set for bidder 123: `bidders/123` - For an account-level filter set for the
+                /// buyer account representing bidder 123: `bidders/123/accounts/123` - For an account-level filter set
+                /// for the child seat buyer account 456 whose bidder is 123: `bidders/123/accounts/456`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("ownerName", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string OwnerName { get; private set; }
+
+                /// <summary>
+                /// Whether the filter set is transient, or should be persisted indefinitely. By default, filter sets
+                /// are not transient. If transient, it will be available for at least 1 hour after creation.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("isTransient", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<bool> IsTransient { get; set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.AdExchangeBuyerII.v2beta1.Data.FilterSet Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "create";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v2beta1/{+ownerName}/filterSets";
+
+                /// <summary>Initializes Create parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("ownerName", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "ownerName",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^buyers/[^/]+$",
+                    });
+                    RequestParameters.Add("isTransient", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "isTransient",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+
+            /// <summary>Deletes the requested filter set from the account with the given account ID.</summary>
+            /// <param name="name">
+            /// Full name of the resource to delete. For example: - For a bidder-level filter set for bidder 123:
+            /// `bidders/123/filterSets/abc` - For an account-level filter set for the buyer account representing bidder
+            /// 123: `bidders/123/accounts/123/filterSets/abc` - For an account-level filter set for the child seat
+            /// buyer account 456 whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`
+            /// </param>
+            public virtual DeleteRequest Delete(string name)
+            {
+                return new DeleteRequest(this.service, name);
+            }
+
+            /// <summary>Deletes the requested filter set from the account with the given account ID.</summary>
+            public class DeleteRequest : AdExchangeBuyerIIBaseServiceRequest<Google.Apis.AdExchangeBuyerII.v2beta1.Data.Empty>
+            {
+                /// <summary>Constructs a new Delete request.</summary>
+                public DeleteRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                {
+                    Name = name;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Full name of the resource to delete. For example: - For a bidder-level filter set for bidder 123:
+                /// `bidders/123/filterSets/abc` - For an account-level filter set for the buyer account representing
+                /// bidder 123: `bidders/123/accounts/123/filterSets/abc` - For an account-level filter set for the
+                /// child seat buyer account 456 whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "delete";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "DELETE";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v2beta1/{+name}";
+
+                /// <summary>Initializes Delete parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^buyers/[^/]+/filterSets/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>Retrieves the requested filter set for the account with the given account ID.</summary>
+            /// <param name="name">
+            /// Full name of the resource being requested. For example: - For a bidder-level filter set for bidder 123:
+            /// `bidders/123/filterSets/abc` - For an account-level filter set for the buyer account representing bidder
+            /// 123: `bidders/123/accounts/123/filterSets/abc` - For an account-level filter set for the child seat
+            /// buyer account 456 whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`
+            /// </param>
+            public virtual GetRequest Get(string name)
+            {
+                return new GetRequest(this.service, name);
+            }
+
+            /// <summary>Retrieves the requested filter set for the account with the given account ID.</summary>
+            public class GetRequest : AdExchangeBuyerIIBaseServiceRequest<Google.Apis.AdExchangeBuyerII.v2beta1.Data.FilterSet>
+            {
+                /// <summary>Constructs a new Get request.</summary>
+                public GetRequest(Google.Apis.Services.IClientService service, string name) : base(service)
+                {
+                    Name = name;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Full name of the resource being requested. For example: - For a bidder-level filter set for bidder
+                /// 123: `bidders/123/filterSets/abc` - For an account-level filter set for the buyer account
+                /// representing bidder 123: `bidders/123/accounts/123/filterSets/abc` - For an account-level filter set
+                /// for the child seat buyer account 456 whose bidder is 123: `bidders/123/accounts/456/filterSets/abc`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "get";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v2beta1/{+name}";
+
+                /// <summary>Initializes Get parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^buyers/[^/]+/filterSets/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>Lists all filter sets for the account with the given account ID.</summary>
+            /// <param name="ownerName">
+            /// Name of the owner (bidder or account) of the filter sets to be listed. For example: - For a bidder-level
+            /// filter set for bidder 123: `bidders/123` - For an account-level filter set for the buyer account
+            /// representing bidder 123: `bidders/123/accounts/123` - For an account-level filter set for the child seat
+            /// buyer account 456 whose bidder is 123: `bidders/123/accounts/456`
+            /// </param>
+            public virtual ListRequest List(string ownerName)
+            {
+                return new ListRequest(this.service, ownerName);
+            }
+
+            /// <summary>Lists all filter sets for the account with the given account ID.</summary>
+            public class ListRequest : AdExchangeBuyerIIBaseServiceRequest<Google.Apis.AdExchangeBuyerII.v2beta1.Data.ListFilterSetsResponse>
+            {
+                /// <summary>Constructs a new List request.</summary>
+                public ListRequest(Google.Apis.Services.IClientService service, string ownerName) : base(service)
+                {
+                    OwnerName = ownerName;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Name of the owner (bidder or account) of the filter sets to be listed. For example: - For a
+                /// bidder-level filter set for bidder 123: `bidders/123` - For an account-level filter set for the
+                /// buyer account representing bidder 123: `bidders/123/accounts/123` - For an account-level filter set
+                /// for the child seat buyer account 456 whose bidder is 123: `bidders/123/accounts/456`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("ownerName", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string OwnerName { get; private set; }
+
+                /// <summary>
+                /// Requested page size. The server may return fewer results than requested. If unspecified, the server
+                /// will pick an appropriate default.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<int> PageSize { get; set; }
+
+                /// <summary>
+                /// A token identifying a page of results the server should return. Typically, this is the value of
+                /// ListFilterSetsResponse.nextPageToken returned from the previous call to the accounts.filterSets.list
+                /// method.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string PageToken { get; set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "list";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v2beta1/{+ownerName}/filterSets";
+
+                /// <summary>Initializes List parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("ownerName", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "ownerName",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^buyers/[^/]+$",
                     });
                     RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
                     {
@@ -6470,7 +7937,10 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("bidsInAuction")]
         public virtual MetricValue BidsInAuction { get; set; }
 
-        /// <summary>The number of bids for which the buyer was billed.</summary>
+        /// <summary>
+        /// The number of bids for which the buyer was billed. Also called valid impressions as invalid impressions are
+        /// not billed.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("billedImpressions")]
         public virtual MetricValue BilledImpressions { get; set; }
 
@@ -6654,8 +8124,8 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
     /// <summary>
     /// A client user is created under a client buyer and has restricted access to the Marketplace and certain other
     /// sections of the Authorized Buyers UI based on the role granted to the associated client buyer. The only way a
-    /// new client user can be created is via accepting an email invitation (see the accounts.clients.invitations.create
-    /// method). All fields are required unless otherwise specified.
+    /// new client user can be created is through accepting an email invitation (see the
+    /// accounts.clients.invitations.create method). All fields are required unless otherwise specified.
     /// </summary>
     public class ClientUser : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -6782,9 +8252,42 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("agencyId")]
         public virtual System.Nullable<long> AgencyId { get; set; }
 
-        /// <summary>Output only. The last update timestamp of the creative via API.</summary>
+        private string _apiUpdateTimeRaw;
+
+        private object _apiUpdateTime;
+
+        /// <summary>Output only. The last update timestamp of the creative through the API.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("apiUpdateTime")]
-        public virtual object ApiUpdateTime { get; set; }
+        public virtual string ApiUpdateTimeRaw
+        {
+            get => _apiUpdateTimeRaw;
+            set
+            {
+                _apiUpdateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _apiUpdateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ApiUpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ApiUpdateTimeDateTimeOffset instead.")]
+        public virtual object ApiUpdateTime
+        {
+            get => _apiUpdateTime;
+            set
+            {
+                _apiUpdateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _apiUpdateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ApiUpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ApiUpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ApiUpdateTimeRaw);
+            set => ApiUpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// All attributes for the ads that may be shown from this creative. Can be used to filter the response of the
@@ -6878,8 +8381,8 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
 
         /// <summary>
         /// Output only. The granular status of this ad in specific contexts. A context here relates to where something
-        /// ultimately serves (for example, a physical location, a platform, an HTTPS vs HTTP request, or the type of
-        /// auction).
+        /// ultimately serves (for example, a physical location, a platform, an HTTPS versus HTTP request, or the type
+        /// of auction).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("servingRestrictions")]
         public virtual System.Collections.Generic.IList<ServingRestriction> ServingRestrictions { get; set; }
@@ -7050,10 +8553,10 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
     /// <summary>
     /// Represents a whole or partial calendar date, such as a birthday. The time of day and time zone are either
     /// specified elsewhere or are insignificant. The date is relative to the Gregorian Calendar. This can represent one
-    /// of the following: * A full date, with non-zero year, month, and day values * A month and day value, with a zero
-    /// year, such as an anniversary * A year on its own, with zero month and day values * A year and month value, with
-    /// a zero day, such as a credit card expiration date Related types are google.type.TimeOfDay and
-    /// `google.protobuf.Timestamp`.
+    /// of the following: * A full date, with non-zero year, month, and day values. * A month and day, with a zero year
+    /// (for example, an anniversary). * A year on its own, with a zero month and a zero day. * A year and month, with a
+    /// zero day (for example, a credit card expiration date). Related types: * google.type.TimeOfDay *
+    /// google.type.DateTime * google.protobuf.Timestamp
     /// </summary>
     public class Date : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -7124,20 +8627,90 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
     /// </summary>
     public class Deal : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _availableEndTimeRaw;
+
+        private object _availableEndTime;
+
         /// <summary>
         /// Proposed flight end time of the deal. This will generally be stored in a granularity of a second. A value is
         /// not required for Private Auction deals or Preferred Deals.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("availableEndTime")]
-        public virtual object AvailableEndTime { get; set; }
+        public virtual string AvailableEndTimeRaw
+        {
+            get => _availableEndTimeRaw;
+            set
+            {
+                _availableEndTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _availableEndTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="AvailableEndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use AvailableEndTimeDateTimeOffset instead.")]
+        public virtual object AvailableEndTime
+        {
+            get => _availableEndTime;
+            set
+            {
+                _availableEndTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _availableEndTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="AvailableEndTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? AvailableEndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(AvailableEndTimeRaw);
+            set => AvailableEndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _availableStartTimeRaw;
+
+        private object _availableStartTime;
 
         /// <summary>
         /// Optional. Proposed flight start time of the deal. This will generally be stored in the granularity of one
-        /// second since deal serving starts at seconds boundary. Any time specified with more granularity (e.g., in
-        /// milliseconds) will be truncated towards the start of time in seconds.
+        /// second since deal serving starts at seconds boundary. Any time specified with more granularity (for example,
+        /// in milliseconds) will be truncated towards the start of time in seconds.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("availableStartTime")]
-        public virtual object AvailableStartTime { get; set; }
+        public virtual string AvailableStartTimeRaw
+        {
+            get => _availableStartTimeRaw;
+            set
+            {
+                _availableStartTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _availableStartTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="AvailableStartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use AvailableStartTimeDateTimeOffset instead.")]
+        public virtual object AvailableStartTime
+        {
+            get => _availableStartTime;
+            set
+            {
+                _availableStartTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _availableStartTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="AvailableStartTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? AvailableStartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(AvailableStartTimeRaw);
+            set => AvailableStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Buyer private data (hidden from seller).</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("buyerPrivateData")]
@@ -7159,17 +8732,50 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("createProductRevision")]
         public virtual System.Nullable<long> CreateProductRevision { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The time of the deal creation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. Specifies the creative pre-approval policy.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creativePreApprovalPolicy")]
         public virtual string CreativePreApprovalPolicy { get; set; }
 
         /// <summary>
-        /// Output only. Restricitions about the creatives associated with the deal (i.e., size) This is available for
-        /// Programmatic Guaranteed/Preferred Deals in Ad Manager.
+        /// Output only. Restricitions about the creatives associated with the deal (for example, size) This is
+        /// available for Programmatic Guaranteed/Preferred Deals in Ad Manager.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creativeRestrictions")]
         public virtual CreativeRestrictions CreativeRestrictions { get; set; }
@@ -7248,9 +8854,42 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("targetingCriterion")]
         public virtual System.Collections.Generic.IList<TargetingCriteria> TargetingCriterion { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The time when the deal was last updated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The web property code for the seller copied over from the product.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("webPropertyCode")]
@@ -7303,7 +8942,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
 
     /// <summary>
     /// The deal terms specify the details of a Product/deal. They specify things like price per buyer, the type of
-    /// pricing model (e.g., fixed price, auction) and expected impressions from the publisher.
+    /// pricing model (for example, fixed price, auction) and expected impressions from the publisher.
     /// </summary>
     public class DealTerms : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -7386,8 +9025,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -7398,7 +9036,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
     /// <summary>
     /// A set of filters that is applied to a request for data. Within a filter set, an AND operation is performed
     /// across the filters represented by each field. An OR operation is performed across the filters represented by the
-    /// multiple values of a repeated field, e.g., "format=VIDEO AND deal_id=12 AND (seller_network_id=34 OR
+    /// multiple values of a repeated field, for example, "format=VIDEO AND deal_id=12 AND (seller_network_id=34 OR
     /// seller_network_id=56)".
     /// </summary>
     public class FilterSet : Google.Apis.Requests.IDirectResponseSchema
@@ -7418,7 +9056,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
 
         /// <summary>
         /// The ID of the creative on which to filter; optional. This field may be set only for a filter set that
-        /// accesses account-level troubleshooting data, i.e., one whose name matches the
+        /// accesses account-level troubleshooting data, for example, one whose name matches the
         /// `bidders/*/accounts/*/filterSets/*` pattern.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creativeId")]
@@ -7426,8 +9064,8 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
 
         /// <summary>
         /// The ID of the deal on which to filter; optional. This field may be set only for a filter set that accesses
-        /// account-level troubleshooting data, i.e., one whose name matches the `bidders/*/accounts/*/filterSets/*`
-        /// pattern.
+        /// account-level troubleshooting data, for example, one whose name matches the
+        /// `bidders/*/accounts/*/filterSets/*` pattern.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("dealId")]
         public virtual System.Nullable<long> DealId { get; set; }
@@ -7459,7 +9097,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
 
         /// <summary>
         /// The list of platforms on which to filter; may be empty. The filters represented by multiple platforms are
-        /// ORed together (i.e., if non-empty, results must match any one of the platforms).
+        /// ORed together (for example, if non-empty, results must match any one of the platforms).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("platforms")]
         public virtual System.Collections.Generic.IList<string> Platforms { get; set; }
@@ -7484,15 +9122,15 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
 
         /// <summary>
         /// For Authorized Buyers only. The list of IDs of the seller (publisher) networks on which to filter; may be
-        /// empty. The filters represented by multiple seller network IDs are ORed together (i.e., if non-empty, results
-        /// must match any one of the publisher networks). See
+        /// empty. The filters represented by multiple seller network IDs are ORed together (for example, if non-empty,
+        /// results must match any one of the publisher networks). See
         /// [seller-network-ids](https://developers.google.com/authorized-buyers/rtb/downloads/seller-network-ids) file
         /// for the set of existing seller network IDs.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sellerNetworkIds")]
         public virtual System.Collections.Generic.IList<System.Nullable<int>> SellerNetworkIds { get; set; }
 
-        /// <summary>The granularity of time intervals if a time series breakdown is desired; optional.</summary>
+        /// <summary>The granularity of time intervals if a time series breakdown is preferred; optional.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("timeSeriesGranularity")]
         public virtual string TimeSeriesGranularity { get; set; }
 
@@ -7523,7 +9161,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
 
     /// <summary>
     /// The number of filtered bids with the specified dimension values, among those filtered due to the requested
-    /// filtering reason (i.e. creative status), that have the specified detail.
+    /// filtering reason (for example, creative status), that have the specified detail.
     /// </summary>
     public class FilteredBidDetailRow : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -7616,7 +9254,10 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("guaranteedImpressions")]
         public virtual System.Nullable<long> GuaranteedImpressions { get; set; }
 
-        /// <summary>Count of guaranteed looks. Required for deal, optional for product.</summary>
+        /// <summary>
+        /// Count of guaranteed looks. Required for deal, optional for product. For CPD deals, buyer changes to
+        /// guaranteed_looks will be ignored.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("guaranteedLooks")]
         public virtual System.Nullable<long> GuaranteedLooks { get; set; }
 
@@ -7626,7 +9267,10 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("impressionCap")]
         public virtual System.Nullable<long> ImpressionCap { get; set; }
 
-        /// <summary>Daily minimum looks for CPD deal types.</summary>
+        /// <summary>
+        /// Daily minimum looks for CPD deal types. For CPD deals, buyer should negotiate on this field instead of
+        /// guaranteed_looks.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minimumDailyLooks")]
         public virtual System.Nullable<long> MinimumDailyLooks { get; set; }
 
@@ -7979,7 +9623,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
     public class ListFilteredBidsResponse : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// List of rows, with counts of filtered bids aggregated by filtering reason (i.e. creative status).
+        /// List of rows, with counts of filtered bids aggregated by filtering reason (for example, creative status).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creativeStatusRows")]
         public virtual System.Collections.Generic.IList<CreativeStatusRow> CreativeStatusRows { get; set; }
@@ -8017,7 +9661,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
     public class ListLosingBidsResponse : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// List of rows, with counts of losing bids aggregated by loss reason (i.e. creative status).
+        /// List of rows, with counts of losing bids aggregated by loss reason (for example, creative status).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creativeStatusRows")]
         public virtual System.Collections.Generic.IList<CreativeStatusRow> CreativeStatusRows { get; set; }
@@ -8101,7 +9745,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
     public class LocationContext : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// IDs representing the geo location for this context. Please refer to the
+        /// IDs representing the geo location for this context. Refer to the
         /// [geo-table.csv](https://storage.googleapis.com/adx-rtb-dictionaries/geo-table.csv) file for different geo
         /// criteria IDs.
         /// </summary>
@@ -8127,11 +9771,11 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("inventorySizeTargeting")]
         public virtual InventorySizeTargeting InventorySizeTargeting { get; set; }
 
-        /// <summary>Placement targeting information, e.g., URL, mobile applications.</summary>
+        /// <summary>Placement targeting information, for example, URL, mobile applications.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("placementTargeting")]
         public virtual PlacementTargeting PlacementTargeting { get; set; }
 
-        /// <summary>Technology targeting information, e.g., operating system, device category.</summary>
+        /// <summary>Technology targeting information, for example, operating system, device category.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("technologyTargeting")]
         public virtual TechnologyTargeting TechnologyTargeting { get; set; }
 
@@ -8145,7 +9789,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
 
     /// <summary>
     /// A metric value, with an expected value and a variance; represents a count that may be either exact or estimated
-    /// (i.e. when sampled).
+    /// (for example, when sampled).
     /// </summary>
     public class MetricValue : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -8154,10 +9798,10 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
         public virtual System.Nullable<long> Value { get; set; }
 
         /// <summary>
-        /// The variance (i.e. square of the standard deviation) of the metric value. If value is exact, variance is 0.
-        /// Can be used to calculate margin of error as a percentage of value, using the following formula, where Z is
-        /// the standard constant that depends on the desired size of the confidence interval (e.g. for 90% confidence
-        /// interval, use Z = 1.645): marginOfError = 100 * Z * sqrt(variance) / value
+        /// The variance (for example, square of the standard deviation) of the metric value. If value is exact,
+        /// variance is 0. Can be used to calculate margin of error as a percentage of value, using the following
+        /// formula, where Z is the standard constant that depends on the preferred size of the confidence interval (for
+        /// example, for 90% confidence interval, use Z = 1.645): marginOfError = 100 * Z * sqrt(variance) / value
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("variance")]
         public virtual System.Nullable<long> Variance { get; set; }
@@ -8318,9 +9962,42 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
     /// <summary>A proposal may be associated to several notes.</summary>
     public class Note : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>Output only. The timestamp for when this note was created.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Output only. The role of the person (buyer/seller) creating the note.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creatorRole")]
@@ -8395,8 +10072,8 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
     }
 
     /// <summary>
-    /// Represents targeting about where the ads can appear, e.g., certain sites or mobile applications. Different
-    /// placement targeting types will be logically OR'ed.
+    /// Represents targeting about where the ads can appear, for example, certain sites or mobile applications.
+    /// Different placement targeting types will be logically OR'ed.
     /// </summary>
     public class PlacementTargeting : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -8485,27 +10162,130 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
     }
 
     /// <summary>
-    /// A product is a segment of inventory that a seller wishes to sell. It is associated with certain terms and
+    /// A product is a segment of inventory that a seller wants to sell. It is associated with certain terms and
     /// targeting information which helps the buyer know more about the inventory.
     /// </summary>
     public class Product : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _availableEndTimeRaw;
+
+        private object _availableEndTime;
+
         /// <summary>
         /// The proposed end time for the deal. The field will be truncated to the order of seconds during serving.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("availableEndTime")]
-        public virtual object AvailableEndTime { get; set; }
+        public virtual string AvailableEndTimeRaw
+        {
+            get => _availableEndTimeRaw;
+            set
+            {
+                _availableEndTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _availableEndTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="AvailableEndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use AvailableEndTimeDateTimeOffset instead.")]
+        public virtual object AvailableEndTime
+        {
+            get => _availableEndTime;
+            set
+            {
+                _availableEndTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _availableEndTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="AvailableEndTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? AvailableEndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(AvailableEndTimeRaw);
+            set => AvailableEndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _availableStartTimeRaw;
+
+        private object _availableStartTime;
 
         /// <summary>
         /// Inventory availability dates. The start time will be truncated to seconds during serving. Thus, a field
         /// specified as 3:23:34.456 (HH:mm:ss.SSS) will be truncated to 3:23:34 when serving.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("availableStartTime")]
-        public virtual object AvailableStartTime { get; set; }
+        public virtual string AvailableStartTimeRaw
+        {
+            get => _availableStartTimeRaw;
+            set
+            {
+                _availableStartTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _availableStartTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="AvailableStartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use AvailableStartTimeDateTimeOffset instead.")]
+        public virtual object AvailableStartTime
+        {
+            get => _availableStartTime;
+            set
+            {
+                _availableStartTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _availableStartTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="AvailableStartTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? AvailableStartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(AvailableStartTimeRaw);
+            set => AvailableStartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _createTimeRaw;
+
+        private object _createTime;
 
         /// <summary>Creation time.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Optional contact information for the creator of this product.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("creatorContacts")]
@@ -8557,9 +10337,42 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("terms")]
         public virtual DealTerms Terms { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Time of last update.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The web-property code for the seller. This needs to be copied as is when adding a new deal to a proposal.
@@ -8667,9 +10480,42 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("termsAndConditions")]
         public virtual string TermsAndConditions { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>Output only. The time when the proposal was last revised.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -8804,9 +10650,44 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
     /// </summary>
     public class RealtimeTimeRange : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _startTimestampRaw;
+
+        private object _startTimestamp;
+
         /// <summary>The start timestamp of the real-time RTB metrics aggregation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTimestamp")]
-        public virtual object StartTimestamp { get; set; }
+        public virtual string StartTimestampRaw
+        {
+            get => _startTimestampRaw;
+            set
+            {
+                _startTimestamp = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimestampRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimestampRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimestampDateTimeOffset instead.")]
+        public virtual object StartTimestamp
+        {
+            get => _startTimestamp;
+            set
+            {
+                _startTimestampRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTimestamp = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimestampRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimestampDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimestampRaw);
+            set => StartTimestampRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -8814,21 +10695,21 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
 
     /// <summary>
     /// A relative date range, specified by an offset and a duration. The supported range of dates begins 30 days before
-    /// today and ends today, i.e., the limits for these values are: offset_days &amp;gt;= 0 duration_days &amp;gt;= 1
-    /// offset_days + duration_days &amp;lt;= 30
+    /// today and ends today, for example, the limits for these values are: offset_days &amp;gt;= 0 duration_days
+    /// &amp;gt;= 1 offset_days + duration_days &amp;lt;= 30
     /// </summary>
     public class RelativeDateRange : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The number of days in the requested date range, e.g., for a range spanning today: 1. For a range spanning
-        /// the last 7 days: 7.
+        /// The number of days in the requested date range, for example, for a range spanning today: 1. For a range
+        /// spanning the last 7 days: 7.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("durationDays")]
         public virtual System.Nullable<int> DurationDays { get; set; }
 
         /// <summary>
-        /// The end date of the filter set, specified as the number of days before today, e.g., for a range where the
-        /// last date is today: 0.
+        /// The end date of the filter set, specified as the number of days before today, for example, for a range where
+        /// the last date is today: 0.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("offsetDays")]
         public virtual System.Nullable<int> OffsetDays { get; set; }
@@ -8954,8 +10835,8 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
 
     /// <summary>
     /// Output only. A representation of the status of an ad in a specific context. A context here relates to where
-    /// something ultimately serves (for example, a user or publisher geo, a platform, an HTTPS vs HTTP request, or the
-    /// type of auction).
+    /// something ultimately serves (for example, a user or publisher geo, a platform, an HTTPS versus HTTP request, or
+    /// the type of auction).
     /// </summary>
     public class ServingRestriction : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -8972,7 +10853,7 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
 
         /// <summary>
         /// Any disapprovals bound to this restriction. Only present if status=DISAPPROVED. Can be used to filter the
-        /// response of the creatives.list method. Deprecated; please use disapproval field instead.
+        /// response of the creatives.list method. Deprecated; use disapproval field instead.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("disapprovalReasons")]
         public virtual System.Collections.Generic.IList<Disapproval> DisapprovalReasons { get; set; }
@@ -9086,13 +10967,79 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
     /// <summary>An interval of time, with an absolute start and end.</summary>
     public class TimeInterval : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>The timestamp marking the end of the range (exclusive) for which data is included.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
 
         /// <summary>The timestamp marking the start of the range (inclusive) for which data is included.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -9105,23 +11052,26 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
     public class TimeOfDay : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Hours of day in 24 hour format. Should be from 0 to 23. An API may choose to allow the value "24:00:00" for
-        /// scenarios like business closing time.
+        /// Hours of a day in 24 hour format. Must be greater than or equal to 0 and typically must be less than or
+        /// equal to 23. An API may choose to allow the value "24:00:00" for scenarios like business closing time.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("hours")]
         public virtual System.Nullable<int> Hours { get; set; }
 
-        /// <summary>Minutes of hour of day. Must be from 0 to 59.</summary>
+        /// <summary>Minutes of an hour. Must be greater than or equal to 0 and less than or equal to 59.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("minutes")]
         public virtual System.Nullable<int> Minutes { get; set; }
 
-        /// <summary>Fractions of seconds in nanoseconds. Must be from 0 to 999,999,999.</summary>
+        /// <summary>
+        /// Fractions of seconds, in nanoseconds. Must be greater than or equal to 0 and less than or equal to
+        /// 999,999,999.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("nanos")]
         public virtual System.Nullable<int> Nanos { get; set; }
 
         /// <summary>
-        /// Seconds of minutes of the time. Must normally be from 0 to 59. An API may allow the value 60 if it allows
-        /// leap-seconds.
+        /// Seconds of a minute. Must be greater than or equal to 0 and typically must be less than or equal to 59. An
+        /// API may allow the value 60 if it allows leap-seconds.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("seconds")]
         public virtual System.Nullable<int> Seconds { get; set; }
@@ -9131,8 +11081,9 @@ namespace Google.Apis.AdExchangeBuyerII.v2beta1.Data
     }
 
     /// <summary>
-    /// Represents a list of targeted and excluded URLs (e.g., google.com). For Private Auction and AdX Preferred Deals,
-    /// URLs are either included or excluded. For Programmatic Guaranteed and Preferred Deals, this doesn't apply.
+    /// Represents a list of targeted and excluded URLs (for example, google.com). For Private Auction and AdX Preferred
+    /// Deals, URLs are either included or excluded. For Programmatic Guaranteed and Preferred Deals, this doesn't
+    /// apply.
     /// </summary>
     public class UrlTargeting : Google.Apis.Requests.IDirectResponseSchema
     {

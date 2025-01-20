@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2025 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -37,6 +37,8 @@ namespace Google.Apis.FirebaseManagement.v1beta1
             AvailableProjects = new AvailableProjectsResource(this);
             Operations = new OperationsResource(this);
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://firebase.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://firebase.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -46,23 +48,16 @@ namespace Google.Apis.FirebaseManagement.v1beta1
         public override string Name => "firebase";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://firebase.googleapis.com/";
-        #else
-            "https://firebase.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://firebase.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Firebase Management API.</summary>
         public class Scope
@@ -312,25 +307,23 @@ namespace Google.Apis.FirebaseManagement.v1beta1
         }
 
         /// <summary>
-        /// Lists each [Google Cloud Platform (GCP) `Project`]
-        /// (https://cloud.google.com/resource-manager/reference/rest/v1/projects) that can have Firebase resources
-        /// added to it. A Project will only be listed if: - The caller has sufficient [Google
-        /// IAM](https://cloud.google.com/iam) permissions to call AddFirebase. - The Project is not already a
-        /// FirebaseProject. - The Project is not in an Organization which has policies that prevent Firebase resources
-        /// from being added.
+        /// Lists each [Google Cloud `Project`](https://cloud.google.com/resource-manager/reference/rest/v1/projects)
+        /// that can have Firebase resources added and Firebase services enabled. A Project will only be listed if: -
+        /// The caller has sufficient [Google IAM](https://cloud.google.com/iam) permissions to call AddFirebase. - The
+        /// Project is not already a FirebaseProject. - The Project is not in an Organization which has policies that
+        /// prevent Firebase resources from being added.
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
-        /// Lists each [Google Cloud Platform (GCP) `Project`]
-        /// (https://cloud.google.com/resource-manager/reference/rest/v1/projects) that can have Firebase resources
-        /// added to it. A Project will only be listed if: - The caller has sufficient [Google
-        /// IAM](https://cloud.google.com/iam) permissions to call AddFirebase. - The Project is not already a
-        /// FirebaseProject. - The Project is not in an Organization which has policies that prevent Firebase resources
-        /// from being added.
+        /// Lists each [Google Cloud `Project`](https://cloud.google.com/resource-manager/reference/rest/v1/projects)
+        /// that can have Firebase resources added and Firebase services enabled. A Project will only be listed if: -
+        /// The caller has sufficient [Google IAM](https://cloud.google.com/iam) permissions to call AddFirebase. - The
+        /// Project is not already a FirebaseProject. - The Project is not in an Organization which has policies that
+        /// prevent Firebase resources from being added.
         /// </summary>
         public class ListRequest : FirebaseManagementBaseServiceRequest<Google.Apis.FirebaseManagement.v1beta1.Data.ListAvailableProjectsResponse>
         {
@@ -409,7 +402,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
         /// <param name="name">The name of the operation resource.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>
@@ -520,7 +513,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
                 /// </param>
                 public virtual CreateRequest Create(Google.Apis.FirebaseManagement.v1beta1.Data.ShaCertificate body, string parent)
                 {
-                    return new CreateRequest(service, body, parent);
+                    return new CreateRequest(this.service, body, parent);
                 }
 
                 /// <summary>Adds a ShaCertificate to the specified AndroidApp.</summary>
@@ -586,7 +579,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>Removes a ShaCertificate from the specified AndroidApp.</summary>
@@ -645,7 +638,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>Lists the SHA-1 and SHA-256 certificates for the specified AndroidApp.</summary>
@@ -707,7 +700,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.FirebaseManagement.v1beta1.Data.AndroidApp body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -773,7 +766,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets the specified AndroidApp.</summary>
@@ -831,7 +824,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
             /// </param>
             public virtual GetConfigRequest GetConfig(string name)
             {
-                return new GetConfigRequest(service, name);
+                return new GetConfigRequest(this.service, name);
             }
 
             /// <summary>Gets the configuration artifact associated with the specified AndroidApp.</summary>
@@ -891,7 +884,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
@@ -931,6 +924,13 @@ namespace Google.Apis.FirebaseManagement.v1beta1
                 [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string PageToken { get; set; }
 
+                /// <summary>
+                /// Controls whether Apps in the DELETED state should be returned in the response. If not specified,
+                /// only `ACTIVE` Apps will be returned.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("showDeleted", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<bool> ShowDeleted { get; set; }
+
                 /// <summary>Gets the method name.</summary>
                 public override string MethodName => "list";
 
@@ -968,6 +968,14 @@ namespace Google.Apis.FirebaseManagement.v1beta1
                         DefaultValue = null,
                         Pattern = null,
                     });
+                    RequestParameters.Add("showDeleted", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "showDeleted",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                 }
             }
 
@@ -985,7 +993,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.FirebaseManagement.v1beta1.Data.AndroidApp body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Updates the attributes of the specified AndroidApp.</summary>
@@ -1013,8 +1021,9 @@ namespace Google.Apis.FirebaseManagement.v1beta1
                 public virtual string Name { get; private set; }
 
                 /// <summary>
-                /// Specifies which fields to update. Note that the fields `name`, `app_id`, `project_id`, and
-                /// `package_name` are all immutable.
+                /// Specifies which fields of the AndroidApp to update. Note that the following fields are immutable:
+                /// `name`, `app_id`, `project_id`, and `package_name`. To update `state`, use any of the following
+                /// endpoints: RemoveAndroidApp or UndeleteAndroidApp.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual object UpdateMask { get; set; }
@@ -1056,6 +1065,136 @@ namespace Google.Apis.FirebaseManagement.v1beta1
                     });
                 }
             }
+
+            /// <summary>Removes the specified AndroidApp from the FirebaseProject.</summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">
+            /// Required. The resource name of the AndroidApp, in the format: projects/
+            /// PROJECT_IDENTIFIER/androidApps/APP_ID Since an APP_ID is a unique identifier, the Unique Resource from
+            /// Sub-Collection access pattern may be used here, in the format: projects/-/androidApps/APP_ID Refer to
+            /// the AndroidApp [name](../projects.androidApps#AndroidApp.FIELDS.name) field for details about
+            /// PROJECT_IDENTIFIER and APP_ID values.
+            /// </param>
+            public virtual RemoveRequest Remove(Google.Apis.FirebaseManagement.v1beta1.Data.RemoveAndroidAppRequest body, string name)
+            {
+                return new RemoveRequest(this.service, body, name);
+            }
+
+            /// <summary>Removes the specified AndroidApp from the FirebaseProject.</summary>
+            public class RemoveRequest : FirebaseManagementBaseServiceRequest<Google.Apis.FirebaseManagement.v1beta1.Data.Operation>
+            {
+                /// <summary>Constructs a new Remove request.</summary>
+                public RemoveRequest(Google.Apis.Services.IClientService service, Google.Apis.FirebaseManagement.v1beta1.Data.RemoveAndroidAppRequest body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The resource name of the AndroidApp, in the format: projects/
+                /// PROJECT_IDENTIFIER/androidApps/APP_ID Since an APP_ID is a unique identifier, the Unique Resource
+                /// from Sub-Collection access pattern may be used here, in the format: projects/-/androidApps/APP_ID
+                /// Refer to the AndroidApp [name](../projects.androidApps#AndroidApp.FIELDS.name) field for details
+                /// about PROJECT_IDENTIFIER and APP_ID values.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.FirebaseManagement.v1beta1.Data.RemoveAndroidAppRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "remove";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1beta1/{+name}:remove";
+
+                /// <summary>Initializes Remove parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/androidApps/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>Restores the specified AndroidApp to the FirebaseProject.</summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">
+            /// Required. The resource name of the AndroidApp, in the format: projects/
+            /// PROJECT_IDENTIFIER/androidApps/APP_ID Since an APP_ID is a unique identifier, the Unique Resource from
+            /// Sub-Collection access pattern may be used here, in the format: projects/-/androidApps/APP_ID Refer to
+            /// the AndroidApp [name](../projects.androidApps#AndroidApp.FIELDS.name) field for details about
+            /// PROJECT_IDENTIFIER and APP_ID values.
+            /// </param>
+            public virtual UndeleteRequest Undelete(Google.Apis.FirebaseManagement.v1beta1.Data.UndeleteAndroidAppRequest body, string name)
+            {
+                return new UndeleteRequest(this.service, body, name);
+            }
+
+            /// <summary>Restores the specified AndroidApp to the FirebaseProject.</summary>
+            public class UndeleteRequest : FirebaseManagementBaseServiceRequest<Google.Apis.FirebaseManagement.v1beta1.Data.Operation>
+            {
+                /// <summary>Constructs a new Undelete request.</summary>
+                public UndeleteRequest(Google.Apis.Services.IClientService service, Google.Apis.FirebaseManagement.v1beta1.Data.UndeleteAndroidAppRequest body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The resource name of the AndroidApp, in the format: projects/
+                /// PROJECT_IDENTIFIER/androidApps/APP_ID Since an APP_ID is a unique identifier, the Unique Resource
+                /// from Sub-Collection access pattern may be used here, in the format: projects/-/androidApps/APP_ID
+                /// Refer to the AndroidApp [name](../projects.androidApps#AndroidApp.FIELDS.name) field for details
+                /// about PROJECT_IDENTIFIER and APP_ID values.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.FirebaseManagement.v1beta1.Data.UndeleteAndroidAppRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "undelete";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1beta1/{+name}:undelete";
+
+                /// <summary>Initializes Undelete parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/androidApps/[^/]+$",
+                    });
+                }
+            }
         }
 
         /// <summary>Gets the AvailableLocations resource.</summary>
@@ -1076,43 +1215,51 @@ namespace Google.Apis.FirebaseManagement.v1beta1
             }
 
             /// <summary>
-            /// Lists the valid Google Cloud Platform (GCP) resource locations for the specified Project (including a
-            /// FirebaseProject). One of these locations can be selected as the Project's [_default_ GCP resource
-            /// location](https://firebase.google.com/docs/projects/locations), which is the geographical location where
-            /// the Project's resources, such as Cloud Firestore, will be provisioned by default. However, if the
-            /// default GCP resource location has already been set for the Project, then this setting cannot be changed.
-            /// This call checks for any possible [location
+            /// **DECOMMISSIONED.** **If called, this endpoint will return a 404 error.** _Instead, use the applicable
+            /// resource-specific REST API (or associated documentation, as needed) to determine valid locations for
+            /// each resource used in your Project._ Lists the valid ["locations for default Google Cloud
+            /// resources"](https://firebase.google.com/docs/projects/locations#default-cloud-location) for the
+            /// specified Project (including a FirebaseProject). One of these locations can be selected as the Project's
+            /// location for default Google Cloud resources, which is the geographical location where the Project's
+            /// resources associated with Google App Engine (such as the default Cloud Firestore instance) will be
+            /// provisioned by default. However, if the location for default Google Cloud resources has already been set
+            /// for the Project, then this setting cannot be changed. This call checks for any possible [location
             /// restrictions](https://cloud.google.com/resource-manager/docs/organization-policy/defining-locations) for
-            /// the specified Project and, thus, might return a subset of all possible GCP resource locations. To list
-            /// all GCP resource locations (regardless of any restrictions), call the endpoint without specifying a
-            /// unique project identifier (that is, `/v1beta1/{parent=projects/-}/listAvailableLocations`). To call
-            /// `ListAvailableLocations` with a specified project, a member must be at minimum a Viewer of the Project.
-            /// Calls without a specified project do not require any specific project permissions.
+            /// the specified Project and, thus, might return a subset of all possible locations. To list all locations
+            /// (regardless of any restrictions), call the endpoint without specifying a unique project identifier (that
+            /// is, `/v1beta1/{parent=projects/-}/listAvailableLocations`). To call `ListAvailableLocations` with a
+            /// specified project, a member must be at minimum a Viewer of the Project. Calls without a specified
+            /// project do not require any specific project permissions.
             /// </summary>
             /// <param name="parent">
-            /// The FirebaseProject for which to list GCP resource locations, in the format: projects/PROJECT_IDENTIFIER
-            /// Refer to the `FirebaseProject` [`name`](../projects#FirebaseProject.FIELDS.name) field for details about
-            /// PROJECT_IDENTIFIER values. If no unique project identifier is specified (that is, `projects/-`), the
-            /// returned list does not take into account org-specific or project-specific location restrictions.
+            /// The FirebaseProject for which to list [locations for default Google Cloud
+            /// resources](https://firebase.google.com/docs/projects/locations#default-cloud-location), in the format:
+            /// projects/PROJECT_IDENTIFIER Refer to the `FirebaseProject`
+            /// [`name`](../projects#FirebaseProject.FIELDS.name) field for details about PROJECT_IDENTIFIER values. If
+            /// no unique project identifier is specified (that is, `projects/-`), the returned list does not take into
+            /// account org-specific or project-specific location restrictions.
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
-            /// Lists the valid Google Cloud Platform (GCP) resource locations for the specified Project (including a
-            /// FirebaseProject). One of these locations can be selected as the Project's [_default_ GCP resource
-            /// location](https://firebase.google.com/docs/projects/locations), which is the geographical location where
-            /// the Project's resources, such as Cloud Firestore, will be provisioned by default. However, if the
-            /// default GCP resource location has already been set for the Project, then this setting cannot be changed.
-            /// This call checks for any possible [location
+            /// **DECOMMISSIONED.** **If called, this endpoint will return a 404 error.** _Instead, use the applicable
+            /// resource-specific REST API (or associated documentation, as needed) to determine valid locations for
+            /// each resource used in your Project._ Lists the valid ["locations for default Google Cloud
+            /// resources"](https://firebase.google.com/docs/projects/locations#default-cloud-location) for the
+            /// specified Project (including a FirebaseProject). One of these locations can be selected as the Project's
+            /// location for default Google Cloud resources, which is the geographical location where the Project's
+            /// resources associated with Google App Engine (such as the default Cloud Firestore instance) will be
+            /// provisioned by default. However, if the location for default Google Cloud resources has already been set
+            /// for the Project, then this setting cannot be changed. This call checks for any possible [location
             /// restrictions](https://cloud.google.com/resource-manager/docs/organization-policy/defining-locations) for
-            /// the specified Project and, thus, might return a subset of all possible GCP resource locations. To list
-            /// all GCP resource locations (regardless of any restrictions), call the endpoint without specifying a
-            /// unique project identifier (that is, `/v1beta1/{parent=projects/-}/listAvailableLocations`). To call
-            /// `ListAvailableLocations` with a specified project, a member must be at minimum a Viewer of the Project.
-            /// Calls without a specified project do not require any specific project permissions.
+            /// the specified Project and, thus, might return a subset of all possible locations. To list all locations
+            /// (regardless of any restrictions), call the endpoint without specifying a unique project identifier (that
+            /// is, `/v1beta1/{parent=projects/-}/listAvailableLocations`). To call `ListAvailableLocations` with a
+            /// specified project, a member must be at minimum a Viewer of the Project. Calls without a specified
+            /// project do not require any specific project permissions.
             /// </summary>
             public class ListRequest : FirebaseManagementBaseServiceRequest<Google.Apis.FirebaseManagement.v1beta1.Data.ListAvailableLocationsResponse>
             {
@@ -1124,8 +1271,9 @@ namespace Google.Apis.FirebaseManagement.v1beta1
                 }
 
                 /// <summary>
-                /// The FirebaseProject for which to list GCP resource locations, in the format:
-                /// projects/PROJECT_IDENTIFIER Refer to the `FirebaseProject`
+                /// The FirebaseProject for which to list [locations for default Google Cloud
+                /// resources](https://firebase.google.com/docs/projects/locations#default-cloud-location), in the
+                /// format: projects/PROJECT_IDENTIFIER Refer to the `FirebaseProject`
                 /// [`name`](../projects#FirebaseProject.FIELDS.name) field for details about PROJECT_IDENTIFIER values.
                 /// If no unique project identifier is specified (that is, `projects/-`), the returned list does not
                 /// take into account org-specific or project-specific location restrictions.
@@ -1207,18 +1355,21 @@ namespace Google.Apis.FirebaseManagement.v1beta1
             }
 
             /// <summary>
-            /// Sets the default Google Cloud Platform (GCP) resource location for the specified FirebaseProject. This
-            /// method creates an App Engine application with a [default Cloud Storage
+            /// **DECOMMISSIONED.** **If called, this endpoint will return a 404 error.** _Instead, use the applicable
+            /// resource-specific REST API to set the location for each resource used in your Project._ Sets the
+            /// ["location for default Google Cloud
+            /// resources"](https://firebase.google.com/docs/projects/locations#default-cloud-location) for the
+            /// specified FirebaseProject. This method creates a Google App Engine application with a [default Cloud
+            /// Storage
             /// bucket](https://cloud.google.com/appengine/docs/standard/python/googlecloudstorageclient/setting-up-cloud-storage#activating_a_cloud_storage_bucket),
             /// located in the specified [`locationId`](#body.request_body.FIELDS.location_id). This location must be
-            /// one of the available [GCP resource locations](https://firebase.google.com/docs/projects/locations).
-            /// After the default GCP resource location is finalized, or if it was already set, it cannot be changed.
-            /// The default GCP resource location for the specified `FirebaseProject` might already be set because
-            /// either the underlying GCP `Project` already has an App Engine application or `FinalizeDefaultLocation`
-            /// was previously called with a specified `locationId`. Any new calls to `FinalizeDefaultLocation` with a
-            /// *different* specified `locationId` will return a 409 error. The result of this call is an
-            /// [`Operation`](../../v1beta1/operations), which can be used to track the provisioning process. The
-            /// [`response`](../../v1beta1/operations#Operation.FIELDS.response) type of the `Operation` is
+            /// one of the available [App Engine locations](https://cloud.google.com/about/locations#region). After the
+            /// location for default Google Cloud resources is finalized, or if it was already set, it cannot be
+            /// changed. The location for default Google Cloud resources for the specified `FirebaseProject` might
+            /// already be set because either the underlying Google Cloud `Project` already has an App Engine
+            /// application or `FinalizeDefaultLocation` was previously called with a specified `locationId`. The result
+            /// of this call is an [`Operation`](../../v1beta1/operations), which can be used to track the provisioning
+            /// process. The [`response`](../../v1beta1/operations#Operation.FIELDS.response) type of the `Operation` is
             /// google.protobuf.Empty. The `Operation` can be polled by its `name` using GetOperation until `done` is
             /// true. When `done` is true, the `Operation` has either succeeded or failed. If the `Operation` has
             /// succeeded, its [`response`](../../v1beta1/operations#Operation.FIELDS.response) will be set to a
@@ -1229,28 +1380,32 @@ namespace Google.Apis.FirebaseManagement.v1beta1
             /// </summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="parent">
-            /// The resource name of the FirebaseProject for which the default GCP resource location will be set, in the
-            /// format: projects/PROJECT_IDENTIFIER Refer to the `FirebaseProject`
+            /// The resource name of the FirebaseProject for which the ["location for default Google Cloud
+            /// resources"](https://firebase.google.com/docs/projects/locations#default-cloud-location) will be set, in
+            /// the format: projects/PROJECT_IDENTIFIER Refer to the `FirebaseProject`
             /// [`name`](../projects#FirebaseProject.FIELDS.name) field for details about PROJECT_IDENTIFIER values.
             /// </param>
             public virtual FinalizeRequest Finalize(Google.Apis.FirebaseManagement.v1beta1.Data.FinalizeDefaultLocationRequest body, string parent)
             {
-                return new FinalizeRequest(service, body, parent);
+                return new FinalizeRequest(this.service, body, parent);
             }
 
             /// <summary>
-            /// Sets the default Google Cloud Platform (GCP) resource location for the specified FirebaseProject. This
-            /// method creates an App Engine application with a [default Cloud Storage
+            /// **DECOMMISSIONED.** **If called, this endpoint will return a 404 error.** _Instead, use the applicable
+            /// resource-specific REST API to set the location for each resource used in your Project._ Sets the
+            /// ["location for default Google Cloud
+            /// resources"](https://firebase.google.com/docs/projects/locations#default-cloud-location) for the
+            /// specified FirebaseProject. This method creates a Google App Engine application with a [default Cloud
+            /// Storage
             /// bucket](https://cloud.google.com/appengine/docs/standard/python/googlecloudstorageclient/setting-up-cloud-storage#activating_a_cloud_storage_bucket),
             /// located in the specified [`locationId`](#body.request_body.FIELDS.location_id). This location must be
-            /// one of the available [GCP resource locations](https://firebase.google.com/docs/projects/locations).
-            /// After the default GCP resource location is finalized, or if it was already set, it cannot be changed.
-            /// The default GCP resource location for the specified `FirebaseProject` might already be set because
-            /// either the underlying GCP `Project` already has an App Engine application or `FinalizeDefaultLocation`
-            /// was previously called with a specified `locationId`. Any new calls to `FinalizeDefaultLocation` with a
-            /// *different* specified `locationId` will return a 409 error. The result of this call is an
-            /// [`Operation`](../../v1beta1/operations), which can be used to track the provisioning process. The
-            /// [`response`](../../v1beta1/operations#Operation.FIELDS.response) type of the `Operation` is
+            /// one of the available [App Engine locations](https://cloud.google.com/about/locations#region). After the
+            /// location for default Google Cloud resources is finalized, or if it was already set, it cannot be
+            /// changed. The location for default Google Cloud resources for the specified `FirebaseProject` might
+            /// already be set because either the underlying Google Cloud `Project` already has an App Engine
+            /// application or `FinalizeDefaultLocation` was previously called with a specified `locationId`. The result
+            /// of this call is an [`Operation`](../../v1beta1/operations), which can be used to track the provisioning
+            /// process. The [`response`](../../v1beta1/operations#Operation.FIELDS.response) type of the `Operation` is
             /// google.protobuf.Empty. The `Operation` can be polled by its `name` using GetOperation until `done` is
             /// true. When `done` is true, the `Operation` has either succeeded or failed. If the `Operation` has
             /// succeeded, its [`response`](../../v1beta1/operations#Operation.FIELDS.response) will be set to a
@@ -1270,8 +1425,9 @@ namespace Google.Apis.FirebaseManagement.v1beta1
                 }
 
                 /// <summary>
-                /// The resource name of the FirebaseProject for which the default GCP resource location will be set, in
-                /// the format: projects/PROJECT_IDENTIFIER Refer to the `FirebaseProject`
+                /// The resource name of the FirebaseProject for which the ["location for default Google Cloud
+                /// resources"](https://firebase.google.com/docs/projects/locations#default-cloud-location) will be set,
+                /// in the format: projects/PROJECT_IDENTIFIER Refer to the `FirebaseProject`
                 /// [`name`](../projects#FirebaseProject.FIELDS.name) field for details about PROJECT_IDENTIFIER values.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
@@ -1338,7 +1494,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.FirebaseManagement.v1beta1.Data.IosApp body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -1404,7 +1560,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets the specified IosApp.</summary>
@@ -1461,7 +1617,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
             /// </param>
             public virtual GetConfigRequest GetConfig(string name)
             {
-                return new GetConfigRequest(service, name);
+                return new GetConfigRequest(this.service, name);
             }
 
             /// <summary>Gets the configuration artifact associated with the specified IosApp.</summary>
@@ -1520,7 +1676,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
@@ -1560,6 +1716,13 @@ namespace Google.Apis.FirebaseManagement.v1beta1
                 [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string PageToken { get; set; }
 
+                /// <summary>
+                /// Controls whether Apps in the DELETED state should be returned in the response. If not specified,
+                /// only `ACTIVE` Apps will be returned.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("showDeleted", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<bool> ShowDeleted { get; set; }
+
                 /// <summary>Gets the method name.</summary>
                 public override string MethodName => "list";
 
@@ -1597,6 +1760,14 @@ namespace Google.Apis.FirebaseManagement.v1beta1
                         DefaultValue = null,
                         Pattern = null,
                     });
+                    RequestParameters.Add("showDeleted", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "showDeleted",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                 }
             }
 
@@ -1613,7 +1784,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.FirebaseManagement.v1beta1.Data.IosApp body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Updates the attributes of the specified IosApp.</summary>
@@ -1640,8 +1811,9 @@ namespace Google.Apis.FirebaseManagement.v1beta1
                 public virtual string Name { get; private set; }
 
                 /// <summary>
-                /// Specifies which fields to update. Note that the fields `name`, `appId`, `projectId`, and `bundleId`
-                /// are all immutable.
+                /// Specifies which fields of the IosApp to update. Note that the following fields are immutable:
+                /// `name`, `app_id`, `project_id`, and `bundle_id`. To update `state`, use any of the following
+                /// endpoints: RemoveIosApp or UndeleteIosApp.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual object UpdateMask { get; set; }
@@ -1683,6 +1855,136 @@ namespace Google.Apis.FirebaseManagement.v1beta1
                     });
                 }
             }
+
+            /// <summary>Removes the specified IosApp from the FirebaseProject.</summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">
+            /// Required. The resource name of the IosApp, in the format: projects/ PROJECT_IDENTIFIER/iosApps/APP_ID
+            /// Since an APP_ID is a unique identifier, the Unique Resource from Sub-Collection access pattern may be
+            /// used here, in the format: projects/-/iosApps/APP_ID Refer to the IosApp
+            /// [name](../projects.iosApps#IosApp.FIELDS.name) field for details about PROJECT_IDENTIFIER and APP_ID
+            /// values.
+            /// </param>
+            public virtual RemoveRequest Remove(Google.Apis.FirebaseManagement.v1beta1.Data.RemoveIosAppRequest body, string name)
+            {
+                return new RemoveRequest(this.service, body, name);
+            }
+
+            /// <summary>Removes the specified IosApp from the FirebaseProject.</summary>
+            public class RemoveRequest : FirebaseManagementBaseServiceRequest<Google.Apis.FirebaseManagement.v1beta1.Data.Operation>
+            {
+                /// <summary>Constructs a new Remove request.</summary>
+                public RemoveRequest(Google.Apis.Services.IClientService service, Google.Apis.FirebaseManagement.v1beta1.Data.RemoveIosAppRequest body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The resource name of the IosApp, in the format: projects/
+                /// PROJECT_IDENTIFIER/iosApps/APP_ID Since an APP_ID is a unique identifier, the Unique Resource from
+                /// Sub-Collection access pattern may be used here, in the format: projects/-/iosApps/APP_ID Refer to
+                /// the IosApp [name](../projects.iosApps#IosApp.FIELDS.name) field for details about PROJECT_IDENTIFIER
+                /// and APP_ID values.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.FirebaseManagement.v1beta1.Data.RemoveIosAppRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "remove";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1beta1/{+name}:remove";
+
+                /// <summary>Initializes Remove parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/iosApps/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>Restores the specified IosApp to the FirebaseProject.</summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">
+            /// Required. The resource name of the IosApp, in the format: projects/ PROJECT_IDENTIFIER/iosApps/APP_ID
+            /// Since an APP_ID is a unique identifier, the Unique Resource from Sub-Collection access pattern may be
+            /// used here, in the format: projects/-/iosApps/APP_ID Refer to the IosApp
+            /// [name](../projects.iosApps#IosApp.FIELDS.name) field for details about PROJECT_IDENTIFIER and APP_ID
+            /// values.
+            /// </param>
+            public virtual UndeleteRequest Undelete(Google.Apis.FirebaseManagement.v1beta1.Data.UndeleteIosAppRequest body, string name)
+            {
+                return new UndeleteRequest(this.service, body, name);
+            }
+
+            /// <summary>Restores the specified IosApp to the FirebaseProject.</summary>
+            public class UndeleteRequest : FirebaseManagementBaseServiceRequest<Google.Apis.FirebaseManagement.v1beta1.Data.Operation>
+            {
+                /// <summary>Constructs a new Undelete request.</summary>
+                public UndeleteRequest(Google.Apis.Services.IClientService service, Google.Apis.FirebaseManagement.v1beta1.Data.UndeleteIosAppRequest body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The resource name of the IosApp, in the format: projects/
+                /// PROJECT_IDENTIFIER/iosApps/APP_ID Since an APP_ID is a unique identifier, the Unique Resource from
+                /// Sub-Collection access pattern may be used here, in the format: projects/-/iosApps/APP_ID Refer to
+                /// the IosApp [name](../projects.iosApps#IosApp.FIELDS.name) field for details about PROJECT_IDENTIFIER
+                /// and APP_ID values.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.FirebaseManagement.v1beta1.Data.UndeleteIosAppRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "undelete";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1beta1/{+name}:undelete";
+
+                /// <summary>Initializes Undelete parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/iosApps/[^/]+$",
+                    });
+                }
+            }
         }
 
         /// <summary>Gets the WebApps resource.</summary>
@@ -1715,7 +2017,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
             /// </param>
             public virtual CreateRequest Create(Google.Apis.FirebaseManagement.v1beta1.Data.WebApp body, string parent)
             {
-                return new CreateRequest(service, body, parent);
+                return new CreateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -1781,7 +2083,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
             /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets the specified WebApp.</summary>
@@ -1838,7 +2140,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
             /// </param>
             public virtual GetConfigRequest GetConfig(string name)
             {
-                return new GetConfigRequest(service, name);
+                return new GetConfigRequest(this.service, name);
             }
 
             /// <summary>Gets the configuration artifact associated with the specified WebApp.</summary>
@@ -1897,7 +2199,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>
@@ -1937,6 +2239,13 @@ namespace Google.Apis.FirebaseManagement.v1beta1
                 [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string PageToken { get; set; }
 
+                /// <summary>
+                /// Controls whether Apps in the DELETED state should be returned in the response. If not specified,
+                /// only `ACTIVE` Apps will be returned.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("showDeleted", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<bool> ShowDeleted { get; set; }
+
                 /// <summary>Gets the method name.</summary>
                 public override string MethodName => "list";
 
@@ -1974,6 +2283,14 @@ namespace Google.Apis.FirebaseManagement.v1beta1
                         DefaultValue = null,
                         Pattern = null,
                     });
+                    RequestParameters.Add("showDeleted", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "showDeleted",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                 }
             }
 
@@ -1990,7 +2307,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
             /// </param>
             public virtual PatchRequest Patch(Google.Apis.FirebaseManagement.v1beta1.Data.WebApp body, string name)
             {
-                return new PatchRequest(service, body, name);
+                return new PatchRequest(this.service, body, name);
             }
 
             /// <summary>Updates the attributes of the specified WebApp.</summary>
@@ -2017,8 +2334,9 @@ namespace Google.Apis.FirebaseManagement.v1beta1
                 public virtual string Name { get; private set; }
 
                 /// <summary>
-                /// Specifies which fields to update. Note that the fields `name`, `appId`, and `projectId` are all
-                /// immutable.
+                /// Specifies which fields of the WebApp to update. Note that the following fields are immutable:
+                /// `name`, `app_id`, and `project_id`. To update `state`, use any of the following endpoints:
+                /// RemoveWebApp or UndeleteWebApp.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual object UpdateMask { get; set; }
@@ -2060,52 +2378,182 @@ namespace Google.Apis.FirebaseManagement.v1beta1
                     });
                 }
             }
+
+            /// <summary>Removes the specified WebApp from the FirebaseProject.</summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">
+            /// Required. The resource name of the WebApp, in the format: projects/ PROJECT_IDENTIFIER/webApps/APP_ID
+            /// Since an APP_ID is a unique identifier, the Unique Resource from Sub-Collection access pattern may be
+            /// used here, in the format: projects/-/webApps/APP_ID Refer to the WebApp
+            /// [name](../projects.webApps#WebApp.FIELDS.name) field for details about PROJECT_IDENTIFIER and APP_ID
+            /// values.
+            /// </param>
+            public virtual RemoveRequest Remove(Google.Apis.FirebaseManagement.v1beta1.Data.RemoveWebAppRequest body, string name)
+            {
+                return new RemoveRequest(this.service, body, name);
+            }
+
+            /// <summary>Removes the specified WebApp from the FirebaseProject.</summary>
+            public class RemoveRequest : FirebaseManagementBaseServiceRequest<Google.Apis.FirebaseManagement.v1beta1.Data.Operation>
+            {
+                /// <summary>Constructs a new Remove request.</summary>
+                public RemoveRequest(Google.Apis.Services.IClientService service, Google.Apis.FirebaseManagement.v1beta1.Data.RemoveWebAppRequest body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The resource name of the WebApp, in the format: projects/
+                /// PROJECT_IDENTIFIER/webApps/APP_ID Since an APP_ID is a unique identifier, the Unique Resource from
+                /// Sub-Collection access pattern may be used here, in the format: projects/-/webApps/APP_ID Refer to
+                /// the WebApp [name](../projects.webApps#WebApp.FIELDS.name) field for details about PROJECT_IDENTIFIER
+                /// and APP_ID values.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.FirebaseManagement.v1beta1.Data.RemoveWebAppRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "remove";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1beta1/{+name}:remove";
+
+                /// <summary>Initializes Remove parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/webApps/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>Restores the specified WebApp to the FirebaseProject.</summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">
+            /// Required. The resource name of the WebApp, in the format: projects/ PROJECT_IDENTIFIER/webApps/APP_ID
+            /// Since an APP_ID is a unique identifier, the Unique Resource from Sub-Collection access pattern may be
+            /// used here, in the format: projects/-/webApps/APP_ID Refer to the WebApp
+            /// [name](../projects.webApps#WebApp.FIELDS.name) field for details about PROJECT_IDENTIFIER and APP_ID
+            /// values.
+            /// </param>
+            public virtual UndeleteRequest Undelete(Google.Apis.FirebaseManagement.v1beta1.Data.UndeleteWebAppRequest body, string name)
+            {
+                return new UndeleteRequest(this.service, body, name);
+            }
+
+            /// <summary>Restores the specified WebApp to the FirebaseProject.</summary>
+            public class UndeleteRequest : FirebaseManagementBaseServiceRequest<Google.Apis.FirebaseManagement.v1beta1.Data.Operation>
+            {
+                /// <summary>Constructs a new Undelete request.</summary>
+                public UndeleteRequest(Google.Apis.Services.IClientService service, Google.Apis.FirebaseManagement.v1beta1.Data.UndeleteWebAppRequest body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The resource name of the WebApp, in the format: projects/
+                /// PROJECT_IDENTIFIER/webApps/APP_ID Since an APP_ID is a unique identifier, the Unique Resource from
+                /// Sub-Collection access pattern may be used here, in the format: projects/-/webApps/APP_ID Refer to
+                /// the WebApp [name](../projects.webApps#WebApp.FIELDS.name) field for details about PROJECT_IDENTIFIER
+                /// and APP_ID values.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.FirebaseManagement.v1beta1.Data.UndeleteWebAppRequest Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "undelete";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1beta1/{+name}:undelete";
+
+                /// <summary>Initializes Undelete parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^projects/[^/]+/webApps/[^/]+$",
+                    });
+                }
+            }
         }
 
         /// <summary>
-        /// Adds Firebase resources to the specified existing [Google Cloud Platform (GCP) `Project`]
-        /// (https://cloud.google.com/resource-manager/reference/rest/v1/projects). Since a FirebaseProject is actually
-        /// also a GCP `Project`, a `FirebaseProject` has the same underlying GCP identifiers (`projectNumber` and
-        /// `projectId`). This allows for easy interop with Google APIs. The result of this call is an
-        /// [`Operation`](../../v1beta1/operations). Poll the `Operation` to track the provisioning process by calling
-        /// GetOperation until [`done`](../../v1beta1/operations#Operation.FIELDS.done) is `true`. When `done` is
-        /// `true`, the `Operation` has either succeeded or failed. If the `Operation` succeeded, its
+        /// Adds Firebase resources and enables Firebase services in the specified existing [Google Cloud
+        /// `Project`](https://cloud.google.com/resource-manager/reference/rest/v1/projects). Since a FirebaseProject is
+        /// actually also a Google Cloud `Project`, a `FirebaseProject` has the same underlying Google Cloud identifiers
+        /// (`projectNumber` and `projectId`). This allows for easy interop with Google APIs. The result of this call is
+        /// an [`Operation`](../../v1beta1/operations). Poll the `Operation` to track the provisioning process by
+        /// calling GetOperation until [`done`](../../v1beta1/operations#Operation.FIELDS.done) is `true`. When `done`
+        /// is `true`, the `Operation` has either succeeded or failed. If the `Operation` succeeded, its
         /// [`response`](../../v1beta1/operations#Operation.FIELDS.response) is set to a FirebaseProject; if the
         /// `Operation` failed, its [`error`](../../v1beta1/operations#Operation.FIELDS.error) is set to a
         /// google.rpc.Status. The `Operation` is automatically deleted after completion, so there is no need to call
-        /// DeleteOperation. This method does not modify any billing account information on the underlying GCP
+        /// DeleteOperation. This method does not modify any billing account information on the underlying Google Cloud
         /// `Project`. To call `AddFirebase`, a project member or service account must have the following permissions
         /// (the IAM roles of Editor and Owner contain these permissions): `firebase.projects.update`,
         /// `resourcemanager.projects.get`, `serviceusage.services.enable`, and `serviceusage.services.get`.
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="project">
-        /// The resource name of the GCP `Project` to which Firebase resources will be added, in the format:
-        /// projects/PROJECT_IDENTIFIER Refer to the `FirebaseProject` [`name`](../projects#FirebaseProject.FIELDS.name)
-        /// field for details about PROJECT_IDENTIFIER values. After calling `AddFirebase`, the unique Project
-        /// identifiers (
+        /// The resource name of the Google Cloud `Project` in which Firebase resources will be added and Firebase
+        /// services enabled, in the format: projects/ PROJECT_IDENTIFIER Refer to the `FirebaseProject`
+        /// [`name`](../projects#FirebaseProject.FIELDS.name) field for details about PROJECT_IDENTIFIER values. After
+        /// calling `AddFirebase`, the unique Project identifiers (
         /// [`projectNumber`](https://cloud.google.com/resource-manager/reference/rest/v1/projects#Project.FIELDS.project_number)
         /// and
         /// [`projectId`](https://cloud.google.com/resource-manager/reference/rest/v1/projects#Project.FIELDS.project_id))
-        /// of the underlying GCP `Project` are also the identifiers of the FirebaseProject.
+        /// of the underlying Google Cloud `Project` are also the identifiers of the FirebaseProject.
         /// </param>
         public virtual AddFirebaseRequest AddFirebase(Google.Apis.FirebaseManagement.v1beta1.Data.AddFirebaseRequest body, string project)
         {
-            return new AddFirebaseRequest(service, body, project);
+            return new AddFirebaseRequest(this.service, body, project);
         }
 
         /// <summary>
-        /// Adds Firebase resources to the specified existing [Google Cloud Platform (GCP) `Project`]
-        /// (https://cloud.google.com/resource-manager/reference/rest/v1/projects). Since a FirebaseProject is actually
-        /// also a GCP `Project`, a `FirebaseProject` has the same underlying GCP identifiers (`projectNumber` and
-        /// `projectId`). This allows for easy interop with Google APIs. The result of this call is an
-        /// [`Operation`](../../v1beta1/operations). Poll the `Operation` to track the provisioning process by calling
-        /// GetOperation until [`done`](../../v1beta1/operations#Operation.FIELDS.done) is `true`. When `done` is
-        /// `true`, the `Operation` has either succeeded or failed. If the `Operation` succeeded, its
+        /// Adds Firebase resources and enables Firebase services in the specified existing [Google Cloud
+        /// `Project`](https://cloud.google.com/resource-manager/reference/rest/v1/projects). Since a FirebaseProject is
+        /// actually also a Google Cloud `Project`, a `FirebaseProject` has the same underlying Google Cloud identifiers
+        /// (`projectNumber` and `projectId`). This allows for easy interop with Google APIs. The result of this call is
+        /// an [`Operation`](../../v1beta1/operations). Poll the `Operation` to track the provisioning process by
+        /// calling GetOperation until [`done`](../../v1beta1/operations#Operation.FIELDS.done) is `true`. When `done`
+        /// is `true`, the `Operation` has either succeeded or failed. If the `Operation` succeeded, its
         /// [`response`](../../v1beta1/operations#Operation.FIELDS.response) is set to a FirebaseProject; if the
         /// `Operation` failed, its [`error`](../../v1beta1/operations#Operation.FIELDS.error) is set to a
         /// google.rpc.Status. The `Operation` is automatically deleted after completion, so there is no need to call
-        /// DeleteOperation. This method does not modify any billing account information on the underlying GCP
+        /// DeleteOperation. This method does not modify any billing account information on the underlying Google Cloud
         /// `Project`. To call `AddFirebase`, a project member or service account must have the following permissions
         /// (the IAM roles of Editor and Owner contain these permissions): `firebase.projects.update`,
         /// `resourcemanager.projects.get`, `serviceusage.services.enable`, and `serviceusage.services.get`.
@@ -2121,14 +2569,14 @@ namespace Google.Apis.FirebaseManagement.v1beta1
             }
 
             /// <summary>
-            /// The resource name of the GCP `Project` to which Firebase resources will be added, in the format:
-            /// projects/PROJECT_IDENTIFIER Refer to the `FirebaseProject`
+            /// The resource name of the Google Cloud `Project` in which Firebase resources will be added and Firebase
+            /// services enabled, in the format: projects/ PROJECT_IDENTIFIER Refer to the `FirebaseProject`
             /// [`name`](../projects#FirebaseProject.FIELDS.name) field for details about PROJECT_IDENTIFIER values.
             /// After calling `AddFirebase`, the unique Project identifiers (
             /// [`projectNumber`](https://cloud.google.com/resource-manager/reference/rest/v1/projects#Project.FIELDS.project_number)
             /// and
             /// [`projectId`](https://cloud.google.com/resource-manager/reference/rest/v1/projects#Project.FIELDS.project_id))
-            /// of the underlying GCP `Project` are also the identifiers of the FirebaseProject.
+            /// of the underlying Google Cloud `Project` are also the identifiers of the FirebaseProject.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("project", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Project { get; private set; }
@@ -2197,7 +2645,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
         /// </param>
         public virtual AddGoogleAnalyticsRequest AddGoogleAnalytics(Google.Apis.FirebaseManagement.v1beta1.Data.AddGoogleAnalyticsRequest body, string parent)
         {
-            return new AddGoogleAnalyticsRequest(service, body, parent);
+            return new AddGoogleAnalyticsRequest(this.service, body, parent);
         }
 
         /// <summary>
@@ -2282,7 +2730,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
         /// </param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>Gets the specified FirebaseProject.</summary>
@@ -2339,7 +2787,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
         /// </param>
         public virtual GetAdminSdkConfigRequest GetAdminSdkConfig(string name)
         {
-            return new GetAdminSdkConfigRequest(service, name);
+            return new GetAdminSdkConfigRequest(this.service, name);
         }
 
         /// <summary>
@@ -2400,7 +2848,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
         /// </param>
         public virtual GetAnalyticsDetailsRequest GetAnalyticsDetails(string name)
         {
-            return new GetAnalyticsDetailsRequest(service, name);
+            return new GetAnalyticsDetailsRequest(this.service, name);
         }
 
         /// <summary>
@@ -2458,7 +2906,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
@@ -2491,6 +2939,13 @@ namespace Google.Apis.FirebaseManagement.v1beta1
             [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string PageToken { get; set; }
 
+            /// <summary>
+            /// Optional. Controls whether Projects in the DELETED state should be returned in the response. If not
+            /// specified, only `ACTIVE` Projects will be returned.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("showDeleted", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> ShowDeleted { get; set; }
+
             /// <summary>Gets the method name.</summary>
             public override string MethodName => "list";
 
@@ -2520,6 +2975,14 @@ namespace Google.Apis.FirebaseManagement.v1beta1
                     DefaultValue = null,
                     Pattern = null,
                 });
+                RequestParameters.Add("showDeleted", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "showDeleted",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
             }
         }
 
@@ -2537,7 +3000,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
         /// </param>
         public virtual PatchRequest Patch(Google.Apis.FirebaseManagement.v1beta1.Data.FirebaseProject body, string name)
         {
-            return new PatchRequest(service, body, name);
+            return new PatchRequest(this.service, body, name);
         }
 
         /// <summary>
@@ -2565,8 +3028,11 @@ namespace Google.Apis.FirebaseManagement.v1beta1
             public virtual string Name { get; private set; }
 
             /// <summary>
-            /// Specifies which fields to update. If this list is empty, then no state will be updated. Note that the
-            /// fields `name`, `projectId`, and `projectNumber` are all immutable.
+            /// Specifies which fields of the FirebaseProject to update. Note that the following fields are immutable:
+            /// `name`, `project_id`, and `project_number`. To update `state`, use any of the following Google Cloud
+            /// endpoints:
+            /// [`projects.delete`](https://cloud.google.com/resource-manager/reference/rest/v1/projects/delete) or
+            /// [`projects.undelete`](https://cloud.google.com/resource-manager/reference/rest/v1/projects/undelete)
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
             public virtual object UpdateMask { get; set; }
@@ -2627,7 +3093,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
         /// </param>
         public virtual RemoveAnalyticsRequest RemoveAnalytics(Google.Apis.FirebaseManagement.v1beta1.Data.RemoveAnalyticsRequest body, string parent)
         {
-            return new RemoveAnalyticsRequest(service, body, parent);
+            return new RemoveAnalyticsRequest(this.service, body, parent);
         }
 
         /// <summary>
@@ -2700,7 +3166,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1
         /// </param>
         public virtual SearchAppsRequest SearchApps(string parent)
         {
-            return new SearchAppsRequest(service, parent);
+            return new SearchAppsRequest(this.service, parent);
         }
 
         /// <summary>
@@ -2726,20 +3192,21 @@ namespace Google.Apis.FirebaseManagement.v1beta1
             public virtual string Parent { get; private set; }
 
             /// <summary>
-            /// A query string compatible with Google's [AIP-160](https://google.aip.dev/160) standard. Use any of the
-            /// following fields in a query: * [`app_id`](../projects.apps#FirebaseAppInfo.FIELDS.app_id) *
-            /// [`namespace`](../projects.apps#FirebaseAppInfo.FIELDS.namespace) *
-            /// [`platform`](../projects.apps#FirebaseAppInfo.FIELDS.platform) We also support the following "virtual"
-            /// fields (fields which are not actually part of the returned resource object, but can be queried as if
-            /// they are pre-populated with specific values): * `sha1_hash`: This field is considered to be a repeated
-            /// `string` field, populated with the list of all SHA-1 certificate fingerprints registered with the app.
-            /// This list is empty if the app is not an Android app. * `sha256_hash`: This field is considered to be a
-            /// repeated `string` field, populated with the list of all SHA-256 certificate fingerprints registered with
-            /// the app. This list is empty if the app is not an Android app. * `app_store_id`: This field is considered
-            /// to be a singular `string` field, populated with the Apple App Store ID registered with the app. This
-            /// field is empty if the app is not an iOS app. * `team_id`: This field is considered to be a singular
-            /// `string` field, populated with the Apple team ID registered with the app. This field is empty if the app
-            /// is not an iOS app.
+            /// A query string compatible with Google's [AIP-160 standard](https://google.aip.dev/160). Use any of the
+            /// following fields in a query: * [`app_id`](../projects/searchApps#FirebaseAppInfo.FIELDS.app_id) *
+            /// [`namespace`](../projects/searchApps#FirebaseAppInfo.FIELDS.namespace) *
+            /// [`platform`](../projects/searchApps#FirebaseAppInfo.FIELDS.platform) This query also supports the
+            /// following "virtual" fields. These are fields which are not actually part of the returned resource
+            /// object, but they can be queried as if they are pre-populated with specific values. * `sha1_hash` or
+            /// `sha1_hashes`: This field is considered to be a _repeated_ `string` field, populated with the list of
+            /// all SHA-1 certificate fingerprints registered with the AndroidApp. This list is empty if the App is not
+            /// an `AndroidApp`. * `sha256_hash` or `sha256_hashes`: This field is considered to be a _repeated_
+            /// `string` field, populated with the list of all SHA-256 certificate fingerprints registered with the
+            /// AndroidApp. This list is empty if the App is not an `AndroidApp`. * `app_store_id`: This field is
+            /// considered to be a _singular_ `string` field, populated with the Apple App Store ID registered with the
+            /// IosApp. This field is empty if the App is not an `IosApp`. * `team_id`: This field is considered to be a
+            /// _singular_ `string` field, populated with the Apple team ID registered with the IosApp. This field is
+            /// empty if the App is not an `IosApp`.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Filter { get; set; }
@@ -2758,6 +3225,13 @@ namespace Google.Apis.FirebaseManagement.v1beta1
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string PageToken { get; set; }
+
+            /// <summary>
+            /// Controls whether Apps in the DELETED state should be returned. If not specified, only `ACTIVE` Apps will
+            /// be returned.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("showDeleted", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<bool> ShowDeleted { get; set; }
 
             /// <summary>Gets the method name.</summary>
             public override string MethodName => "searchApps";
@@ -2804,6 +3278,14 @@ namespace Google.Apis.FirebaseManagement.v1beta1
                     DefaultValue = null,
                     Pattern = null,
                 });
+                RequestParameters.Add("showDeleted", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "showDeleted",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
             }
         }
     }
@@ -2814,10 +3296,12 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
     public class AddFirebaseRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Deprecated. Instead, to set a Project's default GCP resource location, call
-        /// [`FinalizeDefaultLocation`](../projects.defaultLocation/finalize) after you add Firebase resources to the
-        /// GCP `Project`. The ID of the Project's default GCP resource location. The location must be one of the
-        /// available [GCP resource locations](https://firebase.google.com/docs/projects/locations).
+        /// **DEPRECATED.** _Instead, use product-specific REST APIs to work with the location of each resource in a
+        /// Project. This field may be ignored, especially for newly provisioned projects after October 30, 2024._ The
+        /// ID of the Project's ["location for default Google Cloud
+        /// resources"](https://firebase.google.com/docs/projects/locations#default-cloud-location), which are resources
+        /// associated with Google App Engine. The location must be one of the available [Google App Engine
+        /// locations](https://cloud.google.com/about/locations#region).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("locationId")]
         public virtual string LocationId { get; set; }
@@ -2848,16 +3332,25 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
 
     public class AdminSdkConfig : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The default Firebase Realtime Database URL.</summary>
+        /// <summary>
+        /// **DEPRECATED.** _Instead, find the URL of the default Realtime Database instance using the [list
+        /// endpoint](https://firebase.google.com/docs/reference/rest/database/database-management/rest/v1beta/projects.locations.instances/list)
+        /// within the Firebase Realtime Database REST API. If the default instance for the Project has not yet been
+        /// provisioned, the return might not contain a default instance. Note that the config that's generated for the
+        /// Firebase console or the Firebase CLI uses the Realtime Database endpoint to populate this value for that
+        /// config._ The URL of the default Firebase Realtime Database instance.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("databaseURL")]
         public virtual string DatabaseURL { get; set; }
 
         /// <summary>
-        /// The ID of the Project's default GCP resource location. The location is one of the available [GCP resource
-        /// locations](https://firebase.google.com/docs/projects/locations). This field is omitted if the default GCP
-        /// resource location has not been finalized yet. To set a Project's default GCP resource location, call
-        /// [`FinalizeDefaultLocation`](../projects.defaultLocation/finalize) after you add Firebase resources to the
-        /// Project.
+        /// **DEPRECATED.** _Instead, use product-specific REST APIs to find the location of each resource in a Project.
+        /// This field may not be populated, especially for newly provisioned projects after October 30, 2024._ The ID
+        /// of the Project's ["location for default Google Cloud
+        /// resources"](https://firebase.google.com/docs/projects/locations#default-cloud-location), which are resources
+        /// associated with Google App Engine. The location is one of the available [App Engine
+        /// locations](https://cloud.google.com/about/locations#region). This field is omitted if the location for
+        /// default Google Cloud resources has not been set.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("locationId")]
         public virtual string LocationId { get; set; }
@@ -2870,7 +3363,14 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
         public virtual string ProjectId { get; set; }
 
-        /// <summary>The default Cloud Storage for Firebase storage bucket name.</summary>
+        /// <summary>
+        /// **DEPRECATED.** _Instead, find the name of the default Cloud Storage for Firebase bucket using the [list
+        /// endpoint](https://firebase.google.com/docs/reference/rest/storage/rest/v1beta/projects.buckets/list) within
+        /// the Cloud Storage for Firebase REST API. If the default bucket for the Project has not yet been provisioned,
+        /// the return might not contain a default bucket. Note that the config that's generated for the Firebase
+        /// console or the Firebase CLI uses the Cloud Storage for Firebase endpoint to populate this value for that
+        /// config._ The name of the default Cloud Storage for Firebase bucket.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("storageBucket")]
         public virtual string StorageBucket { get; set; }
 
@@ -2933,8 +3433,24 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
     public class AndroidApp : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Immutable. The globally unique, Firebase-assigned identifier for the `AndroidApp`. This identifier should be
-        /// treated as an opaque token, as the data format is not specified.
+        /// The globally unique, Google-assigned identifier (UID) for the Firebase API key associated with the
+        /// `AndroidApp`. Be aware that this value is the UID of the API key, _not_ the
+        /// [`keyString`](https://cloud.google.com/api-keys/docs/reference/rest/v2/projects.locations.keys#Key.FIELDS.key_string)
+        /// of the API key. The `keyString` is the value that can be found in the App's [configuration
+        /// artifact](../../rest/v1beta1/projects.androidApps/getConfig). If `api_key_id` is not set in requests to
+        /// [`androidApps.Create`](../../rest/v1beta1/projects.androidApps/create), then Firebase automatically
+        /// associates an `api_key_id` with the `AndroidApp`. This auto-associated key may be an existing valid key or,
+        /// if no valid key exists, a new one will be provisioned. In patch requests, `api_key_id` cannot be set to an
+        /// empty value, and the new UID must have no restrictions or only have restrictions that are valid for the
+        /// associated `AndroidApp`. We recommend using the [Google Cloud
+        /// Console](https://console.cloud.google.com/apis/credentials) to manage API keys.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("apiKeyId")]
+        public virtual string ApiKeyId { get; set; }
+
+        /// <summary>
+        /// Output only. Immutable. The globally unique, Firebase-assigned identifier for the `AndroidApp`. This
+        /// identifier should be treated as an opaque token, as the data format is not specified.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("appId")]
         public virtual string AppId { get; set; }
@@ -2942,6 +3458,56 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
         /// <summary>The user-assigned display name for the `AndroidApp`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
+
+        /// <summary>
+        /// This checksum is computed by the server based on the value of other fields, and it may be sent with update
+        /// requests to ensure the client has an up-to-date value before proceeding. Learn more about `etag` in Google's
+        /// [AIP-154 standard](https://google.aip.dev/154#declarative-friendly-resources). This etag is strongly
+        /// validated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
+        /// <summary>
+        /// Output only. If the App has been removed from the Project, this is the timestamp of when the App is
+        /// considered expired and will be permanently deleted. After this time, the App cannot be undeleted (that is,
+        /// restored to the Project). This value is only provided if the App is in the `DELETED` state.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The resource name of the AndroidApp, in the format: projects/ PROJECT_IDENTIFIER/androidApps/APP_ID *
@@ -2963,13 +3529,23 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
         public virtual string PackageName { get; set; }
 
         /// <summary>
-        /// Immutable. A user-assigned unique identifier of the parent FirebaseProject for the `AndroidApp`.
+        /// Output only. Immutable. A user-assigned unique identifier of the parent FirebaseProject for the
+        /// `AndroidApp`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
         public virtual string ProjectId { get; set; }
 
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
+        /// <summary>The SHA1 certificate hashes for the AndroidApp.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sha1Hashes")]
+        public virtual System.Collections.Generic.IList<string> Sha1Hashes { get; set; }
+
+        /// <summary>The SHA256 certificate hashes for the AndroidApp.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sha256Hashes")]
+        public virtual System.Collections.Generic.IList<string> Sha256Hashes { get; set; }
+
+        /// <summary>Output only. The lifecycle state of the App.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
     }
 
     /// <summary>Configuration metadata of a single Firebase App for Android.</summary>
@@ -2990,43 +3566,63 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>The default resources associated with the Project.</summary>
+    /// <summary>
+    /// **DEPRECATED.** _Auto-provisioning of these resources is changing, so this object no longer reliably provides
+    /// information about the resources within the Project. Instead, retrieve information about each resource directly
+    /// from its resource-specific API._ The default auto-provisioned resources associated with the Project.
+    /// </summary>
     public class DefaultResources : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The default Firebase Hosting site name, in the format: PROJECT_ID Though rare, your `projectId` might
-        /// already be used as the name for an existing Hosting site in another project (learn more about creating
-        /// non-default, [additional sites](https://firebase.google.com/docs/hosting/multisites)). In these cases, your
-        /// `projectId` is appended with a hyphen then five alphanumeric characters to create your default Hosting site
-        /// name. For example, if your `projectId` is `myproject123`, your default Hosting site name might be:
-        /// `myproject123-a5c16`
+        /// Output only. **DEPRECATED.** _Instead, find the name of the default Firebase Hosting site using
+        /// [ListSites](https://firebase.google.com/docs/reference/hosting/rest/v1beta1/projects.sites/list) within the
+        /// Firebase Hosting REST API. If the default Hosting site for the Project has not yet been provisioned, the
+        /// return might not contain a default site._ The name of the default Firebase Hosting site, in the format:
+        /// PROJECT_ID Though rare, your `projectId` might already be used as the name for an existing Hosting site in
+        /// another project (learn more about creating non-default, [additional
+        /// sites](https://firebase.google.com/docs/hosting/multisites)). In these cases, your `projectId` is appended
+        /// with a hyphen then five alphanumeric characters to create your default Hosting site name. For example, if
+        /// your `projectId` is `myproject123`, your default Hosting site name might be: `myproject123-a5c16`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("hostingSite")]
         public virtual string HostingSite { get; set; }
 
         /// <summary>
-        /// The ID of the Project's default GCP resource location. The location is one of the available [GCP resource
-        /// locations](https://firebase.google.com/docs/projects/locations). This field is omitted if the default GCP
-        /// resource location has not been finalized yet. To set a Project's default GCP resource location, call
-        /// [`FinalizeDefaultLocation`](../projects.defaultLocation/finalize) after you add Firebase resources to the
-        /// Project.
+        /// Output only. **DEPRECATED.** _Instead, use product-specific REST APIs to find the location of each resource
+        /// in a Project. This field may not be populated, especially for newly provisioned projects after October 30,
+        /// 2024._ The ID of the Project's ["location for default Google Cloud
+        /// resources"](https://firebase.google.com/docs/projects/locations#default-cloud-location), which are resources
+        /// associated with Google App Engine. The location is one of the available [Google App Engine
+        /// locations](https://cloud.google.com/about/locations#region). This field is omitted if the location for
+        /// default Google Cloud resources has not been set.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("locationId")]
         public virtual string LocationId { get; set; }
 
         /// <summary>
-        /// The default Firebase Realtime Database instance name, in the format: PROJECT_ID Though rare, your
-        /// `projectId` might already be used as the name for an existing Realtime Database instance in another project
-        /// (learn more about [database sharding](https://firebase.google.com/docs/database/usage/sharding)). In these
-        /// cases, your `projectId` is appended with a hyphen then five alphanumeric characters to create your default
-        /// Realtime Database instance name. For example, if your `projectId` is `myproject123`, your default database
-        /// instance name might be: `myproject123-a5c16`
+        /// Output only. **DEPRECATED.** _Instead, find the name of the default Realtime Database instance using the
+        /// [list
+        /// endpoint](https://firebase.google.com/docs/reference/rest/database/database-management/rest/v1beta/projects.locations.instances/list)
+        /// within the Firebase Realtime Database REST API. If the default Realtime Database instance for a Project has
+        /// not yet been provisioned, the return might not contain a default instance._ The default Firebase Realtime
+        /// Database instance name, in the format: PROJECT_ID Though rare, your `projectId` might already be used as the
+        /// name for an existing Realtime Database instance in another project (learn more about [database
+        /// sharding](https://firebase.google.com/docs/database/usage/sharding)). In these cases, your `projectId` is
+        /// appended with a hyphen then five alphanumeric characters to create your default Realtime Database instance
+        /// name. For example, if your `projectId` is `myproject123`, your default database instance name might be:
+        /// `myproject123-a5c16`
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("realtimeDatabaseInstance")]
         public virtual string RealtimeDatabaseInstance { get; set; }
 
         /// <summary>
-        /// The default Cloud Storage for Firebase storage bucket, in the format: PROJECT_ID.appspot.com
+        /// Output only. **DEPRECATED.** _Instead, find the name of the default Cloud Storage for Firebase bucket using
+        /// the [list
+        /// endpoint](https://firebase.google.com/docs/reference/rest/storage/rest/v1beta/projects.buckets/list) within
+        /// the Cloud Storage for Firebase REST API. If the default bucket for the Project has not yet been provisioned,
+        /// the return might not contain a default bucket._ The name of the default Cloud Storage for Firebase bucket,
+        /// in one of the following formats: * If provisioned _before_ October 30, 2024: PROJECT_ID.firebasestorage.app
+        /// * If provisioned _on or after_ October 30, 2024: PROJECT_ID.firebasestorage.app
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("storageBucket")]
         public virtual string StorageBucket { get; set; }
@@ -3038,8 +3634,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -3050,8 +3645,10 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
     public class FinalizeDefaultLocationRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The ID of the Project's default GCP resource location. The location must be one of the available [GCP
-        /// resource locations](https://firebase.google.com/docs/projects/locations).
+        /// **DEPRECATED** The ID of the Project's ["location for default Google Cloud
+        /// resources"](https://firebase.google.com/docs/projects/locations#default-cloud-location), which are resources
+        /// associated with Google App Engine. The location must be one of the available [Google App Engine
+        /// locations](https://cloud.google.com/about/locations#region).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("locationId")]
         public virtual string LocationId { get; set; }
@@ -3064,6 +3661,23 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
     public class FirebaseAppInfo : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// The globally unique, Google-assigned identifier (UID) for the Firebase API key associated with the App. Be
+        /// aware that this value is the UID of the API key, _not_ the
+        /// [`keyString`](https://cloud.google.com/api-keys/docs/reference/rest/v2/projects.locations.keys#Key.FIELDS.key_string)
+        /// of the API key. The `keyString` is the value that can be found in the App's configuration artifact
+        /// ([`AndroidApp`](../../rest/v1beta1/projects.androidApps/getConfig) |
+        /// [`IosApp`](../../rest/v1beta1/projects.iosApps/getConfig) |
+        /// [`WebApp`](../../rest/v1beta1/projects.webApps/getConfig)). If `api_key_id` is not set in requests to create
+        /// the App ([`AndroidApp`](../../rest/v1beta1/projects.androidApps/create) |
+        /// [`IosApp`](../../rest/v1beta1/projects.iosApps/create) |
+        /// [`WebApp`](../../rest/v1beta1/projects.webApps/create)), then Firebase automatically associates an
+        /// `api_key_id` with the App. This auto-associated key may be an existing valid key or, if no valid key exists,
+        /// a new one will be provisioned.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("apiKeyId")]
+        public virtual string ApiKeyId { get; set; }
+
+        /// <summary>
         /// Output only. Immutable. The globally unique, Firebase-assigned identifier for the `WebApp`. This identifier
         /// should be treated as an opaque token, as the data format is not specified.
         /// </summary>
@@ -3073,6 +3687,47 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
         /// <summary>The user-assigned display name of the Firebase App.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
+
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
+        /// <summary>
+        /// Output only. If the App has been removed from the Project, this is the timestamp of when the App is
+        /// considered expired and will be permanently deleted. After this time, the App cannot be undeleted (that is,
+        /// restored to the Project). This value is only provided if the App is in the `DELETED` state.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The resource name of the Firebase App, in the format: projects/PROJECT_ID /iosApps/APP_ID or
@@ -3095,6 +3750,10 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("platform")]
         public virtual string Platform { get; set; }
 
+        /// <summary>Output only. The lifecycle state of the App.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -3102,17 +3761,34 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
     /// <summary>
     /// A `FirebaseProject` is the top-level Firebase entity. It is the container for Firebase Apps, Firebase Hosting
     /// sites, storage systems (Firebase Realtime Database, Cloud Firestore, Cloud Storage buckets), and other Firebase
-    /// and Google Cloud Platform (GCP) resources. You create a `FirebaseProject` by calling AddFirebase and specifying
-    /// an *existing* [GCP `Project`](https://cloud.google.com/resource-manager/reference/rest/v1/projects). This adds
-    /// Firebase resources to the existing GCP `Project`. Since a FirebaseProject is actually also a GCP `Project`, a
-    /// `FirebaseProject` has the same underlying GCP identifiers (`projectNumber` and `projectId`). This allows for
-    /// easy interop with Google APIs.
+    /// and Google Cloud resources. You create a `FirebaseProject` by calling AddFirebase and specifying an *existing*
+    /// [Google Cloud `Project`](https://cloud.google.com/resource-manager/reference/rest/v1/projects). This adds
+    /// Firebase resources to the existing Google Cloud `Project`. Since a FirebaseProject is actually also a Google
+    /// Cloud `Project`, a `FirebaseProject` has the same underlying Google Cloud identifiers (`projectNumber` and
+    /// `projectId`). This allows for easy interop with Google APIs.
     /// </summary>
     public class FirebaseProject : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// A set of user-defined annotations for the FirebaseProject. Learn more about annotations in Google's [AIP-128
+        /// standard](https://google.aip.dev/128#annotations). These annotations are intended solely for developers and
+        /// client-side tools. Firebase services will not mutate this annotations set.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("annotations")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Annotations { get; set; }
+
         /// <summary>The user-assigned display name of the Project.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
+
+        /// <summary>
+        /// This checksum is computed by the server based on the value of other fields, and it may be sent with update
+        /// requests to ensure the client has an up-to-date value before proceeding. Learn more about `etag` in Google's
+        /// [AIP-154 standard](https://google.aip.dev/154#declarative-friendly-resources). This etag is strongly
+        /// validated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
 
         /// <summary>
         /// The resource name of the Project, in the format: projects/PROJECT_IDENTIFIER PROJECT_IDENTIFIER: the
@@ -3125,42 +3801,55 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// Immutable. A user-assigned unique identifier for the Project. This identifier may appear in URLs or names
-        /// for some Firebase resources associated with the Project, but it should generally be treated as a convenience
-        /// alias to reference the Project.
+        /// Output only. Immutable. A user-assigned unique identifier for the Project. This identifier may appear in
+        /// URLs or names for some Firebase resources associated with the Project, but it should generally be treated as
+        /// a convenience alias to reference the Project.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
         public virtual string ProjectId { get; set; }
 
         /// <summary>
-        /// Immutable. The globally unique, Google-assigned canonical identifier for the Project. Use this identifier
-        /// when configuring integrations and/or making API calls to Firebase or third-party services.
+        /// Output only. Immutable. The globally unique, Google-assigned canonical identifier for the Project. Use this
+        /// identifier when configuring integrations and/or making API calls to Firebase or third-party services.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("projectNumber")]
         public virtual System.Nullable<long> ProjectNumber { get; set; }
 
-        /// <summary>The default Firebase resources associated with the Project.</summary>
+        /// <summary>
+        /// Output only. **DEPRECATED.** _Auto-provisioning of these resources is changing, so this object no longer
+        /// reliably provides information about the Project. Instead, retrieve information about each resource directly
+        /// from its resource-specific API._ The default Firebase resources associated with the Project.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("resources")]
         public virtual DefaultResources Resources { get; set; }
 
-        /// <summary>
-        /// Output only. The lifecycle state of the Project. Updates to the state must be performed via
-        /// com.google.cloudresourcemanager.v1.Projects.DeleteProject and
-        /// com.google.cloudresourcemanager.v1.Projects.UndeleteProject
-        /// </summary>
+        /// <summary>Output only. The lifecycle state of the Project.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
         public virtual string State { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
     }
 
     /// <summary>Details of a Firebase App for iOS.</summary>
     public class IosApp : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Immutable. The globally unique, Firebase-assigned identifier for the `IosApp`. This identifier should be
-        /// treated as an opaque token, as the data format is not specified.
+        /// The globally unique, Google-assigned identifier (UID) for the Firebase API key associated with the `IosApp`.
+        /// Be aware that this value is the UID of the API key, _not_ the
+        /// [`keyString`](https://cloud.google.com/api-keys/docs/reference/rest/v2/projects.locations.keys#Key.FIELDS.key_string)
+        /// of the API key. The `keyString` is the value that can be found in the App's [configuration
+        /// artifact](../../rest/v1beta1/projects.iosApps/getConfig). If `api_key_id` is not set in requests to
+        /// [`iosApps.Create`](../../rest/v1beta1/projects.iosApps/create), then Firebase automatically associates an
+        /// `api_key_id` with the `IosApp`. This auto-associated key may be an existing valid key or, if no valid key
+        /// exists, a new one will be provisioned. In patch requests, `api_key_id` cannot be set to an empty value, and
+        /// the new UID must have no restrictions or only have restrictions that are valid for the associated `IosApp`.
+        /// We recommend using the [Google Cloud Console](https://console.cloud.google.com/apis/credentials) to manage
+        /// API keys.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("apiKeyId")]
+        public virtual string ApiKeyId { get; set; }
+
+        /// <summary>
+        /// Output only. Immutable. The globally unique, Firebase-assigned identifier for the `IosApp`. This identifier
+        /// should be treated as an opaque token, as the data format is not specified.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("appId")]
         public virtual string AppId { get; set; }
@@ -3180,6 +3869,56 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
         public virtual string DisplayName { get; set; }
 
         /// <summary>
+        /// This checksum is computed by the server based on the value of other fields, and it may be sent with update
+        /// requests to ensure the client has an up-to-date value before proceeding. Learn more about `etag` in Google's
+        /// [AIP-154 standard](https://google.aip.dev/154#declarative-friendly-resources). This etag is strongly
+        /// validated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
+        /// <summary>
+        /// Output only. If the App has been removed from the Project, this is the timestamp of when the App is
+        /// considered expired and will be permanently deleted. After this time, the App cannot be undeleted (that is,
+        /// restored to the Project). This value is only provided if the App is in the `DELETED` state.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>
         /// The resource name of the IosApp, in the format: projects/PROJECT_IDENTIFIER /iosApps/APP_ID *
         /// PROJECT_IDENTIFIER: the parent Project's
         /// [`ProjectNumber`](../projects#FirebaseProject.FIELDS.project_number) ***(recommended)*** or its
@@ -3192,17 +3931,18 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// Immutable. A user-assigned unique identifier of the parent FirebaseProject for the `IosApp`.
+        /// Output only. Immutable. A user-assigned unique identifier of the parent FirebaseProject for the `IosApp`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
         public virtual string ProjectId { get; set; }
 
+        /// <summary>Output only. The lifecycle state of the App.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
+
         /// <summary>The Apple Developer Team ID associated with the App in the App Store.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("teamId")]
         public virtual string TeamId { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
     }
 
     /// <summary>Configuration metadata of a single Firebase App for iOS.</summary>
@@ -3271,7 +4011,7 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("nextPageToken")]
         public virtual string NextPageToken { get; set; }
 
-        /// <summary>The list of GCP `Projects` which can have Firebase resources added to them.</summary>
+        /// <summary>The list of Google Cloud `Projects` which can have Firebase resources added to them.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("projectInfo")]
         public virtual System.Collections.Generic.IList<ProjectInfo> ProjectInfo { get; set; }
 
@@ -3344,22 +4084,29 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A GCP resource location that can be selected for a FirebaseProject.</summary>
+    /// <summary>
+    /// **DEPRECATED.** _This Location is no longer used to determine Firebase resource locations. Instead, consult
+    /// product documentation to determine valid locations for each resource used in your Project._ A ["location for
+    /// default Google Cloud resources"](https://firebase.google.com/docs/projects/locations#default-cloud-location)
+    /// that can be selected for a FirebaseProject. These are resources associated with Google App Engine.
+    /// </summary>
     public class Location : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Products and services that are available in the GCP resource location.</summary>
+        /// <summary>
+        /// Products and services that are available in the location for default Google Cloud resources.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("features")]
         public virtual System.Collections.Generic.IList<string> Features { get; set; }
 
         /// <summary>
-        /// The ID of the GCP resource location. It will be one of the available [GCP resource
-        /// locations](https://firebase.google.com/docs/projects/locations#types).
+        /// The ID of the Project's location for default Google Cloud resources. It will be one of the available [Google
+        /// App Engine locations](https://cloud.google.com/about/locations#region).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("locationId")]
         public virtual string LocationId { get; set; }
 
         /// <summary>
-        /// Indicates whether the GCP resource location is a [regional or multi-regional
+        /// Indicates whether the location for default Google Cloud resources is a [regional or multi-regional
         /// location](https://firebase.google.com/docs/projects/locations#types) for data replication.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
@@ -3406,8 +4153,8 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
@@ -3419,26 +4166,45 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>A reference to a Google Cloud Platform (GCP) `Project`.</summary>
+    /// <summary>Describes the progress of an LRO. It is included in the `metadata` field of the `Operation`.</summary>
+    public class OperationMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata about a long-running Product operation.</summary>
+    public class ProductMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>List of warnings related to the associated operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("warningMessages")]
+        public virtual System.Collections.Generic.IList<string> WarningMessages { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A reference to a Google Cloud `Project`.</summary>
     public class ProjectInfo : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The user-assigned display name of the GCP `Project`, for example: `My App`</summary>
+        /// <summary>The user-assigned display name of the Google Cloud `Project`, for example: `My App`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
 
         /// <summary>
-        /// The ID of the Project's default GCP resource location. The location is one of the available [GCP resource
-        /// locations](https://firebase.google.com/docs/projects/locations). Not all Projects will have this field
-        /// populated. If it is not populated, it means that the Project does not yet have a default GCP resource
-        /// location. To set a Project's default GCP resource location, call
-        /// [`FinalizeDefaultLocation`](../projects.defaultLocation/finalize) after you add Firebase resources to the
-        /// Project.
+        /// **DEPRECATED** _Instead, use product-specific REST APIs to work with the location of each resource in a
+        /// Project. This field may not be populated, especially for newly provisioned projects after October 30, 2024._
+        /// The ID of the Project's ["location for default Google Cloud
+        /// resources"](https://firebase.google.com/docs/projects/locations#default-cloud-location). The location is one
+        /// of the available [Google App Engine locations](https://cloud.google.com/about/locations#region). Not all
+        /// Projects will have this field populated. If it is not populated, it means that the Project does not yet have
+        /// a location for default Google Cloud resources.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("locationId")]
         public virtual string LocationId { get; set; }
 
         /// <summary>
-        /// The resource name of the GCP `Project` to which Firebase resources can be added, in the format:
+        /// The resource name of the Google Cloud `Project` to which Firebase resources can be added, in the format:
         /// projects/PROJECT_IDENTIFIER Refer to the `FirebaseProject` [`name`](../projects#FirebaseProject.FIELDS.name)
         /// field for details about PROJECT_IDENTIFIER values.
         /// </summary>
@@ -3462,6 +4228,96 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
+    }
+
+    public class RemoveAndroidAppRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// If set to true, and the App is not found, the request will succeed but no action will be taken on the
+        /// server.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("allowMissing")]
+        public virtual System.Nullable<bool> AllowMissing { get; set; }
+
+        /// <summary>
+        /// Checksum provided in the AndroidApp resource. If provided, this checksum ensures that the client has an
+        /// up-to-date value before proceeding.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>
+        /// Determines whether to _immediately_ delete the AndroidApp. If set to true, the App is immediately deleted
+        /// from the Project and cannot be undeleted (that is, restored to the Project). If not set, defaults to false,
+        /// which means the App will be set to expire in 30 days. Within the 30 days, the App may be restored to the
+        /// Project using UndeleteAndroidApp.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("immediate")]
+        public virtual System.Nullable<bool> Immediate { get; set; }
+
+        /// <summary>If set to true, the request is only validated. The App will _not_ be removed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("validateOnly")]
+        public virtual System.Nullable<bool> ValidateOnly { get; set; }
+    }
+
+    public class RemoveIosAppRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// If set to true, and the App is not found, the request will succeed but no action will be taken on the
+        /// server.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("allowMissing")]
+        public virtual System.Nullable<bool> AllowMissing { get; set; }
+
+        /// <summary>
+        /// Checksum provided in the IosApp resource. If provided, this checksum ensures that the client has an
+        /// up-to-date value before proceeding.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>
+        /// Determines whether to _immediately_ delete the IosApp. If set to true, the App is immediately deleted from
+        /// the Project and cannot be undeleted (that is, restored to the Project). If not set, defaults to false, which
+        /// means the App will be set to expire in 30 days. Within the 30 days, the App may be restored to the Project
+        /// using UndeleteIosApp
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("immediate")]
+        public virtual System.Nullable<bool> Immediate { get; set; }
+
+        /// <summary>If set to true, the request is only validated. The App will _not_ be removed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("validateOnly")]
+        public virtual System.Nullable<bool> ValidateOnly { get; set; }
+    }
+
+    public class RemoveWebAppRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// If set to true, and the App is not found, the request will succeed but no action will be taken on the
+        /// server.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("allowMissing")]
+        public virtual System.Nullable<bool> AllowMissing { get; set; }
+
+        /// <summary>
+        /// Checksum provided in the WebApp resource. If provided, this checksum ensures that the client has an
+        /// up-to-date value before proceeding.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>
+        /// Determines whether to _immediately_ delete the WebApp. If set to true, the App is immediately deleted from
+        /// the Project and cannot be undeleted (that is, restored to the Project). If not set, defaults to false, which
+        /// means the App will be set to expire in 30 days. Within the 30 days, the App may be restored to the Project
+        /// using UndeleteWebApp
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("immediate")]
+        public virtual System.Nullable<bool> Immediate { get; set; }
+
+        /// <summary>If set to true, the request is only validated. The App will _not_ be removed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("validateOnly")]
+        public virtual System.Nullable<bool> ValidateOnly { get; set; }
     }
 
     public class SearchFirebaseAppsResponse : Google.Apis.Requests.IDirectResponseSchema
@@ -3543,27 +4399,38 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
     public class StatusProto : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The canonical error code (see codes.proto) that most closely corresponds to this status. May be missing.
+        /// The canonical error code (see codes.proto) that most closely corresponds to this status. This may be
+        /// missing, and in the common case of the generic space, it definitely will be.
+        /// copybara:strip_begin(b/383363683) copybara:strip_end_and_replace optional int32 canonical_code = 6;
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("canonicalCode")]
         public virtual System.Nullable<int> CanonicalCode { get; set; }
 
         /// <summary>
         /// Numeric code drawn from the space specified below. Often, this is the canonical error space, and code is
-        /// drawn from google3/util/task/codes.proto
+        /// drawn from google3/util/task/codes.proto copybara:strip_begin(b/383363683) copybara:strip_end_and_replace
+        /// optional int32 code = 1;
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("code")]
         public virtual System.Nullable<int> Code { get; set; }
 
-        /// <summary>Detail message</summary>
+        /// <summary>
+        /// Detail message copybara:strip_begin(b/383363683) copybara:strip_end_and_replace optional string message = 3;
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("message")]
         public virtual string Message { get; set; }
 
-        /// <summary>message_set associates an arbitrary proto message with the status.</summary>
+        /// <summary>
+        /// message_set associates an arbitrary proto message with the status. copybara:strip_begin(b/383363683)
+        /// copybara:strip_end_and_replace optional proto2.bridge.MessageSet message_set = 5;
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("messageSet")]
         public virtual MessageSet MessageSet { get; set; }
 
-        /// <summary>The following are usually only present when code != 0 Space to which this status belongs</summary>
+        /// <summary>
+        /// The following are usually only present when code != 0 Space to which this status belongs
+        /// copybara:strip_begin(b/383363683) copybara:strip_end_and_replace optional string space = 2;
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("space")]
         public virtual string Space { get; set; }
 
@@ -3604,12 +4471,70 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
         public virtual string ETag { get; set; }
     }
 
+    public class UndeleteAndroidAppRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Checksum provided in the AndroidApp resource. If provided, this checksum ensures that the client has an
+        /// up-to-date value before proceeding.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>If set to true, the request is only validated. The App will _not_ be undeleted.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("validateOnly")]
+        public virtual System.Nullable<bool> ValidateOnly { get; set; }
+    }
+
+    public class UndeleteIosAppRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Checksum provided in the IosApp resource. If provided, this checksum ensures that the client has an
+        /// up-to-date value before proceeding.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>If set to true, the request is only validated. The App will _not_ be undeleted.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("validateOnly")]
+        public virtual System.Nullable<bool> ValidateOnly { get; set; }
+    }
+
+    public class UndeleteWebAppRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Checksum provided in the WebApp resource. If provided, this checksum ensures that the client has an
+        /// up-to-date value before proceeding.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        /// <summary>If set to true, the request is only validated. The App will _not_ be undeleted.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("validateOnly")]
+        public virtual System.Nullable<bool> ValidateOnly { get; set; }
+    }
+
     /// <summary>Details of a Firebase App for the web.</summary>
     public class WebApp : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Immutable. The globally unique, Firebase-assigned identifier for the `WebApp`. This identifier should be
-        /// treated as an opaque token, as the data format is not specified.
+        /// The globally unique, Google-assigned identifier (UID) for the Firebase API key associated with the `WebApp`.
+        /// Be aware that this value is the UID of the API key, _not_ the
+        /// [`keyString`](https://cloud.google.com/api-keys/docs/reference/rest/v2/projects.locations.keys#Key.FIELDS.key_string)
+        /// of the API key. The `keyString` is the value that can be found in the App's [configuration
+        /// artifact](../../rest/v1beta1/projects.webApps/getConfig). If `api_key_id` is not set in requests to
+        /// [`webApps.Create`](../../rest/v1beta1/projects.webApps/create), then Firebase automatically associates an
+        /// `api_key_id` with the `WebApp`. This auto-associated key may be an existing valid key or, if no valid key
+        /// exists, a new one will be provisioned. In patch requests, `api_key_id` cannot be set to an empty value, and
+        /// the new UID must have no restrictions or only have restrictions that are valid for the associated `WebApp`.
+        /// We recommend using the [Google Cloud Console](https://console.cloud.google.com/apis/credentials) to manage
+        /// API keys.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("apiKeyId")]
+        public virtual string ApiKeyId { get; set; }
+
+        /// <summary>
+        /// Output only. Immutable. The globally unique, Firebase-assigned identifier for the `WebApp`. This identifier
+        /// should be treated as an opaque token, as the data format is not specified.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("appId")]
         public virtual string AppId { get; set; }
@@ -3621,6 +4546,56 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
         /// <summary>The user-assigned display name for the `WebApp`.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
+
+        /// <summary>
+        /// This checksum is computed by the server based on the value of other fields, and it may be sent with update
+        /// requests to ensure the client has an up-to-date value before proceeding. Learn more about `etag` in Google's
+        /// [AIP-154 standard](https://google.aip.dev/154#declarative-friendly-resources). This etag is strongly
+        /// validated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("etag")]
+        public virtual string ETag { get; set; }
+
+        private string _expireTimeRaw;
+
+        private object _expireTime;
+
+        /// <summary>
+        /// Output only. If the App has been removed from the Project, this is the timestamp of when the App is
+        /// considered expired and will be permanently deleted. After this time, the App cannot be undeleted (that is,
+        /// restored to the Project). This value is only provided if the App is in the `DELETED` state.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("expireTime")]
+        public virtual string ExpireTimeRaw
+        {
+            get => _expireTimeRaw;
+            set
+            {
+                _expireTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _expireTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use ExpireTimeDateTimeOffset instead.")]
+        public virtual object ExpireTime
+        {
+            get => _expireTime;
+            set
+            {
+                _expireTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _expireTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="ExpireTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? ExpireTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(ExpireTimeRaw);
+            set => ExpireTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The resource name of the WebApp, in the format: projects/PROJECT_IDENTIFIER /webApps/APP_ID *
@@ -3635,10 +4610,14 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// Immutable. A user-assigned unique identifier of the parent FirebaseProject for the `WebApp`.
+        /// Output only. Immutable. A user-assigned unique identifier of the parent FirebaseProject for the `WebApp`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
         public virtual string ProjectId { get; set; }
+
+        /// <summary>Output only. The lifecycle state of the App.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("state")]
+        public virtual string State { get; set; }
 
         /// <summary>
         /// Output only. Immutable. A unique, Firebase-assigned identifier for the `WebApp`. This identifier is only
@@ -3647,15 +4626,18 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("webId")]
         public virtual string WebId { get; set; }
-
-        /// <summary>The ETag of the item.</summary>
-        public virtual string ETag { get; set; }
     }
 
     /// <summary>Configuration metadata of a single Firebase App for the web.</summary>
     public class WebAppConfig : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>The API key associated with the `WebApp`.</summary>
+        /// <summary>
+        /// The
+        /// [`keyString`](https://cloud.google.com/api-keys/docs/reference/rest/v2/projects.locations.keys#Key.FIELDS.key_string)
+        /// of the API key associated with the `WebApp`. Note that this value is _not_ the
+        /// [`apiKeyId`](../projects.webApps#WebApp.FIELDS.api_key_id) (the UID) of the API key associated with the
+        /// `WebApp`.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("apiKey")]
         public virtual string ApiKey { get; set; }
 
@@ -3669,16 +4651,25 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("authDomain")]
         public virtual string AuthDomain { get; set; }
 
-        /// <summary>The default Firebase Realtime Database URL.</summary>
+        /// <summary>
+        /// **DEPRECATED.** _Instead, find the URL of the default Realtime Database instance using the [list
+        /// endpoint](https://firebase.google.com/docs/reference/rest/database/database-management/rest/v1beta/projects.locations.instances/list)
+        /// within the Firebase Realtime Database REST API. If the default instance for the Project has not yet been
+        /// provisioned, the return might not contain a default instance. Note that the config that's generated for the
+        /// Firebase console or the Firebase CLI uses the Realtime Database endpoint to populate this value for that
+        /// config._ The URL of the default Firebase Realtime Database instance.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("databaseURL")]
         public virtual string DatabaseURL { get; set; }
 
         /// <summary>
-        /// The ID of the Project's default GCP resource location. The location is one of the available [GCP resource
-        /// locations](https://firebase.google.com/docs/projects/locations). This field is omitted if the default GCP
-        /// resource location has not been finalized yet. To set a Project's default GCP resource location, call
-        /// [`FinalizeDefaultLocation`](../projects.defaultLocation/finalize) after you add Firebase resources to the
-        /// Project.
+        /// **DEPRECATED.** _Instead, use product-specific REST APIs to find the location of each resource in a Project.
+        /// This field may not be populated, especially for newly provisioned projects after October 30, 2024._ The ID
+        /// of the Project's ["location for default Google Cloud
+        /// resources"](https://firebase.google.com/docs/projects/locations#default-cloud-location), which are resources
+        /// associated with Google App Engine. The location is one of the available [App Engine
+        /// locations](https://cloud.google.com/about/locations#region). This field is omitted if the location for
+        /// default Google Cloud resources has not been set.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("locationId")]
         public virtual string LocationId { get; set; }
@@ -3705,9 +4696,35 @@ namespace Google.Apis.FirebaseManagement.v1beta1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
         public virtual string ProjectId { get; set; }
 
-        /// <summary>The default Cloud Storage for Firebase storage bucket name.</summary>
+        /// <summary>
+        /// Output only. Immutable. The globally unique, Google-assigned canonical identifier for the Project. Use this
+        /// identifier when configuring integrations and/or making API calls to Google Cloud or third-party services.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("projectNumber")]
+        public virtual string ProjectNumber { get; set; }
+
+        /// <summary>
+        /// Optional. Duplicate field for the URL of the default Realtime Database instances (if the default instance
+        /// has been provisioned). If the request asks for the V2 config format, this field will be populated instead of
+        /// `realtime_database_instance_uri`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("realtimeDatabaseUrl")]
+        public virtual string RealtimeDatabaseUrl { get; set; }
+
+        /// <summary>
+        /// **DEPRECATED.** _Instead, find the name of the default Cloud Storage for Firebase bucket using the [list
+        /// endpoint](https://firebase.google.com/docs/reference/rest/storage/rest/v1beta/projects.buckets/list) within
+        /// the Cloud Storage for Firebase REST API. If the default bucket for the Project has not yet been provisioned,
+        /// the return might not contain a default bucket. Note that the config that's generated for the Firebase
+        /// console or the Firebase CLI uses the Cloud Storage for Firebase endpoint to populate this value for that
+        /// config._ The name of the default Cloud Storage for Firebase bucket.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("storageBucket")]
         public virtual string StorageBucket { get; set; }
+
+        /// <summary>Version of the config specification.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("version")]
+        public virtual string Version { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

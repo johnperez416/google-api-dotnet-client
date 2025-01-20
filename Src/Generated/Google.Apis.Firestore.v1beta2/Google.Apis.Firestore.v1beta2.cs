@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.Firestore.v1beta2
         public FirestoreService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Projects = new ProjectsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://firestore.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://firestore.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.Firestore.v1beta2
         public override string Name => "firestore";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://firestore.googleapis.com/";
-        #else
-            "https://firestore.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://firestore.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Firestore API.</summary>
         public class Scope
@@ -349,7 +344,7 @@ namespace Google.Apis.Firestore.v1beta2
                     /// </param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Gets the metadata and configuration for a Field.</summary>
@@ -405,7 +400,7 @@ namespace Google.Apis.Firestore.v1beta2
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>
@@ -515,7 +510,8 @@ namespace Google.Apis.Firestore.v1beta2
                     /// e.g. `address.city`, or a special field path. The only valid special field is `*`, which
                     /// represents any field. Field paths may be quoted using ` (backtick). The only character that
                     /// needs to be escaped within a quoted field path is the backtick character itself, escaped using a
-                    /// backslash. Special characters in field paths that must be quoted include: `*`, `.`, ```
+                    /// backslash. Special characters in field paths that must be quoted include: `*`, `.`,
+                    /// ```
                     /// (backtick), `[`, `]`, as well as any ascii symbolic characters. Examples: (Note: Comments here
                     /// are written in markdown syntax, so there is an additional layer of backticks to represent a code
                     /// block) `\`address.city\`` represents a field named `address.city`, not the map key `city` in the
@@ -527,7 +523,7 @@ namespace Google.Apis.Firestore.v1beta2
                     /// </param>
                     public virtual PatchRequest Patch(Google.Apis.Firestore.v1beta2.Data.GoogleFirestoreAdminV1beta2Field body, string name)
                     {
-                        return new PatchRequest(service, body, name);
+                        return new PatchRequest(this.service, body, name);
                     }
 
                     /// <summary>
@@ -558,7 +554,8 @@ namespace Google.Apis.Firestore.v1beta2
                         /// represents any field. Field paths may be quoted using ` (backtick). The only character that
                         /// needs to be escaped within a quoted field path is the backtick character itself, escaped
                         /// using a backslash. Special characters in field paths that must be quoted include: `*`, `.`,
-                        /// ``` (backtick), `[`, `]`, as well as any ascii symbolic characters. Examples: (Note:
+                        /// ```
+                        /// (backtick), `[`, `]`, as well as any ascii symbolic characters. Examples: (Note:
                         /// Comments here are written in markdown syntax, so there is an additional layer of backticks
                         /// to represent a code block) `\`address.city\`` represents a field named `address.city`, not
                         /// the map key `city` in the field `address`. `\`*\`` represents a field named `*`, not any
@@ -646,7 +643,7 @@ namespace Google.Apis.Firestore.v1beta2
                     /// </param>
                     public virtual CreateRequest Create(Google.Apis.Firestore.v1beta2.Data.GoogleFirestoreAdminV1beta2Index body, string parent)
                     {
-                        return new CreateRequest(service, body, parent);
+                        return new CreateRequest(this.service, body, parent);
                     }
 
                     /// <summary>
@@ -708,7 +705,7 @@ namespace Google.Apis.Firestore.v1beta2
                     /// </param>
                     public virtual DeleteRequest Delete(string name)
                     {
-                        return new DeleteRequest(service, name);
+                        return new DeleteRequest(this.service, name);
                     }
 
                     /// <summary>Deletes a composite index.</summary>
@@ -759,7 +756,7 @@ namespace Google.Apis.Firestore.v1beta2
                     /// </param>
                     public virtual GetRequest Get(string name)
                     {
-                        return new GetRequest(service, name);
+                        return new GetRequest(this.service, name);
                     }
 
                     /// <summary>Gets a composite index.</summary>
@@ -810,7 +807,7 @@ namespace Google.Apis.Firestore.v1beta2
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>Lists composite indexes.</summary>
@@ -908,7 +905,7 @@ namespace Google.Apis.Firestore.v1beta2
             /// </param>
             public virtual ExportDocumentsRequest ExportDocuments(Google.Apis.Firestore.v1beta2.Data.GoogleFirestoreAdminV1beta2ExportDocumentsRequest body, string name)
             {
-                return new ExportDocumentsRequest(service, body, name);
+                return new ExportDocumentsRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -976,7 +973,7 @@ namespace Google.Apis.Firestore.v1beta2
             /// </param>
             public virtual ImportDocumentsRequest ImportDocuments(Google.Apis.Firestore.v1beta2.Data.GoogleFirestoreAdminV1beta2ImportDocumentsRequest body, string name)
             {
-                return new ImportDocumentsRequest(service, body, name);
+                return new ImportDocumentsRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -1038,10 +1035,287 @@ namespace Google.Apis.Firestore.v1beta2.Data
     /// <summary>
     /// A generic empty message that you can re-use to avoid defining duplicated empty messages in your APIs. A typical
     /// example is to use it as the request or the response type of an API method. For instance: service Foo { rpc
-    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); } The JSON representation for `Empty` is empty JSON
-    /// object `{}`.
+    /// Bar(google.protobuf.Empty) returns (google.protobuf.Empty); }
     /// </summary>
     public class Empty : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata for google.longrunning.Operation results from FirestoreAdmin.BulkDeleteDocuments.</summary>
+    public class GoogleFirestoreAdminV1BulkDeleteDocumentsMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The IDs of the collection groups that are being deleted.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("collectionIds")]
+        public virtual System.Collections.Generic.IList<string> CollectionIds { get; set; }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
+
+        /// <summary>The time this operation completed. Will be unset if operation still in progress.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>Which namespace IDs are being deleted.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("namespaceIds")]
+        public virtual System.Collections.Generic.IList<string> NamespaceIds { get; set; }
+
+        /// <summary>The state of the operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("operationState")]
+        public virtual string OperationState { get; set; }
+
+        /// <summary>The progress, in bytes, of this operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("progressBytes")]
+        public virtual GoogleFirestoreAdminV1Progress ProgressBytes { get; set; }
+
+        /// <summary>The progress, in documents, of this operation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("progressDocuments")]
+        public virtual GoogleFirestoreAdminV1Progress ProgressDocuments { get; set; }
+
+        private string _snapshotTimeRaw;
+
+        private object _snapshotTime;
+
+        /// <summary>
+        /// The timestamp that corresponds to the version of the database that is being read to get the list of
+        /// documents to delete. This time can also be used as the timestamp of PITR in case of disaster recovery
+        /// (subject to PITR window limit).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("snapshotTime")]
+        public virtual string SnapshotTimeRaw
+        {
+            get => _snapshotTimeRaw;
+            set
+            {
+                _snapshotTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _snapshotTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="SnapshotTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use SnapshotTimeDateTimeOffset instead.")]
+        public virtual object SnapshotTime
+        {
+            get => _snapshotTime;
+            set
+            {
+                _snapshotTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _snapshotTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="SnapshotTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? SnapshotTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(SnapshotTimeRaw);
+            set => SnapshotTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
+        /// <summary>The time this operation started.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata related to the create database operation.</summary>
+    public class GoogleFirestoreAdminV1CreateDatabaseMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata related to the delete database operation.</summary>
+    public class GoogleFirestoreAdminV1DeleteDatabaseMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Describes the progress of the operation. Unit of work is generic and must be interpreted based on where Progress
+    /// is used.
+    /// </summary>
+    public class GoogleFirestoreAdminV1Progress : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The amount of work completed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("completedWork")]
+        public virtual System.Nullable<long> CompletedWork { get; set; }
+
+        /// <summary>The amount of work estimated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("estimatedWork")]
+        public virtual System.Nullable<long> EstimatedWork { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata for the long-running operation from the RestoreDatabase request.</summary>
+    public class GoogleFirestoreAdminV1RestoreDatabaseMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The name of the backup restoring from.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("backup")]
+        public virtual string Backup { get; set; }
+
+        /// <summary>The name of the database being restored to.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("database")]
+        public virtual string Database { get; set; }
+
+        private string _endTimeRaw;
+
+        private object _endTime;
+
+        /// <summary>The time the restore finished, unset for ongoing restores.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The operation state of the restore.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("operationState")]
+        public virtual string OperationState { get; set; }
+
+        /// <summary>How far along the restore is as an estimated percentage of remaining time.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("progressPercentage")]
+        public virtual GoogleFirestoreAdminV1Progress ProgressPercentage { get; set; }
+
+        private string _startTimeRaw;
+
+        private object _startTime;
+
+        /// <summary>The time the restore was started.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata related to the update database operation.</summary>
+    public class GoogleFirestoreAdminV1UpdateDatabaseMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1054,9 +1328,42 @@ namespace Google.Apis.Firestore.v1beta2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("collectionIds")]
         public virtual System.Collections.Generic.IList<string> CollectionIds { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>The time this operation completed. Will be unset if operation still in progress.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The state of the export operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("operationState")]
@@ -1074,9 +1381,42 @@ namespace Google.Apis.Firestore.v1beta2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("progressDocuments")]
         public virtual GoogleFirestoreAdminV1beta2Progress ProgressDocuments { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>The time this operation started.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1138,7 +1478,9 @@ namespace Google.Apis.Firestore.v1beta2.Data
         /// or a special field path. The only valid special field is `*`, which represents any field. Field paths may be
         /// quoted using ` (backtick). The only character that needs to be escaped within a quoted field path is the
         /// backtick character itself, escaped using a backslash. Special characters in field paths that must be quoted
-        /// include: `*`, `.`, ``` (backtick), `[`, `]`, as well as any ascii symbolic characters. Examples: (Note:
+        /// include: `*`, `.`,
+        /// ```
+        /// (backtick), `[`, `]`, as well as any ascii symbolic characters. Examples: (Note:
         /// Comments here are written in markdown syntax, so there is an additional layer of backticks to represent a
         /// code block) `\`address.city\`` represents a field named `address.city`, not the map key `city` in the field
         /// `address`. `\`*\`` represents a field named `*`, not any field. A special `Field` contains the default
@@ -1164,9 +1506,42 @@ namespace Google.Apis.Firestore.v1beta2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("documentProgress")]
         public virtual GoogleFirestoreAdminV1beta2Progress DocumentProgress { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>The time this operation completed. Will be unset if operation still in progress.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The field resource that this operation is acting on. For example:
@@ -1179,9 +1554,42 @@ namespace Google.Apis.Firestore.v1beta2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("indexConfigDeltas")]
         public virtual System.Collections.Generic.IList<GoogleFirestoreAdminV1beta2IndexConfigDelta> IndexConfigDeltas { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>The time this operation started.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The state of the operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
@@ -1198,9 +1606,42 @@ namespace Google.Apis.Firestore.v1beta2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("collectionIds")]
         public virtual System.Collections.Generic.IList<string> CollectionIds { get; set; }
 
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>The time this operation completed. Will be unset if operation still in progress.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The location of the documents being imported.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("inputUriPrefix")]
@@ -1218,9 +1659,42 @@ namespace Google.Apis.Firestore.v1beta2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("progressDocuments")]
         public virtual GoogleFirestoreAdminV1beta2Progress ProgressDocuments { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>The time this operation started.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1363,9 +1837,42 @@ namespace Google.Apis.Firestore.v1beta2.Data
     /// <summary>Metadata for google.longrunning.Operation results from FirestoreAdmin.CreateIndex.</summary>
     public class GoogleFirestoreAdminV1beta2IndexOperationMetadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _endTimeRaw;
+
+        private object _endTime;
+
         /// <summary>The time this operation completed. Will be unset if operation still in progress.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
-        public virtual object EndTime { get; set; }
+        public virtual string EndTimeRaw
+        {
+            get => _endTimeRaw;
+            set
+            {
+                _endTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _endTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+        public virtual object EndTime
+        {
+            get => _endTime;
+            set
+            {
+                _endTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _endTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EndTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+            set => EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// The index resource that this operation is acting on. For example:
@@ -1382,9 +1889,42 @@ namespace Google.Apis.Firestore.v1beta2.Data
         [Newtonsoft.Json.JsonPropertyAttribute("progressDocuments")]
         public virtual GoogleFirestoreAdminV1beta2Progress ProgressDocuments { get; set; }
 
+        private string _startTimeRaw;
+
+        private object _startTime;
+
         /// <summary>The time this operation started.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
-        public virtual object StartTime { get; set; }
+        public virtual string StartTimeRaw
+        {
+            get => _startTimeRaw;
+            set
+            {
+                _startTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _startTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+        public virtual object StartTime
+        {
+            get => _startTime;
+            set
+            {
+                _startTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _startTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="StartTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+            set => StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The state of the operation.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("state")]
@@ -1476,8 +2016,8 @@ namespace Google.Apis.Firestore.v1beta2.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.

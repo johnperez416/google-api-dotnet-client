@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,8 +35,11 @@ namespace Google.Apis.Cloudbilling.v1
         public CloudbillingService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             BillingAccounts = new BillingAccountsResource(this);
+            Organizations = new OrganizationsResource(this);
             Projects = new ProjectsResource(this);
             Services = new ServicesResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://cloudbilling.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://cloudbilling.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -46,23 +49,16 @@ namespace Google.Apis.Cloudbilling.v1
         public override string Name => "cloudbilling";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://cloudbilling.googleapis.com/";
-        #else
-            "https://cloudbilling.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://cloudbilling.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Billing API.</summary>
         public class Scope
@@ -98,6 +94,9 @@ namespace Google.Apis.Cloudbilling.v1
 
         /// <summary>Gets the BillingAccounts resource.</summary>
         public virtual BillingAccountsResource BillingAccounts { get; }
+
+        /// <summary>Gets the Organizations resource.</summary>
+        public virtual OrganizationsResource Organizations { get; }
 
         /// <summary>Gets the Projects resource.</summary>
         public virtual ProjectsResource Projects { get; }
@@ -300,6 +299,7 @@ namespace Google.Apis.Cloudbilling.v1
         {
             this.service = service;
             Projects = new ProjectsResource(service);
+            SubAccounts = new SubAccountsResource(service);
         }
 
         /// <summary>Gets the Projects resource.</summary>
@@ -330,7 +330,7 @@ namespace Google.Apis.Cloudbilling.v1
             /// </param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>
@@ -407,21 +407,204 @@ namespace Google.Apis.Cloudbilling.v1
             }
         }
 
-        /// <summary>
-        /// This method creates [billing subaccounts](https://cloud.google.com/billing/docs/concepts#subaccounts).
-        /// Google Cloud resellers should use the Channel Services APIs,
-        /// [accounts.customers.create](https://cloud.google.com/channel/docs/reference/rest/v1/accounts.customers/create)
-        /// and
-        /// [accounts.customers.entitlements.create](https://cloud.google.com/channel/docs/reference/rest/v1/accounts.customers.entitlements/create).
-        /// When creating a subaccount, the current authenticated user must have the `billing.accounts.update` IAM
-        /// permission on the parent account, which is typically given to billing account
-        /// [administrators](https://cloud.google.com/billing/docs/how-to/billing-access). This method will return an
-        /// error if the parent account has not been provisioned as a reseller account.
-        /// </summary>
-        /// <param name="body">The body of the request.</param>
-        public virtual CreateRequest Create(Google.Apis.Cloudbilling.v1.Data.BillingAccount body)
+        /// <summary>Gets the SubAccounts resource.</summary>
+        public virtual SubAccountsResource SubAccounts { get; }
+
+        /// <summary>The "subAccounts" collection of methods.</summary>
+        public class SubAccountsResource
         {
-            return new CreateRequest(service, body);
+            private const string Resource = "subAccounts";
+
+            /// <summary>The service which this resource belongs to.</summary>
+            private readonly Google.Apis.Services.IClientService service;
+
+            /// <summary>Constructs a new resource.</summary>
+            public SubAccountsResource(Google.Apis.Services.IClientService service)
+            {
+                this.service = service;
+            }
+
+            /// <summary>
+            /// This method creates [billing subaccounts](https://cloud.google.com/billing/docs/concepts#subaccounts).
+            /// Google Cloud resellers should use the Channel Services APIs,
+            /// [accounts.customers.create](https://cloud.google.com/channel/docs/reference/rest/v1/accounts.customers/create)
+            /// and
+            /// [accounts.customers.entitlements.create](https://cloud.google.com/channel/docs/reference/rest/v1/accounts.customers.entitlements/create).
+            /// When creating a subaccount, the current authenticated user must have the `billing.accounts.update` IAM
+            /// permission on the parent account, which is typically given to billing account
+            /// [administrators](https://cloud.google.com/billing/docs/how-to/billing-access). This method will return
+            /// an error if the parent account has not been provisioned for subaccounts.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="parent">
+            /// Optional. The parent to create a billing account from. Format: - `billingAccounts/{billing_account_id}`,
+            /// for example, `billingAccounts/012345-567890-ABCDEF`
+            /// </param>
+            public virtual CreateRequest Create(Google.Apis.Cloudbilling.v1.Data.BillingAccount body, string parent)
+            {
+                return new CreateRequest(this.service, body, parent);
+            }
+
+            /// <summary>
+            /// This method creates [billing subaccounts](https://cloud.google.com/billing/docs/concepts#subaccounts).
+            /// Google Cloud resellers should use the Channel Services APIs,
+            /// [accounts.customers.create](https://cloud.google.com/channel/docs/reference/rest/v1/accounts.customers/create)
+            /// and
+            /// [accounts.customers.entitlements.create](https://cloud.google.com/channel/docs/reference/rest/v1/accounts.customers.entitlements/create).
+            /// When creating a subaccount, the current authenticated user must have the `billing.accounts.update` IAM
+            /// permission on the parent account, which is typically given to billing account
+            /// [administrators](https://cloud.google.com/billing/docs/how-to/billing-access). This method will return
+            /// an error if the parent account has not been provisioned for subaccounts.
+            /// </summary>
+            public class CreateRequest : CloudbillingBaseServiceRequest<Google.Apis.Cloudbilling.v1.Data.BillingAccount>
+            {
+                /// <summary>Constructs a new Create request.</summary>
+                public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Cloudbilling.v1.Data.BillingAccount body, string parent) : base(service)
+                {
+                    Parent = parent;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Optional. The parent to create a billing account from. Format: -
+                /// `billingAccounts/{billing_account_id}`, for example, `billingAccounts/012345-567890-ABCDEF`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.Cloudbilling.v1.Data.BillingAccount Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "create";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+parent}/subAccounts";
+
+                /// <summary>Initializes Create parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^billingAccounts/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>
+            /// Lists the billing accounts that the current authenticated user has permission to
+            /// [view](https://cloud.google.com/billing/docs/how-to/billing-access).
+            /// </summary>
+            /// <param name="parent">
+            /// Optional. The parent resource to list billing accounts from. Format: -
+            /// `organizations/{organization_id}`, for example, `organizations/12345678` -
+            /// `billingAccounts/{billing_account_id}`, for example, `billingAccounts/012345-567890-ABCDEF`
+            /// </param>
+            public virtual ListRequest List(string parent)
+            {
+                return new ListRequest(this.service, parent);
+            }
+
+            /// <summary>
+            /// Lists the billing accounts that the current authenticated user has permission to
+            /// [view](https://cloud.google.com/billing/docs/how-to/billing-access).
+            /// </summary>
+            public class ListRequest : CloudbillingBaseServiceRequest<Google.Apis.Cloudbilling.v1.Data.ListBillingAccountsResponse>
+            {
+                /// <summary>Constructs a new List request.</summary>
+                public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                {
+                    Parent = parent;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Optional. The parent resource to list billing accounts from. Format: -
+                /// `organizations/{organization_id}`, for example, `organizations/12345678` -
+                /// `billingAccounts/{billing_account_id}`, for example, `billingAccounts/012345-567890-ABCDEF`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>
+                /// Options for how to filter the returned billing accounts. This only supports filtering for
+                /// [subaccounts](https://cloud.google.com/billing/docs/concepts) under a single provided parent billing
+                /// account. (for example, `master_billing_account=billingAccounts/012345-678901-ABCDEF`). Boolean
+                /// algebra and other fields are not currently supported.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string Filter { get; set; }
+
+                /// <summary>Requested page size. The maximum page size is 100; this is also the default.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<int> PageSize { get; set; }
+
+                /// <summary>
+                /// A token identifying a page of results to return. This should be a `next_page_token` value returned
+                /// from a previous `ListBillingAccounts` call. If unspecified, the first page of results is returned.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string PageToken { get; set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "list";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+parent}/subAccounts";
+
+                /// <summary>Initializes List parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^billingAccounts/[^/]+$",
+                    });
+                    RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "filter",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageSize",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageToken",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
         }
 
         /// <summary>
@@ -433,7 +616,24 @@ namespace Google.Apis.Cloudbilling.v1
         /// When creating a subaccount, the current authenticated user must have the `billing.accounts.update` IAM
         /// permission on the parent account, which is typically given to billing account
         /// [administrators](https://cloud.google.com/billing/docs/how-to/billing-access). This method will return an
-        /// error if the parent account has not been provisioned as a reseller account.
+        /// error if the parent account has not been provisioned for subaccounts.
+        /// </summary>
+        /// <param name="body">The body of the request.</param>
+        public virtual CreateRequest Create(Google.Apis.Cloudbilling.v1.Data.BillingAccount body)
+        {
+            return new CreateRequest(this.service, body);
+        }
+
+        /// <summary>
+        /// This method creates [billing subaccounts](https://cloud.google.com/billing/docs/concepts#subaccounts).
+        /// Google Cloud resellers should use the Channel Services APIs,
+        /// [accounts.customers.create](https://cloud.google.com/channel/docs/reference/rest/v1/accounts.customers/create)
+        /// and
+        /// [accounts.customers.entitlements.create](https://cloud.google.com/channel/docs/reference/rest/v1/accounts.customers.entitlements/create).
+        /// When creating a subaccount, the current authenticated user must have the `billing.accounts.update` IAM
+        /// permission on the parent account, which is typically given to billing account
+        /// [administrators](https://cloud.google.com/billing/docs/how-to/billing-access). This method will return an
+        /// error if the parent account has not been provisioned for subaccounts.
         /// </summary>
         public class CreateRequest : CloudbillingBaseServiceRequest<Google.Apis.Cloudbilling.v1.Data.BillingAccount>
         {
@@ -443,6 +643,13 @@ namespace Google.Apis.Cloudbilling.v1
                 Body = body;
                 InitParameters();
             }
+
+            /// <summary>
+            /// Optional. The parent to create a billing account from. Format: - `billingAccounts/{billing_account_id}`,
+            /// for example, `billingAccounts/012345-567890-ABCDEF`
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Parent { get; set; }
 
             /// <summary>Gets or sets the body of this request.</summary>
             Google.Apis.Cloudbilling.v1.Data.BillingAccount Body { get; set; }
@@ -463,6 +670,14 @@ namespace Google.Apis.Cloudbilling.v1
             protected override void InitParameters()
             {
                 base.InitParameters();
+                RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "parent",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
             }
         }
 
@@ -476,7 +691,7 @@ namespace Google.Apis.Cloudbilling.v1
         /// </param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>
@@ -529,12 +744,12 @@ namespace Google.Apis.Cloudbilling.v1
         /// [viewers](https://cloud.google.com/billing/docs/how-to/billing-access).
         /// </summary>
         /// <param name="resource">
-        /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for the
-        /// appropriate value for this field.
+        /// REQUIRED: The resource for which the policy is being requested. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
         /// </param>
         public virtual GetIamPolicyRequest GetIamPolicy(string resource)
         {
-            return new GetIamPolicyRequest(service, resource);
+            return new GetIamPolicyRequest(this.service, resource);
         }
 
         /// <summary>
@@ -552,8 +767,8 @@ namespace Google.Apis.Cloudbilling.v1
             }
 
             /// <summary>
-            /// REQUIRED: The resource for which the policy is being requested. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
@@ -609,7 +824,7 @@ namespace Google.Apis.Cloudbilling.v1
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
@@ -625,10 +840,10 @@ namespace Google.Apis.Cloudbilling.v1
             }
 
             /// <summary>
-            /// Options for how to filter the returned billing accounts. Currently this only supports filtering for
-            /// [subaccounts](https://cloud.google.com/billing/docs/concepts) under a single provided reseller billing
-            /// account. (e.g. "master_billing_account=billingAccounts/012345-678901-ABCDEF"). Boolean algebra and other
-            /// fields are not currently supported.
+            /// Options for how to filter the returned billing accounts. This only supports filtering for
+            /// [subaccounts](https://cloud.google.com/billing/docs/concepts) under a single provided parent billing
+            /// account. (for example, `master_billing_account=billingAccounts/012345-678901-ABCDEF`). Boolean algebra
+            /// and other fields are not currently supported.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string Filter { get; set; }
@@ -643,6 +858,14 @@ namespace Google.Apis.Cloudbilling.v1
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
             public virtual string PageToken { get; set; }
+
+            /// <summary>
+            /// Optional. The parent resource to list billing accounts from. Format: -
+            /// `organizations/{organization_id}`, for example, `organizations/12345678` -
+            /// `billingAccounts/{billing_account_id}`, for example, `billingAccounts/012345-567890-ABCDEF`
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual string Parent { get; set; }
 
             /// <summary>Gets the method name.</summary>
             public override string MethodName => "list";
@@ -681,6 +904,75 @@ namespace Google.Apis.Cloudbilling.v1
                     DefaultValue = null,
                     Pattern = null,
                 });
+                RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "parent",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>Changes which parent organization a billing account belongs to.</summary>
+        /// <param name="body">The body of the request.</param>
+        /// <param name="name">
+        /// Required. The resource name of the billing account to move. Must be of the form
+        /// `billingAccounts/{billing_account_id}`. The specified billing account cannot be a subaccount, since a
+        /// subaccount always belongs to the same organization as its parent account.
+        /// </param>
+        public virtual MoveRequest Move(Google.Apis.Cloudbilling.v1.Data.MoveBillingAccountRequest body, string name)
+        {
+            return new MoveRequest(this.service, body, name);
+        }
+
+        /// <summary>Changes which parent organization a billing account belongs to.</summary>
+        public class MoveRequest : CloudbillingBaseServiceRequest<Google.Apis.Cloudbilling.v1.Data.BillingAccount>
+        {
+            /// <summary>Constructs a new Move request.</summary>
+            public MoveRequest(Google.Apis.Services.IClientService service, Google.Apis.Cloudbilling.v1.Data.MoveBillingAccountRequest body, string name) : base(service)
+            {
+                Name = name;
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>
+            /// Required. The resource name of the billing account to move. Must be of the form
+            /// `billingAccounts/{billing_account_id}`. The specified billing account cannot be a subaccount, since a
+            /// subaccount always belongs to the same organization as its parent account.
+            /// </summary>
+            [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+            public virtual string Name { get; private set; }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.Cloudbilling.v1.Data.MoveBillingAccountRequest Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "move";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/{+name}:move";
+
+            /// <summary>Initializes Move parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "name",
+                    IsRequired = true,
+                    ParameterType = "path",
+                    DefaultValue = null,
+                    Pattern = @"^billingAccounts/[^/]+$",
+                });
             }
         }
 
@@ -693,7 +985,7 @@ namespace Google.Apis.Cloudbilling.v1
         /// <param name="name">Required. The name of the billing account resource to be updated.</param>
         public virtual PatchRequest Patch(Google.Apis.Cloudbilling.v1.Data.BillingAccount body, string name)
         {
-            return new PatchRequest(service, body, name);
+            return new PatchRequest(this.service, body, name);
         }
 
         /// <summary>
@@ -764,12 +1056,12 @@ namespace Google.Apis.Cloudbilling.v1
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resource">
-        /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for the
-        /// appropriate value for this field.
+        /// REQUIRED: The resource for which the policy is being specified. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
         /// </param>
         public virtual SetIamPolicyRequest SetIamPolicy(Google.Apis.Cloudbilling.v1.Data.SetIamPolicyRequest body, string resource)
         {
-            return new SetIamPolicyRequest(service, body, resource);
+            return new SetIamPolicyRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -788,8 +1080,8 @@ namespace Google.Apis.Cloudbilling.v1
             }
 
             /// <summary>
-            /// REQUIRED: The resource for which the policy is being specified. See the operation documentation for the
-            /// appropriate value for this field.
+            /// REQUIRED: The resource for which the policy is being specified. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
@@ -831,12 +1123,12 @@ namespace Google.Apis.Cloudbilling.v1
         /// </summary>
         /// <param name="body">The body of the request.</param>
         /// <param name="resource">
-        /// REQUIRED: The resource for which the policy detail is being requested. See the operation documentation for
-        /// the appropriate value for this field.
+        /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+        /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
         /// </param>
         public virtual TestIamPermissionsRequest TestIamPermissions(Google.Apis.Cloudbilling.v1.Data.TestIamPermissionsRequest body, string resource)
         {
-            return new TestIamPermissionsRequest(service, body, resource);
+            return new TestIamPermissionsRequest(this.service, body, resource);
         }
 
         /// <summary>
@@ -855,8 +1147,8 @@ namespace Google.Apis.Cloudbilling.v1
             }
 
             /// <summary>
-            /// REQUIRED: The resource for which the policy detail is being requested. See the operation documentation
-            /// for the appropriate value for this field.
+            /// REQUIRED: The resource for which the policy detail is being requested. See [Resource
+            /// names](https://cloud.google.com/apis/design/resource_names) for the appropriate value for this field.
             /// </summary>
             [Google.Apis.Util.RequestParameterAttribute("resource", Google.Apis.Util.RequestParameterType.Path)]
             public virtual string Resource { get; private set; }
@@ -892,6 +1184,295 @@ namespace Google.Apis.Cloudbilling.v1
         }
     }
 
+    /// <summary>The "organizations" collection of methods.</summary>
+    public class OrganizationsResource
+    {
+        private const string Resource = "organizations";
+
+        /// <summary>The service which this resource belongs to.</summary>
+        private readonly Google.Apis.Services.IClientService service;
+
+        /// <summary>Constructs a new resource.</summary>
+        public OrganizationsResource(Google.Apis.Services.IClientService service)
+        {
+            this.service = service;
+            BillingAccounts = new BillingAccountsResource(service);
+        }
+
+        /// <summary>Gets the BillingAccounts resource.</summary>
+        public virtual BillingAccountsResource BillingAccounts { get; }
+
+        /// <summary>The "billingAccounts" collection of methods.</summary>
+        public class BillingAccountsResource
+        {
+            private const string Resource = "billingAccounts";
+
+            /// <summary>The service which this resource belongs to.</summary>
+            private readonly Google.Apis.Services.IClientService service;
+
+            /// <summary>Constructs a new resource.</summary>
+            public BillingAccountsResource(Google.Apis.Services.IClientService service)
+            {
+                this.service = service;
+            }
+
+            /// <summary>
+            /// This method creates [billing subaccounts](https://cloud.google.com/billing/docs/concepts#subaccounts).
+            /// Google Cloud resellers should use the Channel Services APIs,
+            /// [accounts.customers.create](https://cloud.google.com/channel/docs/reference/rest/v1/accounts.customers/create)
+            /// and
+            /// [accounts.customers.entitlements.create](https://cloud.google.com/channel/docs/reference/rest/v1/accounts.customers.entitlements/create).
+            /// When creating a subaccount, the current authenticated user must have the `billing.accounts.update` IAM
+            /// permission on the parent account, which is typically given to billing account
+            /// [administrators](https://cloud.google.com/billing/docs/how-to/billing-access). This method will return
+            /// an error if the parent account has not been provisioned for subaccounts.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="parent">
+            /// Optional. The parent to create a billing account from. Format: - `billingAccounts/{billing_account_id}`,
+            /// for example, `billingAccounts/012345-567890-ABCDEF`
+            /// </param>
+            public virtual CreateRequest Create(Google.Apis.Cloudbilling.v1.Data.BillingAccount body, string parent)
+            {
+                return new CreateRequest(this.service, body, parent);
+            }
+
+            /// <summary>
+            /// This method creates [billing subaccounts](https://cloud.google.com/billing/docs/concepts#subaccounts).
+            /// Google Cloud resellers should use the Channel Services APIs,
+            /// [accounts.customers.create](https://cloud.google.com/channel/docs/reference/rest/v1/accounts.customers/create)
+            /// and
+            /// [accounts.customers.entitlements.create](https://cloud.google.com/channel/docs/reference/rest/v1/accounts.customers.entitlements/create).
+            /// When creating a subaccount, the current authenticated user must have the `billing.accounts.update` IAM
+            /// permission on the parent account, which is typically given to billing account
+            /// [administrators](https://cloud.google.com/billing/docs/how-to/billing-access). This method will return
+            /// an error if the parent account has not been provisioned for subaccounts.
+            /// </summary>
+            public class CreateRequest : CloudbillingBaseServiceRequest<Google.Apis.Cloudbilling.v1.Data.BillingAccount>
+            {
+                /// <summary>Constructs a new Create request.</summary>
+                public CreateRequest(Google.Apis.Services.IClientService service, Google.Apis.Cloudbilling.v1.Data.BillingAccount body, string parent) : base(service)
+                {
+                    Parent = parent;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Optional. The parent to create a billing account from. Format: -
+                /// `billingAccounts/{billing_account_id}`, for example, `billingAccounts/012345-567890-ABCDEF`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.Cloudbilling.v1.Data.BillingAccount Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "create";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "POST";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+parent}/billingAccounts";
+
+                /// <summary>Initializes Create parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^organizations/[^/]+$",
+                    });
+                }
+            }
+
+            /// <summary>
+            /// Lists the billing accounts that the current authenticated user has permission to
+            /// [view](https://cloud.google.com/billing/docs/how-to/billing-access).
+            /// </summary>
+            /// <param name="parent">
+            /// Optional. The parent resource to list billing accounts from. Format: -
+            /// `organizations/{organization_id}`, for example, `organizations/12345678` -
+            /// `billingAccounts/{billing_account_id}`, for example, `billingAccounts/012345-567890-ABCDEF`
+            /// </param>
+            public virtual ListRequest List(string parent)
+            {
+                return new ListRequest(this.service, parent);
+            }
+
+            /// <summary>
+            /// Lists the billing accounts that the current authenticated user has permission to
+            /// [view](https://cloud.google.com/billing/docs/how-to/billing-access).
+            /// </summary>
+            public class ListRequest : CloudbillingBaseServiceRequest<Google.Apis.Cloudbilling.v1.Data.ListBillingAccountsResponse>
+            {
+                /// <summary>Constructs a new List request.</summary>
+                public ListRequest(Google.Apis.Services.IClientService service, string parent) : base(service)
+                {
+                    Parent = parent;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Optional. The parent resource to list billing accounts from. Format: -
+                /// `organizations/{organization_id}`, for example, `organizations/12345678` -
+                /// `billingAccounts/{billing_account_id}`, for example, `billingAccounts/012345-567890-ABCDEF`
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Parent { get; private set; }
+
+                /// <summary>
+                /// Options for how to filter the returned billing accounts. This only supports filtering for
+                /// [subaccounts](https://cloud.google.com/billing/docs/concepts) under a single provided parent billing
+                /// account. (for example, `master_billing_account=billingAccounts/012345-678901-ABCDEF`). Boolean
+                /// algebra and other fields are not currently supported.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("filter", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string Filter { get; set; }
+
+                /// <summary>Requested page size. The maximum page size is 100; this is also the default.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<int> PageSize { get; set; }
+
+                /// <summary>
+                /// A token identifying a page of results to return. This should be a `next_page_token` value returned
+                /// from a previous `ListBillingAccounts` call. If unspecified, the first page of results is returned.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual string PageToken { get; set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "list";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+parent}/billingAccounts";
+
+                /// <summary>Initializes List parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("parent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "parent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^organizations/[^/]+$",
+                    });
+                    RequestParameters.Add("filter", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "filter",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageSize", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageSize",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("pageToken", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "pageToken",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+
+            /// <summary>Changes which parent organization a billing account belongs to.</summary>
+            /// <param name="destinationParent">
+            /// Required. The resource name of the Organization to move the billing account under. Must be of the form
+            /// `organizations/{organization_id}`.
+            /// </param>
+            /// <param name="name">
+            /// Required. The resource name of the billing account to move. Must be of the form
+            /// `billingAccounts/{billing_account_id}`. The specified billing account cannot be a subaccount, since a
+            /// subaccount always belongs to the same organization as its parent account.
+            /// </param>
+            public virtual MoveRequest Move(string destinationParent, string name)
+            {
+                return new MoveRequest(this.service, destinationParent, name);
+            }
+
+            /// <summary>Changes which parent organization a billing account belongs to.</summary>
+            public class MoveRequest : CloudbillingBaseServiceRequest<Google.Apis.Cloudbilling.v1.Data.BillingAccount>
+            {
+                /// <summary>Constructs a new Move request.</summary>
+                public MoveRequest(Google.Apis.Services.IClientService service, string destinationParent, string name) : base(service)
+                {
+                    DestinationParent = destinationParent;
+                    Name = name;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// Required. The resource name of the Organization to move the billing account under. Must be of the
+                /// form `organizations/{organization_id}`.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("destinationParent", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string DestinationParent { get; private set; }
+
+                /// <summary>
+                /// Required. The resource name of the billing account to move. Must be of the form
+                /// `billingAccounts/{billing_account_id}`. The specified billing account cannot be a subaccount, since
+                /// a subaccount always belongs to the same organization as its parent account.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "move";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "GET";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/{+destinationParent}/{+name}:move";
+
+                /// <summary>Initializes Move parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("destinationParent", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "destinationParent",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^organizations/[^/]+$",
+                    });
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^billingAccounts/[^/]+$",
+                    });
+                }
+            }
+        }
+    }
+
     /// <summary>The "projects" collection of methods.</summary>
     public class ProjectsResource
     {
@@ -907,8 +1488,9 @@ namespace Google.Apis.Cloudbilling.v1
         }
 
         /// <summary>
-        /// Gets the billing information for a project. The current authenticated user must have [permission to view the
-        /// project](https://cloud.google.com/docs/permissions-overview#h.bgs0oxofvnoo ).
+        /// Gets the billing information for a project. The current authenticated user must have the
+        /// `resourcemanager.projects.get` permission for the project, which can be granted by assigning the [Project
+        /// Viewer](https://cloud.google.com/iam/docs/understanding-roles#predefined_roles) role.
         /// </summary>
         /// <param name="name">
         /// Required. The resource name of the project for which billing information is retrieved. For example,
@@ -916,12 +1498,13 @@ namespace Google.Apis.Cloudbilling.v1
         /// </param>
         public virtual GetBillingInfoRequest GetBillingInfo(string name)
         {
-            return new GetBillingInfoRequest(service, name);
+            return new GetBillingInfoRequest(this.service, name);
         }
 
         /// <summary>
-        /// Gets the billing information for a project. The current authenticated user must have [permission to view the
-        /// project](https://cloud.google.com/docs/permissions-overview#h.bgs0oxofvnoo ).
+        /// Gets the billing information for a project. The current authenticated user must have the
+        /// `resourcemanager.projects.get` permission for the project, which can be granted by assigning the [Project
+        /// Viewer](https://cloud.google.com/iam/docs/understanding-roles#predefined_roles) role.
         /// </summary>
         public class GetBillingInfoRequest : CloudbillingBaseServiceRequest<Google.Apis.Cloudbilling.v1.Data.ProjectBillingInfo>
         {
@@ -990,7 +1573,7 @@ namespace Google.Apis.Cloudbilling.v1
         /// </param>
         public virtual UpdateBillingInfoRequest UpdateBillingInfo(Google.Apis.Cloudbilling.v1.Data.ProjectBillingInfo body, string name)
         {
-            return new UpdateBillingInfoRequest(service, body, name);
+            return new UpdateBillingInfoRequest(this.service, body, name);
         }
 
         /// <summary>
@@ -1094,10 +1677,10 @@ namespace Google.Apis.Cloudbilling.v1
             }
 
             /// <summary>Lists all publicly available SKUs for a given cloud service.</summary>
-            /// <param name="parent">Required. The name of the service. Example: "services/DA34-426B-A397"</param>
+            /// <param name="parent">Required. The name of the service. Example: "services/6F81-5844-456A"</param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>Lists all publicly available SKUs for a given cloud service.</summary>
@@ -1110,7 +1693,7 @@ namespace Google.Apis.Cloudbilling.v1
                     InitParameters();
                 }
 
-                /// <summary>Required. The name of the service. Example: "services/DA34-426B-A397"</summary>
+                /// <summary>Required. The name of the service. Example: "services/6F81-5844-456A"</summary>
                 [Google.Apis.Util.RequestParameterAttribute("parent", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Parent { get; private set; }
 
@@ -1121,14 +1704,36 @@ namespace Google.Apis.Cloudbilling.v1
                 [Google.Apis.Util.RequestParameterAttribute("currencyCode", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string CurrencyCode { get; set; }
 
+                private object _endTime;
+
                 /// <summary>
-                /// Optional exclusive end time of the time range for which the pricing versions will be returned.
-                /// Timestamps in the future are not allowed. The time range has to be within a single calendar month in
-                /// America/Los_Angeles timezone. Time range as a whole is optional. If not specified, the latest
-                /// pricing will be returned (up to 12 hours old at most).
+                /// String representation of <see cref="EndTimeDateTimeOffset"/>, formatted for inclusion in the HTTP
+                /// request.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("endTime", Google.Apis.Util.RequestParameterType.Query)]
-                public virtual object EndTime { get; set; }
+                public virtual string EndTimeRaw { get; private set; }
+
+                /// <summary><seealso cref="object"/> representation of <see cref="EndTimeRaw"/>.</summary>
+                [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EndTimeDateTimeOffset instead.")]
+                public virtual object EndTime
+                {
+                    get => _endTime;
+                    set
+                    {
+                        EndTimeRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                        _endTime = value;
+                    }
+                }
+
+                public virtual System.DateTimeOffset? EndTimeDateTimeOffset
+                {
+                    get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EndTimeRaw);
+                    set
+                    {
+                        EndTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                        _endTime = value;
+                    }
+                }
 
                 /// <summary>Requested page size. Defaults to 5000.</summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
@@ -1141,14 +1746,36 @@ namespace Google.Apis.Cloudbilling.v1
                 [Google.Apis.Util.RequestParameterAttribute("pageToken", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string PageToken { get; set; }
 
+                private object _startTime;
+
                 /// <summary>
-                /// Optional inclusive start time of the time range for which the pricing versions will be returned.
-                /// Timestamps in the future are not allowed. The time range has to be within a single calendar month in
-                /// America/Los_Angeles timezone. Time range as a whole is optional. If not specified, the latest
-                /// pricing will be returned (up to 12 hours old at most).
+                /// String representation of <see cref="StartTimeDateTimeOffset"/>, formatted for inclusion in the HTTP
+                /// request.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("startTime", Google.Apis.Util.RequestParameterType.Query)]
-                public virtual object StartTime { get; set; }
+                public virtual string StartTimeRaw { get; private set; }
+
+                /// <summary><seealso cref="object"/> representation of <see cref="StartTimeRaw"/>.</summary>
+                [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use StartTimeDateTimeOffset instead.")]
+                public virtual object StartTime
+                {
+                    get => _startTime;
+                    set
+                    {
+                        StartTimeRaw = Google.Apis.Util.Utilities.ConvertToString(value);
+                        _startTime = value;
+                    }
+                }
+
+                public virtual System.DateTimeOffset? StartTimeDateTimeOffset
+                {
+                    get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(StartTimeRaw);
+                    set
+                    {
+                        StartTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+                        _startTime = value;
+                    }
+                }
 
                 /// <summary>Gets the method name.</summary>
                 public override string MethodName => "list";
@@ -1218,7 +1845,7 @@ namespace Google.Apis.Cloudbilling.v1
         /// <summary>Lists all public cloud services.</summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>Lists all public cloud services.</summary>
@@ -1306,7 +1933,8 @@ namespace Google.Apis.Cloudbilling.v1.Data
     /// }, { "log_type": "DATA_WRITE" }, { "log_type": "ADMIN_READ" } ] }, { "service": "sampleservice.googleapis.com",
     /// "audit_log_configs": [ { "log_type": "DATA_READ" }, { "log_type": "DATA_WRITE", "exempted_members": [
     /// "user:aliya@example.com" ] } ] } ] } For sampleservice, this policy enables DATA_READ, DATA_WRITE and ADMIN_READ
-    /// logging. It also exempts jose@example.com from DATA_READ logging, and aliya@example.com from DATA_WRITE logging.
+    /// logging. It also exempts `jose@example.com` from DATA_READ logging, and `aliya@example.com` from DATA_WRITE
+    /// logging.
     /// </summary>
     public class AuditConfig : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1354,6 +1982,16 @@ namespace Google.Apis.Cloudbilling.v1.Data
     public class BillingAccount : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// Optional. The currency in which the billing account is billed and charged, represented as an ISO 4217 code
+        /// such as `USD`. Billing account currency is determined at the time of billing account creation and cannot be
+        /// updated subsequently, so this field should not be set on update requests. In addition, a subaccount always
+        /// matches the currency of its parent billing account, so this field should not be set on subaccount creation
+        /// requests. Clients can read this field to determine the currency of an existing billing account.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("currencyCode")]
+        public virtual string CurrencyCode { get; set; }
+
+        /// <summary>
         /// The display name given to the billing account, such as `My Billing Account`. This name is displayed in the
         /// Google Cloud Console.
         /// </summary>
@@ -1377,11 +2015,20 @@ namespace Google.Apis.Cloudbilling.v1.Data
 
         /// <summary>
         /// Output only. True if the billing account is open, and will therefore be charged for any usage on associated
-        /// projects. False if the billing account is closed, and therefore projects associated with it will be unable
-        /// to use paid services.
+        /// projects. False if the billing account is closed, and therefore projects associated with it are unable to
+        /// use paid services.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("open")]
         public virtual System.Nullable<bool> Open { get; set; }
+
+        /// <summary>
+        /// Output only. The billing account's parent resource identifier. Use the `MoveBillingAccount` method to update
+        /// the account's parent resource if it is a organization. Format: - `organizations/{organization_id}`, for
+        /// example, `organizations/12345678` - `billingAccounts/{billing_account_id}`, for example,
+        /// `billingAccounts/012345-567890-ABCDEF`
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("parent")]
+        public virtual string Parent { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -1401,16 +2048,37 @@ namespace Google.Apis.Cloudbilling.v1.Data
         public virtual Expr Condition { get; set; }
 
         /// <summary>
-        /// Specifies the principals requesting access for a Cloud Platform resource. `members` can have the following
+        /// Specifies the principals requesting access for a Google Cloud resource. `members` can have the following
         /// values: * `allUsers`: A special identifier that represents anyone who is on the internet; with or without a
         /// Google account. * `allAuthenticatedUsers`: A special identifier that represents anyone who is authenticated
-        /// with a Google account or a service account. * `user:{emailid}`: An email address that represents a specific
-        /// Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address that
-        /// represents a service account. For example, `my-other-app@appspot.gserviceaccount.com`. * `group:{emailid}`:
-        /// An email address that represents a Google group. For example, `admins@example.com`. *
-        /// `deleted:user:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a user that
-        /// has been recently deleted. For example, `alice@example.com?uid=123456789012345678901`. If the user is
-        /// recovered, this value reverts to `user:{emailid}` and the recovered user retains the role in the binding. *
+        /// with a Google account or a service account. Does not include identities that come from external identity
+        /// providers (IdPs) through identity federation. * `user:{emailid}`: An email address that represents a
+        /// specific Google account. For example, `alice@example.com` . * `serviceAccount:{emailid}`: An email address
+        /// that represents a Google service account. For example, `my-other-app@appspot.gserviceaccount.com`. *
+        /// `serviceAccount:{projectid}.svc.id.goog[{namespace}/{kubernetes-sa}]`: An identifier for a [Kubernetes
+        /// service account](https://cloud.google.com/kubernetes-engine/docs/how-to/kubernetes-service-accounts). For
+        /// example, `my-project.svc.id.goog[my-namespace/my-kubernetes-sa]`. * `group:{emailid}`: An email address that
+        /// represents a Google group. For example, `admins@example.com`. * `domain:{domain}`: The G Suite domain
+        /// (primary) that represents all the users of that domain. For example, `google.com` or `example.com`. *
+        /// `principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workforce identity pool. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/group/{group_id}`: All
+        /// workforce identities in a group. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All workforce identities with a specific attribute value. *
+        /// `principalSet://iam.googleapis.com/locations/global/workforcePools/{pool_id}/*`: All identities in a
+        /// workforce identity pool. *
+        /// `principal://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/subject/{subject_attribute_value}`:
+        /// A single identity in a workload identity pool. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/group/{group_id}`:
+        /// A workload identity pool group. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/attribute.{attribute_name}/{attribute_value}`:
+        /// All identities in a workload identity pool with a certain attribute. *
+        /// `principalSet://iam.googleapis.com/projects/{project_number}/locations/global/workloadIdentityPools/{pool_id}/*`:
+        /// All identities in a workload identity pool. * `deleted:user:{emailid}?uid={uniqueid}`: An email address
+        /// (plus unique identifier) representing a user that has been recently deleted. For example,
+        /// `alice@example.com?uid=123456789012345678901`. If the user is recovered, this value reverts to
+        /// `user:{emailid}` and the recovered user retains the role in the binding. *
         /// `deleted:serviceAccount:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing a
         /// service account that has been recently deleted. For example,
         /// `my-other-app@appspot.gserviceaccount.com?uid=123456789012345678901`. If the service account is undeleted,
@@ -1418,15 +2086,19 @@ namespace Google.Apis.Cloudbilling.v1.Data
         /// binding. * `deleted:group:{emailid}?uid={uniqueid}`: An email address (plus unique identifier) representing
         /// a Google group that has been recently deleted. For example, `admins@example.com?uid=123456789012345678901`.
         /// If the group is recovered, this value reverts to `group:{emailid}` and the recovered group retains the role
-        /// in the binding. * `domain:{domain}`: The G Suite domain (primary) that represents all the users of that
-        /// domain. For example, `google.com` or `example.com`.
+        /// in the binding. *
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/{pool_id}/subject/{subject_attribute_value}`:
+        /// Deleted single identity in a workforce identity pool. For example,
+        /// `deleted:principal://iam.googleapis.com/locations/global/workforcePools/my-pool-id/subject/my-subject-attribute-value`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("members")]
         public virtual System.Collections.Generic.IList<string> Members { get; set; }
 
         /// <summary>
         /// Role that is assigned to the list of `members`, or principals. For example, `roles/viewer`, `roles/editor`,
-        /// or `roles/owner`.
+        /// or `roles/owner`. For an overview of the IAM roles and permissions, see the [IAM
+        /// documentation](https://cloud.google.com/iam/docs/roles-overview). For a list of the available pre-defined
+        /// roles, see [here](https://cloud.google.com/iam/docs/understanding-roles).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("role")]
         public virtual string Role { get; set; }
@@ -1626,6 +2298,20 @@ namespace Google.Apis.Cloudbilling.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Request message for `MoveBillingAccount` RPC.</summary>
+    public class MoveBillingAccountRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Required. The resource name of the Organization to move the billing account under. Must be of the form
+        /// `organizations/{organization_id}`.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("destinationParent")]
+        public virtual string DestinationParent { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// An Identity and Access Management (IAM) policy, which specifies access controls for Google Cloud resources. A
     /// `Policy` is a collection of `bindings`. A `binding` binds one or more `members`, or principals, to a single
@@ -1635,18 +2321,26 @@ namespace Google.Apis.Cloudbilling.v1.Data
     /// expression that allows access to a resource only if the expression evaluates to `true`. A condition can add
     /// constraints based on attributes of the request, the resource, or both. To learn which resources support
     /// conditions in their IAM policies, see the [IAM
-    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:** { "bindings":
-    /// [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
+    /// documentation](https://cloud.google.com/iam/help/conditions/resource-policies). **JSON example:**
+    /// ```
+    /// {
+    /// "bindings": [ { "role": "roles/resourcemanager.organizationAdmin", "members": [ "user:mike@example.com",
     /// "group:admins@example.com", "domain:google.com", "serviceAccount:my-project-id@appspot.gserviceaccount.com" ] },
     /// { "role": "roles/resourcemanager.organizationViewer", "members": [ "user:eve@example.com" ], "condition": {
     /// "title": "expirable access", "description": "Does not grant access after Sep 2020", "expression": "request.time
-    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 } **YAML example:**
+    /// &amp;lt; timestamp('2020-10-01T00:00:00.000Z')", } } ], "etag": "BwWWja0YfJA=", "version": 3 }
+    /// ```
+    /// **YAML
+    /// example:**
+    /// ```
     /// bindings: - members: - user:mike@example.com - group:admins@example.com - domain:google.com -
     /// serviceAccount:my-project-id@appspot.gserviceaccount.com role: roles/resourcemanager.organizationAdmin -
     /// members: - user:eve@example.com role: roles/resourcemanager.organizationViewer condition: title: expirable
     /// access description: Does not grant access after Sep 2020 expression: request.time &amp;lt;
-    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3 For a description of IAM and its features,
-    /// see the [IAM documentation](https://cloud.google.com/iam/docs/).
+    /// timestamp('2020-10-01T00:00:00.000Z') etag: BwWWja0YfJA= version: 3
+    /// ```
+    /// For a description of IAM and its
+    /// features, see the [IAM documentation](https://cloud.google.com/iam/docs/).
     /// </summary>
     public class Policy : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -1767,6 +2461,10 @@ namespace Google.Apis.Cloudbilling.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("currencyConversionRate")]
         public virtual System.Nullable<double> CurrencyConversionRate { get; set; }
 
+        private string _effectiveTimeRaw;
+
+        private object _effectiveTime;
+
         /// <summary>
         /// The timestamp from which this pricing was effective within the requested time range. This is guaranteed to
         /// be greater than or equal to the start_time field in the request and less than the end_time field in the
@@ -1774,7 +2472,36 @@ namespace Google.Apis.Cloudbilling.v1.Data
         /// last 12 hours, indicating the latest pricing info.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("effectiveTime")]
-        public virtual object EffectiveTime { get; set; }
+        public virtual string EffectiveTimeRaw
+        {
+            get => _effectiveTimeRaw;
+            set
+            {
+                _effectiveTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _effectiveTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="EffectiveTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use EffectiveTimeDateTimeOffset instead.")]
+        public virtual object EffectiveTime
+        {
+            get => _effectiveTime;
+            set
+            {
+                _effectiveTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _effectiveTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="EffectiveTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? EffectiveTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(EffectiveTimeRaw);
+            set => EffectiveTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Expresses the pricing formula. See `PricingExpression` for an example.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("pricingExpression")]
@@ -1804,25 +2531,24 @@ namespace Google.Apis.Cloudbilling.v1.Data
         public virtual string BillingAccountName { get; set; }
 
         /// <summary>
-        /// True if the project is associated with an open billing account, to which usage on the project is charged.
-        /// False if the project is associated with a closed billing account, or no billing account at all, and
-        /// therefore cannot use paid services. This field is read-only.
+        /// Output only. True if the project is associated with an open billing account, to which usage on the project
+        /// is charged. False if the project is associated with a closed billing account, or no billing account at all,
+        /// and therefore cannot use paid services.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("billingEnabled")]
         public virtual System.Nullable<bool> BillingEnabled { get; set; }
 
         /// <summary>
-        /// The resource name for the `ProjectBillingInfo`; has the form `projects/{project_id}/billingInfo`. For
-        /// example, the resource name for the billing information for project `tokyo-rain-123` would be
-        /// `projects/tokyo-rain-123/billingInfo`. This field is read-only.
+        /// Output only. The resource name for the `ProjectBillingInfo`; has the form
+        /// `projects/{project_id}/billingInfo`. For example, the resource name for the billing information for project
+        /// `tokyo-rain-123` would be `projects/tokyo-rain-123/billingInfo`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The ID of the project that this `ProjectBillingInfo` represents, such as `tokyo-rain-123`. This is a
-        /// convenience field so that you don't need to parse the `name` field to obtain a project ID. This field is
-        /// read-only.
+        /// Output only. The ID of the project that this `ProjectBillingInfo` represents, such as `tokyo-rain-123`. This
+        /// is a convenience field so that you don't need to parse the `name` field to obtain a project ID.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("projectId")]
         public virtual string ProjectId { get; set; }
@@ -1844,11 +2570,11 @@ namespace Google.Apis.Cloudbilling.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
 
-        /// <summary>The resource name for the service. Example: "services/DA34-426B-A397"</summary>
+        /// <summary>The resource name for the service. Example: "services/6F81-5844-456A"</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
-        /// <summary>The identifier for the service. Example: "DA34-426B-A397"</summary>
+        /// <summary>The identifier for the service. Example: "6F81-5844-456A"</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("serviceId")]
         public virtual string ServiceId { get; set; }
 
@@ -1861,7 +2587,7 @@ namespace Google.Apis.Cloudbilling.v1.Data
     {
         /// <summary>
         /// REQUIRED: The complete policy to be applied to the `resource`. The size of the policy is limited to a few
-        /// 10s of KB. An empty policy is a valid policy but certain Cloud Platform services (such as Projects) might
+        /// 10s of KB. An empty policy is a valid policy but certain Google Cloud services (such as Projects) might
         /// reject them.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("policy")]
@@ -1878,7 +2604,7 @@ namespace Google.Apis.Cloudbilling.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Encapsulates a single SKU in Google Cloud Platform</summary>
+    /// <summary>Encapsulates a single SKU in Google Cloud</summary>
     public class Sku : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The category hierarchy of this SKU, purely for organizational purpose.</summary>
@@ -1893,7 +2619,7 @@ namespace Google.Apis.Cloudbilling.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("geoTaxonomy")]
         public virtual GeoTaxonomy GeoTaxonomy { get; set; }
 
-        /// <summary>The resource name for the SKU. Example: "services/DA34-426B-A397/skus/AA95-CD31-42FE"</summary>
+        /// <summary>The resource name for the SKU. Example: "services/6F81-5844-456A/skus/D041-B8A1-6E0B"</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
@@ -1914,7 +2640,7 @@ namespace Google.Apis.Cloudbilling.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("serviceRegions")]
         public virtual System.Collections.Generic.IList<string> ServiceRegions { get; set; }
 
-        /// <summary>The identifier for the SKU. Example: "AA95-CD31-42FE"</summary>
+        /// <summary>The identifier for the SKU. Example: "D041-B8A1-6E0B"</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("skuId")]
         public virtual string SkuId { get; set; }
 
@@ -1926,7 +2652,7 @@ namespace Google.Apis.Cloudbilling.v1.Data
     public class TestIamPermissionsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as '*' or 'storage.*')
+        /// The set of permissions to check for the `resource`. Permissions with wildcards (such as `*` or `storage.*`)
         /// are not allowed. For more information see [IAM
         /// Overview](https://cloud.google.com/iam/docs/overview#permissions).
         /// </summary>

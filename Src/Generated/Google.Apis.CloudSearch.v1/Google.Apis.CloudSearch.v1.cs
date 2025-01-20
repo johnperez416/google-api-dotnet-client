@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,6 +42,8 @@ namespace Google.Apis.CloudSearch.v1
             Settings = new SettingsResource(this);
             Stats = new StatsResource(this);
             V1 = new V1Resource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://cloudsearch.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://cloudsearch.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -51,23 +53,16 @@ namespace Google.Apis.CloudSearch.v1
         public override string Name => "cloudsearch";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://cloudsearch.googleapis.com/";
-        #else
-            "https://cloudsearch.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://cloudsearch.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the Cloud Search API.</summary>
         public class Scope
@@ -415,7 +410,7 @@ namespace Google.Apis.CloudSearch.v1
                     /// </param>
                     public virtual ListRequest List(string parent)
                     {
-                        return new ListRequest(service, parent);
+                        return new ListRequest(this.service, parent);
                     }
 
                     /// <summary>
@@ -502,19 +497,19 @@ namespace Google.Apis.CloudSearch.v1
                 }
 
                 /// <summary>
-                /// Checks whether an item is accessible by specified principal. **Note:** This API requires an admin
-                /// account to execute.
+                /// Checks whether an item is accessible by specified principal. Principal must be a user; groups and
+                /// domain values aren't supported. **Note:** This API requires an admin account to execute.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">Item name, format: datasources/{source_id}/items/{item_id}</param>
                 public virtual CheckAccessRequest CheckAccess(Google.Apis.CloudSearch.v1.Data.Principal body, string name)
                 {
-                    return new CheckAccessRequest(service, body, name);
+                    return new CheckAccessRequest(this.service, body, name);
                 }
 
                 /// <summary>
-                /// Checks whether an item is accessible by specified principal. **Note:** This API requires an admin
-                /// account to execute.
+                /// Checks whether an item is accessible by specified principal. Principal must be a user; groups and
+                /// domain values aren't supported. **Note:** This API requires an admin account to execute.
                 /// </summary>
                 public class CheckAccessRequest : CloudSearchBaseServiceRequest<Google.Apis.CloudSearch.v1.Data.CheckAccessResponse>
                 {
@@ -582,7 +577,7 @@ namespace Google.Apis.CloudSearch.v1
                 /// <param name="name">Source name, format: datasources/{source_id}</param>
                 public virtual SearchByViewUrlRequest SearchByViewUrl(Google.Apis.CloudSearch.v1.Data.SearchItemsByViewUrlRequest body, string name)
                 {
-                    return new SearchByViewUrlRequest(service, body, name);
+                    return new SearchByViewUrlRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -680,7 +675,7 @@ namespace Google.Apis.CloudSearch.v1
                 /// </param>
                 public virtual ListForunmappedidentityRequest ListForunmappedidentity(string parent)
                 {
-                    return new ListForunmappedidentityRequest(service, parent);
+                    return new ListForunmappedidentityRequest(this.service, parent);
                 }
 
                 /// <summary>
@@ -813,7 +808,7 @@ namespace Google.Apis.CloudSearch.v1
                 /// </param>
                 public virtual ListRequest List(string parent)
                 {
-                    return new ListRequest(service, parent);
+                    return new ListRequest(this.service, parent);
                 }
 
                 /// <summary>
@@ -1004,11 +999,11 @@ namespace Google.Apis.CloudSearch.v1
                 /// to execute. The service account used is the one whitelisted in the corresponding data source.
                 /// </summary>
                 /// <param name="name">
-                /// Required. Name of the item to delete. Format: datasources/{source_id}/items/{item_id}
+                /// Required. The name of the item to delete. Format: datasources/{source_id}/items/{item_id}
                 /// </param>
                 public virtual DeleteRequest Delete(string name)
                 {
-                    return new DeleteRequest(service, name);
+                    return new DeleteRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -1025,13 +1020,13 @@ namespace Google.Apis.CloudSearch.v1
                     }
 
                     /// <summary>
-                    /// Required. Name of the item to delete. Format: datasources/{source_id}/items/{item_id}
+                    /// Required. The name of the item to delete. Format: datasources/{source_id}/items/{item_id}
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
 
                     /// <summary>
-                    /// Name of connector making this call. Format: datasources/{source_id}/connectors/{ID}
+                    /// The name of connector making this call. Format: datasources/{source_id}/connectors/{ID}
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("connectorName", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string ConnectorName { get; set; }
@@ -1050,8 +1045,8 @@ namespace Google.Apis.CloudSearch.v1
                     public enum ModeEnum
                     {
                         /// <summary>
-                        /// Priority is not specified in the update request. Leaving priority unspecified results in an
-                        /// update failure.
+                        /// The priority is not specified in the update request. Leaving priority unspecified results in
+                        /// an update failure.
                         /// </summary>
                         [Google.Apis.Util.StringValueAttribute("UNSPECIFIED")]
                         UNSPECIFIED = 0,
@@ -1072,7 +1067,9 @@ namespace Google.Apis.CloudSearch.v1
                     /// stores the version from the datasource as a byte string and compares the Item version in the
                     /// index to the version of the queued Item using lexical ordering. Cloud Search Indexing won't
                     /// delete any queued item with a version value that is less than or equal to the version of the
-                    /// currently indexed item. The maximum length for this field is 1024 bytes.
+                    /// currently indexed item. The maximum length for this field is 1024 bytes. For information on how
+                    /// item version affects the deletion process, refer to [Handle revisions after manual
+                    /// deletes](https://developers.google.com/cloud-search/docs/guides/operations).
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("version", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string Version { get; set; }
@@ -1140,11 +1137,11 @@ namespace Google.Apis.CloudSearch.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
-                /// Name of the Data Source to delete items in a queue. Format: datasources/{source_id}
+                /// The name of the Data Source to delete items in a queue. Format: datasources/{source_id}
                 /// </param>
                 public virtual DeleteQueueItemsRequest DeleteQueueItems(Google.Apis.CloudSearch.v1.Data.DeleteQueueItemsRequest body, string name)
                 {
-                    return new DeleteQueueItemsRequest(service, body, name);
+                    return new DeleteQueueItemsRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -1163,7 +1160,7 @@ namespace Google.Apis.CloudSearch.v1
                     }
 
                     /// <summary>
-                    /// Name of the Data Source to delete items in a queue. Format: datasources/{source_id}
+                    /// The name of the Data Source to delete items in a queue. Format: datasources/{source_id}
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
@@ -1203,11 +1200,11 @@ namespace Google.Apis.CloudSearch.v1
                 /// service account used is the one whitelisted in the corresponding data source.
                 /// </summary>
                 /// <param name="name">
-                /// Name of the item to get info. Format: datasources/{source_id}/items/{item_id}
+                /// The name of the item to get info. Format: datasources/{source_id}/items/{item_id}
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -1223,12 +1220,14 @@ namespace Google.Apis.CloudSearch.v1
                         InitParameters();
                     }
 
-                    /// <summary>Name of the item to get info. Format: datasources/{source_id}/items/{item_id}</summary>
+                    /// <summary>
+                    /// The name of the item to get info. Format: datasources/{source_id}/items/{item_id}
+                    /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
 
                     /// <summary>
-                    /// Name of connector making this call. Format: datasources/{source_id}/connectors/{ID}
+                    /// The name of connector making this call. Format: datasources/{source_id}/connectors/{ID}
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("connectorName", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string ConnectorName { get; set; }
@@ -1287,12 +1286,12 @@ namespace Google.Apis.CloudSearch.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
-                /// Name of the Item. Format: datasources/{source_id}/items/{item_id} This is a required field. The
+                /// The name of the Item. Format: datasources/{source_id}/items/{item_id} This is a required field. The
                 /// maximum length is 1536 characters.
                 /// </param>
                 public virtual IndexRequest Index(Google.Apis.CloudSearch.v1.Data.IndexItemRequest body, string name)
                 {
-                    return new IndexRequest(service, body, name);
+                    return new IndexRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -1312,8 +1311,8 @@ namespace Google.Apis.CloudSearch.v1
                     }
 
                     /// <summary>
-                    /// Name of the Item. Format: datasources/{source_id}/items/{item_id} This is a required field. The
-                    /// maximum length is 1536 characters.
+                    /// The name of the Item. Format: datasources/{source_id}/items/{item_id} This is a required field.
+                    /// The maximum length is 1536 characters.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
@@ -1352,10 +1351,12 @@ namespace Google.Apis.CloudSearch.v1
                 /// Lists all or a subset of Item resources. This API requires an admin or service account to execute.
                 /// The service account used is the one whitelisted in the corresponding data source.
                 /// </summary>
-                /// <param name="name">Name of the Data Source to list Items. Format: datasources/{source_id}</param>
+                /// <param name="name">
+                /// The name of the Data Source to list Items. Format: datasources/{source_id}
+                /// </param>
                 public virtual ListRequest List(string name)
                 {
-                    return new ListRequest(service, name);
+                    return new ListRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -1371,7 +1372,7 @@ namespace Google.Apis.CloudSearch.v1
                         InitParameters();
                     }
 
-                    /// <summary>Name of the Data Source to list Items. Format: datasources/{source_id}</summary>
+                    /// <summary>The name of the Data Source to list Items. Format: datasources/{source_id}</summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
 
@@ -1387,7 +1388,7 @@ namespace Google.Apis.CloudSearch.v1
                     public virtual System.Nullable<bool> Brief { get; set; }
 
                     /// <summary>
-                    /// Name of connector making this call. Format: datasources/{source_id}/connectors/{ID}
+                    /// The name of connector making this call. Format: datasources/{source_id}/connectors/{ID}
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("connectorName", Google.Apis.Util.RequestParameterType.Query)]
                     public virtual string ConnectorName { get; set; }
@@ -1484,10 +1485,12 @@ namespace Google.Apis.CloudSearch.v1
                 /// one whitelisted in the corresponding data source.
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
-                /// <param name="name">Name of the Data Source to poll items. Format: datasources/{source_id}</param>
+                /// <param name="name">
+                /// The name of the Data Source to poll items. Format: datasources/{source_id}
+                /// </param>
                 public virtual PollRequest Poll(Google.Apis.CloudSearch.v1.Data.PollItemsRequest body, string name)
                 {
-                    return new PollRequest(service, body, name);
+                    return new PollRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -1510,7 +1513,7 @@ namespace Google.Apis.CloudSearch.v1
                         InitParameters();
                     }
 
-                    /// <summary>Name of the Data Source to poll items. Format: datasources/{source_id}</summary>
+                    /// <summary>The name of the Data Source to poll items. Format: datasources/{source_id}</summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
 
@@ -1551,12 +1554,12 @@ namespace Google.Apis.CloudSearch.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
-                /// Name of the item to push into the indexing queue. Format: datasources/{source_id}/items/{ID} This is
-                /// a required field. The maximum length is 1536 characters.
+                /// The name of the item to push into the indexing queue. Format: datasources/{source_id}/items/{ID}
+                /// This is a required field. The maximum length is 1536 characters.
                 /// </param>
                 public virtual PushRequest Push(Google.Apis.CloudSearch.v1.Data.PushItemRequest body, string name)
                 {
-                    return new PushRequest(service, body, name);
+                    return new PushRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -1575,7 +1578,7 @@ namespace Google.Apis.CloudSearch.v1
                     }
 
                     /// <summary>
-                    /// Name of the item to push into the indexing queue. Format: datasources/{source_id}/items/{ID}
+                    /// The name of the item to push into the indexing queue. Format: datasources/{source_id}/items/{ID}
                     /// This is a required field. The maximum length is 1536 characters.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
@@ -1619,11 +1622,11 @@ namespace Google.Apis.CloudSearch.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
-                /// Name of the Data Source to unreserve all items. Format: datasources/{source_id}
+                /// The name of the Data Source to unreserve all items. Format: datasources/{source_id}
                 /// </param>
                 public virtual UnreserveRequest Unreserve(Google.Apis.CloudSearch.v1.Data.UnreserveItemsRequest body, string name)
                 {
-                    return new UnreserveRequest(service, body, name);
+                    return new UnreserveRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -1643,7 +1646,7 @@ namespace Google.Apis.CloudSearch.v1
                     }
 
                     /// <summary>
-                    /// Name of the Data Source to unreserve all items. Format: datasources/{source_id}
+                    /// The name of the Data Source to unreserve all items. Format: datasources/{source_id}
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
@@ -1685,12 +1688,12 @@ namespace Google.Apis.CloudSearch.v1
                 /// </summary>
                 /// <param name="body">The body of the request.</param>
                 /// <param name="name">
-                /// Name of the Item to start a resumable upload. Format: datasources/{source_id}/items/{item_id}. The
-                /// maximum length is 1536 bytes.
+                /// The name of the Item to start a resumable upload. Format: datasources/{source_id}/items/{item_id}.
+                /// The maximum length is 1536 bytes.
                 /// </param>
                 public virtual UploadRequest Upload(Google.Apis.CloudSearch.v1.Data.StartUploadItemRequest body, string name)
                 {
-                    return new UploadRequest(service, body, name);
+                    return new UploadRequest(this.service, body, name);
                 }
 
                 /// <summary>
@@ -1709,8 +1712,8 @@ namespace Google.Apis.CloudSearch.v1
                     }
 
                     /// <summary>
-                    /// Name of the Item to start a resumable upload. Format: datasources/{source_id}/items/{item_id}.
-                    /// The maximum length is 1536 bytes.
+                    /// The name of the Item to start a resumable upload. Format:
+                    /// datasources/{source_id}/items/{item_id}. The maximum length is 1536 bytes.
                     /// </summary>
                     [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                     public virtual string Name { get; private set; }
@@ -1749,10 +1752,10 @@ namespace Google.Apis.CloudSearch.v1
             /// <summary>
             /// Deletes the schema of a data source. **Note:** This API requires an admin or service account to execute.
             /// </summary>
-            /// <param name="name">Name of the data source to delete Schema. Format: datasources/{source_id}</param>
+            /// <param name="name">The name of the data source to delete Schema. Format: datasources/{source_id}</param>
             public virtual DeleteSchemaRequest DeleteSchema(string name)
             {
-                return new DeleteSchemaRequest(service, name);
+                return new DeleteSchemaRequest(this.service, name);
             }
 
             /// <summary>
@@ -1767,7 +1770,7 @@ namespace Google.Apis.CloudSearch.v1
                     InitParameters();
                 }
 
-                /// <summary>Name of the data source to delete Schema. Format: datasources/{source_id}</summary>
+                /// <summary>The name of the data source to delete Schema. Format: datasources/{source_id}</summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Name { get; private set; }
 
@@ -1812,10 +1815,10 @@ namespace Google.Apis.CloudSearch.v1
             /// <summary>
             /// Gets the schema of a data source. **Note:** This API requires an admin or service account to execute.
             /// </summary>
-            /// <param name="name">Name of the data source to get Schema. Format: datasources/{source_id}</param>
+            /// <param name="name">The name of the data source to get Schema. Format: datasources/{source_id}</param>
             public virtual GetSchemaRequest GetSchema(string name)
             {
-                return new GetSchemaRequest(service, name);
+                return new GetSchemaRequest(this.service, name);
             }
 
             /// <summary>
@@ -1830,7 +1833,7 @@ namespace Google.Apis.CloudSearch.v1
                     InitParameters();
                 }
 
-                /// <summary>Name of the data source to get Schema. Format: datasources/{source_id}</summary>
+                /// <summary>The name of the data source to get Schema. Format: datasources/{source_id}</summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Name { get; private set; }
 
@@ -1878,10 +1881,10 @@ namespace Google.Apis.CloudSearch.v1
             /// admin or service account to execute.
             /// </summary>
             /// <param name="body">The body of the request.</param>
-            /// <param name="name">Name of the data source to update Schema. Format: datasources/{source_id}</param>
+            /// <param name="name">The name of the data source to update Schema. Format: datasources/{source_id}</param>
             public virtual UpdateSchemaRequest UpdateSchema(Google.Apis.CloudSearch.v1.Data.UpdateSchemaRequest body, string name)
             {
-                return new UpdateSchemaRequest(service, body, name);
+                return new UpdateSchemaRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -1899,7 +1902,7 @@ namespace Google.Apis.CloudSearch.v1
                     InitParameters();
                 }
 
-                /// <summary>Name of the data source to update Schema. Format: datasources/{source_id}</summary>
+                /// <summary>The name of the data source to update Schema. Format: datasources/{source_id}</summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Name { get; private set; }
 
@@ -1968,7 +1971,7 @@ namespace Google.Apis.CloudSearch.v1
         /// </param>
         public virtual UploadRequest Upload(Google.Apis.CloudSearch.v1.Data.Media body, string resourceName)
         {
-            return new UploadRequest(service, body, resourceName);
+            return new UploadRequest(this.service, body, resourceName);
         }
 
         /// <summary>
@@ -2216,25 +2219,17 @@ namespace Google.Apis.CloudSearch.v1
 
             /// <summary>
             /// Lists operations that match the specified filter in the request. If the server doesn't support this
-            /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the binding
-            /// to use different resource name schemes, such as `users/*/operations`. To override the binding, API
-            /// services can add a binding such as `"/v1/{name=users/*}/operations"` to their service configuration. For
-            /// backwards compatibility, the default name includes the operations collection id, however overriding
-            /// users must ensure the name binding is the parent resource, without the operations collection id.
+            /// method, it returns `UNIMPLEMENTED`.
             /// </summary>
             /// <param name="name">The name of the operation's parent resource.</param>
             public virtual ListRequest List(string name)
             {
-                return new ListRequest(service, name);
+                return new ListRequest(this.service, name);
             }
 
             /// <summary>
             /// Lists operations that match the specified filter in the request. If the server doesn't support this
-            /// method, it returns `UNIMPLEMENTED`. NOTE: the `name` binding allows API services to override the binding
-            /// to use different resource name schemes, such as `users/*/operations`. To override the binding, API
-            /// services can add a binding such as `"/v1/{name=users/*}/operations"` to their service configuration. For
-            /// backwards compatibility, the default name includes the operations collection id, however overriding
-            /// users must ensure the name binding is the parent resource, without the operations collection id.
+            /// method, it returns `UNIMPLEMENTED`.
             /// </summary>
             public class ListRequest : CloudSearchBaseServiceRequest<Google.Apis.CloudSearch.v1.Data.ListOperationsResponse>
             {
@@ -2317,7 +2312,7 @@ namespace Google.Apis.CloudSearch.v1
         /// <param name="name">The name of the operation resource.</param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>
@@ -2402,7 +2397,7 @@ namespace Google.Apis.CloudSearch.v1
             /// </summary>
             public virtual ListRequest List()
             {
-                return new ListRequest(service);
+                return new ListRequest(this.service);
             }
 
             /// <summary>
@@ -2434,8 +2429,8 @@ namespace Google.Apis.CloudSearch.v1
                 /// http://www.unicode.org/reports/tr35/#Unicode_locale_identifier. For translations. Set this field
                 /// using the language set in browser or for the page. In the event that the user's language preference
                 /// is known, set this field to the known user language. When specified, the documents in search results
-                /// are biased towards the specified language. The suggest API does not use this parameter. Instead,
-                /// suggest autocompletes only based on characters in the query.
+                /// are biased towards the specified language. The Suggest API uses this field as a hint to make better
+                /// third-party autocomplete predictions.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("requestOptions.languageCode", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual string RequestOptionsLanguageCode { get; set; }
@@ -2516,6 +2511,104 @@ namespace Google.Apis.CloudSearch.v1
         }
 
         /// <summary>
+        /// Returns Debug information for Cloud Search Query API provides the search method. **Note:** This API requires
+        /// a standard end user account to execute. A service account can't perform Query API requests directly; to use
+        /// a service account to perform queries, set up [Google Workspace domain-wide delegation of
+        /// authority](https://developers.google.com/cloud-search/docs/guides/delegation/).
+        /// </summary>
+        /// <param name="body">The body of the request.</param>
+        public virtual DebugSearchRequest DebugSearch(Google.Apis.CloudSearch.v1.Data.SearchRequest body)
+        {
+            return new DebugSearchRequest(this.service, body);
+        }
+
+        /// <summary>
+        /// Returns Debug information for Cloud Search Query API provides the search method. **Note:** This API requires
+        /// a standard end user account to execute. A service account can't perform Query API requests directly; to use
+        /// a service account to perform queries, set up [Google Workspace domain-wide delegation of
+        /// authority](https://developers.google.com/cloud-search/docs/guides/delegation/).
+        /// </summary>
+        public class DebugSearchRequest : CloudSearchBaseServiceRequest<Google.Apis.CloudSearch.v1.Data.DebugResponse>
+        {
+            /// <summary>Constructs a new DebugSearch request.</summary>
+            public DebugSearchRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudSearch.v1.Data.SearchRequest body) : base(service)
+            {
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.CloudSearch.v1.Data.SearchRequest Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "debugSearch";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/query:debugSearch";
+
+            /// <summary>Initializes DebugSearch parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+            }
+        }
+
+        /// <summary>
+        /// Provides functionality to remove logged activity for a user. Currently to be used only for Chat 1p clients
+        /// **Note:** This API requires a standard end user account to execute. A service account can't perform Remove
+        /// Activity requests directly; to use a service account to perform queries, set up [Google Workspace
+        /// domain-wide delegation of authority](https://developers.google.com/cloud-search/docs/guides/delegation/).
+        /// </summary>
+        /// <param name="body">The body of the request.</param>
+        public virtual RemoveActivityRequest RemoveActivity(Google.Apis.CloudSearch.v1.Data.RemoveActivityRequest body)
+        {
+            return new RemoveActivityRequest(this.service, body);
+        }
+
+        /// <summary>
+        /// Provides functionality to remove logged activity for a user. Currently to be used only for Chat 1p clients
+        /// **Note:** This API requires a standard end user account to execute. A service account can't perform Remove
+        /// Activity requests directly; to use a service account to perform queries, set up [Google Workspace
+        /// domain-wide delegation of authority](https://developers.google.com/cloud-search/docs/guides/delegation/).
+        /// </summary>
+        public class RemoveActivityRequest : CloudSearchBaseServiceRequest<Google.Apis.CloudSearch.v1.Data.RemoveActivityResponse>
+        {
+            /// <summary>Constructs a new RemoveActivity request.</summary>
+            public RemoveActivityRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudSearch.v1.Data.RemoveActivityRequest body) : base(service)
+            {
+                Body = body;
+                InitParameters();
+            }
+
+            /// <summary>Gets or sets the body of this request.</summary>
+            Google.Apis.CloudSearch.v1.Data.RemoveActivityRequest Body { get; set; }
+
+            /// <summary>Returns the body of the request.</summary>
+            protected override object GetBody() => Body;
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "removeActivity";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "POST";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/query:removeActivity";
+
+            /// <summary>Initializes RemoveActivity parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+            }
+        }
+
+        /// <summary>
         /// The Cloud Search Query API provides the search method, which returns the most relevant results from a user
         /// query. The results can come from Google Workspace apps, such as Gmail or Google Drive, or they can come from
         /// data that you have indexed from a third party. **Note:** This API requires a standard end user account to
@@ -2526,7 +2619,7 @@ namespace Google.Apis.CloudSearch.v1
         /// <param name="body">The body of the request.</param>
         public virtual SearchRequest Search(Google.Apis.CloudSearch.v1.Data.SearchRequest body)
         {
-            return new SearchRequest(service, body);
+            return new SearchRequest(this.service, body);
         }
 
         /// <summary>
@@ -2577,7 +2670,7 @@ namespace Google.Apis.CloudSearch.v1
         /// <param name="body">The body of the request.</param>
         public virtual SuggestRequest Suggest(Google.Apis.CloudSearch.v1.Data.SuggestRequest body)
         {
-            return new SuggestRequest(service, body);
+            return new SuggestRequest(this.service, body);
         }
 
         /// <summary>
@@ -2655,7 +2748,7 @@ namespace Google.Apis.CloudSearch.v1
             /// <param name="body">The body of the request.</param>
             public virtual CreateRequest Create(Google.Apis.CloudSearch.v1.Data.DataSource body)
             {
-                return new CreateRequest(service, body);
+                return new CreateRequest(this.service, body);
             }
 
             /// <summary>Creates a datasource. **Note:** This API requires an admin account to execute.</summary>
@@ -2691,10 +2784,10 @@ namespace Google.Apis.CloudSearch.v1
             }
 
             /// <summary>Deletes a datasource. **Note:** This API requires an admin account to execute.</summary>
-            /// <param name="name">Name of the datasource. Format: datasources/{source_id}.</param>
+            /// <param name="name">The name of the datasource. Format: datasources/{source_id}.</param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>Deletes a datasource. **Note:** This API requires an admin account to execute.</summary>
@@ -2707,7 +2800,7 @@ namespace Google.Apis.CloudSearch.v1
                     InitParameters();
                 }
 
-                /// <summary>Name of the datasource. Format: datasources/{source_id}.</summary>
+                /// <summary>The name of the datasource. Format: datasources/{source_id}.</summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Name { get; private set; }
 
@@ -2750,10 +2843,10 @@ namespace Google.Apis.CloudSearch.v1
             }
 
             /// <summary>Gets a datasource. **Note:** This API requires an admin account to execute.</summary>
-            /// <param name="name">Name of the datasource resource. Format: datasources/{source_id}.</param>
+            /// <param name="name">The name of the datasource resource. Format: datasources/{source_id}.</param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>Gets a datasource. **Note:** This API requires an admin account to execute.</summary>
@@ -2766,7 +2859,7 @@ namespace Google.Apis.CloudSearch.v1
                     InitParameters();
                 }
 
-                /// <summary>Name of the datasource resource. Format: datasources/{source_id}.</summary>
+                /// <summary>The name of the datasource resource. Format: datasources/{source_id}.</summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Name { get; private set; }
 
@@ -2811,7 +2904,7 @@ namespace Google.Apis.CloudSearch.v1
             /// <summary>Lists datasources. **Note:** This API requires an admin account to execute.</summary>
             public virtual ListRequest List()
             {
-                return new ListRequest(service);
+                return new ListRequest(this.service);
             }
 
             /// <summary>Lists datasources. **Note:** This API requires an admin account to execute.</summary>
@@ -2830,7 +2923,8 @@ namespace Google.Apis.CloudSearch.v1
                 public virtual System.Nullable<bool> DebugOptionsEnableDebugging { get; set; }
 
                 /// <summary>
-                /// Maximum number of datasources to fetch in a request. The max value is 100. The default value is 10
+                /// Maximum number of datasources to fetch in a request. The max value is 1000. The default value is
+                /// 1000.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<int> PageSize { get; set; }
@@ -2882,12 +2976,105 @@ namespace Google.Apis.CloudSearch.v1
             /// <summary>Updates a datasource. **Note:** This API requires an admin account to execute.</summary>
             /// <param name="body">The body of the request.</param>
             /// <param name="name">
-            /// Name of the datasource resource. Format: datasources/{source_id}. The name is ignored when creating a
-            /// datasource.
+            /// The name of the datasource resource. Format: datasources/{source_id}. The name is ignored when creating
+            /// a datasource.
+            /// </param>
+            public virtual PatchRequest Patch(Google.Apis.CloudSearch.v1.Data.DataSource body, string name)
+            {
+                return new PatchRequest(this.service, body, name);
+            }
+
+            /// <summary>Updates a datasource. **Note:** This API requires an admin account to execute.</summary>
+            public class PatchRequest : CloudSearchBaseServiceRequest<Google.Apis.CloudSearch.v1.Data.Operation>
+            {
+                /// <summary>Constructs a new Patch request.</summary>
+                public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudSearch.v1.Data.DataSource body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>
+                /// The name of the datasource resource. Format: datasources/{source_id}. The name is ignored when
+                /// creating a datasource.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>
+                /// If you are asked by Google to help with debugging, set this field. Otherwise, ignore this field.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("debugOptions.enableDebugging", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual System.Nullable<bool> DebugOptionsEnableDebugging { get; set; }
+
+                /// <summary>
+                /// Only applies to
+                /// [`settings.datasources.patch`](https://developers.google.com/cloud-search/docs/reference/rest/v1/settings.datasources/patch).
+                /// Update mask to control which fields to update. Example field paths: `name`, `displayName`. * If
+                /// `update_mask` is non-empty, then only the fields specified in the `update_mask` are updated. * If
+                /// you specify a field in the `update_mask`, but don't specify its value in the source, that field is
+                /// cleared. * If the `update_mask` is not present or empty or has the value `*`, then all fields are
+                /// updated.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual object UpdateMask { get; set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.CloudSearch.v1.Data.DataSource Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "patch";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "PATCH";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/settings/{+name}";
+
+                /// <summary>Initializes Patch parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^datasources/[^/]+$",
+                    });
+                    RequestParameters.Add("debugOptions.enableDebugging", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "debugOptions.enableDebugging",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                    RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "updateMask",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+
+            /// <summary>Updates a datasource. **Note:** This API requires an admin account to execute.</summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">
+            /// The name of the datasource resource. Format: datasources/{source_id}. The name is ignored when creating
+            /// a datasource.
             /// </param>
             public virtual UpdateRequest Update(Google.Apis.CloudSearch.v1.Data.UpdateDataSourceRequest body, string name)
             {
-                return new UpdateRequest(service, body, name);
+                return new UpdateRequest(this.service, body, name);
             }
 
             /// <summary>Updates a datasource. **Note:** This API requires an admin account to execute.</summary>
@@ -2902,8 +3089,8 @@ namespace Google.Apis.CloudSearch.v1
                 }
 
                 /// <summary>
-                /// Name of the datasource resource. Format: datasources/{source_id}. The name is ignored when creating
-                /// a datasource.
+                /// The name of the datasource resource. Format: datasources/{source_id}. The name is ignored when
+                /// creating a datasource.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Name { get; private set; }
@@ -2962,7 +3149,7 @@ namespace Google.Apis.CloudSearch.v1
             /// <param name="body">The body of the request.</param>
             public virtual CreateRequest Create(Google.Apis.CloudSearch.v1.Data.SearchApplication body)
             {
-                return new CreateRequest(service, body);
+                return new CreateRequest(this.service, body);
             }
 
             /// <summary>
@@ -3007,7 +3194,7 @@ namespace Google.Apis.CloudSearch.v1
             /// </param>
             public virtual DeleteRequest Delete(string name)
             {
-                return new DeleteRequest(service, name);
+                return new DeleteRequest(this.service, name);
             }
 
             /// <summary>
@@ -3069,10 +3256,12 @@ namespace Google.Apis.CloudSearch.v1
             /// <summary>
             /// Gets the specified search application. **Note:** This API requires an admin account to execute.
             /// </summary>
-            /// <param name="name">Name of the search application. Format: searchapplications/{application_id}.</param>
+            /// <param name="name">
+            /// The name of the search application. Format: searchapplications/{application_id}.
+            /// </param>
             public virtual GetRequest Get(string name)
             {
-                return new GetRequest(service, name);
+                return new GetRequest(this.service, name);
             }
 
             /// <summary>
@@ -3087,7 +3276,7 @@ namespace Google.Apis.CloudSearch.v1
                     InitParameters();
                 }
 
-                /// <summary>Name of the search application. Format: searchapplications/{application_id}.</summary>
+                /// <summary>The name of the search application. Format: searchapplications/{application_id}.</summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Name { get; private set; }
 
@@ -3134,7 +3323,7 @@ namespace Google.Apis.CloudSearch.v1
             /// </summary>
             public virtual ListRequest List()
             {
-                return new ListRequest(service);
+                return new ListRequest(this.service);
             }
 
             /// <summary>
@@ -3205,6 +3394,85 @@ namespace Google.Apis.CloudSearch.v1
             }
 
             /// <summary>
+            /// Updates a search application. **Note:** This API requires an admin account to execute.
+            /// </summary>
+            /// <param name="body">The body of the request.</param>
+            /// <param name="name">
+            /// The name of the Search Application. Format: searchapplications/{application_id}.
+            /// </param>
+            public virtual PatchRequest Patch(Google.Apis.CloudSearch.v1.Data.SearchApplication body, string name)
+            {
+                return new PatchRequest(this.service, body, name);
+            }
+
+            /// <summary>
+            /// Updates a search application. **Note:** This API requires an admin account to execute.
+            /// </summary>
+            public class PatchRequest : CloudSearchBaseServiceRequest<Google.Apis.CloudSearch.v1.Data.Operation>
+            {
+                /// <summary>Constructs a new Patch request.</summary>
+                public PatchRequest(Google.Apis.Services.IClientService service, Google.Apis.CloudSearch.v1.Data.SearchApplication body, string name) : base(service)
+                {
+                    Name = name;
+                    Body = body;
+                    InitParameters();
+                }
+
+                /// <summary>The name of the Search Application. Format: searchapplications/{application_id}.</summary>
+                [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
+                public virtual string Name { get; private set; }
+
+                /// <summary>
+                /// Only applies to
+                /// [`settings.searchapplications.patch`](https://developers.google.com/cloud-search/docs/reference/rest/v1/settings.searchapplications/patch).
+                /// Update mask to control which fields to update. Example field paths: `search_application.name`,
+                /// `search_application.displayName`. * If `update_mask` is non-empty, then only the fields specified in
+                /// the `update_mask` are updated. * If you specify a field in the `update_mask`, but don't specify its
+                /// value in the `search_application`, then that field is cleared. * If the `update_mask` is not present
+                /// or empty or has the value `*`, then all fields are updated.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual object UpdateMask { get; set; }
+
+                /// <summary>Gets or sets the body of this request.</summary>
+                Google.Apis.CloudSearch.v1.Data.SearchApplication Body { get; set; }
+
+                /// <summary>Returns the body of the request.</summary>
+                protected override object GetBody() => Body;
+
+                /// <summary>Gets the method name.</summary>
+                public override string MethodName => "patch";
+
+                /// <summary>Gets the HTTP method.</summary>
+                public override string HttpMethod => "PATCH";
+
+                /// <summary>Gets the REST path.</summary>
+                public override string RestPath => "v1/settings/{+name}";
+
+                /// <summary>Initializes Patch parameter list.</summary>
+                protected override void InitParameters()
+                {
+                    base.InitParameters();
+                    RequestParameters.Add("name", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "name",
+                        IsRequired = true,
+                        ParameterType = "path",
+                        DefaultValue = null,
+                        Pattern = @"^searchapplications/[^/]+$",
+                    });
+                    RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "updateMask",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
+                }
+            }
+
+            /// <summary>
             /// Resets a search application to default settings. This will return an empty response. **Note:** This API
             /// requires an admin account to execute.
             /// </summary>
@@ -3214,7 +3482,7 @@ namespace Google.Apis.CloudSearch.v1
             /// </param>
             public virtual ResetRequest Reset(Google.Apis.CloudSearch.v1.Data.ResetSearchApplicationRequest body, string name)
             {
-                return new ResetRequest(service, body, name);
+                return new ResetRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -3271,10 +3539,12 @@ namespace Google.Apis.CloudSearch.v1
             /// Updates a search application. **Note:** This API requires an admin account to execute.
             /// </summary>
             /// <param name="body">The body of the request.</param>
-            /// <param name="name">Name of the Search Application. Format: searchapplications/{application_id}.</param>
+            /// <param name="name">
+            /// The name of the Search Application. Format: searchapplications/{application_id}.
+            /// </param>
             public virtual UpdateRequest Update(Google.Apis.CloudSearch.v1.Data.SearchApplication body, string name)
             {
-                return new UpdateRequest(service, body, name);
+                return new UpdateRequest(this.service, body, name);
             }
 
             /// <summary>
@@ -3290,9 +3560,21 @@ namespace Google.Apis.CloudSearch.v1
                     InitParameters();
                 }
 
-                /// <summary>Name of the Search Application. Format: searchapplications/{application_id}.</summary>
+                /// <summary>The name of the Search Application. Format: searchapplications/{application_id}.</summary>
                 [Google.Apis.Util.RequestParameterAttribute("name", Google.Apis.Util.RequestParameterType.Path)]
                 public virtual string Name { get; private set; }
+
+                /// <summary>
+                /// Only applies to
+                /// [`settings.searchapplications.patch`](https://developers.google.com/cloud-search/docs/reference/rest/v1/settings.searchapplications/patch).
+                /// Update mask to control which fields to update. Example field paths: `search_application.name`,
+                /// `search_application.displayName`. * If `update_mask` is non-empty, then only the fields specified in
+                /// the `update_mask` are updated. * If you specify a field in the `update_mask`, but don't specify its
+                /// value in the `search_application`, then that field is cleared. * If the `update_mask` is not present
+                /// or empty or has the value `*`, then all fields are updated.
+                /// </summary>
+                [Google.Apis.Util.RequestParameterAttribute("updateMask", Google.Apis.Util.RequestParameterType.Query)]
+                public virtual object UpdateMask { get; set; }
 
                 /// <summary>Gets or sets the body of this request.</summary>
                 Google.Apis.CloudSearch.v1.Data.SearchApplication Body { get; set; }
@@ -3321,6 +3603,14 @@ namespace Google.Apis.CloudSearch.v1
                         DefaultValue = null,
                         Pattern = @"^searchapplications/[^/]+$",
                     });
+                    RequestParameters.Add("updateMask", new Google.Apis.Discovery.Parameter
+                    {
+                        Name = "updateMask",
+                        IsRequired = false,
+                        ParameterType = "query",
+                        DefaultValue = null,
+                        Pattern = null,
+                    });
                 }
             }
         }
@@ -3328,7 +3618,7 @@ namespace Google.Apis.CloudSearch.v1
         /// <summary>Get customer settings. **Note:** This API requires an admin account to execute.</summary>
         public virtual GetCustomerRequest GetCustomer()
         {
-            return new GetCustomerRequest(service);
+            return new GetCustomerRequest(this.service);
         }
 
         /// <summary>Get customer settings. **Note:** This API requires an admin account to execute.</summary>
@@ -3360,7 +3650,7 @@ namespace Google.Apis.CloudSearch.v1
         /// <param name="body">The body of the request.</param>
         public virtual UpdateCustomerRequest UpdateCustomer(Google.Apis.CloudSearch.v1.Data.CustomerSettings body)
         {
-            return new UpdateCustomerRequest(service, body);
+            return new UpdateCustomerRequest(this.service, body);
         }
 
         /// <summary>Update customer settings. **Note:** This API requires an admin account to execute.</summary>
@@ -3475,7 +3765,7 @@ namespace Google.Apis.CloudSearch.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -3641,7 +3931,7 @@ namespace Google.Apis.CloudSearch.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -3807,7 +4097,7 @@ namespace Google.Apis.CloudSearch.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -3973,7 +4263,7 @@ namespace Google.Apis.CloudSearch.v1
                 /// </param>
                 public virtual GetRequest Get(string name)
                 {
-                    return new GetRequest(service, name);
+                    return new GetRequest(this.service, name);
                 }
 
                 /// <summary>
@@ -4101,7 +4391,7 @@ namespace Google.Apis.CloudSearch.v1
         /// </summary>
         public virtual GetIndexRequest GetIndex()
         {
-            return new GetIndexRequest(service);
+            return new GetIndexRequest(this.service);
         }
 
         /// <summary>
@@ -4210,7 +4500,7 @@ namespace Google.Apis.CloudSearch.v1
         /// </summary>
         public virtual GetQueryRequest GetQuery()
         {
-            return new GetQueryRequest(service);
+            return new GetQueryRequest(this.service);
         }
 
         /// <summary>
@@ -4313,12 +4603,121 @@ namespace Google.Apis.CloudSearch.v1
         }
 
         /// <summary>
+        /// Get search application stats for customer. **Note:** This API requires a standard end user account to
+        /// execute.
+        /// </summary>
+        public virtual GetSearchapplicationRequest GetSearchapplication()
+        {
+            return new GetSearchapplicationRequest(this.service);
+        }
+
+        /// <summary>
+        /// Get search application stats for customer. **Note:** This API requires a standard end user account to
+        /// execute.
+        /// </summary>
+        public class GetSearchapplicationRequest : CloudSearchBaseServiceRequest<Google.Apis.CloudSearch.v1.Data.GetCustomerSearchApplicationStatsResponse>
+        {
+            /// <summary>Constructs a new GetSearchapplication request.</summary>
+            public GetSearchapplicationRequest(Google.Apis.Services.IClientService service) : base(service)
+            {
+                InitParameters();
+            }
+
+            /// <summary>Day of month. Must be from 1 to 31 and valid for the year and month.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("endDate.day", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<int> EndDateDay { get; set; }
+
+            /// <summary>Month of date. Must be from 1 to 12.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("endDate.month", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<int> EndDateMonth { get; set; }
+
+            /// <summary>Year of date. Must be from 1 to 9999.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("endDate.year", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<int> EndDateYear { get; set; }
+
+            /// <summary>Day of month. Must be from 1 to 31 and valid for the year and month.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("startDate.day", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<int> StartDateDay { get; set; }
+
+            /// <summary>Month of date. Must be from 1 to 12.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("startDate.month", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<int> StartDateMonth { get; set; }
+
+            /// <summary>Year of date. Must be from 1 to 9999.</summary>
+            [Google.Apis.Util.RequestParameterAttribute("startDate.year", Google.Apis.Util.RequestParameterType.Query)]
+            public virtual System.Nullable<int> StartDateYear { get; set; }
+
+            /// <summary>Gets the method name.</summary>
+            public override string MethodName => "getSearchapplication";
+
+            /// <summary>Gets the HTTP method.</summary>
+            public override string HttpMethod => "GET";
+
+            /// <summary>Gets the REST path.</summary>
+            public override string RestPath => "v1/stats/searchapplication";
+
+            /// <summary>Initializes GetSearchapplication parameter list.</summary>
+            protected override void InitParameters()
+            {
+                base.InitParameters();
+                RequestParameters.Add("endDate.day", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "endDate.day",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("endDate.month", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "endDate.month",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("endDate.year", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "endDate.year",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("startDate.day", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "startDate.day",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("startDate.month", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "startDate.month",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+                RequestParameters.Add("startDate.year", new Google.Apis.Discovery.Parameter
+                {
+                    Name = "startDate.year",
+                    IsRequired = false,
+                    ParameterType = "query",
+                    DefaultValue = null,
+                    Pattern = null,
+                });
+            }
+        }
+
+        /// <summary>
         /// Get the # of search sessions, % of successful sessions with a click query statistics for customer. **Note:**
         /// This API requires a standard end user account to execute.
         /// </summary>
         public virtual GetSessionRequest GetSession()
         {
-            return new GetSessionRequest(service);
+            return new GetSessionRequest(this.service);
         }
 
         /// <summary>
@@ -4426,7 +4825,7 @@ namespace Google.Apis.CloudSearch.v1
         /// </summary>
         public virtual GetUserRequest GetUser()
         {
-            return new GetUserRequest(service);
+            return new GetUserRequest(this.service);
         }
 
         /// <summary>
@@ -4550,7 +4949,7 @@ namespace Google.Apis.CloudSearch.v1
         /// <param name="body">The body of the request.</param>
         public virtual InitializeCustomerRequest InitializeCustomer(Google.Apis.CloudSearch.v1.Data.InitializeCustomerRequest body)
         {
-            return new InitializeCustomerRequest(service, body);
+            return new InitializeCustomerRequest(this.service, body);
         }
 
         /// <summary>
@@ -4591,6 +4990,20 @@ namespace Google.Apis.CloudSearch.v1
 }
 namespace Google.Apis.CloudSearch.v1.Data
 {
+    public class Action : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>[Required] Title of the action.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("title")]
+        public virtual string Title { get; set; }
+
+        /// <summary>[Optional] Url of the action.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("url")]
+        public virtual string Url { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Represents the settings for Cloud audit logging</summary>
     public class AuditLoggingSettings : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -4622,6 +5035,23 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    public class BackgroundColoredText : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// [Optional] Color of the background. The text color can change depending on the selected background color,
+        /// and the client does not have control over this. If missing, the background will be WHITE.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("backgroundColor")]
+        public virtual string BackgroundColor { get; set; }
+
+        /// <summary>[Required] The text to display.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("text")]
+        public virtual string Text { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// Used to provide a search operator for boolean properties. This is optional. Search operators let users restrict
     /// the query to specific fields relevant to the type of item being searched.
@@ -4644,7 +5074,7 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Options for boolean properties.</summary>
+    /// <summary>The options for boolean properties.</summary>
     public class BooleanPropertyOptions : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>If set, describes how the boolean should be used as a search operator.</summary>
@@ -4679,6 +5109,104 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    public class Content : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>[Optional] Actions for this card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("actions")]
+        public virtual System.Collections.Generic.IList<Action> Actions { get; set; }
+
+        /// <summary>[Optional] Description of the card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual SafeHtmlProto Description { get; set; }
+
+        /// <summary>[Optional] Subtitle of the card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("subtitle")]
+        public virtual BackgroundColoredText Subtitle { get; set; }
+
+        /// <summary>[Optional] Title of the card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("title")]
+        public virtual BackgroundColoredText Title { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class Context : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// [Optional] App where the card should be shown. If missing, the card will be shown in TOPAZ.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("app")]
+        public virtual System.Collections.Generic.IList<string> App { get; set; }
+
+        /// <summary>[Optional] Day of week when the card should be shown, where 0 is Monday.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dayOfWeek")]
+        public virtual System.Collections.Generic.IList<System.Nullable<int>> DayOfWeek { get; set; }
+
+        /// <summary>
+        /// [Optional] Date (in seconds since epoch) when the card should stop being shown. If missing, end_date_sec
+        /// will be set to Jan 1st, 2100.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endDateSec")]
+        public virtual System.Nullable<long> EndDateSec { get; set; }
+
+        /// <summary>
+        /// [Optional] End time in seconds, within a day, when the card should stop being shown if it's within
+        /// [start_date_sec, end_date_sec]. If missing, this is set to 86400 (24 hours x 3600 sec/hour), i.e., midnight
+        /// next day.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endDayOffsetSec")]
+        public virtual System.Nullable<long> EndDayOffsetSec { get; set; }
+
+        /// <summary>
+        /// [Optional] The locales for which the card should be triggered (e.g., en_US and en_CA). If missing, the card
+        /// is going to show to clients regardless of their locale.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("locale")]
+        public virtual System.Collections.Generic.IList<string> Locale { get; set; }
+
+        /// <summary>
+        /// [Optional] Text-free locations where the card should be shown. This is expected to match the user's location
+        /// in focus. If no location is specified, the card will be shown for any location.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual System.Collections.Generic.IList<string> Location { get; set; }
+
+        /// <summary>
+        /// [Required only for Answer and RHS cards - will be ignored for Homepage] cards. It's the exact
+        /// case-insensitive queries that will trigger the Answer or RHS card.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("query")]
+        public virtual System.Collections.Generic.IList<string> Query { get; set; }
+
+        /// <summary>
+        /// [Optional] Date (in seconds since epoch) when the card should start being shown. If missing, start_date_sec
+        /// will be Jan 1st, 1970 UTC.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startDateSec")]
+        public virtual System.Nullable<long> StartDateSec { get; set; }
+
+        /// <summary>
+        /// [Optional] Start time in seconds, within a day, when the card should be shown if it's within
+        /// [start_date_sec, end_date_sec]. If 0, the card will be shown from 12:00am on.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startDayOffsetSec")]
+        public virtual System.Nullable<long> StartDayOffsetSec { get; set; }
+
+        /// <summary>
+        /// [Optional] Surface where the card should be shown in. If missing, the card will be shown in any surface.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("surface")]
+        public virtual System.Collections.Generic.IList<string> Surface { get; set; }
+
+        /// <summary>[Required] Type of the card (homepage, Answer or RHS).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual System.Collections.Generic.IList<string> Type { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>
     /// A named attribute associated with an item which can be used for influencing the ranking of the item based on the
     /// context in the request.
@@ -4707,7 +5235,7 @@ namespace Google.Apis.CloudSearch.v1.Data
     /// <summary>Aggregation of items by status code as of the specified date.</summary>
     public class CustomerIndexStats : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Date for which statistics were calculated.</summary>
+        /// <summary>The date for which statistics were calculated.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("date")]
         public virtual Date Date { get; set; }
 
@@ -4722,7 +5250,8 @@ namespace Google.Apis.CloudSearch.v1.Data
     public class CustomerQueryStats : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Date for which query stats were calculated. Stats calculated on the next day close to midnight are returned.
+        /// The date for which query stats were calculated. Stats calculated on the next day close to midnight are
+        /// returned.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("date")]
         public virtual Date Date { get; set; }
@@ -4734,11 +5263,26 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Search application stats for a customer for the given date.</summary>
+    public class CustomerSearchApplicationStats : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The count of search applications for the date.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("count")]
+        public virtual System.Nullable<long> Count { get; set; }
+
+        /// <summary>The date for which search application stats were calculated.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("date")]
+        public virtual Date Date { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     public class CustomerSessionStats : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Date for which session stats were calculated. Stats are calculated on the following day, close to midnight
-        /// PST, and then returned.
+        /// The date for which session stats were calculated. Stats are calculated on the following day, close to
+        /// midnight PST, and then returned.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("date")]
         public virtual Date Date { get; set; }
@@ -4775,7 +5319,7 @@ namespace Google.Apis.CloudSearch.v1.Data
     public class CustomerUserStats : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Date for which session stats were calculated. Stats calculated on the next day close to midnight are
+        /// The date for which session stats were calculated. Stats calculated on the next day close to midnight are
         /// returned.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("date")]
@@ -4833,7 +5377,7 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual System.Collections.Generic.IList<GSuitePrincipal> ItemsVisibility { get; set; }
 
         /// <summary>
-        /// Name of the datasource resource. Format: datasources/{source_id}. The name is ignored when creating a
+        /// The name of the datasource resource. Format: datasources/{source_id}. The name is ignored when creating a
         /// datasource.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
@@ -4842,6 +5386,10 @@ namespace Google.Apis.CloudSearch.v1.Data
         /// <summary>IDs of the Long Running Operations (LROs) currently running for this schema.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("operationIds")]
         public virtual System.Collections.Generic.IList<string> OperationIds { get; set; }
+
+        /// <summary>Can a user request to get thumbnail URI for Items indexed in this data source.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("returnThumbnailUrls")]
+        public virtual System.Nullable<bool> ReturnThumbnailUrls { get; set; }
 
         /// <summary>
         /// A short name or alias for the source. This value will be used to match the 'source' operator. For example,
@@ -4862,7 +5410,7 @@ namespace Google.Apis.CloudSearch.v1.Data
     public class DataSourceIndexStats : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Date for which index stats were calculated. If the date of request is not the current date then stats
+        /// The date for which index stats were calculated. If the date of request is not the current date then stats
         /// calculated on the next day are returned. Stats are calculated close to mid night in this case. If date of
         /// request is current date, then real time stats are returned.
         /// </summary>
@@ -4965,7 +5513,7 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Options for date properties.</summary>
+    /// <summary>The options for date properties.</summary>
     public class DatePropertyOptions : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>If set, describes how the date should be used as a search operator.</summary>
@@ -4999,9 +5547,28 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Debug Search Response.</summary>
+    public class DebugResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Serialized string of GenericSearchRequest.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gsrRequest")]
+        public virtual string GsrRequest { get; set; }
+
+        /// <summary>Serialized string of GenericSearchResponse.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gsrResponse")]
+        public virtual string GsrResponse { get; set; }
+
+        /// <summary>Search response.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("searchResponse")]
+        public virtual SearchResponse SearchResponse { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     public class DeleteQueueItemsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Name of connector making this call. Format: datasources/{source_id}/connectors/{ID}</summary>
+        /// <summary>The name of connector making this call. Format: datasources/{source_id}/connectors/{ID}</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("connectorName")]
         public virtual string ConnectorName { get; set; }
 
@@ -5009,7 +5576,7 @@ namespace Google.Apis.CloudSearch.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("debugOptions")]
         public virtual DebugOptions DebugOptions { get; set; }
 
-        /// <summary>Name of a queue to delete items from.</summary>
+        /// <summary>The name of a queue to delete items from.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("queue")]
         public virtual string Queue { get; set; }
 
@@ -5052,7 +5619,7 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Options for double properties.</summary>
+    /// <summary>The options for double properties.</summary>
     public class DoublePropertyOptions : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>If set, describes how the double should be used as a search operator.</summary>
@@ -5116,9 +5683,1243 @@ namespace Google.Apis.CloudSearch.v1.Data
     /// <summary>A person's email address.</summary>
     public class EmailAddress : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>If the value of type is custom, this property contains the custom type string.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("customType")]
+        public virtual string CustomType { get; set; }
+
         /// <summary>The email address.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("emailAddress")]
         public virtual string EmailAddressValue { get; set; }
+
+        /// <summary>The URL to send email.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("emailUrl")]
+        public virtual string EmailUrl { get; set; }
+
+        /// <summary>Indicates if this is the user's primary email. Only one entry can be marked as primary.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("primary")]
+        public virtual System.Nullable<bool> Primary { get; set; }
+
+        /// <summary>The type of the email account. Acceptable values are: "custom", "home", "other", "work".</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class EnterpriseTopazFrontendTeamsLink : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The identifying link type</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("url")]
+        public virtual SafeUrlProto Url { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class EnterpriseTopazFrontendTeamsPersonCorePhoneNumber : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Phone number in no particular format (as comes from the Focus profile).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("phoneNumber")]
+        public virtual string PhoneNumber { get; set; }
+
+        /// <summary>Phone number URL</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("phoneUrl")]
+        public virtual SafeUrlProto PhoneUrl { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>An AgendaEntry, e.g., a Calendar Event.</summary>
+    public class EnterpriseTopazSidekickAgendaEntry : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>URL of the agenda item.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("agendaItemUrl")]
+        public virtual string AgendaItemUrl { get; set; }
+
+        /// <summary>The chronology from the present.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("chronology")]
+        public virtual string Chronology { get; set; }
+
+        /// <summary>Person who created the event.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("creator")]
+        public virtual EnterpriseTopazSidekickPerson Creator { get; set; }
+
+        /// <summary>
+        /// Attendance status for the current user making the request. This is a convenience data member in order to
+        /// avoid figuring out the same by iterating the invitee list above on the caller side.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("currentUserAttendingStatus")]
+        public virtual string CurrentUserAttendingStatus { get; set; }
+
+        /// <summary>Description of the agenda item (i.e., typically, summary in calendar event).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>Items related to the current AgendaEntry. E.g., related drive/mail/groups documents.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("document")]
+        public virtual System.Collections.Generic.IList<EnterpriseTopazSidekickCommonDocument> Document { get; set; }
+
+        /// <summary>End date "Friday, August 26" in the user's timezone.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endDate")]
+        public virtual string EndDate { get; set; }
+
+        /// <summary>End time (HH:mm) in the user's timezone.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
+        public virtual string EndTime { get; set; }
+
+        /// <summary>End time in milliseconds</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTimeMs")]
+        public virtual System.Nullable<long> EndTimeMs { get; set; }
+
+        /// <summary>Event id provided by Calendar API.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("eventId")]
+        public virtual string EventId { get; set; }
+
+        /// <summary>Whether the guests can invite other guests.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("guestsCanInviteOthers")]
+        public virtual System.Nullable<bool> GuestsCanInviteOthers { get; set; }
+
+        /// <summary>Whether the guests can modify the event.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("guestsCanModify")]
+        public virtual System.Nullable<bool> GuestsCanModify { get; set; }
+
+        /// <summary>
+        /// Whether the guests of the event can be seen. If false, the user is going to be reported as the only attendee
+        /// to the meeting, even though there may be more attendees.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("guestsCanSeeGuests")]
+        public virtual System.Nullable<bool> GuestsCanSeeGuests { get; set; }
+
+        /// <summary>Hangout meeting identifier.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hangoutId")]
+        public virtual string HangoutId { get; set; }
+
+        /// <summary>Absolute URL for the Hangout meeting.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("hangoutUrl")]
+        public virtual string HangoutUrl { get; set; }
+
+        /// <summary>People attending the meeting.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("invitee")]
+        public virtual System.Collections.Generic.IList<EnterpriseTopazSidekickPerson> Invitee { get; set; }
+
+        /// <summary>Whether the entry lasts all day.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("isAllDay")]
+        public virtual System.Nullable<bool> IsAllDay { get; set; }
+
+        /// <summary>Last time the event was modified.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lastModificationTimeMs")]
+        public virtual System.Nullable<long> LastModificationTimeMs { get; set; }
+
+        /// <summary>Agenda item location.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual string Location { get; set; }
+
+        /// <summary>Whether this should be notified to the user.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("notifyToUser")]
+        public virtual System.Nullable<bool> NotifyToUser { get; set; }
+
+        /// <summary>Whether guest list is not returned because number of attendees is too large.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("otherAttendeesExcluded")]
+        public virtual System.Nullable<bool> OtherAttendeesExcluded { get; set; }
+
+        /// <summary>Whether the requester is the owner of the agenda entry.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requesterIsOwner")]
+        public virtual System.Nullable<bool> RequesterIsOwner { get; set; }
+
+        /// <summary>Whether the details of this entry should be displayed to the user.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("showFullEventDetailsToUse")]
+        public virtual System.Nullable<bool> ShowFullEventDetailsToUse { get; set; }
+
+        /// <summary>Start date "Friday, August 26" in the user's timezone.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startDate")]
+        public virtual string StartDate { get; set; }
+
+        /// <summary>Start time (HH:mm) in the user's timezone.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
+        public virtual string StartTime { get; set; }
+
+        /// <summary>Start time in milliseconds.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTimeMs")]
+        public virtual System.Nullable<long> StartTimeMs { get; set; }
+
+        /// <summary>User's calendar timezone;</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("timeZone")]
+        public virtual string TimeZone { get; set; }
+
+        /// <summary>Title of the agenda item.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("title")]
+        public virtual string Title { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class EnterpriseTopazSidekickAgendaGroupCardProto : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("agendaItem")]
+        public virtual System.Collections.Generic.IList<EnterpriseTopazSidekickAgendaItem> AgendaItem { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("context")]
+        public virtual EnterpriseTopazSidekickAgendaGroupCardProtoContext Context { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("currentAgendaItem")]
+        public virtual EnterpriseTopazSidekickAgendaItem CurrentAgendaItem { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>The context that resulted in the generation of the card.</summary>
+    public class EnterpriseTopazSidekickAgendaGroupCardProtoContext : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// User friendly free text that describes the context of the card (e.g. "Next meeting with Bob"). This is
+        /// largely only applicable when the card is generated from a query.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("context")]
+        public virtual string Context { get; set; }
+
+        /// <summary>
+        /// Localized free text that describes the dates represented by the card. Currently, the card will only
+        /// represent a single day.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("date")]
+        public virtual string Date { get; set; }
+
+        /// <summary>Represents restrictions applied to the events requested in the user's query.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("eventsRestrict")]
+        public virtual string EventsRestrict { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class EnterpriseTopazSidekickAgendaItem : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("conflictedGroup")]
+        public virtual EnterpriseTopazSidekickConflictingEventsCardProto ConflictedGroup { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("gapBefore")]
+        public virtual EnterpriseTopazSidekickGap GapBefore { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("meeting")]
+        public virtual EnterpriseTopazSidekickAgendaEntry Meeting { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A list of answers represented as free text.</summary>
+    public class EnterpriseTopazSidekickAnswerAnswerList : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Answers that have a corresponding label.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("labeledAnswer")]
+        public virtual System.Collections.Generic.IList<EnterpriseTopazSidekickAnswerAnswerListLabeledAnswer> LabeledAnswer { get; set; }
+
+        /// <summary>Answer type.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>An answer with a corresponding label.</summary>
+    public class EnterpriseTopazSidekickAnswerAnswerListLabeledAnswer : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The free text answer.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("answer")]
+        public virtual string Answer { get; set; }
+
+        /// <summary>A localized label for the answer (e.g. "Cell phone" vs "Desk phone").</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("label")]
+        public virtual string Label { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Contains a list of suggested queries. Allows the user to determine what natural language queries they can ask
+    /// Cloud Search (e.g. "what can I search for?").
+    /// </summary>
+    public class EnterpriseTopazSidekickAnswerSuggestedQueryAnswerCard : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A list of queries to suggest.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("suggestedQueryCategory")]
+        public virtual System.Collections.Generic.IList<EnterpriseTopazSidekickAnswerSuggestedQueryCategory> SuggestedQueryCategory { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Contains a list of suggested queries for a single category.</summary>
+    public class EnterpriseTopazSidekickAnswerSuggestedQueryCategory : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The query list category.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("category")]
+        public virtual string Category { get; set; }
+
+        /// <summary>Whether this category is enabled.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("isEnabled")]
+        public virtual System.Nullable<bool> IsEnabled { get; set; }
+
+        /// <summary>List of suggested queries to show the user.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("query")]
+        public virtual System.Collections.Generic.IList<string> Query { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Wrapper proto for the Assist cards.</summary>
+    public class EnterpriseTopazSidekickAssistCardProto : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Agenda group card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("agendaGroupCardProto")]
+        public virtual EnterpriseTopazSidekickAgendaGroupCardProto AgendaGroupCardProto { get; set; }
+
+        /// <summary>Card metadata such as chronology and render mode of the card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cardMetadata")]
+        public virtual EnterpriseTopazSidekickCardMetadata CardMetadata { get; set; }
+
+        /// <summary>Card type.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cardType")]
+        public virtual string CardType { get; set; }
+
+        /// <summary>Conflicting events card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("conflictingMeetingsCard")]
+        public virtual EnterpriseTopazSidekickConflictingEventsCardProto ConflictingMeetingsCard { get; set; }
+
+        /// <summary>Answer card for documents that are applicable to the current query.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("documentListCard")]
+        public virtual EnterpriseTopazSidekickDocumentPerCategoryList DocumentListCard { get; set; }
+
+        /// <summary>Documents with mentions.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("documentsWithMentions")]
+        public virtual EnterpriseTopazSidekickDocumentPerCategoryList DocumentsWithMentions { get; set; }
+
+        /// <summary>Find meeting time card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("findMeetingTimeCard")]
+        public virtual EnterpriseTopazSidekickFindMeetingTimeCardProto FindMeetingTimeCard { get; set; }
+
+        /// <summary>Generic answer card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("genericAnswerCard")]
+        public virtual EnterpriseTopazSidekickGenericAnswerCard GenericAnswerCard { get; set; }
+
+        /// <summary>Get and keep ahead card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("getAndKeepAheadCard")]
+        public virtual EnterpriseTopazSidekickGetAndKeepAheadCardProto GetAndKeepAheadCard { get; set; }
+
+        /// <summary>Meeting card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("meeting")]
+        public virtual EnterpriseTopazSidekickAgendaEntry Meeting { get; set; }
+
+        /// <summary>Meeting notes card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("meetingNotesCard")]
+        public virtual EnterpriseTopazSidekickMeetingNotesCardProto MeetingNotesCard { get; set; }
+
+        /// <summary>Request for meeting notes card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("meetingNotesCardRequest")]
+        public virtual EnterpriseTopazSidekickMeetingNotesCardRequest MeetingNotesCardRequest { get; set; }
+
+        /// <summary>The people disambiguation card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("peopleDisambiguationCard")]
+        public virtual EnterpriseTopazSidekickPeopleDisambiguationCard PeopleDisambiguationCard { get; set; }
+
+        /// <summary>People Search promotion card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("peoplePromotionCard")]
+        public virtual PeoplePromotionCard PeoplePromotionCard { get; set; }
+
+        /// <summary>Answer card that represents a single person.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("personAnswerCard")]
+        public virtual EnterpriseTopazSidekickPeopleAnswerPersonAnswerCard PersonAnswerCard { get; set; }
+
+        /// <summary>Full profile card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("personProfileCard")]
+        public virtual EnterpriseTopazSidekickPersonProfileCard PersonProfileCard { get; set; }
+
+        /// <summary>Card with recommended documents for the user.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("personalizedDocsCard")]
+        public virtual EnterpriseTopazSidekickPersonalizedDocsCardProto PersonalizedDocsCard { get; set; }
+
+        /// <summary>Answer card that represents a list of people related to a person.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("relatedPeopleAnswerCard")]
+        public virtual EnterpriseTopazSidekickPeopleAnswerRelatedPeopleAnswerCard RelatedPeopleAnswerCard { get; set; }
+
+        /// <summary>Sahre meeting docs card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("shareMeetingDocsCard")]
+        public virtual EnterpriseTopazSidekickShareMeetingDocsCardProto ShareMeetingDocsCard { get; set; }
+
+        /// <summary>Shared documents.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("sharedDocuments")]
+        public virtual EnterpriseTopazSidekickDocumentPerCategoryList SharedDocuments { get; set; }
+
+        /// <summary>Answer card for what natural language queries the user can ask.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("suggestedQueryAnswerCard")]
+        public virtual EnterpriseTopazSidekickAnswerSuggestedQueryAnswerCard SuggestedQueryAnswerCard { get; set; }
+
+        /// <summary>Third party answer cards.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("thirdPartyAnswerCard")]
+        public virtual ThirdPartyGenericCard ThirdPartyAnswerCard { get; set; }
+
+        /// <summary>Work In Progress card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("workInProgressCardProto")]
+        public virtual EnterpriseTopazSidekickRecentDocumentsCardProto WorkInProgressCardProto { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Card metadata.</summary>
+    public class EnterpriseTopazSidekickCardMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Declares a preference for how this card should be packed in MSCR. All cards in a response must correspond to
+        /// a single category. As a result, cards may be dropped from the response if this field is set. Any card that
+        /// does not match the category of the card with the highest priority in the response will be dropped.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cardCategory")]
+        public virtual string CardCategory { get; set; }
+
+        /// <summary>
+        /// An ID to identify the card and match actions to it. Be thoughtful of new card IDs since actions will be
+        /// associated to that ID. E.g., if two card IDs collide, the system will think that the actions have been
+        /// applied to the same card. Similarly, if EAS can return multiple cards of the same type (e.g., Meetings),
+        /// ensure that the card_id identifies a given instance of the card so that, e.g., dismissals only affect the
+        /// dismissed card as opposed to affecting all meeting cards.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cardId")]
+        public virtual string CardId { get; set; }
+
+        /// <summary>Chronology.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("chronology")]
+        public virtual string Chronology { get; set; }
+
+        /// <summary>Debug info (only reported if request's debug_level &gt; 0).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("debugInfo")]
+        public virtual string DebugInfo { get; set; }
+
+        /// <summary>Information about the NLP done to get the card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("nlpMetadata")]
+        public virtual EnterpriseTopazSidekickNlpMetadata NlpMetadata { get; set; }
+
+        /// <summary>Ranking params.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rankingParams")]
+        public virtual EnterpriseTopazSidekickRankingParams RankingParams { get; set; }
+
+        /// <summary>Render mode.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("renderMode")]
+        public virtual string RenderMode { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Container of debugging information in all object levels. Extend as needed.</summary>
+    public class EnterpriseTopazSidekickCommonDebugInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Debug message.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("message")]
+        public virtual string Message { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Representation of a document. NEXT_TAG: 15</summary>
+    public class EnterpriseTopazSidekickCommonDocument : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Access type, i.e., whether the user has access to the document or not.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("accessType")]
+        public virtual string AccessType { get; set; }
+
+        /// <summary>Information for debugging.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("debugInfo")]
+        public virtual EnterpriseTopazSidekickCommonDebugInfo DebugInfo { get; set; }
+
+        /// <summary>Document id.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("documentId")]
+        public virtual string DocumentId { get; set; }
+
+        /// <summary>Drive document metadata.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("driveDocumentMetadata")]
+        public virtual EnterpriseTopazSidekickCommonDocumentDriveDocumentMetadata DriveDocumentMetadata { get; set; }
+
+        /// <summary>Generic Drive-based url in the format of drive.google.com/open to be used for deeplink</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("genericUrl")]
+        public virtual string GenericUrl { get; set; }
+
+        /// <summary>Justification on why the document is selected.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("justification")]
+        public virtual EnterpriseTopazSidekickCommonDocumentJustification Justification { get; set; }
+
+        /// <summary>MIME type</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mimeType")]
+        public virtual string MimeType { get; set; }
+
+        /// <summary>Document provenance.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("provenance")]
+        public virtual string Provenance { get; set; }
+
+        /// <summary>Justification of why this document is being returned.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("reason")]
+        public virtual string Reason { get; set; }
+
+        /// <summary>A sampling of the text from the document.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("snippet")]
+        public virtual string Snippet { get; set; }
+
+        /// <summary>Thumbnail URL.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("thumbnailUrl")]
+        public virtual string ThumbnailUrl { get; set; }
+
+        /// <summary>Title of the document.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("title")]
+        public virtual string Title { get; set; }
+
+        /// <summary>Type of the document.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        /// <summary>Absolute URL of the document.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("url")]
+        public virtual string Url { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Meta data for drive documents.</summary>
+    public class EnterpriseTopazSidekickCommonDocumentDriveDocumentMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The drive document cosmo id. Client could use the id to build a URL to open a document. Please use
+        /// Document.document_id.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("documentId")]
+        public virtual string DocumentId { get; set; }
+
+        /// <summary>
+        /// Additional field to identify whether a document is private since scope set to LIMITED can mean both that the
+        /// doc is private or that it's shared with others. is_private indicates whether the doc is not shared with
+        /// anyone except for the owner.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("isPrivate")]
+        public virtual System.Nullable<bool> IsPrivate { get; set; }
+
+        /// <summary>Timestamp of the most recent comment added to the document in milliseconds since epoch.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lastCommentTimeMs")]
+        public virtual System.Nullable<ulong> LastCommentTimeMs { get; set; }
+
+        /// <summary>Timestamp of the most recent edit from the current user in milliseconds since epoch.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lastEditTimeMs")]
+        public virtual System.Nullable<ulong> LastEditTimeMs { get; set; }
+
+        /// <summary>Last modification time of the document (independent of the user that modified it).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lastModificationTimeMillis")]
+        public virtual System.Nullable<long> LastModificationTimeMillis { get; set; }
+
+        /// <summary>Timestamp of the last updated time of the document in milliseconds since epoch.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lastUpdatedTimeMs")]
+        public virtual System.Nullable<ulong> LastUpdatedTimeMs { get; set; }
+
+        /// <summary>Timestamp of the most recent view from the current user in milliseconds since epoch.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lastViewTimeMs")]
+        public virtual System.Nullable<ulong> LastViewTimeMs { get; set; }
+
+        /// <summary>The owner of the document.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("owner")]
+        public virtual EnterpriseTopazSidekickCommonPerson Owner { get; set; }
+
+        /// <summary>
+        /// ACL scope of the document which identifies the sharing status of the doc (e.g., limited, shared with link,
+        /// team drive, ...).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("scope")]
+        public virtual string Scope { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Justification of why we are reporting the document.</summary>
+    public class EnterpriseTopazSidekickCommonDocumentJustification : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A locale aware message that explains why this document was selected.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("justification")]
+        public virtual string Justification { get; set; }
+
+        /// <summary>Reason on why the document is selected. Populate for trending documents.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("reason")]
+        public virtual string Reason { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Common representation of a person.</summary>
+    public class EnterpriseTopazSidekickCommonPerson : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The birthday.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("birthday")]
+        public virtual EnterpriseTopazSidekickCommonPersonBirthday Birthday { get; set; }
+
+        /// <summary>Cell phone number.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cellPhone")]
+        public virtual string CellPhone { get; set; }
+
+        /// <summary>The department the person works in (e.g. Engineering).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("department")]
+        public virtual string Department { get; set; }
+
+        /// <summary>Desk location (e.g. US-MTV-PR55-5-5B1I).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deskLocation")]
+        public virtual string DeskLocation { get; set; }
+
+        /// <summary>Work desk phone number.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("deskPhone")]
+        public virtual string DeskPhone { get; set; }
+
+        /// <summary>The full name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
+        public virtual string DisplayName { get; set; }
+
+        /// <summary>Email.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("email")]
+        public virtual string Email { get; set; }
+
+        /// <summary>The last name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("familyName")]
+        public virtual string FamilyName { get; set; }
+
+        /// <summary>The fully formatted address (e.g. 1255 Pear Avenue, Mountain View 94043, United States).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fullAddress")]
+        public virtual string FullAddress { get; set; }
+
+        /// <summary>This field is deprecated. The obfuscated_id should be used instead.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gaiaId")]
+        public virtual System.Nullable<long> GaiaId { get; set; }
+
+        /// <summary>The first name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("givenName")]
+        public virtual string GivenName { get; set; }
+
+        /// <summary>The person's job title (e.g. Software Engineer).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("jobTitle")]
+        public virtual string JobTitle { get; set; }
+
+        /// <summary>The manager.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("manager")]
+        public virtual EnterpriseTopazSidekickCommonPerson Manager { get; set; }
+
+        /// <summary>The obfuscated GAIA ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("obfuscatedId")]
+        public virtual string ObfuscatedId { get; set; }
+
+        /// <summary>The URL for the Focus profile picture.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("photoUrl")]
+        public virtual string PhotoUrl { get; set; }
+
+        /// <summary>The street address (e.g. 1255 Pear Avenue).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("streetAddress")]
+        public virtual string StreetAddress { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class EnterpriseTopazSidekickCommonPersonBirthday : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Unstructured birthday.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("value")]
+        public virtual string Value { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Conflicting meetings card proto.</summary>
+    public class EnterpriseTopazSidekickConflictingEventsCardProto : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>All the events that conflict with main_event.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("conflictingEvent")]
+        public virtual System.Collections.Generic.IList<EnterpriseTopazSidekickAgendaEntry> ConflictingEvent { get; set; }
+
+        /// <summary>The event identified as being the most important.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mainEvent")]
+        public virtual EnterpriseTopazSidekickAgendaEntry MainEvent { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Represents a mapping between a document type and its corresponding documents. Use for Work in Progress card in
+    /// v1 homepage.
+    /// </summary>
+    public class EnterpriseTopazSidekickDocumentGroup : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Document group type</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("groupType")]
+        public virtual string GroupType { get; set; }
+
+        /// <summary>The list of corresponding documents.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("personalizedDocument")]
+        public virtual System.Collections.Generic.IList<EnterpriseTopazSidekickCommonDocument> PersonalizedDocument { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class EnterpriseTopazSidekickDocumentPerCategoryList : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("documents")]
+        public virtual System.Collections.Generic.IList<EnterpriseTopazSidekickDocumentPerCategoryListDocumentPerCategoryListEntry> Documents { get; set; }
+
+        /// <summary>
+        /// Localized message explaining how the documents were derived (e.g. from the last 30 days activity). This
+        /// field is optional.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("helpMessage")]
+        public virtual string HelpMessage { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("listType")]
+        public virtual string ListType { get; set; }
+
+        /// <summary>Description of the types of documents present in the list.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("listTypeDescription")]
+        public virtual string ListTypeDescription { get; set; }
+
+        /// <summary>Response message in case no documents are present in the card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("responseMessage")]
+        public virtual string ResponseMessage { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class EnterpriseTopazSidekickDocumentPerCategoryListDocumentPerCategoryListEntry : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("category")]
+        public virtual string Category { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("document")]
+        public virtual EnterpriseTopazSidekickCommonDocument Document { get; set; }
+
+        /// <summary>Reason this document was selected.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("rationale")]
+        public virtual string Rationale { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response to find meeting time among a set of people.</summary>
+    public class EnterpriseTopazSidekickFindMeetingTimeCardProto : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Slots when all attendees have availability.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("commonAvailableTimeSlots")]
+        public virtual System.Collections.Generic.IList<EnterpriseTopazSidekickTimeSlot> CommonAvailableTimeSlots { get; set; }
+
+        /// <summary>Invitees to the event.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("invitees")]
+        public virtual System.Collections.Generic.IList<EnterpriseTopazSidekickPerson> Invitees { get; set; }
+
+        /// <summary>Requester.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requester")]
+        public virtual EnterpriseTopazSidekickPerson Requester { get; set; }
+
+        /// <summary>Details about the scheduled meeting, if one exists.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("scheduledMeeting")]
+        public virtual EnterpriseTopazSidekickScheduledMeeting ScheduledMeeting { get; set; }
+
+        /// <summary>Invitees that have been skipped in the computation, most likely because they are groups.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("skippedInvitees")]
+        public virtual System.Collections.Generic.IList<EnterpriseTopazSidekickPerson> SkippedInvitees { get; set; }
+
+        /// <summary>Min and max timestamp used to find a common available timeslot.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("timeBoundaries")]
+        public virtual EnterpriseTopazSidekickTimeSlot TimeBoundaries { get; set; }
+
+        /// <summary>Timezone ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("timezoneId")]
+        public virtual string TimezoneId { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class EnterpriseTopazSidekickGap : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Localized time string in the format: 1 hour 15 minutes</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("displayRemainingTime")]
+        public virtual string DisplayRemainingTime { get; set; }
+
+        /// <summary>Localized time string in the format:(Locale CZ) 8:30 odp.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTime")]
+        public virtual string EndTime { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("endTimeMs")]
+        public virtual System.Nullable<ulong> EndTimeMs { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("remainingTime")]
+        public virtual object RemainingTime { get; set; }
+
+        /// <summary>Localized time string in the format:(Locale CZ) 8:30 odp.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTime")]
+        public virtual string StartTime { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("startTimeMs")]
+        public virtual System.Nullable<ulong> StartTimeMs { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class EnterpriseTopazSidekickGenericAnswerCard : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The answer.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("answer")]
+        public virtual string Answer { get; set; }
+
+        /// <summary>Title or header of the card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("title")]
+        public virtual string Title { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Get and keep ahead card</summary>
+    public class EnterpriseTopazSidekickGetAndKeepAheadCardProto : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("declinedEvents")]
+        public virtual EnterpriseTopazSidekickGetAndKeepAheadCardProtoDeclinedEvents DeclinedEvents { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("mentionedDocuments")]
+        public virtual EnterpriseTopazSidekickDocumentPerCategoryList MentionedDocuments { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("sharedDocuments")]
+        public virtual EnterpriseTopazSidekickDocumentPerCategoryList SharedDocuments { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A list of events where all guests declined.</summary>
+    public class EnterpriseTopazSidekickGetAndKeepAheadCardProtoDeclinedEvents : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("events")]
+        public virtual System.Collections.Generic.IList<EnterpriseTopazSidekickAgendaEntry> Events { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Errors in the creation of meeting notes.</summary>
+    public class EnterpriseTopazSidekickMeetingNotesCardError : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The description of the reason why create-meeting-notes failed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("description")]
+        public virtual string Description { get; set; }
+
+        /// <summary>The event to request meeting notes creation</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("event")]
+        public virtual EnterpriseTopazSidekickAgendaEntry Event__ { get; set; }
+
+        /// <summary>The reason why create-meeting-notes failed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("reason")]
+        public virtual string Reason { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Information about the meeting notes created.</summary>
+    public class EnterpriseTopazSidekickMeetingNotesCardProto : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The event to request meeting notes creation.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("event")]
+        public virtual EnterpriseTopazSidekickAgendaEntry Event__ { get; set; }
+
+        /// <summary>Google Drive ID (a.k.a. resource ID) of the file.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fileId")]
+        public virtual string FileId { get; set; }
+
+        /// <summary>Title we want to show for meeting notes in the answer card</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("title")]
+        public virtual string Title { get; set; }
+
+        /// <summary>New URL.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("url")]
+        public virtual string Url { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Meeting notes card request.</summary>
+    public class EnterpriseTopazSidekickMeetingNotesCardRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Who are the meeting notes created for.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("canCreateFor")]
+        public virtual System.Collections.Generic.IList<string> CanCreateFor { get; set; }
+
+        /// <summary>The error and reason if known error occured.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("error")]
+        public virtual EnterpriseTopazSidekickMeetingNotesCardError Error { get; set; }
+
+        /// <summary>The event to request meeting notes creation</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("event")]
+        public virtual EnterpriseTopazSidekickAgendaEntry Event__ { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata about the NLP interpretation of the query.</summary>
+    public class EnterpriseTopazSidekickNlpMetadata : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Confidence of the interpretation that generated this card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("confidence")]
+        public virtual System.Nullable<float> Confidence { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Metadata for disambiguation.</summary>
+    public class EnterpriseTopazSidekickPeopleAnswerDisambiguationInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>A list of people that also matched the query. This list is not complete.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("disambiguation")]
+        public virtual System.Collections.Generic.IList<EnterpriseTopazSidekickPeopleAnswerDisambiguationInfoDisambiguationPerson> Disambiguation { get; set; }
+
+        /// <summary>
+        /// The name that was extracted from the query. This may be in the form of the given name, last name, full name,
+        /// LDAP, or email address. This name can be considered suitable for displaying to the user and can largely be
+        /// considered to be normalized (e.g. "Bob's" -&amp;gt; "Bob").
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// A person that also matches the query, but was not selected due to a lower affinity with the requesting user.
+    /// </summary>
+    public class EnterpriseTopazSidekickPeopleAnswerDisambiguationInfoDisambiguationPerson : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The profile of this person.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("person")]
+        public virtual EnterpriseTopazSidekickCommonPerson Person { get; set; }
+
+        /// <summary>
+        /// The query that can be used to produce an answer card with the same attribute, but for this person.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("query")]
+        public virtual string Query { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Recommended header to display for the card.</summary>
+    public class EnterpriseTopazSidekickPeopleAnswerPeopleAnswerCardHeader : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The suggested title to display. This defaults to the user's query.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("title")]
+        public virtual string Title { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>An answer card for a single person.</summary>
+    public class EnterpriseTopazSidekickPeopleAnswerPersonAnswerCard : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>List of answers.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("answer")]
+        public virtual System.Collections.Generic.IList<SafeHtmlProto> Answer { get; set; }
+
+        /// <summary>List of answers.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("answerText")]
+        public virtual EnterpriseTopazSidekickAnswerAnswerList AnswerText { get; set; }
+
+        /// <summary>Disambiguation information.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("disambiguationInfo")]
+        public virtual EnterpriseTopazSidekickPeopleAnswerDisambiguationInfo DisambiguationInfo { get; set; }
+
+        /// <summary>The header to display for the card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("header")]
+        public virtual EnterpriseTopazSidekickPeopleAnswerPeopleAnswerCardHeader Header { get; set; }
+
+        /// <summary>The response status.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("responseStatus")]
+        public virtual string ResponseStatus { get; set; }
+
+        /// <summary>
+        /// Localized user friendly message to display to the user in the case of missing data or an error.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("statusMessage")]
+        public virtual string StatusMessage { get; set; }
+
+        /// <summary>The profile of the person that was the subject of the query.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("subject")]
+        public virtual EnterpriseTopazSidekickCommonPerson Subject { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>An answer card for a list of people that are related to the subject of the query.</summary>
+    public class EnterpriseTopazSidekickPeopleAnswerRelatedPeopleAnswerCard : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Disambiguation information.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("disambiguationInfo")]
+        public virtual EnterpriseTopazSidekickPeopleAnswerDisambiguationInfo DisambiguationInfo { get; set; }
+
+        /// <summary>The header to display for the card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("header")]
+        public virtual EnterpriseTopazSidekickPeopleAnswerPeopleAnswerCardHeader Header { get; set; }
+
+        /// <summary>A list of people that are related to the query subject.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("relatedPeople")]
+        public virtual System.Collections.Generic.IList<EnterpriseTopazSidekickCommonPerson> RelatedPeople { get; set; }
+
+        /// <summary>Defines the type of relation the list of people have with the subject of the card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("relationType")]
+        public virtual string RelationType { get; set; }
+
+        /// <summary>The response status.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("responseStatus")]
+        public virtual string ResponseStatus { get; set; }
+
+        /// <summary>
+        /// Localized user friendly message to display to the user in the case of missing data or an error.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("statusMessage")]
+        public virtual string StatusMessage { get; set; }
+
+        /// <summary>The profile of the person that was the subject of the query.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("subject")]
+        public virtual EnterpriseTopazSidekickCommonPerson Subject { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class EnterpriseTopazSidekickPeopleDisambiguationCard : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Candidate persons for the query.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("person")]
+        public virtual System.Collections.Generic.IList<EnterpriseTopazSidekickCommonPerson> Person { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Person.</summary>
+    public class EnterpriseTopazSidekickPerson : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The level of affinity this person has with the requesting user.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("affinityLevel")]
+        public virtual string AffinityLevel { get; set; }
+
+        /// <summary>Attendance status of the person when included in a meeting event.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("attendingStatus")]
+        public virtual string AttendingStatus { get; set; }
+
+        /// <summary>Email.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("email")]
+        public virtual string Email { get; set; }
+
+        /// <summary>Gaia id.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("gaiaId")]
+        public virtual System.Nullable<long> GaiaId { get; set; }
+
+        /// <summary>Whether the invitee is a group.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("isGroup")]
+        public virtual System.Nullable<bool> IsGroup { get; set; }
+
+        /// <summary>Name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>Obfuscated Gaia id.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("obfuscatedGaiaId")]
+        public virtual string ObfuscatedGaiaId { get; set; }
+
+        /// <summary>Absolute URL to the profile photo of the person.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("photoUrl")]
+        public virtual string PhotoUrl { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class EnterpriseTopazSidekickPersonProfileCard : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("relatedPeople")]
+        public virtual System.Collections.Generic.IList<EnterpriseTopazSidekickPersonProfileCardRelatedPeople> RelatedPeople { get; set; }
+
+        /// <summary>The subject of the card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("subject")]
+        public virtual EnterpriseTopazSidekickCommonPerson Subject { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class EnterpriseTopazSidekickPersonProfileCardRelatedPeople : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Related people.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("relatedPerson")]
+        public virtual System.Collections.Generic.IList<EnterpriseTopazSidekickCommonPerson> RelatedPerson { get; set; }
+
+        /// <summary>Relation type.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("relation")]
+        public virtual string Relation { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Personalized docs card proto.</summary>
+    public class EnterpriseTopazSidekickPersonalizedDocsCardProto : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Document group.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("documentGroup")]
+        public virtual System.Collections.Generic.IList<EnterpriseTopazSidekickDocumentGroup> DocumentGroup { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Ranking params.</summary>
+    public class EnterpriseTopazSidekickRankingParams : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// The end-time that this object will expect to occur. If the type is marked as FIXED, then this end-time will
+        /// persist after bidding. If the type is marked as FLEXIBLE, this field is NOT expected to be filled and will
+        /// be filled in after it has won a bid. Expected to be set when type is set to FIXED.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTimeMs")]
+        public virtual System.Nullable<ulong> EndTimeMs { get; set; }
+
+        /// <summary>
+        /// The priority to determine between objects that have the same start_time_ms The lower-value of priority ==
+        /// ranked higher. Max-priority = 0. Expected to be set for all types.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("priority")]
+        public virtual string Priority { get; set; }
+
+        /// <summary>The score of the card to be used to break priority-ties</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("score")]
+        public virtual System.Nullable<float> Score { get; set; }
+
+        /// <summary>
+        /// The span that this card will take in the stream Expected to be set when type is set to FLEXIBLE.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("spanMs")]
+        public virtual System.Nullable<ulong> SpanMs { get; set; }
+
+        /// <summary>
+        /// The start-time that this object will bid-for If the type is marked as FIXED, then this start-time will
+        /// persist after bidding. If the type is marked as FLEXIBLE, then it will occur at the given time or sometime
+        /// after the requested time. Expected to be set for all types.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTimeMs")]
+        public virtual System.Nullable<ulong> StartTimeMs { get; set; }
+
+        /// <summary>The packing type of this object.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class EnterpriseTopazSidekickRecentDocumentsCardProto : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("document")]
+        public virtual System.Collections.Generic.IList<EnterpriseTopazSidekickCommonDocument> Document { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Details about scheduled meetings.</summary>
+    public class EnterpriseTopazSidekickScheduledMeeting : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The meeting location.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("meetingLocation")]
+        public virtual string MeetingLocation { get; set; }
+
+        /// <summary>The meeting time slot.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("meetingTime")]
+        public virtual EnterpriseTopazSidekickTimeSlot MeetingTime { get; set; }
+
+        /// <summary>The meeting title.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("meetingTitle")]
+        public virtual string MeetingTitle { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Share meeting docs card proto.</summary>
+    public class EnterpriseTopazSidekickShareMeetingDocsCardProto : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Documents to share for the given meeting.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("document")]
+        public virtual System.Collections.Generic.IList<EnterpriseTopazSidekickCommonDocument> Document { get; set; }
+
+        /// <summary>Event.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("event")]
+        public virtual EnterpriseTopazSidekickAgendaEntry Event__ { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Slot of time.</summary>
+    public class EnterpriseTopazSidekickTimeSlot : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Day end time at the user's timezone.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTimeDay")]
+        public virtual string EndTimeDay { get; set; }
+
+        /// <summary>Hour and minute of the end time at the user's timezone.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTimeHourAndMinute")]
+        public virtual string EndTimeHourAndMinute { get; set; }
+
+        /// <summary>End time in milliseconds.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("endTimeInMillis")]
+        public virtual System.Nullable<long> EndTimeInMillis { get; set; }
+
+        /// <summary>Day start time at user's timezone.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTimeDay")]
+        public virtual string StartTimeDay { get; set; }
+
+        /// <summary>Hour and minute of the start time at the user's timezone.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTimeHourAndMinute")]
+        public virtual string StartTimeHourAndMinute { get; set; }
+
+        /// <summary>Start time in milliseconds.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("startTimeInMillis")]
+        public virtual System.Nullable<long> StartTimeInMillis { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5152,9 +6953,9 @@ namespace Google.Apis.CloudSearch.v1.Data
     }
 
     /// <summary>
-    /// Options for enum properties, which allow you to define a restricted set of strings to match user queries, set
-    /// rankings for those string values, and define an operator name to be paired with those strings so that users can
-    /// narrow results to only items with a specific value. For example, for items in a request tracking system with
+    /// The options for enum properties, which allow you to define a restricted set of strings to match user queries,
+    /// set rankings for those string values, and define an operator name to be paired with those strings so that users
+    /// can narrow results to only items with a specific value. For example, for items in a request tracking system with
     /// priority information, you could define *p0* as an allowable enum value and tie this enum to the operator name
     /// *priority* so that search users could add *priority:p0* to their query to restrict the set of results to only
     /// those items indexed with the value *p0*.
@@ -5262,6 +7063,10 @@ namespace Google.Apis.CloudSearch.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("count")]
         public virtual System.Nullable<int> Count { get; set; }
 
+        /// <summary>Filter to be passed in the search request if the corresponding bucket is selected.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("filter")]
+        public virtual Filter Filter { get; set; }
+
         /// <summary>
         /// Percent of results that match the bucket value. The returned value is between (0-100], and is rounded down
         /// to an integer if fractional. If the value is not explicitly returned, it represents a percentage value that
@@ -5285,6 +7090,14 @@ namespace Google.Apis.CloudSearch.v1.Data
     public class FacetOptions : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
+        /// If set, describes integer faceting options for the given integer property. The corresponding integer
+        /// property in the schema should be marked isFacetable. The number of buckets returned would be minimum of this
+        /// and num_facet_buckets.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("integerFacetingOptions")]
+        public virtual IntegerFacetingOptions IntegerFacetingOptions { get; set; }
+
+        /// <summary>
         /// Maximum number of facet buckets that should be returned for this facet. Defaults to 10. Maximum value is
         /// 100.
         /// </summary>
@@ -5298,7 +7111,7 @@ namespace Google.Apis.CloudSearch.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("objectType")]
         public virtual string ObjectType { get; set; }
 
-        /// <summary>Name of the operator chosen for faceting. @see cloudsearch.SchemaPropertyOptions</summary>
+        /// <summary>The name of the operator chosen for faceting. @see cloudsearch.SchemaPropertyOptions</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("operatorName")]
         public virtual string OperatorName { get; set; }
 
@@ -5315,7 +7128,9 @@ namespace Google.Apis.CloudSearch.v1.Data
     /// <summary>Source specific facet response</summary>
     public class FacetResult : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>FacetBuckets for values in response containing at least a single result.</summary>
+        /// <summary>
+        /// FacetBuckets for values in response containing at least a single result with the corresponding filter.
+        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("buckets")]
         public virtual System.Collections.Generic.IList<FacetBucket> Buckets { get; set; }
 
@@ -5323,7 +7138,7 @@ namespace Google.Apis.CloudSearch.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("objectType")]
         public virtual string ObjectType { get; set; }
 
-        /// <summary>Name of the operator chosen for faceting. @see cloudsearch.SchemaPropertyOptions</summary>
+        /// <summary>The name of the operator chosen for faceting. @see cloudsearch.SchemaPropertyOptions</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("operatorName")]
         public virtual string OperatorName { get; set; }
 
@@ -5337,7 +7152,7 @@ namespace Google.Apis.CloudSearch.v1.Data
 
     public class FieldViolation : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Description of the error.</summary>
+        /// <summary>The description of the error.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("description")]
         public virtual string Description { get; set; }
 
@@ -5415,15 +7230,15 @@ namespace Google.Apis.CloudSearch.v1.Data
 
     public class GSuitePrincipal : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>This principal represents all users of the G Suite domain of the customer.</summary>
+        /// <summary>This principal represents all users of the Google Workspace domain of the customer.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("gsuiteDomain")]
         public virtual System.Nullable<bool> GsuiteDomain { get; set; }
 
-        /// <summary>This principal references a G Suite group account</summary>
+        /// <summary>This principal references a Google Workspace group name.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("gsuiteGroupEmail")]
         public virtual string GsuiteGroupEmail { get; set; }
 
-        /// <summary>This principal references a G Suite user account</summary>
+        /// <summary>This principal references a Google Workspace user account.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("gsuiteUserEmail")]
         public virtual string GsuiteUserEmail { get; set; }
 
@@ -5433,6 +7248,10 @@ namespace Google.Apis.CloudSearch.v1.Data
 
     public class GetCustomerIndexStatsResponse : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Average item count for the given date range for which billing is done.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("averageIndexedItemCount")]
+        public virtual System.Nullable<long> AverageIndexedItemCount { get; set; }
+
         /// <summary>Summary of indexed item counts, one for each day in the requested range.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("stats")]
         public virtual System.Collections.Generic.IList<CustomerIndexStats> Stats { get; set; }
@@ -5445,6 +7264,25 @@ namespace Google.Apis.CloudSearch.v1.Data
     {
         [Newtonsoft.Json.JsonPropertyAttribute("stats")]
         public virtual System.Collections.Generic.IList<CustomerQueryStats> Stats { get; set; }
+
+        /// <summary>Total successful query count (status code 200) for the given date range.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("totalQueryCount")]
+        public virtual System.Nullable<long> TotalQueryCount { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Response format for search application stats for a customer.</summary>
+    public class GetCustomerSearchApplicationStatsResponse : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Average search application count for the given date range.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("averageSearchApplicationCount")]
+        public virtual System.Nullable<long> AverageSearchApplicationCount { get; set; }
+
+        /// <summary>Search application stats by date.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("stats")]
+        public virtual System.Collections.Generic.IList<CustomerSearchApplicationStats> Stats { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5470,6 +7308,10 @@ namespace Google.Apis.CloudSearch.v1.Data
 
     public class GetDataSourceIndexStatsResponse : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Average item count for the given date range for which billing is done.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("averageIndexedItemCount")]
+        public virtual System.Nullable<long> AverageIndexedItemCount { get; set; }
+
         /// <summary>Summary of indexed item counts, one for each day in the requested range.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("stats")]
         public virtual System.Collections.Generic.IList<DataSourceIndexStats> Stats { get; set; }
@@ -5484,6 +7326,10 @@ namespace Google.Apis.CloudSearch.v1.Data
         /// <summary>Query stats per date for a search application.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("stats")]
         public virtual System.Collections.Generic.IList<SearchApplicationQueryStats> Stats { get; set; }
+
+        /// <summary>Total successful query count (status code 200) for the given date range.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("totalQueryCount")]
+        public virtual System.Nullable<long> TotalQueryCount { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -5529,7 +7375,7 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Options for html properties.</summary>
+    /// <summary>The options for html properties.</summary>
     public class HtmlPropertyOptions : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>If set, describes how the property should be used as a search operator.</summary>
@@ -5561,8 +7407,7 @@ namespace Google.Apis.CloudSearch.v1.Data
     public class IndexItemOptions : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Specifies if the index request should allow gsuite principals that do not exist or are deleted in the index
-        /// request.
+        /// Specifies if the index request should allow Google Workspace principals that do not exist or are deleted.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("allowUnknownGsuitePrincipals")]
         public virtual System.Nullable<bool> AllowUnknownGsuitePrincipals { get; set; }
@@ -5573,7 +7418,7 @@ namespace Google.Apis.CloudSearch.v1.Data
 
     public class IndexItemRequest : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Name of connector making this call. Format: datasources/{source_id}/connectors/{ID}</summary>
+        /// <summary>The name of connector making this call. Format: datasources/{source_id}/connectors/{ID}</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("connectorName")]
         public virtual string ConnectorName { get; set; }
 
@@ -5584,7 +7429,7 @@ namespace Google.Apis.CloudSearch.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("indexItemOptions")]
         public virtual IndexItemOptions IndexItemOptions { get; set; }
 
-        /// <summary>Name of the item. Format: datasources/{source_id}/items/{item_id}</summary>
+        /// <summary>The name of the item. Format: datasources/{source_id}/items/{item_id}</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("item")]
         public virtual Item Item { get; set; }
 
@@ -5599,6 +7444,20 @@ namespace Google.Apis.CloudSearch.v1.Data
     /// <summary>Request message for `InitializeCustomer` method.</summary>
     public class InitializeCustomerRequest : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Used to specify integer faceting options.</summary>
+    public class IntegerFacetingOptions : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Buckets for given integer values should be in strictly ascending order. For example, if values supplied are
+        /// (1,5,10,100), the following facet buckets will be formed {&amp;lt;1, [1,5), [5-10), [10-100), &amp;gt;=100}.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("integerBuckets")]
+        public virtual System.Collections.Generic.IList<System.Nullable<long>> IntegerBuckets { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -5645,9 +7504,16 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Options for integer properties.</summary>
+    /// <summary>The options for integer properties.</summary>
     public class IntegerPropertyOptions : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>
+        /// If set, describes integer faceting options for the given integer property. The corresponding integer
+        /// property should be marked isFacetable.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("integerFacetingOptions")]
+        public virtual IntegerFacetingOptions IntegerFacetingOptions { get; set; }
+
         /// <summary>
         /// The maximum value of the property. The minimum and maximum values for the property are used to rank results
         /// according to the ordered ranking. Indexing requests with values greater than the maximum are accepted and
@@ -5691,12 +7557,47 @@ namespace Google.Apis.CloudSearch.v1.Data
     /// <summary>Represents an interaction between a user and an item.</summary>
     public class Interaction : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _interactionTimeRaw;
+
+        private object _interactionTime;
+
         /// <summary>
         /// The time when the user acted on the item. If multiple actions of the same type exist for a single user, only
         /// the most recent action is recorded.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("interactionTime")]
-        public virtual object InteractionTime { get; set; }
+        public virtual string InteractionTimeRaw
+        {
+            get => _interactionTimeRaw;
+            set
+            {
+                _interactionTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _interactionTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="InteractionTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use InteractionTimeDateTimeOffset instead.")]
+        public virtual object InteractionTime
+        {
+            get => _interactionTime;
+            set
+            {
+                _interactionTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _interactionTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="InteractionTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? InteractionTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(InteractionTimeRaw);
+            set => InteractionTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The user that acted on the item.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("principal")]
@@ -5722,16 +7623,16 @@ namespace Google.Apis.CloudSearch.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("content")]
         public virtual ItemContent Content { get; set; }
 
-        /// <summary>Type for this item.</summary>
+        /// <summary>The type for this item.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("itemType")]
         public virtual string ItemType { get; set; }
 
-        /// <summary>Metadata information.</summary>
+        /// <summary>The metadata information.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("metadata")]
         public virtual ItemMetadata Metadata { get; set; }
 
         /// <summary>
-        /// Name of the Item. Format: datasources/{source_id}/items/{item_id} This is a required field. The maximum
+        /// The name of the Item. Format: datasources/{source_id}/items/{item_id} This is a required field. The maximum
         /// length is 1536 characters.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
@@ -5760,7 +7661,9 @@ namespace Google.Apis.CloudSearch.v1.Data
         /// Required. The indexing system stores the version from the datasource as a byte string and compares the Item
         /// version in the index to the version of the queued Item using lexical ordering. Cloud Search Indexing won't
         /// index or delete any queued item with a version value that is less than or equal to the version of the
-        /// currently indexed item. The maximum length for this field is 1024 bytes.
+        /// currently indexed item. The maximum length for this field is 1024 bytes. For information on how item version
+        /// affects the deletion process, refer to [Handle revisions after manual
+        /// deletes](https://developers.google.com/cloud-search/docs/guides/operations).
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("version")]
         public virtual string Version { get; set; }
@@ -5771,7 +7674,7 @@ namespace Google.Apis.CloudSearch.v1.Data
 
     /// <summary>
     /// Access control list information for the item. For more information see [Map
-    /// ACLs](/cloud-search/docs/guides/acls).
+    /// ACLs](https://developers.google.com/cloud-search/docs/guides/acls).
     /// </summary>
     public class ItemAcl : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -5792,7 +7695,7 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual System.Collections.Generic.IList<Principal> DeniedReaders { get; set; }
 
         /// <summary>
-        /// Name of the item to inherit the Access Permission List (ACL) from. Note: ACL inheritance *only* provides
+        /// The name of the item to inherit the Access Permission List (ACL) from. Note: ACL inheritance *only* provides
         /// access permissions to child items and does not define structural relationships, nor does it provide
         /// convenient ways to delete large groups of items. Deleting an ACL parent from the index only alters the
         /// access permissions of child items that reference the parent in the inheritAclFrom field. The item is still
@@ -5859,6 +7762,13 @@ namespace Google.Apis.CloudSearch.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("count")]
         public virtual System.Nullable<long> Count { get; set; }
 
+        /// <summary>
+        /// Number of items matching the status code for which billing is done. This excludes virtual container items
+        /// from the total count. This count would not be applicable for items with ERROR or NEW_ITEM status code.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("indexedItemsCount")]
+        public virtual System.Nullable<long> IndexedItemsCount { get; set; }
+
         /// <summary>Status of the items.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("statusCode")]
         public virtual string StatusCode { get; set; }
@@ -5892,9 +7802,42 @@ namespace Google.Apis.CloudSearch.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("contextAttributes")]
         public virtual System.Collections.Generic.IList<ContextAttribute> ContextAttributes { get; set; }
 
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The time when the item was created in the source repository.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>
         /// Hashing value provided by the API caller. This can be used with the items.push method to calculate modified
@@ -5938,8 +7881,8 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual SearchQualityMetadata SearchQualityMetadata { get; set; }
 
         /// <summary>
-        /// Link to the source repository serving the data. Search results apply this link to the title. Whitespace or
-        /// special characters may cause Cloud Search result links to trigger a redirect notice; to avoid this, encode
+        /// Link to the source repository serving the data. Seach results apply this link to the title. Whitespace or
+        /// special characters may cause Cloud Seach result links to trigger a redirect notice; to avoid this, encode
         /// the URL. The maximum length is 2048 characters.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("sourceRepositoryUrl")]
@@ -5952,9 +7895,42 @@ namespace Google.Apis.CloudSearch.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("title")]
         public virtual string Title { get; set; }
 
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>The time when the item was last modified in the source repository.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6103,6 +8079,61 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>Geo information used for rendering a map that shows the user's work location.</summary>
+    public class MapInfo : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Latitude in degrees</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("lat")]
+        public virtual System.Nullable<double> Lat { get; set; }
+
+        /// <summary>
+        /// URL to a view of a map centered on the user's work location in Campus Maps (for google.com) or Google Maps
+        /// (external).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("locationUrl")]
+        public virtual SafeUrlProto LocationUrl { get; set; }
+
+        /// <summary>Longitude in degrees</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("long")]
+        public virtual System.Nullable<double> Long__ { get; set; }
+
+        /// <summary>MapTiles for the area around a user's work location</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mapTile")]
+        public virtual System.Collections.Generic.IList<MapTile> MapTile { get; set; }
+
+        /// <summary>
+        /// The zoom level of the map. A constant zoom value of 18 is used for now to match the zoom of the map shown on
+        /// a Moma Teams Profile page
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("zoom")]
+        public virtual System.Nullable<int> Zoom { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Information used to render a map tile image in the proper location on a map.</summary>
+    public class MapTile : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// URL to an image file containing an office layout of the user's location for their organization, if one is
+        /// available. For google.com, this image is from Corp Campus Maps.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("imageUrl")]
+        public virtual SafeUrlProto ImageUrl { get; set; }
+
+        /// <summary>Map tile x coordinate</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tileX")]
+        public virtual System.Nullable<double> TileX { get; set; }
+
+        /// <summary>Map tile y coordinate</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("tileY")]
+        public virtual System.Nullable<double> TileY { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>Matched range of a snippet [start, end).</summary>
     public class MatchRange : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -6132,9 +8163,42 @@ namespace Google.Apis.CloudSearch.v1.Data
     /// <summary>Metadata of a matched search result.</summary>
     public class Metadata : Google.Apis.Requests.IDirectResponseSchema
     {
+        private string _createTimeRaw;
+
+        private object _createTime;
+
         /// <summary>The creation time for this document or object in the search result.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("createTime")]
-        public virtual object CreateTime { get; set; }
+        public virtual string CreateTimeRaw
+        {
+            get => _createTimeRaw;
+            set
+            {
+                _createTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _createTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use CreateTimeDateTimeOffset instead.")]
+        public virtual object CreateTime
+        {
+            get => _createTime;
+            set
+            {
+                _createTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _createTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="CreateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? CreateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(CreateTimeRaw);
+            set => CreateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>Options that specify how to display a structured data search result.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayOptions")]
@@ -6160,13 +8224,50 @@ namespace Google.Apis.CloudSearch.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("source")]
         public virtual Source Source { get; set; }
 
+        /// <summary>The thumbnail URL of the result.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("thumbnailUrl")]
+        public virtual string ThumbnailUrl { get; set; }
+
+        private string _updateTimeRaw;
+
+        private object _updateTime;
+
         /// <summary>
         /// The last modified date for the object in the search result. If not set in the item, the value returned here
         /// is empty. When `updateTime` is used for calculating freshness and is not set, this value defaults to 2 years
         /// from the current time.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("updateTime")]
-        public virtual object UpdateTime { get; set; }
+        public virtual string UpdateTimeRaw
+        {
+            get => _updateTimeRaw;
+            set
+            {
+                _updateTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _updateTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use UpdateTimeDateTimeOffset instead.")]
+        public virtual object UpdateTime
+        {
+            get => _updateTime;
+            set
+            {
+                _updateTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _updateTime = value;
+            }
+        }
+
+        /// <summary><seealso cref="System.DateTimeOffset"/> representation of <see cref="UpdateTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? UpdateTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(UpdateTimeRaw);
+            set => UpdateTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6190,7 +8291,7 @@ namespace Google.Apis.CloudSearch.v1.Data
     {
         /// <summary>
         /// The read-only display name formatted according to the locale specified by the viewer's account or the
-        /// Accept-Language HTTP header.
+        /// `Accept-Language` HTTP header.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayName")]
         public virtual string DisplayName { get; set; }
@@ -6247,7 +8348,7 @@ namespace Google.Apis.CloudSearch.v1.Data
     public class ObjectDefinition : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Name for the object, which then defines its type. Item indexing requests should set the objectType field
+        /// The name for the object, which then defines its type. Item indexing requests should set the objectType field
         /// equal to this value. For example, if *name* is *Document*, then indexing requests for items of type Document
         /// should set objectType equal to *Document*. Each object definition must be uniquely named within a schema.
         /// The name must start with a letter and can only contain letters (A-Z, a-z) or numbers (0-9). The maximum
@@ -6296,7 +8397,7 @@ namespace Google.Apis.CloudSearch.v1.Data
     /// <summary>The options for an object.</summary>
     public class ObjectOptions : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Options that determine how the object is displayed in the Cloud Search results page.</summary>
+        /// <summary>The options that determine how the object is displayed in the Cloud Search results page.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayOptions")]
         public virtual ObjectDisplayOptions DisplayOptions { get; set; }
 
@@ -6304,11 +8405,22 @@ namespace Google.Apis.CloudSearch.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("freshnessOptions")]
         public virtual FreshnessOptions FreshnessOptions { get; set; }
 
+        /// <summary>
+        /// Operators that can be used to filter suggestions. For Suggest API, only operators mentioned here will be
+        /// honored in the FilterOptions. Only TEXT and ENUM operators are supported. NOTE: "objecttype", "type" and
+        /// "mimetype" are already supported. This property is to configure schema specific operators. Even though this
+        /// is an array, only one operator can be specified. This is an array for future extensibility. Operators
+        /// mapping to multiple properties within the same object are not supported. If the operator spans across
+        /// different object types, this option has to be set once for each object definition.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("suggestionFilteringOperators")]
+        public virtual System.Collections.Generic.IList<string> SuggestionFilteringOperators { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Options for object properties.</summary>
+    /// <summary>The options for object properties.</summary>
     public class ObjectPropertyOptions : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
@@ -6363,14 +8475,23 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual string Name { get; set; }
 
         /// <summary>
-        /// The normal response of the operation in case of success. If the original method returns no data on success,
-        /// such as `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
+        /// The normal, successful response of the operation. If the original method returns no data on success, such as
+        /// `Delete`, the response is `google.protobuf.Empty`. If the original method is standard
         /// `Get`/`Create`/`Update`, the response should be the resource. For other methods, the response should have
         /// the type `XxxResponse`, where `Xxx` is the original method name. For example, if the original method name is
         /// `TakeSnapshot()`, the inferred response type is `TakeSnapshotResponse`.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("response")]
         public virtual System.Collections.Generic.IDictionary<string, object> Response { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class PeoplePromotionCard : Google.Apis.Requests.IDirectResponseSchema
+    {
+        [Newtonsoft.Json.JsonPropertyAttribute("people")]
+        public virtual System.Collections.Generic.IList<PersonCore> People { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6395,7 +8516,8 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual System.Collections.Generic.IList<EmailAddress> EmailAddresses { get; set; }
 
         /// <summary>
-        /// The resource name of the person to provide information about. See People.get from Google People API.
+        /// The resource name of the person to provide information about. See
+        /// [`People.get`](https://developers.google.com/people/api/rest/v1/people/get) from the Google People API.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
@@ -6408,12 +8530,258 @@ namespace Google.Apis.CloudSearch.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("personNames")]
         public virtual System.Collections.Generic.IList<Name> PersonNames { get; set; }
 
+        /// <summary>The person's phone numbers</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("phoneNumbers")]
+        public virtual System.Collections.Generic.IList<PhoneNumber> PhoneNumbers { get; set; }
+
         /// <summary>
         /// A person's read-only photo. A picture shown next to the person's name to help others recognize the person in
         /// search results.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("photos")]
         public virtual System.Collections.Generic.IList<Photo> Photos { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Information for rendering a person. NEXT ID: 37</summary>
+    public class PersonCore : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// Instructions for how to address this person (e.g. custom pronouns). For google.com this is a set of pronouns
+        /// from a defined list of options.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("addressMeAs")]
+        public virtual string AddressMeAs { get; set; }
+
+        /// <summary>
+        /// People the profile owner is an admin to. Note that not all fields of these PersonCores will be set, in
+        /// particular, relationships will be empty.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("adminTo")]
+        public virtual System.Collections.Generic.IList<PersonCore> AdminTo { get; set; }
+
+        /// <summary>
+        /// The profile owner's admins in no particular order. Note that not all fields of these PersonCores will be
+        /// set, in particular, relationships will be empty.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("admins")]
+        public virtual System.Collections.Generic.IList<PersonCore> Admins { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("availabilityStatus")]
+        public virtual string AvailabilityStatus { get; set; }
+
+        /// <summary>Person birthday.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("birthday")]
+        public virtual Date Birthday { get; set; }
+
+        /// <summary>The URL to open the profile owner's primary calendar.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("calendarUrl")]
+        public virtual SafeUrlProto CalendarUrl { get; set; }
+
+        /// <summary>
+        /// The URL to start a chat conversation with the profile owner. For google.com this is a Hangouts URL.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("chatUrl")]
+        public virtual SafeUrlProto ChatUrl { get; set; }
+
+        /// <summary>Person's cost center as a string, e.g. "926: Googler Apps".</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("costCenter")]
+        public virtual string CostCenter { get; set; }
+
+        /// <summary>
+        /// The person's Organization department, e.g. "People Operations". For google.com this is usually called
+        /// "area".
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("department")]
+        public virtual string Department { get; set; }
+
+        /// <summary>
+        /// A subset of the profile owner's direct reports. The number of entities here may be less than
+        /// total_direct_reports_count, because typically ProfileResponse does not include all the person's reports, if
+        /// there are too many to retrieve efficiently. Note that not all fields of these PersonCores will be set, in
+        /// particular, relationships will be empty.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("directReports")]
+        public virtual System.Collections.Generic.IList<PersonCore> DirectReports { get; set; }
+
+        /// <summary>
+        /// The profile owner's direct dotted line managers in no particular order. Note that not all fields of these
+        /// PersonCores will be set, in particular, relationships will be empty.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dottedLineManagers")]
+        public virtual System.Collections.Generic.IList<PersonCore> DottedLineManagers { get; set; }
+
+        /// <summary>
+        /// A subset of the profile owner's dotted-line reports. The number of entities here may be less than
+        /// total_dlr_count. Note that not all fields of these PersonCores will be set, in particular, relationships
+        /// will be empty.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("dottedLineReports")]
+        public virtual System.Collections.Generic.IList<PersonCore> DottedLineReports { get; set; }
+
+        /// <summary>E-mail addresses of the person. The primary or preferred email should be first.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("emails")]
+        public virtual System.Collections.Generic.IList<string> Emails { get; set; }
+
+        /// <summary>
+        /// Person's employee number (external ID of type "organization") For google.com this is the badge number (e.g.
+        /// 2 for Larry Page).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("employeeId")]
+        public virtual string EmployeeId { get; set; }
+
+        /// <summary>
+        /// A fingerprint used by PAPI to reliably determine if a resource has changed Externally it is used as part of
+        /// the etag.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("fingerprint")]
+        public virtual string Fingerprint { get; set; }
+
+        /// <summary>Full-time equivalent (in ‰) (e.g. 800 for a person who's working 80%).</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("ftePermille")]
+        public virtual System.Nullable<long> FtePermille { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("geoLocation")]
+        public virtual MapInfo GeoLocation { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("gmailUrl")]
+        public virtual string GmailUrl { get; set; }
+
+        /// <summary>
+        /// Profile owner's job title (e.g. "Software Engineer"). For google.com this is the Workday preferred job
+        /// title.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("jobTitle")]
+        public virtual string JobTitle { get; set; }
+
+        /// <summary>List of keys to use from the map 'keywords'.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("keywordTypes")]
+        public virtual System.Collections.Generic.IList<string> KeywordTypes { get; set; }
+
+        /// <summary>Custom keywords the domain admin has added.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("keywords")]
+        public virtual System.Collections.Generic.IDictionary<string, string> Keywords { get; set; }
+
+        /// <summary>Custom links the profile owner has added.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("links")]
+        public virtual System.Collections.Generic.IList<EnterpriseTopazFrontendTeamsLink> Links { get; set; }
+
+        /// <summary>
+        /// Detailed desk location within the company. For google.com this is the desk location code (e.g.
+        /// "DE-MUC-ARP-6T2-6T2C0C") if the person has a desk.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("location")]
+        public virtual string Location { get; set; }
+
+        /// <summary>
+        /// The profile owner's management chain from top to bottom, where managers[0] is the CEO, manager[N-2] is the
+        /// person's manager's manager and managers[N-1] is the person's direct manager. Note that not all fields of
+        /// these PersonCores will be set, in particular, relationships will be empty.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("managers")]
+        public virtual System.Collections.Generic.IList<PersonCore> Managers { get; set; }
+
+        /// <summary>Custom mission statement the profile owner has added.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("mission")]
+        public virtual string Mission { get; set; }
+
+        /// <summary>Human-readable Unicode display name.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("name")]
+        public virtual string Name { get; set; }
+
+        /// <summary>
+        /// Office/building identifier within the company. For google.com this is the office code (e.g. "DE-MUC-ARP").
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("officeLocation")]
+        public virtual string OfficeLocation { get; set; }
+
+        /// <summary>The person's obfuscated Gaia ID.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("personId")]
+        public virtual string PersonId { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("phoneNumbers")]
+        public virtual System.Collections.Generic.IList<EnterpriseTopazFrontendTeamsPersonCorePhoneNumber> PhoneNumbers { get; set; }
+
+        /// <summary>Person photo.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("photoUrl")]
+        public virtual SafeUrlProto PhotoUrl { get; set; }
+
+        /// <summary>Postal address of office/building.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("postalAddress")]
+        public virtual string PostalAddress { get; set; }
+
+        /// <summary>Total count of the profile owner's direct reports.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("totalDirectReportsCount")]
+        public virtual System.Nullable<int> TotalDirectReportsCount { get; set; }
+
+        /// <summary>Total count of the profile owner's dotted-line reports.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("totalDlrCount")]
+        public virtual System.Nullable<int> TotalDlrCount { get; set; }
+
+        /// <summary>
+        /// The sum of all profile owner's reports and their own full-time-equivalents in ‰ (e.g. 1800 if one report is
+        /// working 80% and profile owner 100%).
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("totalFteCount")]
+        public virtual System.Nullable<long> TotalFteCount { get; set; }
+
+        /// <summary>External ID of type "login_id" for the profile. For google.com this is the username/LDAP.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("username")]
+        public virtual string Username { get; set; }
+
+        private string _waldoComeBackTimeRaw;
+
+        private object _waldoComeBackTime;
+
+        [Newtonsoft.Json.JsonPropertyAttribute("waldoComeBackTime")]
+        public virtual string WaldoComeBackTimeRaw
+        {
+            get => _waldoComeBackTimeRaw;
+            set
+            {
+                _waldoComeBackTime = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _waldoComeBackTimeRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="WaldoComeBackTimeRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use WaldoComeBackTimeDateTimeOffset instead.")]
+        public virtual object WaldoComeBackTime
+        {
+            get => _waldoComeBackTime;
+            set
+            {
+                _waldoComeBackTimeRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _waldoComeBackTime = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="WaldoComeBackTimeRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? WaldoComeBackTimeDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(WaldoComeBackTimeRaw);
+            set => WaldoComeBackTimeRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>A person's Phone Number</summary>
+    public class PhoneNumber : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The phone number of the person.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("phoneNumber")]
+        public virtual string PhoneNumberValue { get; set; }
+
+        [Newtonsoft.Json.JsonPropertyAttribute("type")]
+        public virtual string Type { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6432,7 +8800,7 @@ namespace Google.Apis.CloudSearch.v1.Data
 
     public class PollItemsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Name of connector making this call. Format: datasources/{source_id}/connectors/{ID}</summary>
+        /// <summary>The name of connector making this call. Format: datasources/{source_id}/connectors/{ID}</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("connectorName")]
         public virtual string ConnectorName { get; set; }
 
@@ -6482,7 +8850,7 @@ namespace Google.Apis.CloudSearch.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("groupResourceName")]
         public virtual string GroupResourceName { get; set; }
 
-        /// <summary>This principal is a GSuite user, group or domain.</summary>
+        /// <summary>This principal is a Google Workspace user, group or domain.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("gsuitePrincipal")]
         public virtual GSuitePrincipal GsuitePrincipal { get; set; }
 
@@ -6503,7 +8871,7 @@ namespace Google.Apis.CloudSearch.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("code")]
         public virtual string Code { get; set; }
 
-        /// <summary>Description of the error.</summary>
+        /// <summary>The description of the error.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("errorMessage")]
         public virtual string ErrorMessage { get; set; }
 
@@ -6527,8 +8895,8 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual DatePropertyOptions DatePropertyOptions { get; set; }
 
         /// <summary>
-        /// Options that determine how the property is displayed in the Cloud Search results page if it is specified to
-        /// be displayed in the object's display options .
+        /// The options that determine how the property is displayed in the Cloud Search results page if it's specified
+        /// to be displayed in the object's display options.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("displayOptions")]
         public virtual PropertyDisplayOptions DisplayOptions { get; set; }
@@ -6547,7 +8915,8 @@ namespace Google.Apis.CloudSearch.v1.Data
 
         /// <summary>
         /// Indicates that the property can be used for generating facets. Cannot be true for properties whose type is
-        /// object. IsReturnable must be true to set this option. Only supported for Boolean, Enum, and Text properties.
+        /// object. IsReturnable must be true to set this option. Only supported for boolean, enum, integer, and text
+        /// properties.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("isFacetable")]
         public virtual System.Nullable<bool> IsFacetable { get; set; }
@@ -6573,7 +8942,7 @@ namespace Google.Apis.CloudSearch.v1.Data
         /// <summary>
         /// Indicates that the property can be used for sorting. Cannot be true for properties that are repeatable.
         /// Cannot be true for properties whose type is object. IsReturnable must be true to set this option. Only
-        /// supported for Boolean, Date, Double, Integer, and Timestamp properties.
+        /// supported for boolean, date, double, integer, and timestamp properties.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("isSortable")]
         public virtual System.Nullable<bool> IsSortable { get; set; }
@@ -6585,7 +8954,8 @@ namespace Google.Apis.CloudSearch.v1.Data
         /// <summary>
         /// Indicates that users can perform wildcard search for this property. Only supported for Text properties.
         /// IsReturnable must be true to set this option. In a given datasource maximum of 5 properties can be marked as
-        /// is_wildcard_searchable.
+        /// is_wildcard_searchable. For more details, see [Define object
+        /// properties](https://developers.google.com/cloud-search/docs/guides/schema-guide#properties)
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("isWildcardSearchable")]
         public virtual System.Nullable<bool> IsWildcardSearchable { get; set; }
@@ -6644,9 +9014,9 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual string ContentHash { get; set; }
 
         /// <summary>
-        /// Metadata hash of the item according to the repository. If specified, this is used to determine how to modify
-        /// this item's status. Setting this field and the type field results in argument error. The maximum length is
-        /// 2048 characters.
+        /// The metadata hash of the item according to the repository. If specified, this is used to determine how to
+        /// modify this item's status. Setting this field and the type field results in argument error. The maximum
+        /// length is 2048 characters.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("metadataHash")]
         public virtual string MetadataHash { get; set; }
@@ -6659,7 +9029,7 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual string Payload { get; set; }
 
         /// <summary>
-        /// Queue to which this item belongs to. The default queue is chosen if this field is not specified. The maximum
+        /// Queue to which this item belongs. The `default` queue is chosen if this field is not specified. The maximum
         /// length is 512 characters.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("queue")]
@@ -6690,7 +9060,7 @@ namespace Google.Apis.CloudSearch.v1.Data
 
     public class PushItemRequest : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Name of connector making this call. Format: datasources/{source_id}/connectors/{ID}</summary>
+        /// <summary>The name of connector making this call. Format: datasources/{source_id}/connectors/{ID}</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("connectorName")]
         public virtual string ConnectorName { get; set; }
 
@@ -6701,6 +9071,17 @@ namespace Google.Apis.CloudSearch.v1.Data
         /// <summary>Item to push onto the queue.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("item")]
         public virtual PushItem Item { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Details about a user's query activity.</summary>
+    public class QueryActivity : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>User input query to be logged/removed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("query")]
+        public virtual string Query { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6855,8 +9236,8 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual string LessThanOperatorName { get; set; }
 
         /// <summary>
-        /// Name of the object corresponding to the operator. This field is only filled for schema-specific operators,
-        /// and is unset for common operators.
+        /// The name of the object corresponding to the operator. This field is only filled for schema-specific
+        /// operators, and is unset for common operators.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("objectType")]
         public virtual string ObjectType { get; set; }
@@ -6865,7 +9246,7 @@ namespace Google.Apis.CloudSearch.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("operatorName")]
         public virtual string OperatorName { get; set; }
 
-        /// <summary>Type of the operator.</summary>
+        /// <summary>The type of the operator.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
 
@@ -6888,7 +9269,7 @@ namespace Google.Apis.CloudSearch.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("shortName")]
         public virtual string ShortName { get; set; }
 
-        /// <summary>Name of the source</summary>
+        /// <summary>The name of the source</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("source")]
         public virtual Source Source { get; set; }
 
@@ -6901,6 +9282,30 @@ namespace Google.Apis.CloudSearch.v1.Data
     /// phrase completion.
     /// </summary>
     public class QuerySuggestion : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>Remove Logged Activity Request.</summary>
+    public class RemoveActivityRequest : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Request options, such as the search application and clientId.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("requestOptions")]
+        public virtual RequestOptions RequestOptions { get; set; }
+
+        /// <summary>User Activity containing the data to be deleted.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("userActivity")]
+        public virtual UserActivity UserActivity { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Remove Logged Activity Response. will return an empty response for now. Will be revisited in later phases.
+    /// </summary>
+    public class RemoveActivityResponse : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -6919,7 +9324,7 @@ namespace Google.Apis.CloudSearch.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("httpStatusCode")]
         public virtual System.Nullable<int> HttpStatusCode { get; set; }
 
-        /// <summary>Type of error.</summary>
+        /// <summary>The type of error.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("type")]
         public virtual string Type { get; set; }
 
@@ -6939,8 +9344,8 @@ namespace Google.Apis.CloudSearch.v1.Data
         /// http://www.unicode.org/reports/tr35/#Unicode_locale_identifier. For translations. Set this field using the
         /// language set in browser or for the page. In the event that the user's language preference is known, set this
         /// field to the known user language. When specified, the documents in search results are biased towards the
-        /// specified language. The suggest API does not use this parameter. Instead, suggest autocompletes only based
-        /// on characters in the query.
+        /// specified language. The Suggest API uses this field as a hint to make better third-party autocomplete
+        /// predictions.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("languageCode")]
         public virtual string LanguageCode { get; set; }
@@ -6990,16 +9395,13 @@ namespace Google.Apis.CloudSearch.v1.Data
     /// <summary>Information relevant only to a restrict entry. NextId: 12</summary>
     public class RestrictItem : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>
-        /// LINT.ThenChange(//depot/google3/java/com/google/apps/search/quality/itemsuggest/utils/SubtypeRerankingUtils.java)
-        /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("driveFollowUpRestrict")]
         public virtual DriveFollowUpRestrict DriveFollowUpRestrict { get; set; }
 
         [Newtonsoft.Json.JsonPropertyAttribute("driveLocationRestrict")]
         public virtual DriveLocationRestrict DriveLocationRestrict { get; set; }
 
-        /// <summary>LINT.IfChange Drive Types.</summary>
+        /// <summary>Drive Types.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("driveMimeTypeRestrict")]
         public virtual DriveMimeTypeRestrict DriveMimeTypeRestrict { get; set; }
 
@@ -7092,6 +9494,43 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual string ETag { get; set; }
     }
 
+    /// <summary>
+    /// IMPORTANT: It is unsafe to accept this message from an untrusted source, since it's trivial for an attacker to
+    /// forge serialized messages that don't fulfill the type's safety contract -- for example, it could contain
+    /// attacker controlled script. A system which receives a SafeHtmlProto implicitly trusts the producer of the
+    /// SafeHtmlProto. So, it's generally safe to return this message in RPC responses, but generally unsafe to accept
+    /// it in RPC requests.
+    /// </summary>
+    public class SafeHtmlProto : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// IMPORTANT: Never set or read this field, even from tests, it is private. See documentation at the top of
+        /// .proto file for programming language packages with which to create or read this message.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("privateDoNotAccessOrElseSafeHtmlWrappedValue")]
+        public virtual string PrivateDoNotAccessOrElseSafeHtmlWrappedValue { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>
+    /// Message containing a string that is safe to use in URL contexts in DOM APIs and HTML documents, where the URL
+    /// context does not refer to a resource that loads code.
+    /// </summary>
+    public class SafeUrlProto : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>
+        /// IMPORTANT: Never set or read this field, even from tests, it is private. See documentation at the top of
+        /// .proto file for programming language packages with which to create or read this message.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("privateDoNotAccessOrElseSafeUrlWrappedValue")]
+        public virtual string PrivateDoNotAccessOrElseSafeUrlWrappedValue { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
     /// <summary>The schema definition for a data source.</summary>
     public class Schema : Google.Apis.Requests.IDirectResponseSchema
     {
@@ -7158,7 +9597,7 @@ namespace Google.Apis.CloudSearch.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("enableAuditLog")]
         public virtual System.Nullable<bool> EnableAuditLog { get; set; }
 
-        /// <summary>Name of the Search Application. Format: searchapplications/{application_id}.</summary>
+        /// <summary>The name of the Search Application. Format: searchapplications/{application_id}.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
 
@@ -7171,6 +9610,10 @@ namespace Google.Apis.CloudSearch.v1.Data
         /// <summary>The default options for query interpretation</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("queryInterpretationConfig")]
         public virtual QueryInterpretationConfig QueryInterpretationConfig { get; set; }
+
+        /// <summary>With each result we should return the URI for its thumbnail (when applicable)</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("returnResultThumbnailUrls")]
+        public virtual System.Nullable<bool> ReturnResultThumbnailUrls { get; set; }
 
         /// <summary>Configuration for ranking results.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("scoringConfig")]
@@ -7188,7 +9631,8 @@ namespace Google.Apis.CloudSearch.v1.Data
     public class SearchApplicationQueryStats : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Date for which query stats were calculated. Stats calculated on the next day close to midnight are returned.
+        /// The date for which query stats were calculated. Stats calculated on the next day close to midnight are
+        /// returned.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("date")]
         public virtual Date Date { get; set; }
@@ -7203,8 +9647,8 @@ namespace Google.Apis.CloudSearch.v1.Data
     public class SearchApplicationSessionStats : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Date for which session stats were calculated. Stats are calculated on the following day, close to midnight
-        /// PST, and then returned.
+        /// The date for which session stats were calculated. Stats are calculated on the following day, close to
+        /// midnight PST, and then returned.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("date")]
         public virtual Date Date { get; set; }
@@ -7220,7 +9664,7 @@ namespace Google.Apis.CloudSearch.v1.Data
     public class SearchApplicationUserStats : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Date for which session stats were calculated. Stats calculated on the next day close to midnight are
+        /// The date for which session stats were calculated. Stats calculated on the next day close to midnight are
         /// returned.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("date")]
@@ -7291,7 +9735,7 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>The search API request.</summary>
+    /// <summary>The search API request. NEXT ID: 17</summary>
     public class SearchRequest : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
@@ -7319,8 +9763,8 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual System.Nullable<int> PageSize { get; set; }
 
         /// <summary>
-        /// The raw query string. See supported search operators in the [Cloud search Cheat
-        /// Sheet](https://support.google.com/a/users/answer/9299929)
+        /// The raw query string. See supported search operators in the [Narrow your search with
+        /// operators](https://support.google.com/cloudsearch/answer/6172299)
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("query")]
         public virtual string Query { get; set; }
@@ -7345,7 +9789,7 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>The search API response.</summary>
+    /// <summary>The search API response. NEXT ID: 17</summary>
     public class SearchResponse : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>Debugging information about the response.</summary>
@@ -7443,8 +9887,7 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual System.Collections.Generic.IList<MatchRange> MatchRanges { get; set; }
 
         /// <summary>
-        /// The snippet of the document. The snippet of the document. May contain escaped HTML character that should be
-        /// unescaped prior to rendering.
+        /// The snippet of the document. May contain escaped HTML character that should be unescaped prior to rendering.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("snippet")]
         public virtual string SnippetValue { get; set; }
@@ -7456,7 +9899,7 @@ namespace Google.Apis.CloudSearch.v1.Data
     public class SortOptions : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// Name of the operator corresponding to the field to sort on. The corresponding property must be marked as
+        /// The name of the operator corresponding to the field to sort on. The corresponding property must be marked as
         /// sortable.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("operatorName")]
@@ -7570,6 +10013,17 @@ namespace Google.Apis.CloudSearch.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("suggestedQuery")]
         public virtual string SuggestedQuery { get; set; }
 
+        /// <summary>
+        /// The sanitized HTML representing the spell corrected query that can be used in the UI. This usually has
+        /// language-specific tags to mark up parts of the query that are spell checked.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("suggestedQueryHtml")]
+        public virtual SafeHtmlProto SuggestedQueryHtml { get; set; }
+
+        /// <summary>Suggestion triggered for the current query.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("suggestionType")]
+        public virtual string SuggestionType { get; set; }
+
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
     }
@@ -7577,7 +10031,7 @@ namespace Google.Apis.CloudSearch.v1.Data
     /// <summary>Start upload file request.</summary>
     public class StartUploadItemRequest : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Name of connector making this call. Format: datasources/{source_id}/connectors/{ID}</summary>
+        /// <summary>The name of connector making this call. Format: datasources/{source_id}/connectors/{ID}</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("connectorName")]
         public virtual string ConnectorName { get; set; }
 
@@ -7712,9 +10166,9 @@ namespace Google.Apis.CloudSearch.v1.Data
         /// <summary>
         /// If true, the text value is tokenized as one atomic value in operator searches and facet matches. For
         /// example, if the operator name is "genre" and the value is "science-fiction" the query restrictions
-        /// "genre:science" and "genre:fiction" doesn't match the item; "genre:science-fiction" does. Value matching is
-        /// case-sensitive and does not remove special characters. If false, the text is tokenized. For example, if the
-        /// value is "science-fiction" the queries "genre:science" and "genre:fiction" matches the item.
+        /// "genre:science" and "genre:fiction" doesn't match the item; "genre:science-fiction" does. Text value
+        /// matching is case-sensitive and does not remove special characters. If false, the text is tokenized. For
+        /// example, if the value is "science-fiction" the queries "genre:science" and "genre:fiction" matches the item.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("exactMatchWithOperator")]
         public virtual System.Nullable<bool> ExactMatchWithOperator { get; set; }
@@ -7735,7 +10189,7 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Options for text properties.</summary>
+    /// <summary>The options for text properties.</summary>
     public class TextPropertyOptions : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>If set, describes how the property should be used as a search operator.</summary>
@@ -7758,6 +10212,36 @@ namespace Google.Apis.CloudSearch.v1.Data
         /// <summary>The maximum allowable length for text values is 2048 characters.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("values")]
         public virtual System.Collections.Generic.IList<string> Values { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    public class ThirdPartyGenericCard : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Unique identifier for the card.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("cardId")]
+        public virtual string CardId { get; set; }
+
+        /// <summary>Category that the card belongs to.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("category")]
+        public virtual string Category { get; set; }
+
+        /// <summary>[Required] Card content.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("content")]
+        public virtual Content Content { get; set; }
+
+        /// <summary>[Required] Context where the card should be triggered.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("context")]
+        public virtual Context Context { get; set; }
+
+        /// <summary>Whether the card can be dismissed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("isDismissible")]
+        public virtual System.Nullable<bool> IsDismissible { get; set; }
+
+        /// <summary>Priority of the card, where 0 is the highest priority.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("priority")]
+        public virtual System.Nullable<int> Priority { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -7805,7 +10289,7 @@ namespace Google.Apis.CloudSearch.v1.Data
         public virtual string ETag { get; set; }
     }
 
-    /// <summary>Options for timestamp properties.</summary>
+    /// <summary>The options for timestamp properties.</summary>
     public class TimestampPropertyOptions : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>If set, describes how the timestamp should be used as a search operator.</summary>
@@ -7842,7 +10326,7 @@ namespace Google.Apis.CloudSearch.v1.Data
 
     public class UnreserveItemsRequest : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Name of connector making this call. Format: datasources/{source_id}/connectors/{ID}</summary>
+        /// <summary>The name of connector making this call. Format: datasources/{source_id}/connectors/{ID}</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("connectorName")]
         public virtual string ConnectorName { get; set; }
 
@@ -7850,7 +10334,7 @@ namespace Google.Apis.CloudSearch.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("debugOptions")]
         public virtual DebugOptions DebugOptions { get; set; }
 
-        /// <summary>Name of a queue to unreserve items from.</summary>
+        /// <summary>The name of a queue to unreserve items from.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("queue")]
         public virtual string Queue { get; set; }
 
@@ -7866,6 +10350,17 @@ namespace Google.Apis.CloudSearch.v1.Data
 
         [Newtonsoft.Json.JsonPropertyAttribute("source")]
         public virtual DataSource Source { get; set; }
+
+        /// <summary>
+        /// Only applies to
+        /// [`settings.datasources.patch`](https://developers.google.com/cloud-search/docs/reference/rest/v1/settings.datasources/patch).
+        /// Update mask to control which fields to update. Example field paths: `name`, `displayName`. * If
+        /// `update_mask` is non-empty, then only the fields specified in the `update_mask` are updated. * If you
+        /// specify a field in the `update_mask`, but don't specify its value in the source, that field is cleared. * If
+        /// the `update_mask` is not present or empty or has the value `*`, then all fields are updated.
+        /// </summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("updateMask")]
+        public virtual object UpdateMask { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -7893,14 +10388,25 @@ namespace Google.Apis.CloudSearch.v1.Data
     }
 
     /// <summary>
-    /// Represents an upload session reference. This reference is created via upload method. Updating of item content
-    /// may refer to this uploaded content via contentDataRef.
+    /// Represents an upload session reference. This reference is created via upload method. This reference is valid for
+    /// 30 days after its creation. Updating of item content may refer to this uploaded content via contentDataRef.
     /// </summary>
     public class UploadItemRef : Google.Apis.Requests.IDirectResponseSchema
     {
-        /// <summary>Name of the content reference. The maximum length is 2048 characters.</summary>
+        /// <summary>The name of the content reference. The maximum length is 2048 characters.</summary>
         [Newtonsoft.Json.JsonPropertyAttribute("name")]
         public virtual string Name { get; set; }
+
+        /// <summary>The ETag of the item.</summary>
+        public virtual string ETag { get; set; }
+    }
+
+    /// <summary>User's single or bulk query activity. This can be a logging query or deletion query.</summary>
+    public class UserActivity : Google.Apis.Requests.IDirectResponseSchema
+    {
+        /// <summary>Contains data which needs to be logged/removed.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("queryActivity")]
+        public virtual QueryActivity QueryActivity { get; set; }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }
@@ -7938,8 +10444,43 @@ namespace Google.Apis.CloudSearch.v1.Data
         [Newtonsoft.Json.JsonPropertyAttribute("stringValue")]
         public virtual string StringValue { get; set; }
 
+        private string _timestampValueRaw;
+
+        private object _timestampValue;
+
         [Newtonsoft.Json.JsonPropertyAttribute("timestampValue")]
-        public virtual object TimestampValue { get; set; }
+        public virtual string TimestampValueRaw
+        {
+            get => _timestampValueRaw;
+            set
+            {
+                _timestampValue = Google.Apis.Util.Utilities.DeserializeForGoogleFormat(value);
+                _timestampValueRaw = value;
+            }
+        }
+
+        /// <summary><seealso cref="object"/> representation of <see cref="TimestampValueRaw"/>.</summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        [System.ObsoleteAttribute("This property is obsolete and may behave unexpectedly; please use TimestampValueDateTimeOffset instead.")]
+        public virtual object TimestampValue
+        {
+            get => _timestampValue;
+            set
+            {
+                _timestampValueRaw = Google.Apis.Util.Utilities.SerializeForGoogleFormat(value);
+                _timestampValue = value;
+            }
+        }
+
+        /// <summary>
+        /// <seealso cref="System.DateTimeOffset"/> representation of <see cref="TimestampValueRaw"/>.
+        /// </summary>
+        [Newtonsoft.Json.JsonIgnoreAttribute]
+        public virtual System.DateTimeOffset? TimestampValueDateTimeOffset
+        {
+            get => Google.Apis.Util.DiscoveryFormat.ParseGoogleDateTimeToDateTimeOffset(TimestampValueRaw);
+            set => TimestampValueRaw = Google.Apis.Util.DiscoveryFormat.FormatDateTimeOffsetToGoogleDateTime(value);
+        }
 
         /// <summary>The ETag of the item.</summary>
         public virtual string ETag { get; set; }

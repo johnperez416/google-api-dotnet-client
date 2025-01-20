@@ -1,4 +1,4 @@
-// Copyright 2021 Google LLC
+// Copyright 2024 Google LLC
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,8 @@ namespace Google.Apis.AdMob.v1
         public AdMobService(Google.Apis.Services.BaseClientService.Initializer initializer) : base(initializer)
         {
             Accounts = new AccountsResource(this);
+            BaseUri = GetEffectiveUri(BaseUriOverride, "https://admob.googleapis.com/");
+            BatchUri = GetEffectiveUri(null, "https://admob.googleapis.com/batch");
         }
 
         /// <summary>Gets the service supported features.</summary>
@@ -44,23 +46,16 @@ namespace Google.Apis.AdMob.v1
         public override string Name => "admob";
 
         /// <summary>Gets the service base URI.</summary>
-        public override string BaseUri =>
-        #if NETSTANDARD1_3 || NETSTANDARD2_0 || NET45
-            BaseUriOverride ?? "https://admob.googleapis.com/";
-        #else
-            "https://admob.googleapis.com/";
-        #endif
+        public override string BaseUri { get; }
 
         /// <summary>Gets the service base path.</summary>
         public override string BasePath => "";
 
-        #if !NET40
         /// <summary>Gets the batch base URI; <c>null</c> if unspecified.</summary>
-        public override string BatchUri => "https://admob.googleapis.com/batch";
+        public override string BatchUri { get; }
 
         /// <summary>Gets the batch base path; <c>null</c> if unspecified.</summary>
         public override string BatchPath => "batch";
-        #endif
 
         /// <summary>Available OAuth 2.0 scopes for use with the AdMob API.</summary>
         public class Scope
@@ -308,7 +303,7 @@ namespace Google.Apis.AdMob.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>List the ad units under the specified AdMob account.</summary>
@@ -328,8 +323,8 @@ namespace Google.Apis.AdMob.v1
                 public virtual string Parent { get; private set; }
 
                 /// <summary>
-                /// The maximum number of ad units to return. If unspecified or 0, at most 1000 ad units will be
-                /// returned. The maximum value is 10,000; values above 10,000 will be coerced to 10,000.
+                /// The maximum number of ad units to return. If unspecified or 0, at most 10,000 ad units will be
+                /// returned. The maximum value is 20,000; values above 20,000 will be coerced to 20,000.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<int> PageSize { get; set; }
@@ -405,7 +400,7 @@ namespace Google.Apis.AdMob.v1
             /// </param>
             public virtual ListRequest List(string parent)
             {
-                return new ListRequest(service, parent);
+                return new ListRequest(this.service, parent);
             }
 
             /// <summary>List the apps under the specified AdMob account.</summary>
@@ -425,8 +420,8 @@ namespace Google.Apis.AdMob.v1
                 public virtual string Parent { get; private set; }
 
                 /// <summary>
-                /// The maximum number of apps to return. If unspecified or 0, at most 1000 apps will be returned. The
-                /// maximum value is 10,000; values above 10,000 will be coerced to 10,000.
+                /// The maximum number of apps to return. If unspecified or 0, at most 10,000 apps will be returned. The
+                /// maximum value is 20,000; values above 20,000 will be coerced to 20,000.
                 /// </summary>
                 [Google.Apis.Util.RequestParameterAttribute("pageSize", Google.Apis.Util.RequestParameterType.Query)]
                 public virtual System.Nullable<int> PageSize { get; set; }
@@ -506,7 +501,7 @@ namespace Google.Apis.AdMob.v1
             /// </param>
             public virtual GenerateRequest Generate(Google.Apis.AdMob.v1.Data.GenerateMediationReportRequest body, string parent)
             {
-                return new GenerateRequest(service, body, parent);
+                return new GenerateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -587,7 +582,7 @@ namespace Google.Apis.AdMob.v1
             /// </param>
             public virtual GenerateRequest Generate(Google.Apis.AdMob.v1.Data.GenerateNetworkReportRequest body, string parent)
             {
-                return new GenerateRequest(service, body, parent);
+                return new GenerateRequest(this.service, body, parent);
             }
 
             /// <summary>
@@ -647,7 +642,7 @@ namespace Google.Apis.AdMob.v1
         /// </param>
         public virtual GetRequest Get(string name)
         {
-            return new GetRequest(service, name);
+            return new GetRequest(this.service, name);
         }
 
         /// <summary>Gets information about the specified AdMob publisher account.</summary>
@@ -696,7 +691,7 @@ namespace Google.Apis.AdMob.v1
         /// </summary>
         public virtual ListRequest List()
         {
-            return new ListRequest(service);
+            return new ListRequest(this.service);
         }
 
         /// <summary>
@@ -761,12 +756,13 @@ namespace Google.Apis.AdMob.v1.Data
     public class AdUnit : Google.Apis.Requests.IDirectResponseSchema
     {
         /// <summary>
-        /// AdFormat of the ad unit. Possible values are as follows: "BANNER" - Banner ad format. "BANNER_INTERSTITIAL"
-        /// - Legacy format that can be used as either banner or interstitial. This format can no longer be created but
-        /// can be targeted by mediation groups. "INTERSTITIAL" - A full screen ad. Supported ad types are "RICH_MEDIA"
-        /// and "VIDEO". "NATIVE" - Native ad format. "REWARDED" - An ad that, once viewed, gets a callback verifying
-        /// the view so that a reward can be given to the user. Supported ad types are "RICH_MEDIA" (interactive) and
-        /// video where video can not be excluded.
+        /// AdFormat of the ad unit. Possible values are as follows: "APP_OPEN" - App Open ad format. "BANNER" - Banner
+        /// ad format. "BANNER_INTERSTITIAL" - Legacy format that can be used as either banner or interstitial. This
+        /// format can no longer be created but can be targeted by mediation groups. "INTERSTITIAL" - A full screen ad.
+        /// Supported ad types are "RICH_MEDIA" and "VIDEO". "NATIVE" - Native ad format. "REWARDED" - An ad that, once
+        /// viewed, gets a callback verifying the view so that a reward can be given to the user. Supported ad types are
+        /// "RICH_MEDIA" (interactive) and video where video can not be excluded. "REWARDED_INTERSTITIAL" - Rewarded
+        /// Interstitial ad format. Only supports video ad type. See https://support.google.com/admob/answer/9884467.
         /// </summary>
         [Newtonsoft.Json.JsonPropertyAttribute("adFormat")]
         public virtual string AdFormat { get; set; }
@@ -813,6 +809,10 @@ namespace Google.Apis.AdMob.v1.Data
     /// <summary>Describes an AdMob app for a specific platform (For example: Android or iOS).</summary>
     public class App : Google.Apis.Requests.IDirectResponseSchema
     {
+        /// <summary>Output only. The approval state for the app. The field is read-only.</summary>
+        [Newtonsoft.Json.JsonPropertyAttribute("appApprovalState")]
+        public virtual string AppApprovalState { get; set; }
+
         /// <summary>
         /// The externally visible ID of the app which can be used to integrate with the AdMob SDK. This is a read only
         /// property. Example: ca-app-pub-9876543210987654~0123456789
@@ -893,10 +893,10 @@ namespace Google.Apis.AdMob.v1.Data
     /// <summary>
     /// Represents a whole or partial calendar date, such as a birthday. The time of day and time zone are either
     /// specified elsewhere or are insignificant. The date is relative to the Gregorian Calendar. This can represent one
-    /// of the following: * A full date, with non-zero year, month, and day values * A month and day value, with a zero
-    /// year, such as an anniversary * A year on its own, with zero month and day values * A year and month value, with
-    /// a zero day, such as a credit card expiration date Related types are google.type.TimeOfDay and
-    /// `google.protobuf.Timestamp`.
+    /// of the following: * A full date, with non-zero year, month, and day values. * A month and day, with a zero year
+    /// (for example, an anniversary). * A year on its own, with a zero month and a zero day. * A year and month, with a
+    /// zero day (for example, a credit card expiration date). Related types: * google.type.TimeOfDay *
+    /// google.type.DateTime * google.protobuf.Timestamp
     /// </summary>
     public class Date : Google.Apis.Requests.IDirectResponseSchema
     {

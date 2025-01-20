@@ -83,12 +83,13 @@ namespace Google.Apis.Auth.OAuth2.Flows
             public IHttpClientFactory HttpClientFactory { get; set; }
 
             /// <summary>
-            /// Get or sets the exponential back-off policy. Default value is  <c>UnsuccessfulResponse503</c>, which 
-            /// means that exponential back-off is used on 503 abnormal HTTP responses.
-            /// If the value is set to <c>None</c>, no exponential back-off policy is used, and it's up to user to
-            /// configure the <see cref="Google.Apis.Http.ConfigurableMessageHandler"/> in an
-            /// <see cref="Google.Apis.Http.IConfigurableHttpClientInitializer"/> to set a specific back-off
-            /// implementation (using <see cref="Google.Apis.Http.BackOffHandler"/>).
+            /// Indicates which of exceptions and / or HTTP status codes are automatically retried using exponential backoff.
+            /// The default value is <see cref="ExponentialBackOffPolicy.RecommendedOrDefault"/> which means retries will be
+            /// executed as recommended by each service. For services that have no specific recommendations
+            /// <see cref="ExponentialBackOffPolicy.UnsuccessfulResponse503"/> will be used, which means HTTP Status code 503
+            /// will be retried with exponential backoff.
+            /// If set to <see cref="ExponentialBackOffPolicy.None" /> no automatic retries will happen.
+            /// Calling code may still specify custom retries by configuring <see cref="HttpClient"/>.
             /// </summary>
             public ExponentialBackOffPolicy DefaultExponentialBackOffPolicy { get; set; }
 
@@ -108,7 +109,7 @@ namespace Google.Apis.Auth.OAuth2.Flows
 
                 Scopes = new List<string>();
                 AccessMethod = new BearerToken.AuthorizationHeaderAccessMethod();
-                DefaultExponentialBackOffPolicy = ExponentialBackOffPolicy.UnsuccessfulResponse503;
+                DefaultExponentialBackOffPolicy = ExponentialBackOffPolicy.RecommendedOrDefault;
                 Clock = SystemClock.Default;
             }
 
@@ -131,36 +132,23 @@ namespace Google.Apis.Auth.OAuth2.Flows
 
         #endregion
 
-        #region Readonly fields
-
-        private readonly IAccessMethod accessMethod;
-        private readonly string tokenServerUrl;
-        private readonly string authorizationServerUrl;
-        private readonly ClientSecrets clientSecrets;
-        private readonly IDataStore dataStore;
-        private readonly IEnumerable<string> scopes;
-        private readonly ConfigurableHttpClient httpClient;
-        private readonly IClock clock;
-
-        #endregion
-
         /// <summary>Gets the token server URL.</summary>
-        public string TokenServerUrl { get { return tokenServerUrl; } }
+        public string TokenServerUrl { get; }
 
         /// <summary>Gets the authorization code server URL.</summary>
-        public string AuthorizationServerUrl { get { return authorizationServerUrl; } }
+        public string AuthorizationServerUrl { get; }
 
         /// <summary>Gets the client secrets which includes the client identifier and its secret.</summary>
-        public ClientSecrets ClientSecrets { get { return clientSecrets; } }
+        public ClientSecrets ClientSecrets { get; }
 
         /// <summary>Gets the data store used to store the credentials.</summary>
-        public IDataStore DataStore { get { return dataStore; } }
+        public IDataStore DataStore { get; }
 
         /// <summary>Gets the scopes which indicate the API access your application is requesting.</summary>
-        public IEnumerable<string> Scopes { get { return scopes; } }
+        public IEnumerable<string> Scopes { get; }
 
         /// <summary>Gets the HTTP client used to make authentication requests to the server.</summary>
-        public ConfigurableHttpClient HttpClient { get { return httpClient; } }
+        public ConfigurableHttpClient HttpClient { get; }
 
         internal IHttpClientFactory HttpClientFactory { get; }
 
@@ -169,8 +157,8 @@ namespace Google.Apis.Auth.OAuth2.Flows
         /// <summary>Constructs a new flow using the initializer's properties.</summary>
         public AuthorizationCodeFlow(Initializer initializer)
         {
-            clientSecrets = initializer.ClientSecrets;
-            if (clientSecrets == null)
+            ClientSecrets = initializer.ClientSecrets;
+            if (ClientSecrets == null)
             {
                 if (initializer.ClientSecretsStream == null)
                 {
@@ -179,7 +167,7 @@ namespace Google.Apis.Auth.OAuth2.Flows
 
                 using (initializer.ClientSecretsStream)
                 {
-                    clientSecrets = GoogleClientSecrets.FromStream(initializer.ClientSecretsStream).Secrets;
+                    ClientSecrets = GoogleClientSecrets.FromStream(initializer.ClientSecretsStream).Secrets;
                 }
             }
             else if (initializer.ClientSecretsStream != null)
@@ -188,31 +176,37 @@ namespace Google.Apis.Auth.OAuth2.Flows
                     "You CAN'T set both ClientSecrets AND ClientSecretStream on the initializer");
             }
 
-            accessMethod = initializer.AccessMethod.ThrowIfNull("Initializer.AccessMethod");
-            clock = initializer.Clock.ThrowIfNull("Initializer.Clock");
-            tokenServerUrl = initializer.TokenServerUrl.ThrowIfNullOrEmpty("Initializer.TokenServerUrl");
-            authorizationServerUrl = initializer.AuthorizationServerUrl.ThrowIfNullOrEmpty
+            AccessMethod = initializer.AccessMethod.ThrowIfNull("Initializer.AccessMethod");
+            Clock = initializer.Clock.ThrowIfNull("Initializer.Clock");
+            TokenServerUrl = initializer.TokenServerUrl.ThrowIfNullOrEmpty("Initializer.TokenServerUrl");
+            AuthorizationServerUrl = initializer.AuthorizationServerUrl.ThrowIfNullOrEmpty
                 ("Initializer.AuthorizationServerUrl");
 
-            dataStore = initializer.DataStore;
-            if (dataStore == null)
+            DataStore = initializer.DataStore;
+            if (DataStore == null)
             {
                 Logger.Warning("Datastore is null, as a result the user's credential will not be stored");
             }
-            scopes = initializer.Scopes;
+            Scopes = initializer.Scopes;
 
             // Set the HTTP client.
             DefaultExponentialBackOffPolicy = initializer.DefaultExponentialBackOffPolicy;
             HttpClientFactory = initializer.HttpClientFactory ?? new HttpClientFactory();
 
             var httpArgs = new CreateHttpClientArgs();
-            // Add exponential back-off initializer if necessary.
-            if (DefaultExponentialBackOffPolicy != ExponentialBackOffPolicy.None)
+
+            // In case the user explicitly configured retry policy.
+            var customRetryPolicy = GoogleAuthConsts.StripOAuth2TokenEndpointRecommendedPolicy(DefaultExponentialBackOffPolicy);
+            if (customRetryPolicy != ExponentialBackOffPolicy.None)
             {
-                httpArgs.Initializers.Add(new ExponentialBackOffInitializer(
-                    DefaultExponentialBackOffPolicy, () => new BackOffHandler(new ExponentialBackOff())));
+                httpArgs.Initializers.Add(new ExponentialBackOffInitializer(customRetryPolicy, () => new BackOffHandler(new ExponentialBackOff())));
             }
-            httpClient = HttpClientFactory.CreateHttpClient(httpArgs);
+            // In case recommended is also configured.
+            if (DefaultExponentialBackOffPolicy.HasFlag(ExponentialBackOffPolicy.RecommendedOrDefault))
+            {
+                httpArgs.Initializers.Add(GoogleAuthConsts.OAuth2TokenEndpointRecommendedRetry);
+            }
+            HttpClient = HttpClientFactory.CreateHttpClient(httpArgs);
         }
 
         /// <inheritdoc/>
@@ -222,10 +216,10 @@ namespace Google.Apis.Auth.OAuth2.Flows
         #region IAuthorizationCodeFlow overrides
 
         /// <inheritdoc/>
-        public IAccessMethod AccessMethod { get { return accessMethod; } }
+        public IAccessMethod AccessMethod { get; }
 
         /// <inheritdoc/>
-        public IClock Clock { get { return clock; } }
+        public IClock Clock { get; }
 
         /// <inheritdoc/>
         public async Task<TokenResponse> LoadTokenAsync(string userId, CancellationToken taskCancellationToken)
@@ -263,13 +257,28 @@ namespace Google.Apis.Auth.OAuth2.Flows
         public async Task<TokenResponse> ExchangeCodeForTokenAsync(string userId, string code, string redirectUri,
             CancellationToken taskCancellationToken)
         {
-            var authorizationCodeTokenReq = new AuthorizationCodeTokenRequest
+            var authorizationCodeTokenReq = CreateAuthorizationCodeTokenRequest(userId, code, redirectUri);
+
+            return await ExchangeCodeForTokenAsync(userId, authorizationCodeTokenReq, taskCancellationToken).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="AuthorizationCodeTokenRequest"/> for the given parameters.
+        /// </summary>
+        protected internal AuthorizationCodeTokenRequest CreateAuthorizationCodeTokenRequest(string userId, string code, string redirectUri) =>
+            new AuthorizationCodeTokenRequest
             {
                 Scope = Scopes == null ? null : string.Join(" ", Scopes),
                 RedirectUri = redirectUri,
                 Code = code,
             };
 
+        /// <summary>
+        /// Executes <paramref name="authorizationCodeTokenReq"/> and stores and returns the received token.
+        /// </summary>
+        protected internal async Task<TokenResponse> ExchangeCodeForTokenAsync(string userId, AuthorizationCodeTokenRequest authorizationCodeTokenReq,
+            CancellationToken taskCancellationToken)
+        {
             var token = await FetchTokenAsync(userId, authorizationCodeTokenReq, taskCancellationToken)
                 .ConfigureAwait(false);
             await StoreTokenAsync(userId, token, taskCancellationToken).ConfigureAwait(false);
@@ -335,8 +344,8 @@ namespace Google.Apis.Auth.OAuth2.Flows
 
             try
             {
-                var tokenResponse = await request.ExecuteAsync
-                    (httpClient, TokenServerUrl, taskCancellationToken, Clock, Logger).ConfigureAwait(false);
+                var tokenResponse = await request.PostFormAsync
+                    (HttpClient, TokenServerUrl, null, Clock, Logger, taskCancellationToken).ConfigureAwait(false);
                 return tokenResponse;
             }
             catch (TokenResponseException ex)
